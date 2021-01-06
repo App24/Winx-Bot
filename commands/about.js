@@ -2,7 +2,7 @@ const Command = require("../Command");
 const Discord=require("discord.js");
 const Utils=require("../Utils");
 
-const version="3.0.0";
+const version="3.0.1";
 
 const command=new Command("about");
 command.description="About the bot";
