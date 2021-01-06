@@ -1,6 +1,6 @@
 {
   "name": "Winx-Bot",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "Winx Bot used in many winx related servers",
   "main": "index.js",
   "scripts": {
