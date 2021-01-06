@@ -2,12 +2,12 @@ const Discord=require('discord.js');
 const parser=require('discord-command-parser');
 const fs=require('fs');
 const Keyv=require('keyv');
+const {join}=require("path");
 const Utils=require('./Utils');
 
 const intents=new Discord.Intents(Discord.Intents.NON_PRIVILEGED);
 intents.add('GUILD_MEMBERS');
 const client=new Discord.Client({ws:{intents:intents}});
-const commandFiles=fs.readdirSync("./commands");
 const cooldowns = new Discord.Collection();
 
 client.commands=new Discord.Collection();
@@ -31,23 +31,21 @@ tables["serverInfo"]=ServerInfo;
 
 client.tables=tables;
 
-for (const file of commandFiles) {
-    if(file.endsWith(".js")){
-    const command = require(`./commands/${file}`);
+function loadCommands(){
+    const files=Utils.iterateDir("./commands");
+    for(const file of files){
+        if(file.endsWith(".js")){
+            const command=require(`./${file}`);
 
-	// set a new item in the Collection
-    // with the key as the command name and the value as the exported module
-    if(!command.deprecated) client.commands.set(command.name, command);
-    }else{
-        for(const f of fs.readdirSync(`./commands/${file}`)){
-            const command = require(`./commands/${file}/${f}`);
-
-            // set a new item in the Collection
-            // with the key as the command name and the value as the exported module
-            if(!command.deprecated) client.commands.set(command.name, command);
+            if(!command.deprecated){
+                client.commands.set(command.name, command);
+                console.log(`Loaded Command: ${command.name}`);
+            }
         }
     }
 }
+
+loadCommands();
 
 client.once("shardReady", async(shardId)=>{
     console.log(`Shard ${shardId} is ready!`);

@@ -1,4 +1,6 @@
 const Discord=require('discord.js');
+const {join}=require("path");
+const fs=require('fs');
 
 module.exports={
     asyncForEach: async(array, callback) => {
@@ -89,5 +91,37 @@ module.exports={
     capitalize: function(s){
         if (typeof s !== 'string') return '';
         return s.charAt(0).toUpperCase() + s.slice(1);
+    },
+    iterateDir: function(directory){
+        const files = [],
+        dirs = [];
+
+        function loadFiles(directory){
+            try {
+
+                let dirContent = fs.readdirSync(directory);
+
+                dirContent.forEach( path => {
+
+                    const fullPath = join(directory,path);
+
+                    if ( fs.statSync(fullPath).isFile() )
+                        files.push(fullPath);
+                    else
+                        dirs.push(fullPath);
+                });
+
+                if ( dirs.length !== 0 )
+
+                    loadFiles(dirs.pop());
+
+                return files;
+
+            } catch(ex) {
+                console.log(ex);
+                return false;
+            }
+        }
+        return loadFiles(directory);
     }
 };
