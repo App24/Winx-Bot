@@ -24,7 +24,7 @@ command.run=async(bot, message, args)=>{
         embed.setColor("#ff0000");
         embed.setFooter((await Utils.getMemberById(bot.user.id, message.guild)).nickname||bot.user.username);
         embed.setThumbnail(bot.user.avatarURL());
-        message.channel.send(embed);
+        return message.channel.send(embed);
     }
 
     
