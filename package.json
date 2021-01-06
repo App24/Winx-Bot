@@ -1,0 +1,30 @@
+{
+  "name": "Winx-Bot",
+  "version": "3.0.0",
+  "description": "Winx Bot used in many winx related servers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/App24/Winx-Bot.git"
+  },
+  "keywords": [],
+  "author": "App24",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/App24/Winx-Bot/issues"
+  },
+  "homepage": "https://github.com/App24/Winx-Bot#readme",
+  "dependencies": {
+    "@keyv/sqlite": "^2.0.2",
+    "discord-command-parser": "^1.5.3",
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.17.0",
+    "keyv": "^4.0.3",
+    "nodemon": "^2.0.6"
+  }
+}
