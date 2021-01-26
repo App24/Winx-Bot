@@ -53,6 +53,19 @@ client.once("shardReady", async(shardId)=>{
 
 const capXp=new Discord.Collection();
 
+client.on('guildBanAdd', async(guild, user)=>{
+    let levels=await Levels.get(guild.id);
+    if(!levels){
+        return;
+    }
+    let userInfo=await levels.find(_user=>_user["id"]===user.id);
+    if(!userInfo){
+        return;
+    }
+    delete levels[userInfo];
+    Levels.set(guild.id, levels);
+});
+
 client.on("message", async(message)=>{
     if(!message.content.startsWith(process.env.PREFIX)||message.author.bot||message.channel.type==='dm'){
         if(message.author.bot||message.channel.type==='dm') return;
@@ -102,7 +115,7 @@ client.on("message", async(message)=>{
         }
         const index=levels.indexOf(userInfo);
         userInfo["xp"]+=xpPerMessage;
-        if(userInfo["xp"]>=Utils.getXPLevel(userInfo["level"])){
+        while(userInfo["xp"]>=Utils.getXPLevel(userInfo["level"])){
             userInfo["xp"]-=Utils.getXPLevel(userInfo["level"]);
             userInfo["level"]++;
             let ranks=await Ranks.get(message.guild.id);

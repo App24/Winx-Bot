@@ -4,7 +4,7 @@ const Utils=require("../../Utils");
 const command=new Command("removechannel");
 command.description="Excludes a channel from being used for leveling";
 command.args=true;
-command.usage="<channel> [clear]";
+command.usage="<channel/list> [clear]";
 command.permissions=["MANAGE_GUILD"];
 command.hidden=true;
 command.run=async(bot, message, args)=>{
@@ -17,6 +17,16 @@ command.run=async(bot, message, args)=>{
         await Excludes.set(message.guild.id, []);
         excludes=await Excludes.get(message.guild.id);
     }
+    if(args[0].toLowerCase()==="list"){
+        if(excludes.length<=0) return message.channel.send("No excluded Channels");
+        var text="";
+        await Utils.asyncForEach(excludes, async(exclude)=>{
+            const channel=await Utils.getChannelById(exclude["id"], message.guild);
+            if(channel) text+=`${channel}\n`;
+        });
+        if(text.length<=0) return;
+        return message.channel.send(text);
+    }
     const channel=await Utils.getChannelFromMention(args[0], message.guild);
     if(!channel) return message.channel.send("You must provide a channel!");
     let excludedChannel=await excludes.find(u=>u["id"]===channel.id);
@@ -26,20 +36,20 @@ command.run=async(bot, message, args)=>{
                 return message.channel.send("This guild does not contain any excluded channels");
             }
             if(!excludedChannel){
-                return message.channel.send(`There is no channel by the name \`${channel.name}\``);
+                return message.channel.send(`The channel ${channel.name} is not excluded!`);
             }
             const index=excludes.indexOf(excludedChannel);
             if(index>-1) excludes.splice(index,1);
             await Excludes.set(message.guild.id, excludes);
-            return message.channel.send(`Removed channel \`${channel.name}\` from being excluded!`);
+            return message.channel.send(`${channel} is no longer excluded!`);
         }
     }
     if(excludedChannel){
-        return message.channel.send(`\`${channel.name}\` is already excluded!`);
+        return message.channel.send(`${channel} is already excluded!`);
     }
     excludes.push({"id":channel.id});
     await Excludes.set(message.guild.id, excludes);
-    return message.channel.send(`\`${channel.name}\` is now excluded!`);
+    return message.channel.send(`${channel} is now excluded!`);
 };
 
 module.exports=command;

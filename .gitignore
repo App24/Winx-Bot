@@ -1,3 +1,5 @@
 .env
 databases/
 node_modules/
+quinten.js
+givexp.js

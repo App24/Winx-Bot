@@ -17,7 +17,7 @@ command.run=async(bot, message, args)=>{
                 if(command.description) text+=command.description;
                 if(command.usage&&text!="​") text+="\n";
                 if(command.usage) text+=`Usage: ${command.usage}`;
-                embed.addField(Utils.capitalize(command.name), text);
+                embed.addField(Utils.capitalize(command.name), text, true);
             }
         });
         embed.setTimestamp();

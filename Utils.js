@@ -5,7 +5,8 @@ const fs=require('fs');
 module.exports={
     asyncForEach: async(array, callback) => {
         for (let index = 0; index < array.length; index++) {
-            await callback(array[index], index, array);
+            var answer=await callback(array[index], index, array);
+            if(answer===true) break;
         }
     },
     getXPLevel: function(level){
@@ -28,7 +29,6 @@ module.exports={
         return await this.getUserById(id, client);
     },
     getChannelFromMention: async function(mention, guild) {
-        console.log("ds");
         if(!guild||!mention) return;
         // The id is the first and only match found by the RegEx.
         const matches = mention.match(/^<#!?(\d+)>$/);
@@ -62,7 +62,7 @@ module.exports={
     },
     getRoleById: async function(id, guild){
         if(!id||!guild) return;
-        return await guild.roles.fetch(id).catch(_=>{return undefined;});
+        return await guild.roles.fetch(id).catch(()=>{return undefined;});
     },
     getChannelById: async function(id, guild){
         if(!id||!guild) return;
@@ -81,6 +81,8 @@ module.exports={
             if(!sentArray[0]) return undefined;
 
             return new Discord.User(client, sentArray[0]);
+        }).catch(()=>{
+            return undefined;
         });
         return member;
     },
