@@ -102,7 +102,7 @@ class MagicLevels extends Command{
         if(userSettings){
             let barColor=await userSettings["settings"].find(setting=>setting["id"]==="barColor");
             if(barColor){
-                var rgb=Utils.hexToRgb(barColor["startColor"]);
+                var rgb=Utils.hextoRGB(barColor["startColor"]);
                 startHsl=this._rgbToHsl(rgb.r,rgb.g,rgb.b);
             }
         }
@@ -110,7 +110,7 @@ class MagicLevels extends Command{
         if(userSettings){
             let barColor=await userSettings["settings"].find(setting=>setting["id"]==="barColor");
             if(barColor){
-                var rgb=Utils.hexToRgb(barColor["endColor"]);
+                var rgb=Utils.hextoRGB(barColor["endColor"]);
                 endHsl=this._rgbToHsl(rgb.r,rgb.g,rgb.b);
             }
         }
