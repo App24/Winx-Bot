@@ -32,6 +32,17 @@ class ModRole extends Command{
                 break;
             }
             case "remove":{
+                if(args.length<2){
+                    return this._printTLArgsError(message, 2);
+                }
+                const role=await Utils.getRoleFromMention(args[1], message.guild);
+                if(!role) return message.reply(`${args[1]} is not a valid role!`);
+                const alreadyRole=modRoles.find(other=>other===role.id);
+                if(!alreadyRole) return message.reply(`${role} is already a mod role!`);
+                const index=modRoles.indexOf(role.id);
+                if(index > -1) modRoles.splice(index, 1);
+                await ModRoles.set(message.guild.id, modRoles);
+                message.channel.send(`Successfully removed ${role} as a mod role!`);
                 break;
             }
             case "list":{

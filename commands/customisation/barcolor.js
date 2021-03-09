@@ -15,10 +15,10 @@ class BarColor extends Command{
     async onRun(bot, message, args){
         const UserSettings=bot.tables["userSettings"];
         const serverUserSettings=await Utils.getServerDatabase(UserSettings, message.guild.id);
-        let userSettings=await serverUserSettings.find(settings=>settings["id"]===message.authorid);
+        let userSettings=await serverUserSettings.find(settings=>settings["id"]===message.author.id);
         if(!userSettings){
-            await serverUserSettings.push({"id": message.authorid, "settings":[]});
-            userSettings=await serverUserSettings.find(settings=>settings["id"]===message.authorid);
+            await serverUserSettings.push({"id": message.author.id, "settings":[]});
+            userSettings=await serverUserSettings.find(settings=>settings["id"]===message.author.id);
         }
         if(args.length<=0){
             let barColor=await userSettings["settings"].find(setting=>setting["id"]==="barColor");
@@ -38,6 +38,10 @@ class BarColor extends Command{
         }
         let startHex=barColor["startColor"], endHex=barColor["endColor"];
         if(args[0].toLowerCase()==="start"){
+            if(!args[1]){
+                await this._showColor(message, barColor["startColor"]);
+                return;
+            }
             if(args[1].toLowerCase()==="reset"){
                 startHex="cc0000";
             }else{
@@ -52,6 +56,10 @@ class BarColor extends Command{
                 this._showColor(message, hex);
             }
         }else if(args[0].toLowerCase()==="end"){
+            if(!args[1]){
+                await this._showColor(message, barColor["endColor"]);
+                return;
+            }
             if(args[1].toLowerCase()==="reset"){
                 endHex="44cc00";
             }else{

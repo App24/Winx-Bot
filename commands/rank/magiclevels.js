@@ -35,11 +35,7 @@ class MagicLevels extends Command{
             return (a["level"]>b["level"])?1:-1;
         });
         const UserSettings=bot.tables["userSettings"];
-        let serverUserSettings=await UserSettings.get(message.guild.id);
-        if(!serverUserSettings){
-            await UserSettings.set(message.guild.id, []);
-            serverUserSettings=await UserSettings.get(message.guild.id);
-        }
+        const serverUserSettings=await Utils.getServerDatabase(UserSettings, message.guild.id);
         let userSettings=await serverUserSettings.find(settings=>settings["id"]===user.id);
         let hex="363636";
         if(userSettings){
