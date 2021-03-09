@@ -16,7 +16,7 @@ class SuggestionsC extends Command{
         const Suggestions=bot.tables["suggestions"];
         const requests=await Suggestions.entries();
         if(!requests||!requests.length) return message.channel.send("There are no suggestions!");
-        const botMember=await Utils.getMemberById(bot.user.id, message.guild);
+        const botMember=await Utils.getMemberByID(bot.user.id, message.guild);
         if(args[0].toLowerCase()==="list"){
             if(args.length<2) return message.reply("You must provide 2 arguments");
             const type=args[1].toLowerCase();
@@ -99,7 +99,7 @@ class SuggestionsC extends Command{
                 state="❌ Rejected";
                 break;
         }
-        const user=await Utils.getUserById(request[1]["requestor"], bot);
+        const user=await Utils.getUserByID(request[1]["requestor"], bot);
         const embed=new Discord.MessageEmbed()
         .setTitle(state)
         .setDescription(`**Request by ${user||"Account Deleted"}**\n${request[1]["request"]}`)

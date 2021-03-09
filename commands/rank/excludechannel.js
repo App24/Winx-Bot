@@ -18,14 +18,14 @@ class ExcludeChannel extends Command{
             if(excludes.length<=0) return message.channel.send("No excluded channels!");
             var text="";
             await Utils.asyncForEach(excludes, async(exclude)=>{
-                const channel=await Utils.getChannelByID(exclude, message.guild);
+                const channel=await Utils.getChannelByID(exclude["id"], message.guild);
                 if(channel)text+=`${channel}\n`;
             });
             if(text.length<=0) return;
             return message.channel.send(text);
         }
         const channel=await Utils.getChannelFromMention(args[0], message.guild);
-        if(!channel) return message.channel.reply("You must provide a channel!");
+        if(!channel) return message.reply("You must provide a channel!");
         let excludedChannel=await excludes.find(c=>c["id"]===channel.id);
         if(args[1]&&args[1].toLowerCase()==="remove"){
             if(!excludes){

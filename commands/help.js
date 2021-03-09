@@ -24,11 +24,7 @@ class Help extends Command{
             const list={};
             let i=0;
             commands.forEach(command => {
-                let hasPerms=true;
-                if(command.permissions){
-                    hasPerms =userMember.hasPermission(command.permissions);
-                }
-                if((!command.ownerOnly&&!command.modOnly)&&hasPerms){
+                if((!command.ownerOnly&&!command.modOnly)&&!command.permissions){
                     if(!command.hidden){
                         let category=command.category;
                         if(!category) category="Other";

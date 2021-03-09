@@ -122,69 +122,70 @@ client.on("message", async(message)=>{
             serverInfo["xpPerMessage"]=5;
             await ServerInfo.set(message.guild.id, serverInfo);
         }
-        if(!serverInfo["messagesPerMinute"]){
-            serverInfo["messagesPerMinute"]=50;
-            await ServerInfo.set(message.guild.id, serverInfo);
-        }
+        // if(!serverInfo["messagesPerMinute"]){
+        //     serverInfo["messagesPerMinute"]=50;
+        //     await ServerInfo.set(message.guild.id, serverInfo);
+        // }
         const xpPerMessage=serverInfo["xpPerMessage"];
-        const messagesPerMinute=serverInfo["messagesPerMinute"];
+        await Utils.addXP(client, message.author, xpPerMessage, message.guild, message.channel);
+        // const messagesPerMinute=serverInfo["messagesPerMinute"];
         
-        if(!capXp.has(message.guild.id)){
-            capXp.set(message.guild.id, []);
-        }
-        const data=capXp.get(message.guild.id);
-        if(!data.find(other=>{return other["id"]===message.author.id;})){
-            const _=capXp.get(message.guild.id);
-            _.push({"id": message.author.id, "cap":[]});
-            capXp.set(message.guild.id, _);
-        }
-        const xpData=capXp.get(message.guild.id).find(other=>{return other["id"]===message.author.id;})["cap"];
-        if(xpData.length>=messagesPerMinute) return;
-        const newDate=Date.now();
-        xpData.push(newDate);
-        setTimeout(()=>{
-            const index=xpData.indexOf(newDate);
-            xpData.splice(index, 1);
-        }, 60*1000);
+        // if(!capXp.has(message.guild.id)){
+        //     capXp.set(message.guild.id, []);
+        // }
+        // const data=capXp.get(message.guild.id);
+        // if(!data.find(other=>{return other["id"]===message.author.id;})){
+        //     const _=capXp.get(message.guild.id);
+        //     _.push({"id": message.author.id, "cap":[]});
+        //     capXp.set(message.guild.id, _);
+        // }
+        // const xpData=capXp.get(message.guild.id).find(other=>{return other["id"]===message.author.id;})["cap"];
+        // if(xpData.length>=messagesPerMinute) return;
+        // const newDate=Date.now();
+        // xpData.push(newDate);
+        // setTimeout(()=>{
+        //     const index=xpData.indexOf(newDate);
+        //     xpData.splice(index, 1);
+        // }, 60*1000);
 
-        const levels=await Utils.getServerDatabase(Levels, message.guild.id);
-        let userInfo=await levels.find(user=>user["id"]===message.author.id);
-        if(!userInfo){
-            await levels.push({"id":message.author.id, "xp":0, "level":0});
-            userInfo=await levels.find(user=>user["id"]===message.author.id);
-        }
-        const index=levels.indexOf(userInfo);
-        userInfo["xp"]+=xpPerMessage;
-        let levelChannel=message.channel;
-        if(serverInfo["levelChannel"]){
-            const channel=await Utils.getChannelByID(serverInfo["levelChannel"], message.guild);
-            if(channel) levelChannel=channel;
-        }
-        while(userInfo["xp"]>=Utils.getLevelXP(userInfo["level"])){
-            userInfo["xp"]-=Utils.getLevelXP(userInfo["level"]);
-            userInfo["level"]++;
-            let ranks=await Ranks.get(message.guild.id);
-            if(!ranks){
-                return;
-            }
-            let rankLevel=await ranks.find(u=>u["level"]===userInfo["level"]);
-            if(rankLevel){
-                let gifs=rankLevel["gifs"];
-                const user=await Utils.getMemberByID(message.author.id, message.guild);
-                if(!user){
-                    return message.channel.send("error somewhere idk 🤷‍♀️🤷‍♀️");
-                }
-                const rank=await Utils.getRoleByID(rankLevel["role"], message.guild);
-                user.roles.add(rank);
-                levelChannel.send(`${message.author} has earned a new transformation called ${Utils.capitalize(rank.name)}. Amazing work!`);
-                if(gifs&&gifs.length){
-                    levelChannel.send(gifs[Math.floor(Math.random()*gifs.length)]);
-                }
-            }
-            levelChannel.send(`${message.author} has leveled up to level ${userInfo["level"]}!`);
-        }
-        levels[index]=userInfo;
-        Levels.set(message.guild.id, levels);
+        // const levels=await Utils.getServerDatabase(Levels, message.guild.id);
+        // let userInfo=await levels.find(user=>user["id"]===message.author.id);
+        // if(!userInfo){
+        //     await levels.push({"id":message.author.id, "xp":0, "level":0});
+        //     userInfo=await levels.find(user=>user["id"]===message.author.id);
+        // }
+        // const index=levels.indexOf(userInfo);
+        // userInfo["xp"]+=xpPerMessage;
+        // let levelChannel=message.channel;
+        // if(serverInfo["levelChannel"]){
+        //     const channel=await Utils.getChannelByID(serverInfo["levelChannel"], message.guild);
+        //     if(channel) levelChannel=channel;
+        // }
+        // while(userInfo["xp"]>=Utils.getLevelXP(userInfo["level"])){
+        //     userInfo["xp"]-=Utils.getLevelXP(userInfo["level"]);
+        //     userInfo["level"]++;
+        //     let ranks=await Ranks.get(message.guild.id);
+        //     if(!ranks){
+        //         return;
+        //     }
+        //     let rankLevel=await ranks.find(u=>u["level"]===userInfo["level"]);
+        //     if(rankLevel){
+        //         let gifs=rankLevel["gifs"];
+        //         const user=await Utils.getMemberByID(message.author.id, message.guild);
+        //         if(!user){
+        //             return message.channel.send("error somewhere idk 🤷‍♀️🤷‍♀️");
+        //         }
+        //         const rank=await Utils.getRoleByID(rankLevel["role"], message.guild);
+        //         user.roles.add(rank);
+        //         levelChannel.send(`${message.author} has earned a new transformation called ${Utils.capitalise(rank.name)}. Amazing work!`);
+        //         if(gifs&&gifs.length){
+        //             levelChannel.send(gifs[Math.floor(Math.random()*gifs.length)]);
+        //         }
+        //     }
+        //     levelChannel.send(`${message.author} has leveled up to level ${userInfo["level"]}!`);
+        // }
+        // levels[index]=userInfo;
+        // Levels.set(message.guild.id, levels);
         return;
     }
 

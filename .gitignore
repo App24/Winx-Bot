@@ -1,5 +1,4 @@
 .env
 databases/
 node_modules/
-quinten.js
-givexp.js
+package-lock.json

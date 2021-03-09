@@ -2,8 +2,6 @@ const Command = require("../Command");
 const Discord=require("discord.js");
 const Utils=require("../Utils");
 
-const version="3.5.0";
-
 class About extends Command{
     constructor(){
         super("about");
@@ -23,7 +21,7 @@ class About extends Command{
         embed.setAuthor((await Utils.getMemberByID(bot.user.id, message.guild)).nickname||bot.user.username, bot.user.avatarURL());
         embed.addField("About", "This bot was created by and for Winx fans, it allows for users to level up and earn new transformations, it is entirely customisable from transformation names to when you get each!");
         embed.addField("Creators", data.join(", "));
-        embed.addField("Version", version);
+        embed.addField("Version", process.env.VERSION);
         const botMember=await Utils.getMemberByID(bot.user.id, message.guild);
         if(botMember.roles&&botMember.roles.color)
         embed.setColor(botMember.roles.color.color);

@@ -19,7 +19,7 @@ class Suggestion extends Command{
         Promise.all(promises).then(async(results)=>{
             const channeld=results[0].reduce((acc,curr)=>{if(curr!==undefined) acc=curr;});
             const channel=new Discord.TextChannel(new Discord.Guild(bot, {id:channeld["guild"]}), {id:channeld["id"]});
-            const botMember=await Utils.getMemberById(bot.user.id, message.channel.guild);
+            const botMember=await Utils.getMemberByID(bot.user.id, message.channel.guild);
             const user=message.author;
             const request=args.join(" ");
             const text=`**Request by ${user}**\n${request}`;
@@ -33,7 +33,7 @@ class Suggestion extends Command{
             channel.send(embed).then(async(msg)=>{
                 msg.react('✅');
                 msg.react('❌');
-                const collector=msg.createReactionCollector((reaction, user)=>(['✅', "❌"].includes(reaction.emoji.name) && user.id===process.env.OWNER_ID), {max: 1});
+                const collector=msg.createReactionCollector((reaction, _user)=>(['✅', "❌"].includes(reaction.emoji.name) && _user.id===process.env.OWNER_ID), {max: 1});
     
                 collector.once("end", ()=>{
                     msg.reactions.removeAll();

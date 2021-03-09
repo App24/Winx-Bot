@@ -2,7 +2,9 @@ const Discord=require('discord.js');
 const {join}=require("path");
 const fs=require('fs');
 
-module.exports={asyncForEach, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getChannelFromMention, getUserFromMention, getRoleFromMention, clamp, capitalise, loadFiles, genRanHex, hextoRGB, toHexString, getServerDatabase, hasRole, hasModRole, blend, fitText, isClass, isPatreon};
+module.exports={asyncForEach, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getChannelFromMention, getUserFromMention, getRoleFromMention, clamp, capitalise, loadFiles, genRanHex, hextoRGB, toHexString, getServerDatabase, hasRole, hasModRole, blend, fitText, isClass, isPatreon, addXP};
+
+const capXp=new Discord.Collection();
 
 async function asyncForEach(array, callback){
     for(let i = 0; i < array.length; i++){
@@ -200,4 +202,78 @@ async function isPatreon(user, guild, bot){
     const paid=await getServerDatabase(Paid, guild.id);
     const userPaid=paid.find(other=>{return other===user.id;});
     return userPaid!==undefined;
+}
+
+async function addXP(bot, user, xp, guild, channel){
+    if(!bot||!user||!xp||!guild||!channel) return;
+    const Levels=bot.tables["levels"];
+    const Ranks=bot.tables["ranks"];
+    const ServerInfo=bot.tables["serverInfo"];
+    const serverInfo=await this.getServerDatabase(ServerInfo, guild.id, {"xpPerMessage": 5, "messagesPerMinute": 50});
+    if(!serverInfo["xpPerMessage"]){
+        serverInfo["xpPerMessage"]=5;
+        await ServerInfo.set(guild.id, serverInfo);
+    }
+    if(!serverInfo["messagesPerMinute"]){
+        serverInfo["messagesPerMinute"]=50;
+        await ServerInfo.set(guild.id, serverInfo);
+    }
+    const messagesPerMinute=serverInfo["messagesPerMinute"];
+        
+    if(!capXp.has(guild.id)){
+        capXp.set(guild.id, []);
+    }
+    const data=capXp.get(guild.id);
+    if(!data.find(other=>{return other["id"]===user.id;})){
+        const _=capXp.get(guild.id);
+        _.push({"id": user.id, "cap":[]});
+        capXp.set(guild.id, _);
+    }
+    const xpData=capXp.get(guild.id).find(other=>{return other["id"]===user.id;})["cap"];
+    if(xpData.length>=messagesPerMinute) return;
+    const newDate=Date.now();
+    xpData.push(newDate);
+    setTimeout(()=>{
+        const index=xpData.indexOf(newDate);
+        xpData.splice(index, 1);
+    }, 60*1000);
+
+    const levels=await this.getServerDatabase(Levels, guild.id);
+    let userInfo=await levels.find(u=>u["id"]===user.id);
+    if(!userInfo){
+        await levels.push({"id":user.id, "xp":0, "level":0});
+        userInfo=await levels.find(u=>u["id"]===user.id);
+    }
+    const index=levels.indexOf(userInfo);
+    userInfo["xp"]+=xp;
+    let levelChannel=channel;
+    if(serverInfo["levelChannel"]){
+        const _channel=await this.getChannelByID(serverInfo["levelChannel"], guild);
+        if(_channel) levelChannel=_channel;
+    }
+    while(userInfo["xp"]>=this.getLevelXP(userInfo["level"])){
+        userInfo["xp"]-=this.getLevelXP(userInfo["level"]);
+        userInfo["level"]++;
+        let ranks=await Ranks.get(guild.id);
+        if(!ranks){
+            return;
+        }
+        let rankLevel=await ranks.find(u=>u["level"]===userInfo["level"]);
+        if(rankLevel){
+            let gifs=rankLevel["gifs"];
+            const _user=await this.getMemberByID(user.id, guild);
+            if(!_user){
+                return channel.send("error somewhere idk 🤷‍♀️🤷‍♀️");
+            }
+            const rank=await this.getRoleByID(rankLevel["role"], guild);
+            _user.roles.add(rank);
+            levelChannel.send(`${user} has earned a new transformation called ${this.capitalise(rank.name)}. Amazing work!`);
+            if(gifs&&gifs.length){
+                levelChannel.send(gifs[Math.floor(Math.random()*gifs.length)]);
+            }
+        }
+        levelChannel.send(`${user} has leveled up to level ${userInfo["level"]}!`);
+    }
+    levels[index]=userInfo;
+    Levels.set(guild.id, levels);
 }

@@ -1,6 +1,6 @@
 const CAT_SETTINGS="Settings";
 const CAT_OWNER="Owner";
-const CAT_TINGZ="Tingz";
+const CAT_TINGZ="Characters";
 const CAT_RANK="Rankings";
 const CAT_INFO="Info";
 const CAT_CUSTOM="Customisation";
