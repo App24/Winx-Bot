@@ -6,7 +6,7 @@ import * as Utils from '../../Utils';
 
 class BarColor extends Command{
     constructor(){
-        super("barcolor");
+        super();
         this.paid=true;
         this.description="Set the bar color of your card!";
         this.usage="[start/end/hex] [hex]";

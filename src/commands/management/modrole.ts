@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class ModRole extends Command{
     constructor(){
-        super("modrole");
+        super();
         this.permissions=["MANAGE_GUILD"];
         this.args=true;
         this.usage="<add/remove/list> [role]";

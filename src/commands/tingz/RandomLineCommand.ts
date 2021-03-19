@@ -5,8 +5,10 @@ import * as Utils from '../../Utils';
 import { Message } from 'discord.js';
 
 class RandomLineCommand extends Command{
+    private name : string;
     constructor(name : string){
-        super(name);
+        super();
+        this.name=name;
         this.description=`${Utils.capitalise(name)} Tinz`;
         this.category=Command.TingzCategory;
     }

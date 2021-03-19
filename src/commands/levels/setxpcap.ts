@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class SetXPCap extends Command{
     constructor(){
-        super("setxpcap");
+        super();
         this.usage="[amount above 0]";
         this.modOnly=true;
         this.category=Command.SettingsCategory;

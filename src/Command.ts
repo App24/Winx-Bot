@@ -11,7 +11,6 @@ const CAT_PATREON="Patreon";
 
 abstract class Command{
 
-    public name : string;
     public guildOnly : boolean;
     public modOnly : boolean;
     public minArgsLength : number;
@@ -27,8 +26,7 @@ abstract class Command{
     public aliases : Array<string>;
     public category : string;
 
-    public constructor(name : string){
-        this.name=name;
+    public constructor(){
         this.minArgsLength=1;
         this.guildOnly=true;
         this.category="Other";

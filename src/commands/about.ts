@@ -4,7 +4,7 @@ import * as Utils from '../Utils';
 
 class About extends Command{
     constructor(){
-        super("about");
+        super();
         this.description="About the bot";
         this.category=Command.InfoCategory;
     }

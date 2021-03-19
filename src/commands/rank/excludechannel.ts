@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class ExcludeChannel extends Command{
     constructor(){
-        super("excludechannel");
+        super();
         this.modOnly=true;
         this.args=true;
         this.usage="<channel/list> [remove]";

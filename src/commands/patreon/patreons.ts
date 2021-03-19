@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class Patreons extends Command{
     constructor(){
-        super("patreons");
+        super();
         this.hidden=true;
         this.modOnly=true;
         this.category=Command.PatreonCategory;

@@ -6,7 +6,7 @@ import * as Utils from '../../Utils';
 
 class ExpMagicLevels extends Command{
     constructor(){
-        super("expmagiclevels");
+        super();
         this.ownerOnly=true;
     }
 

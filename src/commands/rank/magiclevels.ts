@@ -6,10 +6,11 @@ import * as Utils from '../../Utils';
 
 class MagicLevels extends Command{
     constructor(){
-        super("magiclevels");
+        super();
         this.category=Command.RankCategory;
         this.usage="[user]";
         this.description="Shows how far you are to the next level";
+        this.aliases=["ml", "levels"];
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

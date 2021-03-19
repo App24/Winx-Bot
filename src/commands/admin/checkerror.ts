@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class CheckError extends Command{
     constructor(){
-        super("checkerror");
+        super();
         this.ownerOnly=true;
         this.args=true;
         this.usage="<error id/clear/list/prune>";

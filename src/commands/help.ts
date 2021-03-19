@@ -4,7 +4,7 @@ import * as Utils from '../Utils';
 
 class Help extends Command{
     constructor(){
-        super("help");
+        super();
         this.usage="[command/category]";
         this.aliases=["commands"];
         this.description="Show commands";
@@ -23,7 +23,7 @@ class Help extends Command{
         if(!args.length){
             const list={};
             let i=0;
-            commands.forEach(command => {
+            commands.forEach((command, name) => {
                 if((!command.ownerOnly&&!command.modOnly)&&!command.permissions){
                     if(!command.hidden){
                         let category=command.category;
@@ -36,16 +36,16 @@ class Help extends Command{
                         if(command.modOnly||command.permissions) text+=`\n__Mod Only__`;
                         if(!(category in list)){
                             list[category]=[i];
-                            list[category].push(`**${command.name}:** ${command.description||""}${text}`);
+                            list[category].push(`**${name}:** ${command.description||""}${text}`);
                             i++;
                         }else{
-                            list[category].push(`**${command.name}:** ${command.description||""}${text}`);
+                            list[category].push(`**${name}:** ${command.description||""}${text}`);
                         }
                     }
                 }
             });
 
-            data.push(`\nYou can you \`${process.env.PREFIX}${this.name} ${this.usage}\` to get info on a specific command!`);
+            data.push(`\nYou can you \`${process.env.PREFIX}help ${this.usage}\` to get info on a specific command!`);
 
 
             const generateEmbed=start=>{
@@ -111,7 +111,7 @@ class Help extends Command{
         if(args[0].toLowerCase()==="-a"){
             const list={};
             let i=0;
-            commands.forEach(command => {
+            commands.forEach((command, name) => {
                 let hasPerms=true;
                 if(command.permissions){
                     hasPerms =userMember.hasPermission(<Discord.PermissionResolvable>command.permissions);
@@ -128,16 +128,16 @@ class Help extends Command{
                         if(command.modOnly||command.permissions) text+=`\n__Mod Only__`;
                         if(!(category in list)){
                             list[category]=[i];
-                            list[category].push(`**${command.name}:** ${command.description||""}${text}`);
+                            list[category].push(`**${name}:** ${command.description||""}${text}`);
                             i++;
                         }else{
-                            list[category].push(`**${command.name}:** ${command.description||""}${text}`);
+                            list[category].push(`**${name}:** ${command.description||""}${text}`);
                         }
                     }
                 }
             });
 
-            data.push(`\nYou can you \`${process.env.PREFIX}${this.name} ${this.usage}\` to get info on a specific command!`);
+            data.push(`\nYou can you \`${process.env.PREFIX}help ${this.usage}\` to get info on a specific command!`);
 
 
             const generateEmbed=start=>{

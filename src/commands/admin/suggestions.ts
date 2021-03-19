@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class SuggestionsC extends Command{
     constructor(){
-        super("suggestions");
+        super();
         this.ownerOnly=true;
         this.args=true;
         this.guildOnly=false;
@@ -110,3 +110,5 @@ class SuggestionsC extends Command{
     }
 
 }
+
+module.exports=SuggestionsC;

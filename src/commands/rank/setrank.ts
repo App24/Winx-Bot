@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class SetRank extends Command{
     constructor(){
-        super("setrank");
+        super();
         this.modOnly=true;
         this.category=Command.RankCategory;
         this.args=true;

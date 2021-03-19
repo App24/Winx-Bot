@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class Rank extends Command{
     constructor(){
-        super("rank");
+        super();
         this.description="Shows your position on the leaderboard compared to other people on the server";
         this.category=Command.RankCategory;
         this.usage="[user]";

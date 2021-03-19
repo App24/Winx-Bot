@@ -3,7 +3,7 @@ import Command from '../../Command';
 
 class RandomChoice extends Command{
     constructor(){
-        super("randomchoice");
+        super();
         this.args=true;
         this.minArgsLength=2;
         this.description="Choose a random option";

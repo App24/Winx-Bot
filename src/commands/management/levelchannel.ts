@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class LevelChannel extends Command{
     constructor(){
-        super("levelchannel");
+        super();
         this.args=true;
         this.modOnly=true;
         this.usage="<channel/list/clear>";

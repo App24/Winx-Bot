@@ -1,5 +1,6 @@
 import Discord, { Intents } from 'discord.js';
 import fs from 'fs';
+import path from 'path';
 import Command from './Command';
 import Keyv from './keyv-index';
 import {loadFiles, isClass, asyncForEach} from "./Utils";
@@ -8,8 +9,8 @@ class BotClient extends Discord.Client{
     private Tables = new Discord.Collection<string, Keyv>();
     public Commands = new Discord.Collection<string, Command>();
 
-    public constructor(intents : Intents){
-        super({ws: {intents: intents}});
+    public constructor(options?: Discord.ClientOptions){
+        super(options);
         
         this.loadCommands();
 
@@ -56,8 +57,9 @@ class BotClient extends Discord.Client{
                     if(isClass(commandRequire)){
                         const command=new commandRequire();
                         if(!command.deprecated){
-                            this.Commands.set(command.name, command);
-                            console.log(`Loaded Command: ${command.name}`);
+                            const name=path.basename(file).slice(0,-3);
+                            this.Commands.set(name, command);
+                            console.log(`Loaded Command: ${name}`);
                         }
                     }
                 }catch{}

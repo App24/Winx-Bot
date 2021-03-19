@@ -4,7 +4,7 @@ import * as Utils from '../Utils';
 
 class GiveXP extends Command{
     constructor(){
-        super("givexp");
+        super();
         this.description="About the bot";
         this.cooldown=60*5;
     }

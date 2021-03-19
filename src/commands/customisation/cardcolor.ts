@@ -6,7 +6,7 @@ import * as Utils from '../../Utils';
 
 class CardColor extends Command{
     constructor(){
-        super("cardcolor");
+        super();
         this.paid=true;
         this.description="Set the background color of your card!";
         this.category=Command.CustomisationCategory;

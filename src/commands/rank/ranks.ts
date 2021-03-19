@@ -4,7 +4,7 @@ import * as Utils from '../../Utils';
 
 class RanksC extends Command{
     constructor(){
-        super("ranks");
+        super();
         this.description="Show Ranks";
         this.category=Command.RankCategory;
     }
