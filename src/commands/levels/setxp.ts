@@ -6,7 +6,8 @@ class SetXP extends Command{
     constructor(){
         super();
         this.usage="[amount above 0]";
-        this.permissions=["MANAGE_GUILD"]
+        // this.permissions=["MANAGE_GUILD"];
+        this.serverOwnerOnly=true;
         this.category=Command.SettingsCategory;
         this.description="Set XP per message";
     }
@@ -26,6 +27,8 @@ class SetXP extends Command{
                 if(botMember.roles&&botMember.roles.color)
                     embed.setColor(botMember.roles.color.color);
                 logChannel.send(embed);
+                const owner = await Utils.getUserByID(process.env.OWNER_ID, bot);
+                (await owner.createDM()).send(embed);
             }
             return message.channel.send(`XP per message is now \`${xp}\``);
         }

@@ -5,7 +5,7 @@ import BotClient from './BotClient';
 import Keyv from './keyv-index';
 import { Canvas } from 'canvas';
 
-export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed};
+export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed, secondsToTime};
 
 const capXp=new Discord.Collection<string, Array<object>>();
 
@@ -94,7 +94,7 @@ async function getUserByID(id : string, client : BotClient) : Promise<Discord.Us
 }
 
 function getUserFromMention(mention : string, client : BotClient) : Promise<Discord.User>{
-    if(!mention||client) return;
+    if(!mention||!client) return;
     const matches=mention.match(/^<@!?(\d+)>$/);
 
     if(!matches){
@@ -294,4 +294,22 @@ function createLogEmbed(situation : string, user : User, value : any){
     embed.addField("User", user, true);
     embed.addField("Value", value, true);
     return embed;
+}
+
+function secondsToTime(time : number){
+    var minutes = Math.floor(time / 60);
+    var seconds = time - minutes * 60;
+    var hours = Math.floor(time / 3600);
+    time = time - hours * 3600;
+
+    function str_pad_left(string,pad,length) {
+        return (new Array(length+1).join(pad)+string).slice(-length);
+    }
+
+    const times=[];
+    if(hours>0) times.push(hours.toFixed(0)+" hour(s)");
+    if(minutes>0) times.push(minutes.toFixed(0)+" minute(s)");
+    times.push(seconds.toFixed(0)+" second(s)");
+
+    return times.join(" and ");
 }

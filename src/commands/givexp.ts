@@ -6,7 +6,7 @@ class GiveXP extends Command{
     constructor(){
         super();
         this.description="About the bot";
-        this.cooldown=60*5;
+        this.cooldown=60*10;
     }
 
     public async onRun(bot : import("../BotClient"), message : Discord.Message, args: string[]){
