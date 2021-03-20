@@ -46,7 +46,7 @@ client.on("ready", async()=>{
         data:{
             type: 4,
             data:{
-                content: "Not Yet Implemented! (Tell Discord to release slash commands in discordjs)"
+                content: "Not Yet Implemented! (Yell at Discord to release slash commands in discordjs :sob:)"
             }
         }
     });
