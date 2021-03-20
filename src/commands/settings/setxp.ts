@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import Command from "../../Command";
 import * as Utils from '../../Utils';
+import {MAX_XP_PER_MESSAGE} from '../../Constants';
 
 class SetXP extends Command{
     constructor(){
@@ -14,7 +15,7 @@ class SetXP extends Command{
 
     public async onRun(bot: import("../../BotClient"), message: Message, args: string[]) {
         const ServerInfo=bot.getDatabase("serverInfo");
-        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {"xpPerMessage": 5, "messagesPerMinute": 50});
+        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {"xpPerMessage": MAX_XP_PER_MESSAGE});
         if(args.length){
             const xp=parseInt(args[0]);
             if(isNaN(xp)||xp<=0) return message.reply(`\`${args[0]}\` does not seem to be a valid number!`);
@@ -32,7 +33,10 @@ class SetXP extends Command{
             }
             return message.channel.send(`XP per message is now \`${xp}\``);
         }
-    
+        
+        if(!serverInfo["xpPerMessage"]){
+            serverInfo["xpPerMessage"]=MAX_XP_PER_MESSAGE;
+        }
         return message.channel.send(`The XP per message is \`${serverInfo["xpPerMessage"]}\``);
     }
 }

@@ -1,20 +1,21 @@
 import { Message } from "discord.js";
 import Command from "../../Command";
 import * as Utils from '../../Utils';
+import {MAX_MESSAGE_PER_MINUTE} from '../../Constants';
 
-class SetXPCap extends Command{
+class SetMaxMessage extends Command{
     constructor(){
         super();
         this.usage="[amount above 0]";
         // this.permissions=["MANAGE_GUILD"];
         this.serverOwnerOnly=true;
         this.category=Command.SettingsCategory;
-        this.description="Set XP per message";
+        this.description="Set maximum of messages per minute";
     }
 
     public async onRun(bot: import("../../BotClient"), message: Message, args: string[]) {
         const ServerInfo=bot.getDatabase("serverInfo");
-        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {"xpPerMessage": 5, "messagesPerMinute": 50});
+        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {"messagesPerMinute": MAX_MESSAGE_PER_MINUTE});
         if(args.length){
             const xp=parseInt(args[0]);
             if(isNaN(xp)||xp<=0) return message.reply(`\`${args[0]}\` does not seem to be a valid number!`);
@@ -32,9 +33,12 @@ class SetXPCap extends Command{
             }
             return message.channel.send(`Max messages per minute is now \`${xp}\``);
         }
-    
+        
+        if(!serverInfo["messagesPerMinute"]){
+            serverInfo["messagesPerMinute"]=MAX_MESSAGE_PER_MINUTE;
+        }
         return message.channel.send(`The max messages per minute is \`${serverInfo["messagesPerMinute"]}\``);
     }
 }
 
-module.exports=SetXPCap;
+module.exports=SetMaxMessage;
