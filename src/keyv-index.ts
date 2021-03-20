@@ -52,7 +52,7 @@ class Keyv extends EventEmitter{
 		return fullKey.replace(nsregexp, '');
     }
 
-    private parseValue(data, opts : object | any = {}) {
+    private parseValue(key, data, opts : object | any = {}) {
 		let value;
 		let raw = opts ? opts.raw : false;
 		if (typeof data === 'string') {
@@ -64,9 +64,9 @@ class Keyv extends EventEmitter{
 			return undefined;
 		}
 		if (typeof data.expires === 'number' && Date.now() > data.expires) {
-			// if (opts.removeExpired === true) {
-			// 	this.delete(key);
-			// }
+			if (opts.removeExpired === true) {
+				this.delete(key);
+			}
 			return undefined;
 		}
 		if (raw === true) {
@@ -78,13 +78,14 @@ class Keyv extends EventEmitter{
 
     public get(key : string, opts?) : Promise<any>{
         opts=Object.assign({removeExpired: true}, opts);
+		const oldKey=key;
         key=this.getKeyPrefix(key);
         const store=this.opts.store;
         return Promise.resolve()
             .then(()=>store.get(key))
             .then(data=>{
                 data = (typeof data==="string") ? this.opts.deserialize(data) : data;
-                return this.parseValue(data, opts);
+                return this.parseValue(oldKey, data, opts);
             });
     }
 
@@ -144,7 +145,7 @@ class Keyv extends EventEmitter{
 			.then(data=>{
 				const lst=[];
 				data.forEach(element => {
-					lst.push(this.parseValue(element.value, opts));
+					lst.push(this.parseValue(element.key, element.value, opts));
 				});
 				return lst;
 			});
@@ -157,7 +158,7 @@ class Keyv extends EventEmitter{
 				const lst=[];
 				data.forEach(element => {
 					if(element.key===this.getKeyPrefix(key))
-					lst.push(this.parseValue(element.value, opts));
+					lst.push(this.parseValue(element.key, element.value, opts));
 				});
 				return lst;
 			});
@@ -169,7 +170,7 @@ class Keyv extends EventEmitter{
 		.then(data=>{
 			return data.map(e=>[
 				this.stripKeyPrefix(e["key"]),
-				this.parseValue(e["value"], opts)
+				this.parseValue(e["key"], e["value"], opts)
 			]);
 		});
 	}

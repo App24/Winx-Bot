@@ -8,6 +8,7 @@ class About extends Command{
         super();
         this.description="About the bot";
         this.category=Command.InfoCategory;
+        this.guildOnly=false;
     }
 
     public async onRun(bot : import("../BotClient"), message : Discord.Message, args: string[]){

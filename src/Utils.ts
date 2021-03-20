@@ -54,22 +54,28 @@ function getLevelXP(level : number){
 }
 
 function getRoleByID(id : string, guild : Discord.Guild) : Promise<Discord.Role>{
+    if(!id||!guild) return undefined;
     return guild.roles.fetch(id).catch(()=>undefined);
 }
 
 function getChannelByID(id : string, guild : Discord.Guild) : Discord.GuildChannel{
+    if(!id||!guild) return undefined;
     return guild.channels.cache.find(channel=>channel.id===id);
 }
 
 function getMemberByID(id : string, guild : Discord.Guild) : Promise<Discord.GuildMember>{
+    if(!id||!guild) return undefined;
     return guild.members.fetch(id).catch(()=>undefined);
 }
 
 function getTextChannelByID(id : string, guild : Discord.Guild) : Discord.TextChannel{
+    if(!id||!guild) return undefined;
     return <Discord.TextChannel>guild.channels.cache.find(channel=>channel.id===id&&channel.type==="text");
 }
 
 async function getUserByID(id : string, client : BotClient) : Promise<Discord.User>{
+    if(!id||!client) return undefined;
+    
     const member=await client.shard.broadcastEval(`(async () => {
         const member=this.users.fetch('${id}');
         if(member){
@@ -88,7 +94,7 @@ async function getUserByID(id : string, client : BotClient) : Promise<Discord.Us
 }
 
 function getUserFromMention(mention : string, client : BotClient) : Promise<Discord.User>{
-    if(!mention) return;
+    if(!mention||client) return;
     const matches=mention.match(/^<@!?(\d+)>$/);
 
     if(!matches){
@@ -99,7 +105,7 @@ function getUserFromMention(mention : string, client : BotClient) : Promise<Disc
 }
 
 function getChannelFromMention(mention : string, guild : Discord.Guild){
-    if(!mention) return;
+    if(!mention||!guild) return;
     const matches=mention.match(/^<#!?(\d+)>$/);
 
     if(!matches){
@@ -110,7 +116,7 @@ function getChannelFromMention(mention : string, guild : Discord.Guild){
 }
 
 function getTextChannelFromMention(mention : string, guild : Discord.Guild){
-    if(!mention) return;
+    if(!mention||!guild) return;
     const matches=mention.match(/^<#!?(\d+)>$/);
 
     if(!matches){
@@ -121,7 +127,7 @@ function getTextChannelFromMention(mention : string, guild : Discord.Guild){
 }
 
 function getRoleFromMention(mention : string, guild : Discord.Guild){
-    if(!mention) return;
+    if(!mention||!guild) return;
     const matches=mention.match(/^<@&?(\d+)>$/);
 
     if(!matches){

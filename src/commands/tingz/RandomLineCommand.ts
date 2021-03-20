@@ -11,6 +11,7 @@ class RandomLineCommand extends Command{
         this.name=name;
         this.description=`${Utils.capitalise(name)} Tinz`;
         this.category=Command.TingzCategory;
+        this.guildOnly=false;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Message, args: string[]) {
