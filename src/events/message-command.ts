@@ -40,7 +40,7 @@ module.exports = (client : import("../BotClient"))=>{
             if(message.author.id!==process.env.OWNER_ID) return message.channel.send("Sorry, only the bot creator can use this command!");
         }
 
-        if(command.serverOwnerOnly){
+        if(command.guildOwnerOnly){
             if(message.author.id!==message.guild.ownerID) return message.channel.send("Sorry, only the server owner can use this command!");
         }
 

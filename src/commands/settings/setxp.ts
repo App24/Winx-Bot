@@ -8,7 +8,7 @@ class SetXP extends Command{
         super();
         this.usage="[amount above 0]";
         // this.permissions=["MANAGE_GUILD"];
-        this.serverOwnerOnly=true;
+        this.guildOwnerOnly=true;
         this.category=Command.SettingsCategory;
         this.description="Set XP per message";
     }

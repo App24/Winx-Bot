@@ -21,7 +21,7 @@ abstract class Command{
     public deprecated : boolean;
     public cooldown : number;
     public creatorOnly : boolean;
-    public serverOwnerOnly : boolean;
+    public guildOwnerOnly : boolean;
     public hidden : true;
     public aliases : Array<string>;
     public category : string;
