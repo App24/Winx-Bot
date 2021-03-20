@@ -5,19 +5,31 @@ import Command from './Command';
 import Keyv from './keyv-index';
 import {loadFiles, isClass, asyncForEach} from "./Utils";
 
+interface BotOptions{
+    clientOptions? : Discord.ClientOptions;
+    logLoading? : 'none' | 'simplified' | 'complex' | 'all';
+    loadEvents? : boolean;
+    loadCommands? : boolean;
+}
+
 class BotClient extends Discord.Client{
     private Tables = new Discord.Collection<string, Keyv>();
     public Commands = new Discord.Collection<string, Command>();
 
-    public constructor(options?: Discord.ClientOptions){
-        super(options);
-        
-        this.loadCommands();
+    private botOptions : BotOptions;
 
+    public constructor(options?: BotOptions){
+        super(options.clientOptions);
+        this.botOptions=options;
+        
         this.loadDatabases();
+        if(this.botOptions.loadCommands)
+            this.loadCommands();
+        if(this.botOptions.loadEvents)
+            this.loadEvents();
     }
 
-    public async loadDatabases(){
+    private loadDatabases(){
         const databaseDir="databases";
 
         if(!fs.existsSync(databaseDir)){
@@ -48,6 +60,7 @@ class BotClient extends Discord.Client{
     private loadCommands(){
         const files=loadFiles("dist/commands");
         if(!files) return;
+        let loaded=0;
         for(const file of files){
             if(file.endsWith(".js")){
                 try{
@@ -57,12 +70,59 @@ class BotClient extends Discord.Client{
                         if(!command.deprecated){
                             const name=path.basename(file).slice(0,-3);
                             this.Commands.set(name, command);
-                            console.log(`Loaded Command: ${name}`);
+                            switch(this.botOptions.logLoading){
+                                case 'complex':
+                                case 'all':
+                                    console.log(`Loaded Command: ${name}`);
+                                    break;
+                            }
+                            loaded++;
                         }
                     }
                 }catch{}
             }
         }
+        switch(this.botOptions.logLoading){
+            case 'simplified':
+            case 'all':
+                console.log(`Loaded ${loaded} commands!`);
+                break;
+        }
+    }
+
+    private loadEvents(){
+        const files=loadFiles("dist/events");
+        if(!files) return;
+        let loaded=0;
+        ;(async()=>{
+            for(const file of files){
+                if(file.endsWith(".js")){
+                    const event=await import(`./${file.substr(5, file.length)}`);
+                    const {default: func}=event;
+                    const name=path.basename(file).slice(0,-3);
+    
+                    if(typeof func !== "function"){
+                        continue;
+                    }
+    
+                    func(this);
+
+                    switch(this.botOptions.logLoading){
+                        case 'complex':
+                        case 'all':
+                            console.log(`Loaded Event: ${name}`);
+                            break;
+                    }
+                    loaded++;
+                }
+            }
+            switch(this.botOptions.logLoading){
+                case 'simplified':
+                case 'all':
+                    console.log(`Loaded ${loaded} events!`);
+                    break;
+            }
+        })();
     }
 
     public getDatabase(name : string) : Keyv{
