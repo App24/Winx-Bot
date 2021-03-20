@@ -5,7 +5,7 @@ import * as Utils from '../../Utils';
 class Patreon extends Command{
     constructor(){
         super();
-        this.modOnly=true;
+        this.permissions=["MANAGE_GUILD"]
         this.hidden=true;
         this.args=true;
         this.minArgsLength=2;

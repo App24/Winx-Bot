@@ -6,7 +6,7 @@ class Patreons extends Command{
     constructor(){
         super();
         this.hidden=true;
-        this.modOnly=true;
+        this.permissions=["MANAGE_GUILD"]
         this.category=Command.PatreonCategory;
     }
 

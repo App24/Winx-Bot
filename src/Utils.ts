@@ -1,11 +1,11 @@
-import Discord from 'discord.js';
+import Discord, { Guild, TextChannel, User } from 'discord.js';
 import {join} from 'path';
 import fs from 'fs';
 import BotClient from './BotClient';
 import Keyv from './keyv-index';
 import { Canvas } from 'canvas';
 
-export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, hasModRole, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention};
+export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed};
 
 const capXp=new Discord.Collection<string, Array<object>>();
 
@@ -174,19 +174,6 @@ function hasRole(member : Discord.GuildMember, role : Discord.Role) : boolean{
     return member.roles.cache.find(other=>other.id===role.id) !== undefined;
 }
 
-async function hasModRole(member : Discord.GuildMember, guild : Discord.Guild, client : BotClient) : Promise<boolean> {
-    const ModRoles=client.getDatabase("modRoles");
-    const modRoles=await getServerDatabase(ModRoles, guild.id);
-    let mod=false;
-    await asyncForEach(modRoles, async(roleId)=>{
-        const role=await getRoleByID(roleId, guild);
-        if(!role) return;
-        mod=hasRole(member, role);
-        return mod;
-    });
-    return mod;
-}
-
 async function getServerDatabase(database : Keyv, guildId : string, defaultValue : any =[]){
     let serverDatabase=await database.get(guildId);
     if(!serverDatabase){
@@ -284,4 +271,21 @@ async function addXP(client : BotClient, user : Discord.User, xp : number, guild
     }
     levels[index]=userInfo;
     await Levels.set(guild.id, levels);
+}
+
+async function getLogChannel(client : BotClient, guild : Guild) : Promise<TextChannel>{
+    const ServerInfo=client.getDatabase("serverInfo");
+    const serverInfo=await getServerDatabase(ServerInfo, guild.id, {});
+    if(!serverInfo["logChannel"]) return undefined;
+    const channel=getTextChannelByID(serverInfo["logChannel"], guild);
+    if(!channel) return undefined;
+    return channel;
+}
+
+function createLogEmbed(situation : string, user : User, value : any){
+    const embed=new Discord.MessageEmbed();
+    embed.setTitle(situation);
+    embed.addField("User", user, true);
+    embed.addField("Value", value, true);
+    return embed;
 }

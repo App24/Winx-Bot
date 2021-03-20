@@ -41,6 +41,7 @@ client.on("ready", async()=>{
 });
 
 (<any>client).ws.on("INTERACTION_CREATE", async(interactionObject)=>{
+
     (<any>client).api.interactions(interactionObject.id, interactionObject.token).callback.post({
         data:{
             type: 4,
@@ -88,7 +89,7 @@ client.on("message", async(message)=>{
         }
         const xpPerMessage=serverInfo["xpPerMessage"];
         const xp=Math.min(xpPerMessage, message.content.length);
-        await Utils.addXP(client, message.author, xp, message.guild, message.channel);
+        await Utils.addXP(client, message.author, xpPerMessage, message.guild, message.channel);
         return;
     }
 
@@ -134,14 +135,6 @@ client.on("message", async(message)=>{
     if(command.permissions){
         if(!message.member.hasPermission(<Discord.PermissionResolvable>command.permissions)){
             return message.reply(`You do not have permissions to use this command!`);
-        }
-    }
-
-    if(command.modOnly){
-        const member=await Utils.getMemberByID(message.author.id, message.guild);
-        const modrole=await Utils.hasModRole(member, message.guild, client);
-        if(!modrole){
-            return message.reply(`This is a mod only command!`);
         }
     }
 

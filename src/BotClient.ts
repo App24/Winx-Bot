@@ -31,7 +31,6 @@ class BotClient extends Discord.Client{
         const UserSettings=new Keyv(`sqlite://${databaseDir}/userSettings.sqlite`);
         const Errors=new Keyv(`sqlite://${databaseDir}/errors.sqlite`);
         const Paid=new Keyv(`sqlite://${databaseDir}/paid.sqlite`);
-        const ModRoles=new Keyv(`sqlite://${databaseDir}/modRoles.sqlite`);
         const Suggestions=new Keyv(`sqlite://${databaseDir}/suggestions.sqlite`);
         const CustomCommands=new Keyv(`sqlite://${databaseDir}/customCommands.sqlite`);
 
@@ -42,7 +41,6 @@ class BotClient extends Discord.Client{
         this.Tables.set("userSettings", UserSettings);
         this.Tables.set("errors", Errors);
         this.Tables.set("paid", Paid);
-        this.Tables.set("modRoles", ModRoles);
         this.Tables.set("suggestions", Suggestions);
         this.Tables.set("customCommands", CustomCommands);
     }

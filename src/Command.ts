@@ -12,7 +12,6 @@ const CAT_PATREON="Patreon";
 abstract class Command{
 
     public guildOnly : boolean;
-    public modOnly : boolean;
     public minArgsLength : number;
     public paid : boolean;
     public description : string;

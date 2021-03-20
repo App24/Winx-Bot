@@ -6,7 +6,7 @@ class LevelChannel extends Command{
     constructor(){
         super();
         this.args=true;
-        this.modOnly=true;
+        this.permissions=["MANAGE_GUILD"]
         this.usage="<channel/list/clear>";
         this.description="Sets the Levels Channel!";
         this.category=Command.SettingsCategory;
@@ -14,7 +14,7 @@ class LevelChannel extends Command{
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
         const ServerInfo=bot.getDatabase("serverInfo");
-        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id);
+        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {});
 
         if(args[0].toLowerCase()==="list"){
             if(serverInfo["levelChannel"]){
@@ -33,7 +33,7 @@ class LevelChannel extends Command{
             }
         }
 
-        const channel=await Utils.getChannelFromMention(args[0], message.guild);
+        const channel=await Utils.getTextChannelFromMention(args[0], message.guild);
         if(!channel) return message.reply(`${args[0]} is not a valid channel!`);
         serverInfo["levelChannel"]=channel.id;
         await ServerInfo.set(message.guild.id, serverInfo);

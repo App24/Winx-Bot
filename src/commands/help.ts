@@ -18,13 +18,12 @@ class Help extends Command{
         const botMember=await Utils.getMemberByID(bot.user.id, message.guild);
 
         const userMember=await Utils.getMemberByID(message.author.id, message.guild);
-        const showMod=await Utils.hasModRole(userMember, message.guild, bot);
 
         if(!args.length){
             const list={};
             let i=0;
             commands.forEach((command, name) => {
-                if((!command.ownerOnly&&!command.modOnly)&&!command.permissions){
+                if((!command.ownerOnly)&&!command.permissions){
                     if(!command.hidden){
                         let category=command.category;
                         if(!category) category="Other";
@@ -33,7 +32,6 @@ class Help extends Command{
                         if(command.paid) text+="\n__Premium Only__";
                         if(command.usage) text+=`\nUsage: ${command.usage}`;
                         if(command.aliases) text+=`\nAliases: ${command.aliases}`;
-                        if(command.modOnly||command.permissions) text+=`\n__Mod Only__`;
                         if(!(category in list)){
                             list[category]=[i];
                             list[category].push(`**${name}:** ${command.description||""}${text}`);
@@ -116,7 +114,7 @@ class Help extends Command{
                 if(command.permissions){
                     hasPerms =userMember.hasPermission(<Discord.PermissionResolvable>command.permissions);
                 }
-                if(((!command.ownerOnly&&!command.modOnly)||(showMod&&!command.ownerOnly))&&hasPerms){
+                if((!command.ownerOnly)&&hasPerms){
                     if(!command.hidden){
                         let category=command.category;
                         if(!category) category="Other";
@@ -125,7 +123,6 @@ class Help extends Command{
                         if(command.paid) text+="\n__Premium Only__";
                         if(command.usage) text+=`\nUsage: ${command.usage}`;
                         if(command.aliases) text+=`\nAliases: ${command.aliases}`;
-                        if(command.modOnly||command.permissions) text+=`\n__Mod Only__`;
                         if(!(category in list)){
                             list[category]=[i];
                             list[category].push(`**${name}:** ${command.description||""}${text}`);
@@ -209,7 +206,7 @@ class Help extends Command{
                 if(c.permissions){
                     hasPerms =userMember.hasPermission(<Discord.PermissionResolvable>c.permissions);
                 }
-                return (c.category&&c.category.toLowerCase()==name)&&!c.hidden&&(((!c.ownerOnly&&!c.modOnly)||(showMod&&!c.ownerOnly))&&hasPerms);
+                return (c.category&&c.category.toLowerCase()==name)&&!c.hidden&&hasPerms;
             });
             if(!cat||cat.size<1) return message.reply("That is not a valid command/category!");
 
@@ -225,8 +222,8 @@ class Help extends Command{
                 const embed = new Discord.MessageEmbed()
                 .setTitle(`Showing commands ${start+1}-${start + currentList.size} out of ${cat.size}\n**${cat.values().next().value.category}**`);
                 // catData.push(`**${cat.values().next().value.category}**`);
-                currentList.forEach(c => {
-                    addToData(catData, c, false);
+                currentList.forEach((c, name) => {
+                    addToData(catData, c, name, false);
                 });
                 embed.setDescription(catData);
                 
@@ -272,7 +269,7 @@ class Help extends Command{
             });
         }
 
-        addToData(data, command, true);
+        addToData(data, command, name, true);
 
         const embed=new Discord.MessageEmbed()
             .setDescription(data);
@@ -287,12 +284,12 @@ class Help extends Command{
 
 }
 
-function addToData(data, command, showCat){
-    data.push(`**${command.name}**: ${command.description||""}`);
-    if (command.usage) data.push(`${process.env.PREFIX}${command.name} ${command.usage}`);
+function addToData(data, command, name, showCat){
+    data.push(`**${name}**: ${command.description||""}`);
+    if (command.usage) data.push(`${process.env.PREFIX}${name} ${command.usage}`);
     if (command.aliases) data.push(`Aliases: ${command.aliases.join(', ')}`);
     if(showCat) data.push(`Category: ${command.category||"Other"}`);
-    if(command.modOnly||command.permissions) data.push(`__Mod Only__`);
+    if(command.permissions) data.push(`__Mod Only__`);
 }
 
 module.exports=Help;
