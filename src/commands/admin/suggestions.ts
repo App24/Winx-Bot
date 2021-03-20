@@ -5,7 +5,7 @@ import * as Utils from '../../Utils';
 class SuggestionsC extends Command{
     constructor(){
         super();
-        this.ownerOnly=true;
+        this.creatorOnly=true;
         this.args=true;
         this.guildOnly=false;
         this.usage="<list/finish/reject/id> [non/finish/rejected/id]";

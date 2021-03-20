@@ -23,7 +23,7 @@ class Help extends Command{
             const list={};
             let i=0;
             commands.forEach((command, name) => {
-                if((!command.ownerOnly)&&!command.permissions){
+                if((!command.creatorOnly)&&!command.permissions){
                     if(!command.hidden){
                         let category=command.category;
                         if(!category) category="Other";
@@ -114,7 +114,7 @@ class Help extends Command{
                 if(command.permissions){
                     hasPerms =userMember.hasPermission(<Discord.PermissionResolvable>command.permissions);
                 }
-                if((!command.ownerOnly)&&hasPerms){
+                if((!command.creatorOnly)&&hasPerms){
                     if(!command.hidden){
                         let category=command.category;
                         if(!category) category="Other";

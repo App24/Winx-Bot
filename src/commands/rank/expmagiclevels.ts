@@ -7,7 +7,7 @@ import * as Utils from '../../Utils';
 class ExpMagicLevels extends Command{
     constructor(){
         super();
-        this.ownerOnly=true;
+        this.creatorOnly=true;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

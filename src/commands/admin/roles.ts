@@ -5,7 +5,7 @@ import * as Utils from '../../Utils';
 class Roles extends Command{
     constructor(){
         super();
-        this.ownerOnly=true;
+        this.creatorOnly=true;
         this.deprecated=true;
         this.category=Command.OwnerCategory;
     }

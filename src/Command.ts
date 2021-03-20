@@ -20,7 +20,8 @@ abstract class Command{
     public permissions : Array<string>;
     public deprecated : boolean;
     public cooldown : number;
-    public ownerOnly : boolean;
+    public creatorOnly : boolean;
+    public serverOwnerOnly : boolean;
     public hidden : true;
     public aliases : Array<string>;
     public category : string;
