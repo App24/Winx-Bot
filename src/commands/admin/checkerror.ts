@@ -32,7 +32,7 @@ class CheckError extends Command{
             await Errors.clear();
             await Utils.asyncForEach(errors, async(_error)=>{
                 const error=JSON.parse(_error[1]);
-                if(currentTime-error.time<msPerWeek*2){
+                if(currentTime-error.time>msPerWeek*2){
                     await Errors.set(_error[0], JSON.stringify(error));
                 }
             });
