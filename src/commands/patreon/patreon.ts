@@ -7,7 +7,7 @@ class Patreon extends Command{
         super();
         this.permissions=["MANAGE_GUILD"]
         this.hidden=true;
-        this.args=true;
+        this.maxArgsLength=2;
         this.minArgsLength=2;
         this.usage="<add/remove> <user>";
         this.category=Command.PatreonCategory;

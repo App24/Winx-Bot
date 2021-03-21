@@ -13,10 +13,10 @@ abstract class Command{
 
     public guildOnly : boolean;
     public minArgsLength : number;
+    public maxArgsLength : number;
     public paid : boolean;
     public description : string;
     public usage : string;
-    public args : boolean;
     public permissions : Array<string>;
     public deprecated : boolean;
     public cooldown : number;
@@ -27,7 +27,8 @@ abstract class Command{
     public category : string;
 
     public constructor(){
-        this.minArgsLength=1;
+        this.minArgsLength=0;
+        this.maxArgsLength=Number.MAX_SAFE_INTEGER;
         this.guildOnly=true;
         this.category="Other";
     }

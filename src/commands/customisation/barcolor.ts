@@ -8,6 +8,7 @@ class BarColor extends Command{
     constructor(){
         super();
         this.paid=true;
+        this.maxArgsLength=2;
         this.description="Set the bar color of your card!";
         this.usage="[start/end/hex] [hex]";
         this.category=Command.CustomisationCategory;

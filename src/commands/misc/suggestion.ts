@@ -5,7 +5,7 @@ import * as Utils from '../../Utils';
 class Suggestion extends Command{
     constructor(){
         super();
-        this.args=true;
+        this.minArgsLength=1;
         this.usage="<suggestion>";
         this.description="Suggest a feature for the bot!";
         this.aliases=["suggest"];

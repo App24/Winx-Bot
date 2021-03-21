@@ -4,7 +4,6 @@ import Command from '../../Command';
 class RandomChoice extends Command{
     constructor(){
         super();
-        this.args=true;
         this.minArgsLength=2;
         this.description="Choose a random option";
         this.usage="<choice1> <choice2> [choice3] ...";

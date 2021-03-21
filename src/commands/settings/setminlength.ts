@@ -7,6 +7,7 @@ class SetMinLength extends Command{
     constructor(){
         super();
         this.usage="[amount above 0]";
+        this.maxArgsLength=1;
         // this.permissions=["MANAGE_GUILD"];
         this.guildOwnerOnly=true;
         this.category=Command.SettingsCategory;

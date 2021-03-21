@@ -8,6 +8,7 @@ class CardColor extends Command{
     constructor(){
         super();
         this.paid=true;
+        this.maxArgsLength=1;
         this.description="Set the background color of your card!";
         this.category=Command.CustomisationCategory;
         this.usage="[hex/reset]";

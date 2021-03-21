@@ -78,18 +78,24 @@ module.exports = (client : import("../BotClient"))=>{
         timestamps.set(message.author.id, now);
         setTimeout(()=>timestamps.delete(message.author.id), cooldownAmount);
 
-        if(command.args){
-            let minArgsLength=1;
-            if(command.minArgsLength) minArgsLength=command.minArgsLength;
-            if(args.length<minArgsLength){
-                let reply=`You didn't provide enough arguments, ${message.author}`;
+        const minArgsLength=command.minArgsLength;
+        const maxArgsLength=command.maxArgsLength;
+        if(args.length<minArgsLength){
+            let reply=`You didn't provide enough arguments, ${message.author}`;
 
-                if(command.usage){
-                    reply+=`\nThe proper usage would be: \`${process.env.PREFIX}${commandName} ${command.usage}\``;
-                }
-
-                return message.channel.send(reply);
+            if(command.usage){
+                reply+=`\nThe proper usage would be: \`${process.env.PREFIX}${commandName} ${command.usage}\``;
             }
+
+            return message.channel.send(reply);
+        }else if(args.length>maxArgsLength){
+            let reply=`You provide too many arguments, ${message.author}`;
+
+            if(command.usage){
+                reply+=`\nThe proper usage would be: \`${process.env.PREFIX}${commandName} ${command.usage}\``;
+            }
+
+            return message.channel.send(reply);
         }
 
         try{

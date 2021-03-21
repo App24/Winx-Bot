@@ -9,6 +9,7 @@ class Help extends Command{
         this.aliases=["commands"];
         this.description="Show commands";
         this.category=Command.InfoCategory;
+        this.maxArgsLength=1;
     }
 
     public async onRun(bot: import("../BotClient"), message: Discord.Message, args: string[]) {

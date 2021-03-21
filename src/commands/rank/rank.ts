@@ -8,6 +8,7 @@ class Rank extends Command{
         this.description="Shows your position on the leaderboard compared to other people on the server";
         this.category=Command.RankCategory;
         this.usage="[user]";
+        this.maxArgsLength=1;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

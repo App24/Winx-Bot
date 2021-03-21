@@ -6,7 +6,8 @@ class CheckError extends Command{
     constructor(){
         super();
         this.creatorOnly=true;
-        this.args=true;
+        this.minArgsLength=1;
+        this.maxArgsLength=1;
         this.usage="<error id/clear/list/prune>";
         this.guildOnly=false;
         this.category=Command.OwnerCategory;

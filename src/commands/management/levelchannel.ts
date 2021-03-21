@@ -5,7 +5,8 @@ import * as Utils from '../../Utils';
 class LevelChannel extends Command{
     constructor(){
         super();
-        this.args=true;
+        this.minArgsLength=1;
+        this.maxArgsLength=1;
         this.permissions=["MANAGE_GUILD"]
         this.usage="<channel/list/clear>";
         this.description="Sets the Levels Channel!";

@@ -7,10 +7,10 @@ class SetRank extends Command{
         super();
         this.permissions=["MANAGE_GUILD"]
         this.category=Command.RankCategory;
-        this.args=true;
+        this.minArgsLength=1;
         this.description="Set a rank";
         this.minArgsLength=2;
-        this.usage="<level above 0> <role/clear/add/remove/list> [gif]";
+        this.usage="<level above 0> <role/clear/add/remove/list> [gifs]";
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

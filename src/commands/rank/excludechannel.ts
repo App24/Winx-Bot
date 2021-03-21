@@ -5,8 +5,9 @@ import * as Utils from '../../Utils';
 class ExcludeChannel extends Command{
     constructor(){
         super();
-        this.permissions=["MANAGE_GUILD"]
-        this.args=true;
+        this.permissions=["MANAGE_GUILD"];
+        this.minArgsLength=1;
+        this.maxArgsLength=2;
         this.usage="<channel/list> [remove]";
         this.description="Excludes a channel from being used for leveling";
         this.category=Command.RankCategory;

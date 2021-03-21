@@ -8,6 +8,7 @@ class MagicLevels extends Command{
     constructor(){
         super();
         this.category=Command.RankCategory;
+        this.maxArgsLength=1;
         this.usage="[user]";
         this.description="Shows how far you are to the next level";
         this.aliases=["ml", "levels"];

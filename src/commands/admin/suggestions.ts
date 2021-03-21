@@ -6,7 +6,8 @@ class SuggestionsC extends Command{
     constructor(){
         super();
         this.creatorOnly=true;
-        this.args=true;
+        this.minArgsLength=1;
+        this.maxArgsLength=2;
         this.guildOnly=false;
         this.usage="<list/finish/reject/id> [non/finish/rejected/id]";
         this.category=Command.OwnerCategory;
