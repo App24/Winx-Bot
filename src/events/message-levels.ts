@@ -6,6 +6,7 @@ const levelCooldowns = new Discord.Collection<string, Discord.Collection<string,
 
 module.exports=(client : import("../BotClient"))=>{
     client.on("message", async(message)=>{
+        if(message.content.startsWith(process.env.PREFIX)||message.author.bot||message.channel.type==="dm") return;
         const Excludes=client.getDatabase("excludes");
         const ServerInfo=client.getDatabase("serverInfo");
         const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {});
@@ -13,7 +14,7 @@ module.exports=(client : import("../BotClient"))=>{
             serverInfo["minMessageLength"]=MIN_MESSAGE_LENGTH;
             await ServerInfo.set(message.guild.id, serverInfo);
         }
-        if(message.content.startsWith(process.env.PREFIX)||message.author.bot||message.content.length<serverInfo["minMessageLength"]||message.channel.type==="dm") return;
+        if(message.content.length<serverInfo["minMessageLength"]) return;
         const excluded=await Excludes.get(message.guild.id);
         if(excluded){
             const channelExcluded=await excluded.find(u=>u["id"]===message.channel.id);
