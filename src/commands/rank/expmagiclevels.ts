@@ -122,9 +122,13 @@ class ExpMagicLevels extends Command{
 
         ctx.fillStyle="#"+hex;
         this.roundRect(ctx,0,0,canvas.width,canvas.height, 20).fill();
+        
+        var rgb=Utils.hexToRGB(hex);
+        const brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+        const textColor = (brightness > 125) ? 'black' : 'white';
 
         ctx.font=nameFont[0];
-        ctx.fillStyle="#ffffff";
+        ctx.fillStyle=textColor;
         ctx.fillText(text, pfpX+(pfpRadius*2)+pfpX, textPos);
 
         const barWidth=maxInfoSize;
@@ -144,10 +148,12 @@ class ExpMagicLevels extends Command{
         ctx.font=transformationFont[0];
         ctx.textBaseline='top';
         ctx.textAlign="left";
+        ctx.fillStyle=textColor;
         ctx.fillText(currentTransText, pfpX+(pfpRadius*2)+pfpX, textPos+10+barHeight);
 
         ctx.textBaseline='top';
         ctx.textAlign="left";
+        ctx.fillStyle=textColor;
         ctx.fillText(nextTransText, pfpX+(pfpRadius*2)+pfpX, textPos+10+barHeight+transformationFont[1]);
 
         if(user.id===process.env.OWNER_ID){
