@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import Command from './Command';
 import Keyv from './keyv-index';
+import SlashCommand from './SlashCommand';
 import {loadFiles, isClass, asyncForEach} from "./Utils";
 
 interface BotOptions{
@@ -10,11 +11,13 @@ interface BotOptions{
     logLoading? : 'none' | 'simplified' | 'complex' | 'all';
     loadEvents? : boolean;
     loadCommands? : boolean;
+    loadSlashes? : boolean;
 }
 
 class BotClient extends Discord.Client{
     private Tables = new Discord.Collection<string, Keyv>();
     public Commands = new Discord.Collection<string, Command>();
+    public Slashes = new Discord.Collection<string, SlashCommand>();
 
     private botOptions : BotOptions;
 
@@ -23,10 +26,14 @@ class BotClient extends Discord.Client{
         this.botOptions=options;
         
         this.loadDatabases();
-        if(this.botOptions.loadCommands)
-            this.loadCommands();
-        if(this.botOptions.loadEvents)
-            this.loadEvents();
+        ;(async()=>{
+            if(this.botOptions.loadCommands)
+                await this.loadCommands();
+            if(this.botOptions.loadSlashes)
+                await this.loadSlashes();
+            if(this.botOptions.loadEvents)
+                await this.loadEvents();
+        })();
     }
 
     private loadDatabases(){
@@ -57,16 +64,17 @@ class BotClient extends Discord.Client{
         this.Tables.set("customCommands", CustomCommands);
     }
 
-    private loadCommands(){
+    private async loadCommands(){
         const files=loadFiles("dist/commands");
         if(!files) return;
         let loaded=0;
         for(const file of files){
             if(file.endsWith(".js")){
                 try{
-                    const commandRequire=require(`./${file.substr(5, file.length)}`);
-                    if(isClass(commandRequire)){
-                        const command=new commandRequire();
+                    const commandImport=await import(`./${file.substr(5, file.length)}`);
+                    const {default: cClass}=commandImport;
+                    if(isClass(cClass)){
+                        const command=new cClass();
                         if(!command.deprecated){
                             const name=path.basename(file).slice(0,-3);
                             this.Commands.set(name, command);
@@ -90,39 +98,71 @@ class BotClient extends Discord.Client{
         }
     }
 
-    private loadEvents(){
+    private async loadEvents(){
         const files=loadFiles("dist/events");
         if(!files) return;
         let loaded=0;
-        ;(async()=>{
-            for(const file of files){
-                if(file.endsWith(".js")){
-                    const event=await import(`./${file.substr(5, file.length)}`);
-                    const {default: func}=event;
+        for(const file of files){
+            if(file.endsWith(".js")){
+                const event=await import(`./${file.substr(5, file.length)}`);
+                const {default: func}=event;
+                const name=path.basename(file).slice(0,-3);
+
+                if(typeof func !== "function"){
+                    continue;
+                }
+
+                func(this);
+
+                switch(this.botOptions.logLoading){
+                    case 'complex':
+                    case 'all':
+                        console.log(`Loaded Event: ${name}`);
+                        break;
+                }
+                loaded++;
+            }
+        }
+        switch(this.botOptions.logLoading){
+            case 'simplified':
+            case 'all':
+                console.log(`Loaded ${loaded} events!`);
+                break;
+        }
+    }
+
+    private async loadSlashes(){
+        const files=loadFiles("dist/slashes");
+        if(!files) return;
+        let loaded=0;
+        for(const file of files){
+            if(file.endsWith(".js")){
+                try{
+                    const slash=await import(`./${file.substr(5, file.length)}`);
+                    const {data, options, onRun}=slash;
                     const name=path.basename(file).slice(0,-3);
-    
-                    if(typeof func !== "function"){
-                        continue;
-                    }
-    
-                    func(this);
+                    data.name=name;
+
+                    const command=new SlashCommand(data||{}, options, onRun);
+                    this.Slashes.set(name, command);
 
                     switch(this.botOptions.logLoading){
                         case 'complex':
                         case 'all':
-                            console.log(`Loaded Event: ${name}`);
+                            console.log(`Loaded Slash: ${name}`);
                             break;
                     }
+
                     loaded++;
-                }
+                }catch{}
             }
-            switch(this.botOptions.logLoading){
-                case 'simplified':
-                case 'all':
-                    console.log(`Loaded ${loaded} events!`);
-                    break;
-            }
-        })();
+        }
+        switch(this.botOptions.logLoading){
+            case 'simplified':
+            case 'all':
+                console.log(`Loaded ${loaded} slashes!`);
+                break;
+        }
     }
 
     public getDatabase(name : string) : Keyv{

@@ -1,11 +1,12 @@
-import Discord, { Guild, TextChannel, User } from 'discord.js';
+import Discord, { DMChannel, Guild, TextChannel, User, Webhook, WebhookClient } from 'discord.js';
 import {join} from 'path';
 import fs from 'fs';
 import BotClient from './BotClient';
 import Keyv from './keyv-index';
 import { Canvas } from 'canvas';
+import { GuildMember } from 'discord.js';
 
-export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed, secondsToTime};
+export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed, secondsToTime, createAPIMessage, reply};
 
 const capXp=new Discord.Collection<string, Array<object>>();
 
@@ -312,4 +313,32 @@ function secondsToTime(time : number){
     times.push(seconds.toFixed(0)+" second(s)");
 
     return times.join(" and ");
+}
+
+async function reply(client:BotClient, interaction, response){
+    let data={
+        content: response
+    };
+
+    if(typeof response==="object"){
+        data=<any>await createAPIMessage(client, interaction, response);
+    }
+    if(!data) return;
+
+    (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
+        data:{
+            type:4,
+            data
+        }
+    });
+}
+
+async function createAPIMessage(client:BotClient, interaction, content){
+    let channel=client.channels.resolve(interaction.channel_id);
+    if(channel===null){
+        channel=await (await getUserByID(interaction.user.id, client)).createDM();
+    }
+    if(!channel||channel==null) return;
+    const {data, files}=await Discord.APIMessage.create(<TextChannel|DMChannel|User|GuildMember|Webhook|WebhookClient>client.channels.resolve(interaction.channel_id), content).resolveData().resolveFiles();
+    return {...data, files};
 }

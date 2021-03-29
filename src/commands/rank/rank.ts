@@ -30,11 +30,11 @@ class Rank extends Command{
         const actualLevels=[];
         var _userIndex=0;
         await Utils.asyncForEach(levels, async(element)=>{
-            const user=await Utils.getUserByID(element["id"], bot);
+            const user=await Utils.getMemberByID(element["id"], message.guild);
             if(user){
                 actualLevels.push(element);
                 _userIndex++;
-                if(_userIndex>=16){
+                if(_userIndex>=15){
                     return true;
                 }
             }
