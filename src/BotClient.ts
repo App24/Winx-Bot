@@ -139,11 +139,11 @@ class BotClient extends Discord.Client{
             if(file.endsWith(".js")){
                 try{
                     const slash=await import(`./${file.substr(5, file.length)}`);
-                    const {data, options, onRun}=slash;
-                    const name=path.basename(file).slice(0,-3);
+                    const {data, onRun}=slash;
+                    const name=(data&&data.name)?data.name:path.basename(file).slice(0,-3);
                     data.name=name;
 
-                    const command=new SlashCommand(data||{}, options, onRun);
+                    const command=new SlashCommand(data||{}, onRun);
                     this.Slashes.set(name, command);
 
                     switch(this.botOptions.logLoading){

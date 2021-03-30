@@ -1,5 +1,4 @@
 import Discord from 'discord.js';
-import Command from '../Command';
 import * as Utils from '../Utils';
 import {VERSION} from '../Constants';
 
