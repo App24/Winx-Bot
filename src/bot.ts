@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import BotClient from './BotClient';
 import { ERROR_HEX } from './Constants';
-import { reply, secondsToTime } from './Utils';
+import { getUserByID, isPatreon, reply, secondsToTime } from './Utils';
 
 const intents=new Discord.Intents(Discord.Intents.NON_PRIVILEGED);
 intents.add('GUILD_MEMBERS');
@@ -15,16 +15,54 @@ const client=new BotClient({
 
 const cooldowns = new Discord.Collection<string, Discord.Collection<string, number>>();
 
+function getOptions(options, newOptions : any[]){
+    for(const option of options){
+        if(option.type===2||option.type===1){
+            newOptions.push(option.name);
+            if(option.options){
+                getOptions(option.options, newOptions);
+            }
+        }
+        else{
+            newOptions.push(option.value);
+        }
+    }
+}
+
 (<any>client).ws.on("INTERACTION_CREATE", async(interaction)=>{
     const {name, options}=interaction.data;
     const commandName=name.toLowerCase();
     const newOptions=[];
     if(options)
-    for(const option of options){
-        newOptions.push(option.value);
-    }
+        getOptions(options, newOptions);
+
+    console.log(interaction.data.id);
 
     const command=client.Slashes.get(commandName);
+
+    if(!command)
+        return (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
+            data:{
+                type: 4,
+                data:{
+                    content: "Not Yet Implemented! (Yell at Discord to release slash commands in discordjs :sob:)"
+                }
+            }
+        });
+
+    if(command.data.paid){
+        if(!interaction.guild_id){
+            const embed=new Discord.MessageEmbed();
+            embed.setDescription("Server Only Slash Command!");
+            embed.setColor(ERROR_HEX);
+            return reply(client, interaction, embed);
+        }
+        const user=await getUserByID(interaction.member.user.id, client);
+        const userPaid=await isPatreon(user, client.guilds.resolve(interaction.guild_id), client);
+        if(!userPaid){
+            return reply(client, interaction, "This command is a premium feature only. Contact a mod to find out how to gain access to it.");
+        }
+    }
 
     if(!cooldowns.has(commandName)){
         cooldowns.set(commandName, new Discord.Collection());
@@ -48,16 +86,6 @@ const cooldowns = new Discord.Collection<string, Discord.Collection<string, numb
 
     timestamps.set(userId, now);
     setTimeout(()=>timestamps.delete(userId), cooldownAmount);
-
-    if(!command)
-        return (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-            data:{
-                type: 4,
-                data:{
-                    content: "Not Yet Implemented! (Yell at Discord to release slash commands in discordjs :sob:)"
-                }
-            }
-        });
     
     if(command.data.guildOnly&&!interaction.guild_id){
         const embed=new Discord.MessageEmbed();
