@@ -11,12 +11,6 @@ module.exports={
 }
 
 module.exports.onRun=async (client:import("../../BotClient"), interaction, args : string[])=>{
-    await (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-        data:{
-            type:5
-        }
-    });
-
     const channel=<Discord.GuildChannel>client.channels.resolve(interaction.channel_id);
     const UserSettings=client.getDatabase("userSettings");
     const user=await Utils.getUserByID(interaction.member.user.id, client);
@@ -30,44 +24,24 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
         case "get":{
             let barColor=await userSettings["settings"].find(setting=>setting["id"]==="barColor");
             if(!barColor){
-                return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                    data:{
-                        content: "You do not have a custom bar color!"
-                    }
-                });
+                return Utils.reply(client, interaction, `You do not have a custom bar color!`);
             }
             switch(args[1]){
                 case "both":{
-                    await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: "Done!"
-                        }
-                    });
+                    await Utils.reply(client, interaction, `Done!`);
                     await showColor(channel, barColor["startColor"], "Start");
                     await showColor(channel, barColor["endColor"], "End");
                 }break;
                 case "end":{
-                    await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: "Done!"
-                        }
-                    });
+                    await Utils.reply(client, interaction, "Done!");
                     await showColor(channel, barColor["endColor"]);
                 }break;
                 case "start":{
-                    await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: "Done!"
-                        }
-                    });
+                    await Utils.reply(client, interaction, "Done!");
                     await showColor(channel, barColor["startColor"]);
                 }break;
                 default:{
-                    (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: "How did you get here?"
-                        }
-                    });
+                    Utils.reply(client, interaction, "How did you even get here?");
                 }break;
             }
         } break;
@@ -83,11 +57,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
                     hex=hex.substring(1);
                 }
                 if(hex.length!==6){
-                    return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: "That is not a valid color!"
-                        }
-                    });
+                    return Utils.reply(client, interaction, "That is not a valid color!");
                 }
             }
             let startHex=barColor["startColor"], endHex=barColor["endColor"];
@@ -103,11 +73,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
                     barColor["startColor"]=startHex;
                     barColor["endColor"]=endHex;
                     await UserSettings.set(interaction.guild_id, serverUserSettings);
-                    await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: `Done!`
-                        }
-                    });
+                    await Utils.reply(client, interaction, "Done!");
                     await showColor(channel, startHex, "Start");
                     await showColor(channel, endHex, "End");
                 }break;
@@ -119,11 +85,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
                     }
                     barColor["startColor"]=startHex;
                     await UserSettings.set(interaction.guild_id, serverUserSettings);
-                    await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: `Done!`
-                        }
-                    });
+                    await Utils.reply(client, interaction, "Done!");
                     await showColor(channel, startHex);
                 }break;
                 case "end":{
@@ -134,28 +96,16 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
                     }
                     barColor["endColor"]=endHex;
                     await UserSettings.set(interaction.guild_id, serverUserSettings);
-                    await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: `Done!`
-                        }
-                    });
+                    await Utils.reply(client, interaction, "Done!");
                     await showColor(channel, endHex);
                 }break;
                 default:{
-                    (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: "How did you get here?"
-                        }
-                    });
+                    Utils.reply(client, interaction, "How did you even get here?");
                 }break;
             }
         } break;
         default:{
-            (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                data:{
-                    content: "How did you get here?"
-                }
-            });
+            Utils.reply(client, interaction, "How did you even get here?");
         } break;
     }
 }

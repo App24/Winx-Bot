@@ -59,28 +59,15 @@ function rgbToHsl(r : number, g : number, b : number){
 }
 
 module.exports.onRun=async (client:import("../../BotClient"), interaction, args : string[])=>{
-    await (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-        data:{
-            type:5
-        }
-    });
     const channel=<Discord.GuildChannel>client.channels.resolve(interaction.channel_id);
 
     let user=await Utils.getUserFromMention(args[0], client);
     if(!user) user=await Utils.getUserByID(interaction.member.user.id, client);
     if(user.bot)
-        return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-            data:{
-                content: `${user} is a a bot and therefore has no levels!`
-            }
-        });
+        return Utils.reply(client, interaction, `${user} is a bot and therefore has no levels!`);
     const member=await Utils.getMemberByID(user.id, channel.guild);
     if(!member)
-        return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-        data:{
-            content: `${user} is not a member of this server!`
-        }
-    });
+        return Utils.reply(client, interaction, `${user} is not a member of this server!`);
     const Levels=client.getDatabase("levels");
     const Ranks=client.getDatabase("ranks");
     const ranks : Array<any>=await Utils.getServerDatabase(Ranks, channel.guild.id);
@@ -241,11 +228,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
 
     const attachment=new Discord.MessageAttachment(canvas.toBuffer(), "magiclevels.png");
 
-    await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-        data:{
-            content: "Done"
-        }
-    });
+    await Utils.reply(client, interaction, "Done");
 
     (<Discord.TextChannel>channel).send(attachment);
 }

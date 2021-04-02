@@ -325,11 +325,8 @@ async function reply(client:BotClient, interaction, response){
     }
     if(!data) return;
 
-    (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-        data:{
-            type:4,
-            data
-        }
+    (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
+        data
     });
 }
 

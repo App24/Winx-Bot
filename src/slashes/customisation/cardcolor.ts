@@ -11,12 +11,6 @@ module.exports={
 }
 
 module.exports.onRun=async (client:import("../../BotClient"), interaction, args : string[])=>{
-    await (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-        data:{
-            type:5
-        }
-    });
-
     const channel=<Discord.GuildChannel>client.channels.resolve(interaction.channel_id);
     const UserSettings=client.getDatabase("userSettings");
     const user=await Utils.getUserByID(interaction.member.user.id, client);
@@ -31,17 +25,9 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
         case "get":{
             let cardColor=await userSettings["settings"].find(setting=>setting["id"]==="cardColor");
             if(!cardColor){
-                return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                    data:{
-                        content: "You not have a custom background color!"
-                    }
-                });
+                return Utils.reply(client, interaction, "You do not have a custom background color!");
             }
-            await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                data:{
-                    content: "Done!"
-                }
-            });
+            await Utils.reply(client, interaction, "Done!");
             showColor(channel, cardColor["color"]);
         } break;
         case "set":{
@@ -56,11 +42,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
                     hex=hex.substring(1);
                 }
                 if(hex.length!==6){
-                    return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                        data:{
-                            content: "That is not a valid color!"
-                        }
-                    });
+                    return Utils.reply(client, interaction, "That is not a valid color!");
                 }
             }
             if(hex==="reset"){
@@ -68,19 +50,11 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
             }
             cardColor["color"]=hex;
             await UserSettings.set(interaction.guild_id, serverUserSettings);
-            await (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                data:{
-                    content: "Done!"
-                }
-            });
+            await Utils.reply(client, interaction, "Done!");
             await showColor(channel, cardColor["color"]);
         } break;
         default:{
-            (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                data:{
-                    content: "How did you get here?"
-                }
-            });
+            Utils.reply(client, interaction, "How did you even get here?");
         } break;
     }
 }

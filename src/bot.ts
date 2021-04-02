@@ -38,15 +38,14 @@ function getOptions(options, newOptions : any[]){
 
     const command=client.Slashes.get(commandName);
 
+    await (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
+        data:{
+            type: 5
+        }
+    });
+
     if(!command)
-        return (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-            data:{
-                type: 4,
-                data:{
-                    content: "Not Yet Implemented! (Yell at Discord to release slash commands in discordjs :sob:)"
-                }
-            }
-        });
+        return reply(client, interaction, `Not Yet Implemented! (Yell at Discord to release slash commands in discordjs :sob:)`);
 
     if(command.data.paid){
         if(!interaction.guild_id){

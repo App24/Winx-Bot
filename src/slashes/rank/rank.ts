@@ -8,13 +8,6 @@ module.exports={
 }
 
 module.exports.onRun=async (client:import("../../BotClient"), interaction, args : string[])=>{
-
-    await (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-        data:{
-            type:5
-        }
-    });
-
     const Levels=client.getDatabase("levels");
     const levels=await Levels.get(interaction.guild_id);
     const channel=<Discord.GuildChannel>client.channels.resolve(interaction.channel_id);
@@ -22,20 +15,12 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     if(args.length>0){
         const temp=await Utils.getUserFromMention(args[0], client);
         if(!temp){
-            return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                data:{
-                    content: `\`${args[0]}\` is not a valid user`
-                }
-            });
+            return Utils.reply(client, interaction, `\`${args[0]}\` is not a valid user!`);
         }
         if(temp) _user=temp;
     }
     if(!levels)
-        return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-            data:{
-                content: "There are no levels in this server"
-            }
-        });
+        return Utils.reply(client, interaction, `There are no levels in this server!`);
     await levels.sort((a,b)=>{
         if(a["level"]===b["level"]){
             return (a["xp"]>b["xp"])?-1:1;
@@ -87,11 +72,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
             const userIndex=levels.findIndex((user)=>user["id"]===_user.id);
             const member=await Utils.getMemberByID(_user.id, channel.guild);
             if(!member)
-            return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                data:{
-                    content: `The user ${_user} is not a member of the server!`
-                }
-            });
+                return Utils.reply(client, interaction, `The user ${_user} is not a member of this server!`);
             let text="";
             text+=`${userIndex+1}. **__${_user.username}`;
             if(member.nickname)
@@ -101,11 +82,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
             _data.push(`Level: ${userInfo["level"]} XP: ${userInfo["xp"]}/${Utils.getLevelXP(userInfo["level"])}`);
 
         }else{
-            return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-                data:{
-                    content: `\`${_user.username}\` does not have any levels!`
-                }
-            });
+            return Utils.reply(client, interaction, `\`${_user.username}\` does not have any levels!`);
         }
     }
     const embed=new Discord.MessageEmbed();
@@ -114,9 +91,5 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     if(botMember.roles&&botMember.roles.color)
         embed.setColor(botMember.roles.color.color);
 
-    const data=<any>await Utils.createAPIMessage(client, interaction, embed);
-
-    (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-        data
-    });
+    Utils.reply(client, interaction, embed);
 }

@@ -8,22 +8,11 @@ module.exports={
 }
 
 module.exports.onRun=async (client:import("../../BotClient"), interaction, args : string[])=>{
-
-    await (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-        data:{
-            type:5
-        }
-    });
-
     const Ranks=client.getDatabase("ranks");
     const channel=<Discord.GuildChannel>client.channels.resolve(interaction.channel_id);
     let ranks=await Ranks.get(interaction.guild_id);
     if(!ranks){
-        return (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-            data:{
-                content: "This guild does not contain any ranks"
-            }
-        });
+        return Utils.reply(client, interaction, "This guild does not contain any ranks");
     }
     const embed=new Discord.MessageEmbed();
     const _data=[];
@@ -40,9 +29,5 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     if(botMember.roles&&botMember.roles.color)
         embed.setColor(botMember.roles.color.color);
 
-    const data=<any>await Utils.createAPIMessage(client, interaction, embed);
-
-    (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-        data
-    });
+    Utils.reply(client, interaction, embed);
 };
