@@ -212,12 +212,13 @@ class Help extends Command{
             if(!cat||cat.size<1) return message.reply("That is not a valid command/category!");
 
             const generateEmbed = start =>{
-                const currentList=new Discord.Collection();
+                const currentList=new Discord.Collection<string, Command>();
                 const catData=[];
                 for (let i = start; i < cat.size; i++) {
                     if(i>=start+increments) break;
+                    const name=cat.keyArray()[i];
                     const element = cat.array()[i];
-                    currentList.set(element["name"], element);
+                    currentList.set(name, element);
                 }
 
                 const embed = new Discord.MessageEmbed()
@@ -285,7 +286,7 @@ class Help extends Command{
 
 }
 
-function addToData(data, command, name, showCat){
+function addToData(data, command : Command, name : string, showCat : boolean){
     data.push(`**${name}**: ${command.description||""}`);
     if (command.usage) data.push(`${process.env.PREFIX}${name} ${command.usage}`);
     if (command.aliases) data.push(`Aliases: ${command.aliases.join(', ')}`);
