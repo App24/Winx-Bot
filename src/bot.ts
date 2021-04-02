@@ -36,8 +36,6 @@ function getOptions(options, newOptions : any[]){
     if(options)
         getOptions(options, newOptions);
 
-    console.log(interaction.data.id);
-
     const command=client.Slashes.get(commandName);
 
     if(!command)
