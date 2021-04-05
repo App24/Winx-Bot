@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 module.exports={
@@ -8,7 +9,7 @@ module.exports={
 }
 
 module.exports.onRun=async (client:import("../../BotClient"), interaction, args : string[])=>{
-    const Ranks=client.getDatabase("ranks");
+    const Ranks=client.getDatabase(DatabaseType.Ranks);
     const channel=<Discord.GuildChannel>client.channels.resolve(interaction.channel_id);
     let ranks=await Ranks.get(interaction.guild_id);
     if(!ranks){

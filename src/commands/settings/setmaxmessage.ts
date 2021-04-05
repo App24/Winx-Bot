@@ -2,6 +2,7 @@ import { Message } from "discord.js";
 import Command from "../../Command";
 import * as Utils from '../../Utils';
 import {MAX_MESSAGE_PER_MINUTE} from '../../Constants';
+import DatabaseType from "../../DatabaseTypes";
 
 class SetMaxMessage extends Command{
     constructor(){
@@ -15,7 +16,7 @@ class SetMaxMessage extends Command{
     }
 
     public async onRun(bot: import("../../BotClient"), message: Message, args: string[]) {
-        const ServerInfo=bot.getDatabase("serverInfo");
+        const ServerInfo=bot.getDatabase(DatabaseType.ServerInfo);
         const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {"messagesPerMinute": MAX_MESSAGE_PER_MINUTE});
         if(args.length){
             const xp=parseInt(args[0]);

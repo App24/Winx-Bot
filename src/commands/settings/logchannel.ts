@@ -1,5 +1,6 @@
 import Discord from "discord.js";
 import Command from "../../Command";
+import DatabaseType from "../../DatabaseTypes";
 import * as Utils from '../../Utils';
 
 class LogChannel extends Command{
@@ -12,7 +13,7 @@ class LogChannel extends Command{
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const ServerInfo=bot.getDatabase("serverInfo");
+        const ServerInfo=bot.getDatabase(DatabaseType.ServerInfo);
         const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {});
         if(!args[0]){
             if(serverInfo["logChannel"]){

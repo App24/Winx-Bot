@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class RanksC extends Command{
@@ -10,7 +11,7 @@ class RanksC extends Command{
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const Ranks=bot.getDatabase("ranks");
+        const Ranks=bot.getDatabase(DatabaseType.Ranks);
         let ranks=await Ranks.get(message.guild.id);
         if(!ranks){
             return message.channel.send("This guild does not contain any ranks");

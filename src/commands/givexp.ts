@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../Command';
+import DatabaseType from '../DatabaseTypes';
 import * as Utils from '../Utils';
 
 class GiveXP extends Command{
@@ -10,7 +11,7 @@ class GiveXP extends Command{
     }
 
     public async onRun(bot : import("../BotClient"), message : Discord.Message, args: string[]){
-        const Levels=bot.getDatabase("levels");
+        const Levels=bot.getDatabase(DatabaseType.Levels);
         const levels=await Utils.getServerDatabase(Levels, message.guild.id);
         let userInfo=await levels.find(u=>u["id"]===message.author.id);
         if(!userInfo){

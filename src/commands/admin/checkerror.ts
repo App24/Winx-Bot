@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class CheckError extends Command{
@@ -14,7 +15,7 @@ class CheckError extends Command{
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const Errors=bot.getDatabase("errors");
+        const Errors=bot.getDatabase(DatabaseType.Errors);
         if(args[0].toLowerCase()==="clear"){
             await Errors.clear();
             return message.channel.send("Cleared!");

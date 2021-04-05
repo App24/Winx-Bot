@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class ExcludeChannel extends Command{
@@ -10,11 +11,11 @@ class ExcludeChannel extends Command{
         this.maxArgsLength=2;
         this.usage="<channel/list> [remove]";
         this.description="Excludes a channel from being used for leveling";
-        this.category=Command.RankCategory;
+        this.category=Command.SettingsCategory;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const Excludes=bot.getDatabase("excludes");
+        const Excludes=bot.getDatabase(DatabaseType.Excludes);
         const excludes=await Utils.getServerDatabase(Excludes, message.guild.id);
         if(args[0].toLowerCase()==="list"){
             if(excludes.length<=0) return message.channel.send("No excluded channels!");

@@ -1,6 +1,7 @@
 import * as Utils from '../Utils';
 import Discord from 'discord.js';
 import {parse} from 'discord-command-parser';
+import DatabaseType from '../DatabaseTypes';
 
 const cooldowns = new Discord.Collection<string, Discord.Collection<string, number>>();
 
@@ -16,7 +17,7 @@ module.exports = (client : import("../BotClient"))=>{
         const command=client.Commands.get(commandName)||client.Commands.find(cmd=>cmd.aliases&&cmd.aliases.includes(commandName));
 
         if(!command){
-            const customCommands : Array<any>=await Utils.getServerDatabase(client.getDatabase("customCommands"), message.guild.id);
+            const customCommands : Array<any>=await Utils.getServerDatabase(client.getDatabase(DatabaseType.CustomCommands), message.guild.id);
             const customCommand=customCommands.find(cmd=>cmd["commandName"].toLowerCase()===commandName);
             if(customCommand){
                 const messages=customCommand["messages"]||[];
@@ -34,6 +35,10 @@ module.exports = (client : import("../BotClient"))=>{
 
         if(command.guildOnly&&message.channel.type!=="text"){
             return message.reply('I can\'t execute that command inside DMs!');
+        }
+
+        if(command.guildIds){
+            if(!command.guildIds.includes(message.guild.id)) return;
         }
 
         if(command.creatorOnly){
@@ -101,7 +106,7 @@ module.exports = (client : import("../BotClient"))=>{
         try{
             await command.onRun(client, message, args);
         }catch(error){
-            const Errors=client.getDatabase("errors");
+            const Errors=client.getDatabase(DatabaseType.Errors);
             let hex=Utils.genRanHex(16);
             let errors=await Errors.get(hex);
             while(errors){

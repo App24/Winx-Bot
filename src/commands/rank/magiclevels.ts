@@ -2,6 +2,7 @@ import Canvas from 'canvas';
 import Discord from 'discord.js';
 import Command from '../../Command';
 import { CARD_HEX } from '../../Constants';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class MagicLevels extends Command{
@@ -20,8 +21,8 @@ class MagicLevels extends Command{
         if(user.bot) return message.channel.send(`${user} is a a bot and therefore has no levels!`);
         const member=await Utils.getMemberByID(user.id, message.guild);
         if(!member) return message.channel.send(`${user} is not a member of this server!`);
-        const Levels=bot.getDatabase("levels");
-        const Ranks=bot.getDatabase("ranks");
+        const Levels=bot.getDatabase(DatabaseType.Levels);
+        const Ranks=bot.getDatabase(DatabaseType.Ranks);
         const ranks : Array<any>=await Utils.getServerDatabase(Ranks, message.guild.id);
         const levels : Array<any>=await Utils.getServerDatabase(Levels, message.guild.id);
         let userLevel=levels.find(u=>u["id"]===user.id);
@@ -32,7 +33,7 @@ class MagicLevels extends Command{
         await ranks.sort((a,b)=>{
             return (a["level"]>b["level"])?1:-1;
         });
-        const UserSettings=bot.getDatabase("userSettings");
+        const UserSettings=bot.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings=await Utils.getServerDatabase(UserSettings, message.guild.id);
         let userSettings=serverUserSettings.find(setting=>setting["id"]===user.id);
         let hex=CARD_HEX;
@@ -42,11 +43,10 @@ class MagicLevels extends Command{
                 hex=cardColor["color"];
             }
         }
-        let text="";
-        text+=`${user.username}`;
+        let name=`${user.username}`;
         if(member.nickname)
-            text+=` (${member.nickname})`;
-        text+=`: Level: ${userLevel["level"]}`;
+            name+=` (${member.nickname})`;
+        let levelsText=`: Level: ${userLevel["level"]}`;
 
         let currentTransRole,nextTransRole;
         let nextTransformationIndex=-1;
@@ -108,7 +108,7 @@ class MagicLevels extends Command{
 
         const maxInfoSize=800;
         
-        const nameFont=Utils.fitText(canvas, text, 70, maxInfoSize);
+        const nameFont=Utils.fitText(canvas, name+levelsText, 70, maxInfoSize);
         const pfpRadius=(nameFont[1])*2;
         const pfpX=5;
         const pfpY=5;
@@ -131,9 +131,15 @@ class MagicLevels extends Command{
         const brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
         const textColor = (brightness > 125) ? 'black' : 'white';
 
+        let nameColor=textColor;
+
+        if(member.roles&&member.roles.color&&member.roles.color.color) nameColor=member.roles.color.hexColor;
+
         ctx.font=nameFont[0];
+        ctx.fillStyle=nameColor;
+        ctx.fillText(name, pfpX+(pfpRadius*2)+pfpX, textPos);
         ctx.fillStyle=textColor;
-        ctx.fillText(text, pfpX+(pfpRadius*2)+pfpX, textPos);
+        ctx.fillText(levelsText, pfpX+(pfpRadius*2)+pfpX+ctx.measureText(name).width, textPos);
 
         const barWidth=maxInfoSize;
         const filled=userLevel["xp"]/Utils.getLevelXP(userLevel["level"]);

@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class Patreon extends Command{
@@ -15,7 +16,7 @@ class Patreon extends Command{
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
         const operation=args[0].toLowerCase();
-        const Paid=bot.getDatabase("paid");
+        const Paid=bot.getDatabase(DatabaseType.Paid);
         const paid=await Utils.getServerDatabase(Paid, message.guild.id);
         const user=await Utils.getUserFromMention(args[1], bot);
         if(!user) return message.reply(`${args[1]} is not a valid user!`);

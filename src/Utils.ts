@@ -5,8 +5,9 @@ import BotClient from './BotClient';
 import Keyv from './keyv-index';
 import { Canvas } from 'canvas';
 import { GuildMember } from 'discord.js';
+import DatabaseType from './DatabaseTypes';
 
-export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed, secondsToTime, createAPIMessage, reply};
+export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed, secondsToTime, createAPIMessage, reply, removeXP};
 
 const capXp=new Discord.Collection<string, Array<object>>();
 
@@ -202,16 +203,62 @@ function fitText(canvas : Canvas, text : string, maxFontSize : number, maxWidth 
 }
 
 async function isPatreon(user : Discord.User, guild : Discord.Guild, client : BotClient) : Promise<boolean>{
-    const Paid=client.getDatabase("paid");
+    const Paid=client.getDatabase(DatabaseType.Paid);
     const paid=await getServerDatabase(Paid, guild.id);
     const userPaid=paid.find(other=>{return other===user.id;});
     return userPaid!==undefined;
 }
 
+async function removeXP(client : BotClient, user : Discord.User, xp : number, guild : Discord.Guild, channel : Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel){
+    const Levels=client.getDatabase(DatabaseType.Levels);
+    const Ranks=client.getDatabase(DatabaseType.Ranks);
+    const ServerInfo=client.getDatabase(DatabaseType.ServerInfo);
+    const serverInfo=await getServerDatabase(ServerInfo, guild.id, {"xpPerMessage": 5, "messagesPerMinute": 50});
+
+    const levels : Array<object>=await getServerDatabase(Levels, guild.id);
+    let userInfo : object=await levels.find(u=>u["id"]===user.id);
+    if(!userInfo){
+        await levels.push({"id":user.id, "xp":0, "level":0});
+        userInfo=await levels.find(u=>u["id"]===user.id);
+    }
+    const index=levels.indexOf(userInfo);
+    userInfo["xp"]-=xp;
+    let levelChannel=channel;
+    if(serverInfo["levelChannel"]){
+        const _channel=await getTextChannelByID(serverInfo["levelChannel"], guild);
+        if(_channel) levelChannel=_channel;
+    }
+    while(userInfo["xp"]<=0){
+        if(userInfo["level"]<=0){ if(userInfo["xp"]<0) userInfo["xp"]=0; break;}
+        userInfo["xp"]+=getLevelXP(userInfo["level"]-1);
+        userInfo["level"]--;
+        let ranks=await Ranks.get(guild.id);
+        if(ranks){
+            let rankLevel=await ranks.find(u=>u["level"]===userInfo["level"]+1);
+            if(rankLevel){
+                let gifs=rankLevel["gifs"];
+                const _user=await getMemberByID(user.id, guild);
+                if(!_user){
+                    return channel.send("error somewhere idk 🤷‍♀️🤷‍♀️");
+                }
+                const rank=await this.getRoleByID(rankLevel["role"], guild);
+                _user.roles.remove(rank, "lost transformation lol");
+                levelChannel.send(`${user} has lost a transformation called ${this.capitalise(rank.name)}. Laugh at them!`);
+                if(gifs&&gifs.length){
+                    levelChannel.send(gifs[Math.floor(Math.random()*gifs.length)]);
+                }
+            }
+        }
+        levelChannel.send(`${user} has leveled down to level ${userInfo["level"]}!`);
+    }
+    levels[index]=userInfo;
+    await Levels.set(guild.id, levels);
+}
+
 async function addXP(client : BotClient, user : Discord.User, xp : number, guild : Discord.Guild, channel : Discord.TextChannel | Discord.DMChannel | Discord.NewsChannel){
-    const Levels=client.getDatabase("levels");
-    const Ranks=client.getDatabase("ranks");
-    const ServerInfo=client.getDatabase("serverInfo");
+    const Levels=client.getDatabase(DatabaseType.Levels);
+    const Ranks=client.getDatabase(DatabaseType.Ranks);
+    const ServerInfo=client.getDatabase(DatabaseType.ServerInfo);
     const serverInfo=await getServerDatabase(ServerInfo, guild.id, {"xpPerMessage": 5, "messagesPerMinute": 50});
     if(!serverInfo["xpPerMessage"]){
         serverInfo["xpPerMessage"]=5;
@@ -281,7 +328,7 @@ async function addXP(client : BotClient, user : Discord.User, xp : number, guild
 }
 
 async function getLogChannel(client : BotClient, guild : Guild) : Promise<TextChannel>{
-    const ServerInfo=client.getDatabase("serverInfo");
+    const ServerInfo=client.getDatabase(DatabaseType.ServerInfo);
     const serverInfo=await getServerDatabase(ServerInfo, guild.id, {});
     if(!serverInfo["logChannel"]) return undefined;
     const channel=getTextChannelByID(serverInfo["logChannel"], guild);

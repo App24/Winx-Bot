@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class CheckBans extends Command{
@@ -13,7 +14,7 @@ class CheckBans extends Command{
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
         const bans=await message.guild.fetchBans();
         var bansList=[];
-        const Levels=bot.getDatabase("levels");
+        const Levels=bot.getDatabase(DatabaseType.Levels);
         const levels=await Levels.get(message.guild.id);
         if(!levels) return message.channel.send("There are no levels in this server");
         bans.forEach(element => {

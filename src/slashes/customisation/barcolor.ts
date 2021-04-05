@@ -1,6 +1,7 @@
 import Canvas from 'canvas';
 import Discord from 'discord.js';
 import { BAR_END_HEX, BAR_START_HEX } from '../../Constants';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 module.exports={
@@ -12,7 +13,7 @@ module.exports={
 
 module.exports.onRun=async (client:import("../../BotClient"), interaction, args : string[])=>{
     const channel=<Discord.GuildChannel>client.channels.resolve(interaction.channel_id);
-    const UserSettings=client.getDatabase("userSettings");
+    const UserSettings=client.getDatabase(DatabaseType.UserSettings);
     const user=await Utils.getUserByID(interaction.member.user.id, client);
     const serverUserSettings=await Utils.getServerDatabase(UserSettings, interaction.guild_id);
     let userSettings=await serverUserSettings.find(settings=>settings["id"]===user.id);

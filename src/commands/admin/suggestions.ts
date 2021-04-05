@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class SuggestionsC extends Command{
@@ -14,7 +15,7 @@ class SuggestionsC extends Command{
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const Suggestions=bot.getDatabase("suggestions");
+        const Suggestions=bot.getDatabase(DatabaseType.Suggestions);
         const requests=await Suggestions.entries();
         if(!requests||!requests.length) return message.channel.send("There are no suggestions!");
         const botMember=await Utils.getMemberByID(bot.user.id, message.guild);

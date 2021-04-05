@@ -2,6 +2,7 @@ import Discord from 'discord.js';
 import * as Utils from '../../Utils';
 import Canvas from 'canvas';
 import { CARD_HEX } from '../../Constants';
+import DatabaseType from '../../DatabaseTypes';
 
 module.exports={
     data: {
@@ -68,8 +69,8 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     const member=await Utils.getMemberByID(user.id, channel.guild);
     if(!member)
         return Utils.reply(client, interaction, `${user} is not a member of this server!`);
-    const Levels=client.getDatabase("levels");
-    const Ranks=client.getDatabase("ranks");
+    const Levels=client.getDatabase(DatabaseType.Levels);
+    const Ranks=client.getDatabase(DatabaseType.Ranks);
     const ranks : Array<any>=await Utils.getServerDatabase(Ranks, channel.guild.id);
     const levels : Array<any>=await Utils.getServerDatabase(Levels, channel.guild.id);
     let userLevel=levels.find(u=>u["id"]===user.id);
@@ -80,7 +81,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     await ranks.sort((a,b)=>{
         return (a["level"]>b["level"])?1:-1;
     });
-    const UserSettings=client.getDatabase("userSettings");
+    const UserSettings=client.getDatabase(DatabaseType.UserSettings);
     const serverUserSettings=await Utils.getServerDatabase(UserSettings, channel.guild.id);
     let userSettings=serverUserSettings.find(setting=>setting["id"]===user.id);
     let hex=CARD_HEX;
@@ -90,11 +91,10 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
             hex=cardColor["color"];
         }
     }
-    let text="";
-    text+=`${user.username}`;
+    let name=`${user.username}`;
     if(member.nickname)
-        text+=` (${member.nickname})`;
-    text+=`: Level: ${userLevel["level"]}`;
+        name+=` (${member.nickname})`;
+    let levelsText=`: Level: ${userLevel["level"]}`;
 
     let currentTransRole,nextTransRole;
     let nextTransformationIndex=-1;
@@ -156,7 +156,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
 
     const maxInfoSize=800;
     
-    const nameFont=Utils.fitText(canvas, text, 70, maxInfoSize);
+    const nameFont=Utils.fitText(canvas, name+levelsText, 70, maxInfoSize);
     const pfpRadius=(nameFont[1])*2;
     const pfpX=5;
     const pfpY=5;
@@ -179,9 +179,15 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     const brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
     const textColor = (brightness > 125) ? 'black' : 'white';
 
+    let nameColor=textColor;
+
+    if(member.roles&&member.roles.color&&member.roles.color.color) nameColor=member.roles.color.hexColor;
+
     ctx.font=nameFont[0];
+    ctx.fillStyle=nameColor;
+    ctx.fillText(name, pfpX+(pfpRadius*2)+pfpX, textPos);
     ctx.fillStyle=textColor;
-    ctx.fillText(text, pfpX+(pfpRadius*2)+pfpX, textPos);
+    ctx.fillText(levelsText, pfpX+(pfpRadius*2)+pfpX+ctx.measureText(name).width, textPos);
 
     const barWidth=maxInfoSize;
     const filled=userLevel["xp"]/Utils.getLevelXP(userLevel["level"]);

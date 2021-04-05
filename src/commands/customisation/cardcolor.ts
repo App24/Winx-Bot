@@ -2,6 +2,7 @@ import Canvas from 'canvas';
 import Discord from 'discord.js';
 import Command from '../../Command';
 import { CARD_HEX } from '../../Constants';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class CardColor extends Command{
@@ -15,7 +16,7 @@ class CardColor extends Command{
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const UserSettings=bot.getDatabase("userSettings");
+        const UserSettings=bot.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings=await Utils.getServerDatabase(UserSettings, message.guild.id);
         let userSettings=await serverUserSettings.find(settings=>settings["id"]===message.author.id);
         if(!userSettings){

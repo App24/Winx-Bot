@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 module.exports={
@@ -40,7 +41,7 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
                     const embed2=msg.embeds[0];
                     embed2.setTitle("Accepted");
                     msg.edit(embed2);
-                    const Suggestions=client.getDatabase("suggestions");
+                    const Suggestions=client.getDatabase(DatabaseType.Suggestions);
                     let hex=Utils.genRanHex(16);
                     let suggestions=await Suggestions.get(hex);
                     while(suggestions){

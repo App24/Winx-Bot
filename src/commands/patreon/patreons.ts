@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class Patreons extends Command{
@@ -11,7 +12,7 @@ class Patreons extends Command{
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const Paid=bot.getDatabase("paid");
+        const Paid=bot.getDatabase(DatabaseType.Paid);
         const patreons=(await Paid.valuesFrom(message.guild.id))[0];
         if(!patreons||!patreons.length) return message.channel.send("No patreons in this server!");
         const embed=new Discord.MessageEmbed();

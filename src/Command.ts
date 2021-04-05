@@ -25,6 +25,7 @@ abstract class Command{
     public hidden : true;
     public aliases : Array<string>;
     public category : string;
+    public guildIds : string[];
 
     public constructor(){
         this.minArgsLength=0;

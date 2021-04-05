@@ -1,12 +1,13 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class SetRank extends Command{
     constructor(){
         super();
         this.permissions=["MANAGE_GUILD"]
-        this.category=Command.RankCategory;
+        this.category=Command.SettingsCategory;
         this.minArgsLength=1;
         this.description="Set a rank";
         this.minArgsLength=2;
@@ -16,7 +17,7 @@ class SetRank extends Command{
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
         const level=parseInt(args[0]);
         if(isNaN(level)||level<0) return message.reply(`\`${args[0]}\` does not seem to be a valid number!`);
-        const Ranks=bot.getDatabase("ranks");
+        const Ranks=bot.getDatabase(DatabaseType.Ranks);
         let ranks=await Ranks.get(message.guild.id);
         if(args[1].toLowerCase()==="clear"){
             if(!ranks){

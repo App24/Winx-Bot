@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import Command from '../../Command';
+import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
 class Suggestion extends Command{
@@ -46,7 +47,7 @@ class Suggestion extends Command{
                         const embed2=msg.embeds[0];
                         embed2.setTitle("Accepted");
                         msg.edit(embed2);
-                        const Suggestions=bot.getDatabase("suggestions");
+                        const Suggestions=bot.getDatabase(DatabaseType.Suggestions);
                         let hex=Utils.genRanHex(16);
                         let suggestions=await Suggestions.get(hex);
                         while(suggestions){

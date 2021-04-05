@@ -24,16 +24,4 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     }
 
     await Utils.reply(client, interaction, data[Math.floor(Math.random()*data.length)]);
-
-    // await (<any>client).api.interactions(interaction.id, interaction.token).callback.post({
-    //     data:{
-    //         type:5
-    //     }
-    // });
-
-    // (<any>client).api.webhooks(client.user.id, interaction.token).messages("@original").patch({
-    //     data:{
-    //         content: "Test"
-    //     }
-    // });
 }
