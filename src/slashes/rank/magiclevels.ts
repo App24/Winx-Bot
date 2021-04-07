@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import * as Utils from '../../Utils';
 import Canvas from 'canvas';
-import { CARD_HEX } from '../../Constants';
+import { CARD_HEX, CARD_NAME_DEFAULT } from '../../Constants';
 import DatabaseType from '../../DatabaseTypes';
 
 module.exports={
@@ -182,6 +182,12 @@ module.exports.onRun=async (client:import("../../BotClient"), interaction, args 
     let nameColor=textColor;
 
     if(member.roles&&member.roles.color&&member.roles.color.color) nameColor=member.roles.color.hexColor;
+    if(userSettings){
+        let cardNameColor=userSettings["settings"].find(setting=>setting["id"]==="cardNameColor");
+        if(cardNameColor&&cardNameColor["color"]!==CARD_NAME_DEFAULT){
+            nameColor="#"+cardNameColor["color"];
+        }
+    }
 
     ctx.font=nameFont[0];
     ctx.fillStyle=nameColor;

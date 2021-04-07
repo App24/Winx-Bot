@@ -106,7 +106,7 @@ class SuggestionsC extends Command{
         .setTitle(state)
         .setDescription(`**Request by ${user||"Account Deleted"}**\n${request[1]["request"]}`)
         .setFooter(request[0]);
-        if(botMember.roles&&botMember.roles.color)
+        if(botMember&&botMember.roles&&botMember.roles.color)
         embed.setColor(botMember.roles.color.color);
         return embed;
     }
