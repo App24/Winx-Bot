@@ -2,7 +2,7 @@ export const CARD_HEX="363636";
 export const BAR_START_HEX="cc0000";
 export const BAR_END_HEX="44cc00";
 export const CARD_NAME_DEFAULT="none";
-export const VERSION="1.6.7";
+export const VERSION="1.6.8";
 
 //level/xp related
 export const MAX_MESSAGE_PER_MINUTE=50;
