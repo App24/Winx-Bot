@@ -15,15 +15,15 @@ class CheckBans extends Command{
         const bans=await message.guild.fetchBans();
         var bansList=[];
         const Levels=bot.getDatabase(DatabaseType.Levels);
-        const levels=await Levels.get(message.guild.id);
+        const levels:any[]=await Levels.get(message.guild.id);
         if(!levels) return message.channel.send("There are no levels in this server");
         bans.forEach(element => {
             bansList.push(element);
         });
         await Utils.asyncForEach(bansList, async(ban)=>{
-            const level=await levels.find((user)=>user.id==ban.user.id);
-            if(level)
-                delete levels[level];
+            const level=await levels.findIndex((user)=>user["id"]===ban.user.id);
+            if(level>-1)
+                levels.splice(level, 1);
         });
         await Levels.set(message.guild.id, levels);
         message.channel.send("Deleted all banned users from the levels!");

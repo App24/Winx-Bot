@@ -55,7 +55,7 @@ class Rules extends Command{
         embed.setColor("#ab1459");
         embed.setTitle('Links');
         embed.addFields(
-            { name: '<:discord:805615932797616149>  -  https://discord.gg/UtytbnABRy', value: ' for inviting people here. '},
+            { name: '<:discord:805615932797616149>  -  (disabled for now)', value: ' for inviting people here. '},
             { name: '<:paypal:805611737347784725>  -  https://paypal.me/WinxServer', value: ' for payments and donations. '},
             { name: '<:minecraft:805768235907285034>  -  winxclubowo.aternos.me', value: 'our very own minecraft server. '},
             { name: ':e_mail:  -  WinxServer55@gmail.com', value: ' for business inquiries only. '},
