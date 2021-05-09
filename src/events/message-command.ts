@@ -7,7 +7,7 @@ const cooldowns = new Discord.Collection<string, Discord.Collection<string, numb
 
 module.exports = (client : import("../BotClient"))=>{
     client.on("message", async(message)=>{
-        if(!message.content.startsWith(process.env.PREFIX)||message.author.bot)return;
+        if(!message.content.toLowerCase().startsWith(process.env.PREFIX)||message.author.bot)return;
 
         const parsed=parse(message, process.env.PREFIX, {allowSpaceBeforeCommand: true, ignorePrefixCase: true});
         if(!parsed.success) return;

@@ -6,7 +6,7 @@ import * as Utils from '../../Utils';
 class CheckBans extends Command{
     constructor(){
         super();
-        this.permissions=["MANAGE_GUILD"]
+        this.permissions=["MANAGE_GUILD"];
         this.category=Command.RankCategory;
         this.description="Check bans";
     }

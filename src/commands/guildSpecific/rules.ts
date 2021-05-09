@@ -20,14 +20,16 @@ class Rules extends Command{
         embed.setTitle("Welcome!");
         embed.setDescription("We hope you enjoy your time in our server all about our favorite show, Winx Club. With that said, there are the few rules we have in place so that everyone has a nice time here.");
         embed.addFields(
-            { name: ':white_small_square:rule#1', value: 'Be nice to each other! We are here to have nice civil conversations, not to cause drama and fight with each other.'},
-            { name: ':white_small_square:rule#2', value: 'Please spoiler tag any topics that might be heavy or triggering to others. This is also applies to spoilers about the show.'},
-            { name: ':white_small_square:rule#3', value: 'No discrimination allowed (racism, homophobia, transphobia, etc...).'},
+            { name: ':white_small_square:rule#1', value: 'Be nice to each other! We are here to have nice civil conversations, not to cause drama and fight with each other. Anyone that does starts drama will be muted for 6 hours, and if repeated will lead to a day long ban and kick and ban from the server!'},
+            { name: ':white_small_square:rule#2', value: 'No discrimination allowed (racism, homophobia, transphobia, etc...).'},
+            { name: ':white_small_square:rule#3', value: 'Please spoiler tag any topics that might be heavy or triggering to others. This is also applies to spoilers about the show.'},
             { name: ':white_small_square:rule#4', value: 'Spam and excessive repeated messages are not allowed.'},
             { name: ':white_small_square:rule#5', value: 'Swearing is fine, but keep nsfw conversions/media to yourself, as this server is PG-13.'},
-            { name: ':white_small_square:rule#6', value: 'No self-promo of discord servers, any services/product that is paid and not art, giveaways. To clarify, posting art and art commissions is allowed, and so are youtube channels. If you still want to post any of the prohibited stuff, message a mod and they will give you a link to apply for it, it will then be discussed between mods.'},
-            { name: ':white_small_square:rule#7', value: 'No politics. This is a strict rule. Any discussion of politics will get deleted and you will get a warn.'},
-            { name: ':white_small_square:rule#8', value: 'If you post art that is not yours,or use a base for your art, please credit the creator, and dont claim somebodys art is yours, that can lead to a warning.'},
+            { name: ':white_small_square:rule#6', value: 'Banned words are banned for a reason, any attempt at circumventing these bans will lead to a mute or kick/ban.'},
+            { name: ':white_small_square:rule#7', value: 'No self-promo of discord servers, any services/product that is paid and not art, giveaways. To clarify, posting art and art commissions is allowed, and so are youtube channels. If you still want to post any of the prohibited stuff, message a mod and they will give you a link to apply for it, it will then be discussed between mods.'},
+            { name: ':white_small_square:rule#8', value: 'No politics. This is a strict rule. Any discussion of politics will get deleted and you will get a warn.'},
+            { name: ':white_small_square:rule#9', value: 'If you post art that is not yours,or use a base for your art, please credit the creator, and dont claim somebodys art is yours, that can lead to a warning.'},
+            { name: ':white_small_square:rule#10', value: 'Please only talk about Fate in the <#801849519045083216> channel and if you discuss it, don\'t start fights and be mature please.'},
         );
         await message.channel.send(embed);
 
@@ -55,7 +57,7 @@ class Rules extends Command{
         embed.setColor("#ab1459");
         embed.setTitle('Links');
         embed.addFields(
-            { name: '<:discord:805615932797616149>  -  (disabled for now)', value: ' for inviting people here. '},
+            { name: '<:discord:805615932797616149>  -  https://discord.gg/vjypQ6gVDp', value: ' for inviting people here. '},
             { name: '<:paypal:805611737347784725>  -  https://paypal.me/WinxServer', value: ' for payments and donations. '},
             { name: '<:minecraft:805768235907285034>  -  winxclubowo.aternos.me', value: 'our very own minecraft server. '},
             { name: ':e_mail:  -  WinxServer55@gmail.com', value: ' for business inquiries only. '},

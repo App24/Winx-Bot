@@ -30,8 +30,6 @@ class SetXP extends Command{
                 if(botMember.roles&&botMember.roles.color)
                     embed.setColor(botMember.roles.color.color);
                 logChannel.send(embed);
-                const owner = await Utils.getUserByID(process.env.OWNER_ID, bot);
-                (await owner.createDM()).send(embed);
             }
             return message.channel.send(`XP per message is now \`${xp}\``);
         }

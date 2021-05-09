@@ -52,7 +52,7 @@ function isClass(v) : boolean{
 }
 
 function getLevelXP(level : number){
-    return level*2*100+50;
+    return Math.abs(level)*2*100+50;
 }
 
 function getRoleByID(id : string, guild : Discord.Guild) : Promise<Discord.Role>{

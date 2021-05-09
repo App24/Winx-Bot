@@ -1,15 +1,20 @@
+import { VERSION } from "../Constants";
+
 module.exports=(client : import("../BotClient"))=>{
     client.on("ready", async()=>{
         let i=0;
         setInterval(() => {
-            switch (i%3) {
+            switch (i%5) {
                 case 0:
-                    client.user.setActivity(`${process.env.PREFIX}help for help!`);
+                    client.user.setActivity(`Version: ${VERSION}`);
                     break;
                 case 1:
-                    client.user.setActivity(`${process.env.PREFIX}suggestion for your suggestion!`);
+                    client.user.setActivity(`${process.env.PREFIX}help for help!`);
                     break;
                 case 2:
+                    client.user.setActivity(`${process.env.PREFIX}suggestion for your suggestion!`);
+                    break;
+                case 3:
                     const promises = [
                         client.shard.broadcastEval('this.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)'),
                     ];
@@ -18,6 +23,9 @@ module.exports=(client : import("../BotClient"))=>{
                         client.user.setActivity(`${numUsers} users earning their transformations!`);
         
                     });
+                    break;
+                case 4:
+                    client.user.setActivity(`${process.env.PREFIX}contactcreator to contact the creator of the bot!`);
                     break;
             }
             i++;

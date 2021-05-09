@@ -21,9 +21,9 @@ class Patreon extends Command{
         const user=await Utils.getUserFromMention(args[1], bot);
         if(!user) return message.reply(`${args[1]} is not a valid user!`);
         const member=await Utils.getMemberByID(user.id, message.guild);
-        if(!member) return message.reply(`${user} is not a member of the server!`);
         const userPaid=paid.find(other=>{return other===user.id;});
         if(operation==="add"){
+            if(!member) return message.reply(`${user} is not a member of the server!`);
             if(userPaid){
                 return message.reply(`${user} is already a patreon!`);
             }

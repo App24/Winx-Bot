@@ -7,7 +7,7 @@ const levelCooldowns = new Discord.Collection<string, Discord.Collection<string,
 
 module.exports=(client : import("../BotClient"))=>{
     client.on("message", async(message)=>{
-        if(message.content.startsWith(process.env.PREFIX)||message.author.bot||message.channel.type==="dm") return;
+        if(message.content.toLowerCase().startsWith(process.env.PREFIX)||message.author.bot||message.channel.type==="dm") return;
         const Excludes=client.getDatabase(DatabaseType.Excludes);
         const ServerInfo=client.getDatabase(DatabaseType.ServerInfo);
         const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {});
