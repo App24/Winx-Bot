@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Settings } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
@@ -7,7 +8,7 @@ class SetRank extends Command{
     constructor(){
         super();
         this.permissions=["MANAGE_GUILD"]
-        this.category=Command.SettingsCategory;
+        this.category=Settings;
         this.minArgsLength=1;
         this.description="Set a rank";
         this.minArgsLength=2;

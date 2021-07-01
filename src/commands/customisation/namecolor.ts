@@ -1,5 +1,6 @@
 import Canvas from 'canvas';
 import Discord from 'discord.js';
+import { Custom } from '../../Category';
 import Command from '../../Command';
 import { CARD_NAME_DEFAULT } from '../../Constants';
 import DatabaseType from '../../DatabaseTypes';
@@ -11,7 +12,7 @@ class NameColor extends Command{
         this.paid=true;
         this.maxArgsLength=1;
         this.description="Set the name color of your card!";
-        this.category=Command.CustomisationCategory;
+        this.category=Custom;
         this.usage="[hex/reset]";
     }
 

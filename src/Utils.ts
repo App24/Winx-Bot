@@ -7,7 +7,7 @@ import { Canvas } from 'canvas';
 import { GuildMember } from 'discord.js';
 import DatabaseType from './DatabaseTypes';
 
-export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed, secondsToTime, createAPIMessage, reply, removeXP};
+export{asyncForEach, loadFiles, isClass, getLevelXP, getRoleByID, getChannelByID, getMemberByID, getUserByID, getUserFromMention, getChannelFromMention, getRoleFromMention, clamp, capitalise, addXP, blend, genRanHex, getServerDatabase, toHexString, hexToRGB, fitText, hasRole, isPatreon, getTextChannelByID, getTextChannelFromMention, getLogChannel, createLogEmbed, secondsToTime, createAPIMessage, reply, removeXP, parse};
 
 const capXp=new Discord.Collection<string, Array<object>>();
 
@@ -53,6 +53,7 @@ function isClass(v) : boolean{
 
 function getLevelXP(level : number){
     return Math.abs(level)*2*100+50;
+    // return Math.round((50+100)*Math.pow(1.25, Math.abs(level)));
 }
 
 function getRoleByID(id : string, guild : Discord.Guild) : Promise<Discord.Role>{
@@ -385,4 +386,11 @@ async function createAPIMessage(client:BotClient, interaction, content){
     if(!channel||channel==null) return;
     const {data, files}=await Discord.APIMessage.create(<TextChannel|DMChannel|User|GuildMember|Webhook|WebhookClient>client.channels.resolve(interaction.channel_id), content).resolveData().resolveFiles();
     return {...data, files};
+}
+
+function parse(str : string, ...args) {
+    var actualArgs = [].slice.call(arguments, 1),
+        i = 0;
+
+    return str.replace(/%s/g, () => actualArgs[i++]);
 }

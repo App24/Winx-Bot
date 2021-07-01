@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Rank } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
@@ -7,7 +8,7 @@ class CheckBans extends Command{
     constructor(){
         super();
         this.permissions=["MANAGE_GUILD"];
-        this.category=Command.RankCategory;
+        this.category=Rank;
         this.description="Check bans";
     }
 

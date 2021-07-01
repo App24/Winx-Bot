@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "npx rimraf dist && npx tsc && npx tsc && node dist/index.js",
+    "compile": "npx rimraf dist && npx tsc && node dist/index.js",
     "dev": "npx nodemon -e ts  --exec \"npm run compile\""
   },
   "repository": {

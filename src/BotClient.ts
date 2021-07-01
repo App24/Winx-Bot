@@ -6,6 +6,7 @@ import DatabaseType from './DatabaseTypes';
 import Keyv from './keyv-index';
 import SlashCommand from './SlashCommand';
 import {loadFiles, isClass, asyncForEach} from "./Utils";
+import Logger from './Logger';
 
 interface BotOptions{
     clientOptions? : Discord.ClientOptions;
@@ -26,6 +27,7 @@ class BotClient extends Discord.Client{
         super(options.clientOptions);
         this.botOptions=options;
         
+        Logger.Initialise();
         this.loadDatabases();
         ;(async()=>{
             if(this.botOptions.loadCommands)
@@ -53,6 +55,8 @@ class BotClient extends Discord.Client{
         this.Tables.set(DatabaseType.Paid, new Keyv(`sqlite://${databaseDir}/paid.sqlite`));
         this.Tables.set(DatabaseType.Suggestions, new Keyv(`sqlite://${databaseDir}/suggestions.sqlite`));
         this.Tables.set(DatabaseType.CustomCommands, new Keyv(`sqlite://${databaseDir}/customCommands.sqlite`));
+
+        Logger.Log("Loaded Databases!");
     }
 
     private async loadCommands(){
@@ -72,7 +76,7 @@ class BotClient extends Discord.Client{
                             switch(this.botOptions.logLoading){
                                 case 'complex':
                                 case 'all':
-                                    console.log(`Loaded Command: ${name}`);
+                                    Logger.Log(`Loaded Command: ${name}`);
                                     break;
                             }
                             loaded++;
@@ -84,7 +88,7 @@ class BotClient extends Discord.Client{
         switch(this.botOptions.logLoading){
             case 'simplified':
             case 'all':
-                console.log(`Loaded ${loaded} commands!`);
+                Logger.Log(`Loaded ${loaded} commands!`);
                 break;
         }
     }
@@ -108,7 +112,7 @@ class BotClient extends Discord.Client{
                 switch(this.botOptions.logLoading){
                     case 'complex':
                     case 'all':
-                        console.log(`Loaded Event: ${name}`);
+                        Logger.Log(`Loaded Event: ${name}`);
                         break;
                 }
                 loaded++;
@@ -117,7 +121,7 @@ class BotClient extends Discord.Client{
         switch(this.botOptions.logLoading){
             case 'simplified':
             case 'all':
-                console.log(`Loaded ${loaded} events!`);
+                Logger.Log(`Loaded ${loaded} events!`);
                 break;
         }
     }
@@ -140,7 +144,7 @@ class BotClient extends Discord.Client{
                     switch(this.botOptions.logLoading){
                         case 'complex':
                         case 'all':
-                            console.log(`Loaded Slash: ${name}`);
+                            Logger.Log(`Loaded Slash: ${name}`);
                             break;
                     }
 
@@ -151,7 +155,7 @@ class BotClient extends Discord.Client{
         switch(this.botOptions.logLoading){
             case 'simplified':
             case 'all':
-                console.log(`Loaded ${loaded} slashes!`);
+                Logger.Log(`Loaded ${loaded} slashes!`);
                 break;
         }
     }

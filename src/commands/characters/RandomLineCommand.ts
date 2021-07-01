@@ -3,6 +3,7 @@ import fs from 'fs';
 import readline from 'readline';
 import * as Utils from '../../Utils';
 import { Message } from 'discord.js';
+import { Characters } from '../../Category';
 
 class RandomLineCommand extends Command{
     private name : string;
@@ -10,7 +11,7 @@ class RandomLineCommand extends Command{
         super();
         this.name=name;
         this.description=`${Utils.capitalise(name)} Tinz`;
-        this.category=Command.TingzCategory;
+        this.category=Characters;
         this.guildOnly=false;
     }
 

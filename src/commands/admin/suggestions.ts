@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Owner } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
@@ -11,7 +12,7 @@ class SuggestionsC extends Command{
         this.maxArgsLength=2;
         this.guildOnly=false;
         this.usage="<list/finish/reject/id> [non/finish/rejected/id]";
-        this.category=Command.OwnerCategory;
+        this.category=Owner;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

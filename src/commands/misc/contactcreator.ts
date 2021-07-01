@@ -1,11 +1,12 @@
 import Discord from 'discord.js';
+import { Info } from '../../Category';
 import Command from '../../Command';
 import * as Utils from '../../Utils';
 
 class ContactCreator extends Command{
     public constructor(){
         super();
-        this.category=Command.InfoCategory;
+        this.category=Info;
         this.guildOnly=false;
         this.description="Contact the creator of the bot to report issues or other stuff";
         this.minArgsLength=1;

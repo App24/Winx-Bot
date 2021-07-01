@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Settings } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
@@ -11,7 +12,7 @@ class ExcludeChannel extends Command{
         this.maxArgsLength=2;
         this.usage="<channel/list> [remove]";
         this.description="Excludes a channel from being used for leveling";
-        this.category=Command.SettingsCategory;
+        this.category=Settings;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

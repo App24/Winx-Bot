@@ -1,5 +1,6 @@
 import Canvas from 'canvas';
 import Discord from 'discord.js';
+import { Custom } from '../../Category';
 import Command from '../../Command';
 import { BAR_END_HEX, BAR_START_HEX } from '../../Constants';
 import DatabaseType from '../../DatabaseTypes';
@@ -12,7 +13,7 @@ class BarColor extends Command{
         this.maxArgsLength=2;
         this.description="Set the bar color of your card!";
         this.usage="[start/end/hex] [hex]";
-        this.category=Command.CustomisationCategory;
+        this.category=Custom;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

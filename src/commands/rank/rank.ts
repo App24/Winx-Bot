@@ -1,13 +1,14 @@
 import Discord from 'discord.js';
+import { Rank } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
-class Rank extends Command{
+class CRank extends Command{
     constructor(){
         super();
         this.description="Shows your position on the leaderboard compared to other people on the server";
-        this.category=Command.RankCategory;
+        this.category=Rank;
         this.usage="[user]";
         this.maxArgsLength=1;
     }
@@ -94,4 +95,4 @@ class Rank extends Command{
     }
 }
 
-module.exports=Rank;
+module.exports=CRank;

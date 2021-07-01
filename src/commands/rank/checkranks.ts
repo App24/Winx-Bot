@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Rank } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
@@ -8,7 +9,7 @@ class CheckRanks extends Command{
         super();
         this.permissions=["MANAGE_GUILD"]
         this.description="Check ranks";
-        this.category=Command.RankCategory;
+        this.category=Rank;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

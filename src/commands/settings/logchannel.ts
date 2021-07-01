@@ -1,4 +1,5 @@
 import Discord from "discord.js";
+import { Settings } from "../../Category";
 import Command from "../../Command";
 import DatabaseType from "../../DatabaseTypes";
 import * as Utils from '../../Utils';
@@ -9,7 +10,7 @@ class LogChannel extends Command{
         this.permissions=["MANAGE_GUILD"];
         this.usage="[channel/delete]";
         this.description="Sets the Log Channel!";
-        this.category=Command.SettingsCategory;
+        this.category=Settings;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

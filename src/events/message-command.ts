@@ -33,6 +33,10 @@ module.exports = (client : import("../BotClient"))=>{
             return;
         }
 
+        if(!command.enabled){
+            return message.reply(`That command is disabled!`);
+        }
+
         if(command.guildOnly&&message.channel.type!=="text"){
             return message.reply('I can\'t execute that command inside DMs!');
         }

@@ -2,12 +2,13 @@ import Discord from 'discord.js';
 import Command from '../Command';
 import * as Utils from '../Utils';
 import {VERSION} from '../Constants';
+import { Info } from '../Category';
 
 class About extends Command{
     constructor(){
         super();
         this.description="About the bot";
-        this.category=Command.InfoCategory;
+        this.category=Info;
         this.guildOnly=false;
     }
 

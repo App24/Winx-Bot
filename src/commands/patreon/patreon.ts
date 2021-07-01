@@ -1,9 +1,10 @@
 import Discord from 'discord.js';
+import { Patreon } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
 
-class Patreon extends Command{
+class CPatreon extends Command{
     constructor(){
         super();
         this.permissions=["MANAGE_GUILD"]
@@ -11,7 +12,7 @@ class Patreon extends Command{
         this.maxArgsLength=2;
         this.minArgsLength=2;
         this.usage="<add/remove> <user>";
-        this.category=Command.PatreonCategory;
+        this.category=Patreon;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
@@ -42,4 +43,4 @@ class Patreon extends Command{
 
 }
 
-module.exports=Patreon;
+module.exports=CPatreon;

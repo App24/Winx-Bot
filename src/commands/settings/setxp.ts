@@ -3,6 +3,7 @@ import Command from "../../Command";
 import * as Utils from '../../Utils';
 import {MAX_XP_PER_MESSAGE} from '../../Constants';
 import DatabaseType from "../../DatabaseTypes";
+import { Settings } from "../../Category";
 
 class SetXP extends Command{
     constructor(){
@@ -11,7 +12,7 @@ class SetXP extends Command{
         this.maxArgsLength=1;
         // this.permissions=["MANAGE_GUILD"];
         this.guildOwnerOnly=true;
-        this.category=Command.SettingsCategory;
+        this.category=Settings;
         this.description="Set XP per message";
     }
 

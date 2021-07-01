@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Owner } from '../../Category';
 import Command from '../../Command';
 import * as Utils from '../../Utils';
 
@@ -7,7 +8,7 @@ class Roles extends Command{
         super();
         this.creatorOnly=true;
         this.deprecated=true;
-        this.category=Command.OwnerCategory;
+        this.category=Owner;
     }
 
     public onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

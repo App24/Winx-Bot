@@ -1,5 +1,6 @@
 import Canvas from 'canvas';
 import Discord from 'discord.js';
+import { Rank } from '../../Category';
 import Command from '../../Command';
 import { CARD_HEX, CARD_NAME_DEFAULT } from '../../Constants';
 import DatabaseType from '../../DatabaseTypes';
@@ -8,7 +9,7 @@ import * as Utils from '../../Utils';
 class MagicLevels extends Command{
     constructor(){
         super();
-        this.category=Command.RankCategory;
+        this.category=Rank;
         this.maxArgsLength=1;
         this.usage="[user]";
         this.description="Shows how far you are to the next level";

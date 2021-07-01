@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Rank } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
@@ -7,7 +8,7 @@ class RanksC extends Command{
     constructor(){
         super();
         this.description="Show Ranks";
-        this.category=Command.RankCategory;
+        this.category=Rank;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {

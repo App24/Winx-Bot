@@ -1,4 +1,5 @@
 import Discord from 'discord.js';
+import { Patreon } from '../../Category';
 import Command from '../../Command';
 import DatabaseType from '../../DatabaseTypes';
 import * as Utils from '../../Utils';
@@ -8,7 +9,7 @@ class Patreons extends Command{
         super();
         this.hidden=true;
         this.permissions=["MANAGE_GUILD"]
-        this.category=Command.PatreonCategory;
+        this.category=Patreon;
     }
 
     public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
