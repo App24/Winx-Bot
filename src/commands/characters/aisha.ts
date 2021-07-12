@@ -1,9 +1,9 @@
-import RandomLineCommand from './RandomLineCommand';
+import { RandomLineCommand } from "./RandomLineCommand";
 
-class Aisha extends RandomLineCommand{
+class AishaCommand extends RandomLineCommand{
     constructor(){
         super("aisha");
     }
 }
 
-module.exports=Aisha;
+export=AishaCommand;

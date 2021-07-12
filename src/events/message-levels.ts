@@ -1,30 +1,26 @@
-import * as Utils from '../Utils';
-import Discord from 'discord.js';
-import { MAX_MESSAGE_LENGTH, MAX_XP_PER_MESSAGE, MIN_MESSAGE_LENGTH } from '../Constants';
-import DatabaseType from '../DatabaseTypes';
+import { Collection } from "discord.js";
+import { BotUser } from "../BotClient"
+import { PREFIX } from "../Constants";
+import { DatabaseType } from "../structs/DatabaseTypes";
+import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/ServerInfo";
+import { getServerDatabase } from "../Utils";
+import { addXP } from "../XPUtils";
 
-const levelCooldowns = new Discord.Collection<string, Discord.Collection<string, number>>();
+const levelCooldowns = new Collection<string, Collection<string, number>>();
 
-module.exports=(client : import("../BotClient"))=>{
-    client.on("message", async(message)=>{
-        if(message.content.toLowerCase().startsWith(process.env.PREFIX)||message.author.bot||message.channel.type==="dm") return;
-        const Excludes=client.getDatabase(DatabaseType.Excludes);
-        const ServerInfo=client.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {});
-        if(!serverInfo["minMessageLength"]){
-            serverInfo["minMessageLength"]=MIN_MESSAGE_LENGTH;
-            await ServerInfo.set(message.guild.id, serverInfo);
-        }
-        if(message.content.length<serverInfo["minMessageLength"]) return;
-        const excluded=await Excludes.get(message.guild.id);
+export=()=>{
+    BotUser.on("message", async(message)=>{
+        if(message.content.toLowerCase().startsWith(PREFIX)||message.author.bot||message.channel.type==="dm") return;
+        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        if(message.content.length<serverInfo.minMessageLength) return;
+        const excluded=serverInfo.excludeChannels;
         if(excluded){
-            const channelExcluded=await excluded.find(u=>u["id"]===message.channel.id);
-            if(channelExcluded){
-                return;
-            }
+            if(excluded.find(c=>c===message.channel.id)) return;
         }
+
         if(!levelCooldowns.has(message.guild.id)){
-            levelCooldowns.set(message.guild.id, new Discord.Collection());
+            levelCooldowns.set(message.guild.id, new Collection());
         }
 
         const now=Date.now();
@@ -41,17 +37,9 @@ module.exports=(client : import("../BotClient"))=>{
 
         timestamps.set(message.author.id, now);
         setTimeout(()=>timestamps.delete(message.author.id), cooldownAmount);
-        if(!serverInfo["xpPerMessage"]){
-            serverInfo["xpPerMessage"]=MAX_XP_PER_MESSAGE;
-            await ServerInfo.set(message.guild.id, serverInfo);
-        }
-        if(!serverInfo["maxMessageLength"]){
-            serverInfo["maxMessageLength"]=MAX_MESSAGE_LENGTH;
-            await ServerInfo.set(message.guild.id, serverInfo);
-        }
-        const xpPerMessage=serverInfo["xpPerMessage"];
-        const xp=Math.ceil((Math.min(message.content.length, serverInfo["maxMessageLength"])/serverInfo["maxMessageLength"])*xpPerMessage);
-        await Utils.addXP(client, message.author, xp, message.guild, message.channel);
-        return;
+
+        const xp=Math.ceil((Math.min(message.content.length, serverInfo.maxMessageLength)/serverInfo.maxMessageLength)*serverInfo.maxXpPerMessage);
+        await addXP(message.author, message.guild, message.channel, xp);
+
     });
 }

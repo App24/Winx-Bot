@@ -1,23 +1,29 @@
-import * as Utils from '../Utils';
-import Discord, { GuildMember } from 'discord.js';
-import DatabaseType from '../DatabaseTypes';
+import { GuildMember } from "discord.js";
+import { BotUser } from "../BotClient";
+import { getRoleByID } from "../GetterUtilts";
+import { DatabaseType } from "../structs/DatabaseTypes";
+import { RankLevel } from "../structs/databaseTypes/RankLevel";
+import { UserLevel } from "../structs/databaseTypes/UserLevel";
+import { asyncForEach, getServerDatabase } from "../Utils";
 
-module.exports=(client : import("../BotClient"))=>{
-    client.on("guildMemberAdd", async(member:GuildMember)=>{
-        const Levels=client.getDatabase(DatabaseType.Levels);
-        const Ranks=client.getDatabase(DatabaseType.Ranks);
-        const levels=await Levels.get(member.guild.id);
-        const ranks=await Ranks.get(member.guild.id);
+export=()=>{
+    BotUser.on("guildMemberAdd", async(member:GuildMember)=>{
+        const Levels=BotUser.getDatabase(DatabaseType.Levels);
+        const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
+        const levels:UserLevel[]=await getServerDatabase(Levels, member.guild.id);
+        const ranks:RankLevel[]=await getServerDatabase(Ranks, member.guild.id);
         if(!levels||!ranks) return;
-        const user=await levels.find(u=>u["id"]===member.user.id);
+        const user=levels.find(u=>u.userId===member.id);
         if(user){
-            await Utils.asyncForEach(ranks, async(rank) => {
-                if(user["level"]>=rank["level"]){
-                    const role=await Utils.getRoleByID(rank["role"], member.guild);
-                    if(!role) return;
+            asyncForEach(ranks, async(rank : RankLevel)=>{
+                const role=await getRoleByID(rank.roleId, member.guild);
+                if(!role) return;
+                if(user.level>=rank.level){
                     member.roles.add(role);
+                }else if(user.level<rank.level){
+                    member.roles.remove(role);
                 }
             });
         }
     });
-}
+};

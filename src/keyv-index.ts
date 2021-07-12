@@ -167,11 +167,15 @@ class Keyv extends EventEmitter{
 	public entries(opts?){
 		return Promise.resolve()
 		.then(()=>this.query("SELECT * FROM keyv"))
-		.then(data=>{
-			return data.map(e=>[
-				this.stripKeyPrefix(e["key"]),
-				this.parseValue(e["key"], e["value"], opts)
-			]);
+		.then((data)=>{
+			const newData:{"key": string, "value": any}[]=[];
+			data.forEach(e=>{
+				newData.push({
+					"key": this.stripKeyPrefix(e["key"]),
+					"value": this.parseValue(e["key"], e["value"], opts)
+				});
+			})
+			return newData;
 		});
 	}
 }

@@ -1,115 +1,157 @@
-import Canvas from 'canvas';
-import Discord from 'discord.js';
-import { Custom } from '../../Category';
-import Command from '../../Command';
-import { BAR_END_HEX, BAR_START_HEX } from '../../Constants';
-import DatabaseType from '../../DatabaseTypes';
-import * as Utils from '../../Utils';
+import { Message } from "discord.js";
+import { BotUser } from "../../BotClient";
+import { Customisation } from "../../structs/Category";
+import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { DatabaseType } from "../../structs/DatabaseTypes";
+import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { SubCommand } from "../../structs/SubCommand";
+import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../Utils";
 
-class BarColor extends Command{
-    constructor(){
-        super();
-        this.paid=true;
-        this.maxArgsLength=2;
-        this.description="Set the bar color of your card!";
-        this.usage="[start/end/hex] [hex]";
-        this.category=Custom;
+class BarColorCommand extends Command{
+    public constructor(){
+        super("Sets the color of your bar!");
+        this.access=CommandAccess.Patreon;
+        this.availability=CommandAvailability.Guild;
+        this.category=Customisation;
+        this.minArgs=2;
+        this.maxArgs=3;
+        this.usage="<get/set/reset> <start/end/both> [hex color]";
+        this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }
 
-    public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const UserSettings=bot.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings=await Utils.getServerDatabase(UserSettings, message.guild.id);
-        let userSettings=await serverUserSettings.find(settings=>settings["id"]===message.author.id);
-        if(!userSettings){
-            await serverUserSettings.push({"id": message.author.id, "settings":[]});
-            userSettings=await serverUserSettings.find(settings=>settings["id"]===message.author.id);
-        }
-        if(args.length<=0){
-            let barColor=await userSettings["settings"].find(setting=>setting["id"]==="barColor");
-            if(!barColor){
-                return message.channel.send(`You do not have a custom bar color!`);
-            }
-            await message.channel.send("Start");
-            await this.showColor(message, barColor["startColor"]);
-            await message.channel.send("End");
-            await this.showColor(message, barColor["endColor"]);
-            return;
-        }
-        let barColor=await userSettings["settings"].find(setting=>setting["id"]==="barColor");
-        if(!barColor){
-            await userSettings["settings"].push({"id": "barColor", "startColor": BAR_START_HEX, "endColor": BAR_END_HEX});
-            barColor=await userSettings["settings"].find(setting=>setting["id"]==="barColor");
-        }
-        let startHex=barColor["startColor"], endHex=barColor["endColor"];
-        if(args[0].toLowerCase()==="start"){
-            if(!args[1]){
-                await this.showColor(message, barColor["startColor"]);
-                return;
-            }
-            if(args[1].toLowerCase()==="reset"){
-                startHex=BAR_START_HEX;
-            }else{
-                let hex=args[1];
-                if(hex.startsWith("#")){
-                    hex=hex.substring(1);
-                }
-                if(hex.length!==6){
-                    return message.reply("That is not a valid color!");
-                }
-                startHex=hex;
-                this.showColor(message, hex);
-            }
-        }else if(args[0].toLowerCase()==="end"){
-            if(!args[1]){
-                await this.showColor(message, barColor["endColor"]);
-                return;
-            }
-            if(args[1].toLowerCase()==="reset"){
-                endHex=BAR_END_HEX;
-            }else{
-                let hex=args[1];
-                if(hex.startsWith("#")){
-                    hex=hex.substring(1);
-                }
-                if(hex.length!==6){
-                    return message.reply("That is not a valid color!");
-                }
-                endHex=hex;
-                this.showColor(message, hex);
-            }
-        }else{
-            if(args[0].toLowerCase()==="reset"){
-                startHex=BAR_START_HEX;
-                endHex=BAR_END_HEX;
-            }else{
-                let hex=args[0];
-                if(hex.startsWith("#")){
-                    hex=hex.substring(1);
-                }
-                if(hex.length!==6){
-                    return message.reply("That is not a valid color!");
-                }
-                startHex=hex;
-                endHex=hex;
-                this.showColor(message, hex);
-            }
-        }
-        barColor["startColor"]=startHex;
-        barColor["endColor"]=endHex;
-        message.channel.send("Settings Updated!");
-        await UserSettings.set(message.guild.id, serverUserSettings);
+    public async onRun(message : Message, args : string[]){
+        this.onRunSubCommands(message, args.shift(), args, true);
     }
-
-    private async showColor(message, color){
-        const canvas = Canvas.createCanvas(700, 320);
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle="#"+color;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-        const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'color.png');
-        await message.channel.send(`#${color}`, attachment);
-    }
-
 }
 
-module.exports=BarColor;
+class GetSubCommand extends SubCommand{
+    public constructor(){
+        super("get");
+        this.minArgs=1;
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
+            await UserSettings.set(message.guild.id, serverUserSettings);
+        }
+        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+
+        const op=args[0].toLowerCase();
+        let mod:BarMode;
+        if(op==="start"){
+            mod=BarMode.Start;
+        }else if(op==="end"){
+            mod=BarMode.End;
+        }else if(op==="both"){
+            mod=BarMode.Start|BarMode.End;
+        }else{
+            return message.reply("That is not a valid option!");
+        }
+
+        if((mod&BarMode.Start)===BarMode.Start){
+            await message.channel.send(`Start: #${userSettings.barStartColor}`, canvasToMessageAttachment(canvasColor(userSettings.barStartColor)));
+        }
+        if((mod&BarMode.End)===BarMode.End){
+            await message.channel.send(`End: #${userSettings.barEndColor}`, canvasToMessageAttachment(canvasColor(userSettings.barEndColor)));
+        }
+    }
+}
+
+class SetSubCommand extends SubCommand{
+    public constructor(){
+        super("set");
+        this.minArgs=2;
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
+            await UserSettings.set(message.guild.id, serverUserSettings);
+        }
+        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+
+        const op=args[0].toLowerCase();
+        let mod:BarMode;
+        let append="";
+        if(op==="start"){
+            append="start of";
+            mod=BarMode.Start;
+        }else if(op==="end"){
+            append="end of";
+            mod=BarMode.End;
+        }else if(op==="both"){
+            append="both start and end of";
+            mod=BarMode.Start|BarMode.End;
+        }else{
+            return message.reply("That is not a valid option!");
+        }
+
+        let color=args[1].toLowerCase();
+        if(color.startsWith("#")){
+            color=color.substring(1);
+        }
+        if(!isHexColor(color)) return message.reply("That is not a valid hex color");
+        if((mod&BarMode.Start)===BarMode.Start){
+            userSettings.barStartColor=color;
+        }
+        if((mod&BarMode.End)===BarMode.End){
+            userSettings.barEndColor=color;
+        }
+        await UserSettings.set(message.guild.id, serverUserSettings);
+        return message.channel.send(`Set the ${append} bar color to #${color}!`);
+    }
+}
+
+class ResetSubCommand extends SubCommand{
+    public constructor(){
+        super("reset");
+        this.minArgs=1;
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
+            await UserSettings.set(message.guild.id, serverUserSettings);
+        }
+        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+
+        const op=args[0].toLowerCase();
+        let mod:BarMode;
+        let append="";
+        if(op==="start"){
+            append="start of";
+            mod=BarMode.Start;
+        }else if(op==="end"){
+            append="end of";
+            mod=BarMode.End;
+        }else if(op==="both"){
+            append="both start and end of";
+            mod=BarMode.Start|BarMode.End;
+        }else{
+            return message.reply("That is not a valid option!");
+        }
+
+        if((mod&BarMode.Start)===BarMode.Start){
+            userSettings.barStartColor=DEFAULT_USER_SETTING.barStartColor;
+        }
+        if((mod&BarMode.End)===BarMode.End){
+            userSettings.barEndColor=DEFAULT_USER_SETTING.barEndColor;
+        }
+        await UserSettings.set(message.guild.id, serverUserSettings);
+        return message.channel.send(`Resetted ${append} bar color!`);
+    }
+}
+
+enum BarMode{
+    Start=1,
+    End=2
+}
+
+export=BarColorCommand;

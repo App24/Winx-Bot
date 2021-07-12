@@ -1,21 +1,20 @@
-import Command from '../../Command';
+import { Message } from "discord.js";
+import { Characters } from "../../structs/Category";
+import { Command } from "../../structs/Command";
+import { capitalise } from "../../Utils";
 import fs from 'fs';
 import readline from 'readline';
-import * as Utils from '../../Utils';
-import { Message } from 'discord.js';
-import { Characters } from '../../Category';
 
-class RandomLineCommand extends Command{
+export class RandomLineCommand extends Command{
     private name : string;
-    constructor(name : string){
-        super();
+    
+    public constructor(name : string){
+        super(`${capitalise(name)} Tingz`);
         this.name=name;
-        this.description=`${Utils.capitalise(name)} Tinz`;
         this.category=Characters;
-        this.guildOnly=false;
     }
 
-    public async onRun(bot: import("../../BotClient"), message: Message, args: string[]) {
+    public async onRun(message : Message, args : string[]){
         const fileStream=fs.createReadStream(`lines/${this.name}.txt`);
 
         const rl=readline.createInterface({
@@ -25,12 +24,10 @@ class RandomLineCommand extends Command{
 
         const data=[];
 
-        for await (const line of rl){
+        for await(const line of rl){
             data.push(line);
         }
 
-        message.channel.send(data[Math.floor(Math.random()*data.length)]);
+        message.channel.send(data[Math.floor(data.length*Math.random())]);
     }
 }
-
-export=RandomLineCommand;

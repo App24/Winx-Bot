@@ -1,9 +1,9 @@
-import RandomLineCommand from './RandomLineCommand';
+import { RandomLineCommand } from "./RandomLineCommand";
 
-class Tecna extends RandomLineCommand{
+class TecnaCommand extends RandomLineCommand{
     constructor(){
         super("tecna");
     }
 }
 
-module.exports=Tecna;
+export=TecnaCommand;

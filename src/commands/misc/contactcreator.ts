@@ -1,24 +1,23 @@
-import Discord from 'discord.js';
-import { Info } from '../../Category';
-import Command from '../../Command';
-import * as Utils from '../../Utils';
+import { Message } from "discord.js";
+import { OWNER_ID } from "../../Constants";
+import { getUserByID } from "../../GetterUtilts";
+import { Info } from "../../structs/Category";
+import { Command } from "../../structs/Command";
 
-class ContactCreator extends Command{
+class ContactCreatorCommand extends Command{
     public constructor(){
-        super();
+        super("Contact the creator of the bot!");
+        this.minArgs=1;
         this.category=Info;
-        this.guildOnly=false;
-        this.description="Contact the creator of the bot to report issues or other stuff";
-        this.minArgsLength=1;
         this.usage="<message content>";
     }
 
-    public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const messageContent=message.content.slice(17,message.content.length);
-        const owner = await Utils.getUserByID(process.env.OWNER_ID, bot);
+    public async onRun(message : Message, args : string[]){
+        const messageContent=args.join(" ");
+        const owner=await getUserByID(OWNER_ID);
         (await owner.createDM()).send(`${message.author}: ${messageContent}`);
         message.reply("Sent!");
     }
 }
 
-module.exports=ContactCreator;
+export=ContactCreatorCommand;

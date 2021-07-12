@@ -1,9 +1,9 @@
-import RandomLineCommand from './RandomLineCommand';
+import { RandomLineCommand } from "./RandomLineCommand";
 
-class Musa extends RandomLineCommand{
+class MusaCommand extends RandomLineCommand{
     constructor(){
         super("musa");
     }
 }
 
-module.exports=Musa;
+export=MusaCommand;

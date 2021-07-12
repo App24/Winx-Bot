@@ -1,73 +1,63 @@
-import * as Utils from '../Utils';
-import Discord from 'discord.js';
-import {parse} from 'discord-command-parser';
-import DatabaseType from '../DatabaseTypes';
+import { parse } from "discord-command-parser";
+import { Collection } from "discord.js";
+import { BotUser } from "../BotClient"
+import { OWNER_ID, PREFIX } from "../Constants";
+import { getUserByID, getMemberByID } from "../GetterUtilts";
+import { CommandAccess, CommandAvailability } from "../structs/Command";
+import { DatabaseType } from "../structs/DatabaseTypes";
+import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
+import { genRanHex, isDM, isPatreon, secondsToTime } from "../Utils";
 
-const cooldowns = new Discord.Collection<string, Discord.Collection<string, number>>();
+const cooldowns = new Collection<string, Collection<string, number>>();
 
-module.exports = (client : import("../BotClient"))=>{
-    client.on("message", async(message)=>{
-        if(!message.content.toLowerCase().startsWith(process.env.PREFIX)||message.author.bot)return;
+export=()=>{
+    BotUser.on("message", async(message)=>{
+        if(!message.content.toLowerCase().startsWith(PREFIX)||message.author.bot) return;
 
-        const parsed=parse(message, process.env.PREFIX, {allowSpaceBeforeCommand: true, ignorePrefixCase: true});
+        const parsed=parse(message, PREFIX, {allowSpaceBeforeCommand: true, ignorePrefixCase: true});
         if(!parsed.success) return;
         const commandName=parsed.command.toLowerCase();
         const args=parsed.arguments;
 
-        const command=client.Commands.get(commandName)||client.Commands.find(cmd=>cmd.aliases&&cmd.aliases.includes(commandName));
+        const command=BotUser.Commands.get(commandName)||BotUser.Commands.find(cmd=>cmd.aliases&&cmd.aliases.includes(commandName));
 
-        if(!command){
-            const customCommands : Array<any>=await Utils.getServerDatabase(client.getDatabase(DatabaseType.CustomCommands), message.guild.id);
-            const customCommand=customCommands.find(cmd=>cmd["commandName"].toLowerCase()===commandName);
-            if(customCommand){
-                const messages=customCommand["messages"]||[];
-                const deleteMessage=customCommand["deleteMessage"]||false;
-                const _message=messages[Math.floor(Math.random()*messages.length)];
-                if(deleteMessage){
-                    if(message.deletable) message.delete();
+        if(!command) return;
+
+        if(!isDM(message.channel)&&command.guildIds&&!command.guildIds.includes(message.guild.id)) return;
+
+        if(!command.enabled) return message.reply("This command is disabled!");
+
+        if(command.availability===CommandAvailability.Guild&&(message.channel.type!=="text"&&message.channel.type!=="news")){
+            return message.reply("This is a server only command!");
+        }else if(command.availability===CommandAvailability.DM&&message.channel.type!=="dm"){
+            return message.reply("This is a DM only command!");
+        }
+
+        switch(command.access){
+            case CommandAccess.Patreon:{
+                if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
+                    return message.reply("You cannot run this command! It is a patreon only feature! Contact a mod to find out how to gain access to it!");
                 }
-                await Utils.asyncForEach(_message, async(element)=>{
-                    await message.channel.send(element);
-                });
-            }
-            return;
-        }
-
-        if(!command.enabled){
-            return message.reply(`That command is disabled!`);
-        }
-
-        if(command.guildOnly&&message.channel.type!=="text"){
-            return message.reply('I can\'t execute that command inside DMs!');
-        }
-
-        if(command.guildIds){
-            if(!command.guildIds.includes(message.guild.id)) return;
-        }
-
-        if(command.creatorOnly){
-            if(message.author.id!==process.env.OWNER_ID) return message.channel.send("Sorry, only the bot creator can use this command!");
-        }
-
-        if(command.guildOwnerOnly){
-            if(message.author.id!==message.guild.ownerID) return message.channel.send("Sorry, only the server owner can use this command!");
-        }
-
-        if(command.paid){
-            const userPaid=await Utils.isPatreon(message.author, message.guild, client);
-            if(!userPaid){
-                return message.reply("This command is a premium feature only. Contact a mod to find out how to gain access to it.");
-            }
-        }
-
-        if(command.permissions){
-            if(!message.member.hasPermission(<Discord.PermissionResolvable>command.permissions)){
-                return message.reply(`You do not have permissions to use this command!`);
-            }
+            }break;
+            case CommandAccess.Moderators:{
+                if(isDM(message.channel)||!message.member.hasPermission("MANAGE_GUILD")){
+                    return message.reply("You cannot run this command!");
+                }
+            }break;
+            case CommandAccess.GuildOwner:{
+                if(isDM(message.channel)||message.author.id!==message.guild.ownerID){
+                    return message.reply("You cannot run this command!");
+                }
+            }break;
+            case CommandAccess.BotOwner:{
+                if(message.author.id!==OWNER_ID){
+                    return message.reply("You cannot run this command!");
+                }
+            }break;
         }
 
         if(!cooldowns.has(commandName)){
-            cooldowns.set(commandName, new Discord.Collection());
+            cooldowns.set(commandName, new Collection());
         }
 
         const now=Date.now();
@@ -79,51 +69,49 @@ module.exports = (client : import("../BotClient"))=>{
 
             if(now < expirationTime){
                 const timeLeft=(expirationTime-now)/1000;
-                // return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${commandName}\` command.`);
-                return message.reply(`please wait ${Utils.secondsToTime(timeLeft)} before reusing the \`${commandName}\` command.`);
+                return message.reply(`please wait ${secondsToTime(timeLeft)} before reusing the \`${commandName}\` command.`);
             }
         }
 
         timestamps.set(message.author.id, now);
         setTimeout(()=>timestamps.delete(message.author.id), cooldownAmount);
 
-        const minArgsLength=command.minArgsLength;
-        const maxArgsLength=command.maxArgsLength;
-        if(args.length<minArgsLength){
-            let reply=`You didn't provide enough arguments, ${message.author}`;
+        if(args.length<command.minArgs){
+            let reply=`You didn't provide enough arguments`;
 
             if(command.usage){
-                reply+=`\nThe proper usage would be: \`${process.env.PREFIX}${commandName} ${command.usage}\``;
+                reply+=`\nThe proper usage would be: \`${PREFIX}${commandName} ${command.usage}\``;
             }
 
-            return message.channel.send(reply);
-        }else if(args.length>maxArgsLength){
-            let reply=`You provide too many arguments, ${message.author}`;
+            return message.reply(reply);
+        }else if(args.length>command.maxArgs){
+            let reply=`You provide too many arguments`;
 
             if(command.usage){
-                reply+=`\nThe proper usage would be: \`${process.env.PREFIX}${commandName} ${command.usage}\``;
+                reply+=`\nThe proper usage would be: \`${PREFIX}${commandName} ${command.usage}\``;
             }
 
-            return message.channel.send(reply);
+            return message.reply(reply);
         }
 
         try{
-            await command.onRun(client, message, args);
+            await command.onRun(message, args);
         }catch(error){
-            const Errors=client.getDatabase(DatabaseType.Errors);
-            let hex=Utils.genRanHex(16);
+            const Errors=BotUser.getDatabase(DatabaseType.Errors);
+            let hex=genRanHex(16);
             let errors=await Errors.get(hex);
             while(errors){
-                hex=Utils.genRanHex(16);
+                hex=genRanHex(16);
                 errors=await Errors.get(hex);
             }
             console.error(`Code: ${hex}\n${error.stack}`);
             var datetime = new Date();
-            const obj={"time": datetime.toISOString().slice(0,10), "error":error.stack};
-            const objString=JSON.stringify(obj);
-            await Errors.set(hex, objString);
-            const owner = await Utils.getUserByID(process.env.OWNER_ID, client);
-            const ownerMember=await Utils.getMemberByID(owner.id, message.guild);
+            const errorObj=new ErrorStruct();
+            errorObj.time=datetime.getTime();
+            errorObj.error=error.stack;
+            await Errors.set(hex, errorObj);
+            const owner = await getUserByID(OWNER_ID);
+            const ownerMember=await getMemberByID(owner.id, message.guild);
             let text=`Error: \`${hex}\``;
             if(ownerMember){
                 text+=`\nServer: ${message.guild.name}`;

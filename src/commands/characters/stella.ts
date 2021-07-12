@@ -1,9 +1,9 @@
-import RandomLineCommand from './RandomLineCommand';
+import { RandomLineCommand } from "./RandomLineCommand";
 
-class Stella extends RandomLineCommand{
+class StellaCommand extends RandomLineCommand{
     constructor(){
         super("stella");
     }
 }
 
-module.exports=Stella;
+export=StellaCommand;

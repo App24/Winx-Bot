@@ -1,9 +1,9 @@
-import RandomLineCommand from './RandomLineCommand';
+import { RandomLineCommand } from "./RandomLineCommand";
 
-class Stormy extends RandomLineCommand{
+class StormyCommand extends RandomLineCommand{
     constructor(){
         super("stormy");
     }
 }
 
-module.exports=Stormy;
+export=StormyCommand;

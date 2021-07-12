@@ -1,7 +1,7 @@
-import Logger from "../Logger";
+import { BotUser } from "../BotClient";
 
-module.exports=(client:import("../BotClient"))=>{
-    client.on("shardReady", (shardId)=>{
-        Logger.Log(`Shard ${shardId} is ready!`);
+export=()=>{
+    BotUser.on("shardReady", (shardId)=>{
+        console.log(`Shard ${shardId} is ready!`);
     });
 }

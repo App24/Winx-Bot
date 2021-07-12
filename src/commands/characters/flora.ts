@@ -1,9 +1,9 @@
-import RandomLineCommand from './RandomLineCommand';
+import { RandomLineCommand } from "./RandomLineCommand";
 
-class Flora extends RandomLineCommand{
+class FloraCommand extends RandomLineCommand{
     constructor(){
         super("flora");
     }
 }
 
-module.exports=Flora;
+export=FloraCommand;

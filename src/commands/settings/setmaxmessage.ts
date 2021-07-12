@@ -1,45 +1,33 @@
 import { Message } from "discord.js";
-import Command from "../../Command";
-import * as Utils from '../../Utils';
-import {MAX_MESSAGE_PER_MINUTE} from '../../Constants';
-import DatabaseType from "../../DatabaseTypes";
-import { Settings } from "../../Category";
+import { BotUser } from "../../BotClient";
+import { Settings } from "../../structs/Category";
+import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { DatabaseType } from "../../structs/DatabaseTypes";
+import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
+import { getServerDatabase } from "../../Utils";
 
-class SetMaxMessage extends Command{
-    constructor(){
-        super();
+class SetMaxMessageCommand extends Command{
+    public constructor(){
+        super("Set maximum of messages per minute");
+        this.maxArgs=1;
         this.usage="[amount above 0]";
-        this.maxArgsLength=1;
-        // this.permissions=["MANAGE_GUILD"];
-        this.guildOwnerOnly=true;
         this.category=Settings;
-        this.description="Set maximum of messages per minute";
+        this.access=CommandAccess.GuildOwner;
+        this.availability=CommandAvailability.Guild
     }
 
-    public async onRun(bot: import("../../BotClient"), message: Message, args: string[]) {
-        const ServerInfo=bot.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {"messagesPerMinute": MAX_MESSAGE_PER_MINUTE});
+    public async onRun(message : Message, args : string[]){
+        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
         if(args.length){
-            const xp=parseInt(args[0]);
-            if(isNaN(xp)||xp<=0) return message.reply(`\`${args[0]}\` does not seem to be a valid number!`);
-            serverInfo["messagesPerMinute"]=xp;
+            const amount=parseInt(args[0]);
+            if(isNaN(amount)||amount<=0) return message.reply("That is not a valid number!");
+            serverInfo.maxMessagePerMinute=amount;
             await ServerInfo.set(message.guild.id, serverInfo);
-            const logChannel=await Utils.getLogChannel(bot, message.guild);
-            if(logChannel){
-                const embed=Utils.createLogEmbed("Max messages per minute", message.author, xp);
-                const botMember=await Utils.getMemberByID(bot.user.id, message.guild);
-                if(botMember.roles&&botMember.roles.color)
-                    embed.setColor(botMember.roles.color.color);
-                logChannel.send(embed);
-            }
-            return message.channel.send(`Max messages per minute is now \`${xp}\``);
+            return message.channel.send(`Max messages per minute is now \`${serverInfo.maxMessagePerMinute}\``);
         }
-        
-        if(!serverInfo["messagesPerMinute"]){
-            serverInfo["messagesPerMinute"]=MAX_MESSAGE_PER_MINUTE;
-        }
-        return message.channel.send(`The max messages per minute is \`${serverInfo["messagesPerMinute"]}\``);
+        return message.channel.send(`Max messages per minute is \`${serverInfo.maxMessagePerMinute}\``)
     }
 }
 
-module.exports=SetMaxMessage;
+export=SetMaxMessageCommand;

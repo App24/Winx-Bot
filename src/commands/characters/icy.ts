@@ -1,9 +1,9 @@
-import RandomLineCommand from './RandomLineCommand';
+import { RandomLineCommand } from "./RandomLineCommand";
 
-class Icy extends RandomLineCommand{
+class IcyCommand extends RandomLineCommand{
     constructor(){
         super("icy");
     }
 }
 
-module.exports=Icy;
+export=IcyCommand;

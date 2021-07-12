@@ -1,80 +1,103 @@
-import Discord from 'discord.js';
-import { Categories, Category, Info } from '../Category';
-import Command from '../Command';
-import * as Utils from '../Utils';
+import { Message, MessageEmbed } from "discord.js";
+import { BotUser } from "../BotClient";
+import { OWNER_ID, PREFIX } from "../Constants";
+import { Categories, Category, Info } from "../structs/Category";
+import { Command, CommandAccess, CommandAvailability } from "../structs/Command";
+import { asyncForEach, getBotRoleColor, isDM } from "../Utils";
 
-class Help extends Command{
-    constructor(){
-        super();
+class HelpCommand extends Command{
+    public constructor(){
+        super("Shows commands");
+        this.maxArgs=1;
         this.usage="[category]";
-        this.aliases=["commands"];
-        this.description="Show commands";
-        this.creatorOnly=true;
         this.category=Info;
-        this.maxArgsLength=1;
     }
 
-    public async onRun(bot: import("../BotClient"), message: Discord.Message, args: string[]) {
-        const userMember=await Utils.getMemberByID(message.author.id, message.guild);
-
+    public async onRun(message: Message, args: string[]) {
+        const available=message.channel.type==="dm"?CommandAvailability.DM:CommandAvailability.Guild;
         if(!args.length){
-            const data=[];
-            Categories.forEach(category=>{
-                if(!category.hidden)
-                data.push(`${category.emoji}: **${category.name}**`);
-            });
-
-            data.push("You can use `w!help [category]` to get the commands of that category!");
-
-            const embed=new Discord.MessageEmbed()
-            .setDescription(data);
-            const botMember=await Utils.getMemberByID(bot.user.id, message.guild);
-            if(botMember.roles&&botMember.roles.color)
-                embed.setColor(botMember.roles.color.color);
+            const embed=new MessageEmbed();
+            embed.setTitle("Categories");
+            let categories=[];
+            Categories.forEach((category=>{
+                if(category.availability===CommandAvailability.Both||(category.availability===available)){
+                    if(category.access){
+                        switch(category.access){
+                            case CommandAccess.BotOwner:{
+                                if(message.author.id!==OWNER_ID)
+                                    return;
+                            }break;
+                            case CommandAccess.Moderators:{
+                                if(isDM(message.channel)||!message.member.hasPermission("MANAGE_GUILD"))
+                                    return;
+                            }break;
+                            case CommandAccess.GuildOwner:{
+                                if(isDM(message.channel)||message.author.id!==message.guild.ownerID)
+                                    return;
+                            }break;
+                        }
+                    }
+                    categories.push(`${category.emoji}: ${category.name}`);
+                }
+            }));
+            embed.setDescription(categories);
+            embed.setFooter(`You can do ${PREFIX}help ${this.usage} to get the commands in a certain category!`);
+            embed.setColor((await getBotRoleColor(message.guild)));
             return message.channel.send(embed);
         }
 
-        let category : Category;
-        Categories.forEach(_category=>{
+        let category : Category=undefined;
+        for(var _category of Categories){
             if(_category.name.toLowerCase()===args[0].toLowerCase()){
                 category=_category;
+                break;
             }
-        });
-        if(!category){
-            return message.reply(`${args[0]} is not a valid category!`);
         }
+        if(!category) return message.reply("That is not a valid category");
 
-        const data=[];
-        const embed=new Discord.MessageEmbed();
-        embed.setTitle(`${category.emoji}: **${category.name}**`);
-        bot.Commands.forEach((command, name)=>{
-            if(command.category.categoryEnum===category.categoryEnum){
-                let hasPerms=true;
-                if(command.permissions){
-                    // hasPerms=false;
-                    hasPerms = userMember.hasPermission(<Discord.PermissionResolvable>command.permissions);
-                }
-                if(command.creatorOnly){
-                    hasPerms=false;
-                }
-                if(command.guildOwnerOnly) hasPerms=false;
-                if(hasPerms){
-                    data.push(`${name}`);
-                    let description=`${command.description||"test"}`;
-                    if(command.paid) description+="\n__Premium Only__";
-                    if(command.usage) description+=`\nUsage: ${command.usage}`;
-                    if(command.aliases) description+=`\nAliases: ${command.aliases}`;
-                    embed.addField(`${name}${command.enabled?"":" - __Disabled__"}`, description);
+        if(category.availability!==CommandAvailability.Both&&(category.availability!==available)) return message.reply("That category is not available here!");
+
+        const embed=new MessageEmbed();
+        embed.setTitle(`${category.emoji}: ${category.name}`);
+        BotUser.Commands.forEach((command, name)=>{
+            if(command.category===category){
+                if(command.availability===CommandAvailability.Both||(command.availability===available)){
+                    if((command.guildIds&&command.guildIds.includes(message.guild.id))||(!command.guildIds||!command.guildIds.length)){
+
+                        switch(command.access){
+                            case CommandAccess.Moderators:{
+                                if(isDM(message.channel)||!message.member.hasPermission("MANAGE_GUILD")){
+                                    return;
+                                }
+                            }break;
+                            case CommandAccess.GuildOwner:{
+                                if(isDM(message.channel)||message.author.id!==message.guild.ownerID){
+                                    return;
+                                }
+                            }break;
+                            case CommandAccess.BotOwner:{
+                                if(message.author.id!==OWNER_ID){
+                                    return;
+                                }
+                            }break;
+                        }
+
+                        let title=`${name}`;
+                        if(!command.enabled) title+=` - __Disabled__`;
+                        let description=`${command.description}`;
+                        if(command.aliases) description+=`\nAliases: ${command.aliases.join(", ")}`;
+                        if(command.usage) description+=`\nUsage: ${command.usage}`;
+                        if(command.access===CommandAccess.Patreon) description+=`\n__Patreon Only__`;
+                        embed.addField(title, description);
+                    }
                 }
             }
         });
-        if(!data.length) return message.reply(`There are no commands for that category!`);
-        const botMember=await Utils.getMemberByID(bot.user.id, message.guild);
-        if(botMember.roles&&botMember.roles.color)
-            embed.setColor(botMember.roles.color.color);
+        if(!embed.fields.length) return message.reply("That category has no commands!");
+        embed.setColor((await getBotRoleColor(message.guild)));
         return message.channel.send(embed);
     }
 
 }
 
-module.exports=Help;
+export=HelpCommand;

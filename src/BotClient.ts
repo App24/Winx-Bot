@@ -1,62 +1,39 @@
-import Discord, { Intents } from 'discord.js';
+import { Client, ClientOptions, Collection, Intents } from "discord.js";
+import Keyv from "./keyv-index";
+import { DatabaseType } from "./structs/DatabaseTypes";
 import fs from 'fs';
 import path from 'path';
-import Command from './Command';
-import DatabaseType from './DatabaseTypes';
-import Keyv from './keyv-index';
-import SlashCommand from './SlashCommand';
-import {loadFiles, isClass, asyncForEach} from "./Utils";
-import Logger from './Logger';
+import { DATABASE_FOLDER } from "./Constants";
+import { loadFiles } from "./Utils";
+import { Command } from "./structs/Command";
 
 interface BotOptions{
-    clientOptions? : Discord.ClientOptions;
+    clientOptions? : ClientOptions;
     logLoading? : 'none' | 'simplified' | 'complex' | 'all';
     loadEvents? : boolean;
     loadCommands? : boolean;
     loadSlashes? : boolean;
 }
 
-class BotClient extends Discord.Client{
-    private Tables = new Discord.Collection<DatabaseType, Keyv>();
-    public Commands = new Discord.Collection<string, Command>();
-    public Slashes = new Discord.Collection<string, SlashCommand>();
+class BotClient extends Client{
+    private databases=new Collection<DatabaseType, Keyv>();
+    public Commands = new Collection<string, Command>();
 
     private botOptions : BotOptions;
 
-    public constructor(options?: BotOptions){
+    public constructor(options: BotOptions){
         super(options.clientOptions);
         this.botOptions=options;
-        
-        Logger.Initialise();
+
         this.loadDatabases();
         ;(async()=>{
             if(this.botOptions.loadCommands)
                 await this.loadCommands();
-            if(this.botOptions.loadSlashes)
-                await this.loadSlashes();
+            // if(this.botOptions.loadSlashes)
+            //     await this.loadSlashes();
             if(this.botOptions.loadEvents)
                 await this.loadEvents();
         })();
-    }
-
-    private loadDatabases(){
-        const databaseDir="databases";
-
-        if(!fs.existsSync(databaseDir)){
-            fs.mkdirSync(databaseDir);
-        }
-
-        this.Tables.set(DatabaseType.Levels, new Keyv(`sqlite://${databaseDir}/levels.sqlite`));
-        this.Tables.set(DatabaseType.Ranks, new Keyv(`sqlite://${databaseDir}/ranks.sqlite`));
-        this.Tables.set(DatabaseType.Excludes, new Keyv(`sqlite://${databaseDir}/excludes.sqlite`));
-        this.Tables.set(DatabaseType.ServerInfo, new Keyv(`sqlite://${databaseDir}/serverInfo.sqlite`));
-        this.Tables.set(DatabaseType.UserSettings, new Keyv(`sqlite://${databaseDir}/userSettings.sqlite`));
-        this.Tables.set(DatabaseType.Errors, new Keyv(`sqlite://${databaseDir}/errors.sqlite`));
-        this.Tables.set(DatabaseType.Paid, new Keyv(`sqlite://${databaseDir}/paid.sqlite`));
-        this.Tables.set(DatabaseType.Suggestions, new Keyv(`sqlite://${databaseDir}/suggestions.sqlite`));
-        this.Tables.set(DatabaseType.CustomCommands, new Keyv(`sqlite://${databaseDir}/customCommands.sqlite`));
-
-        Logger.Log("Loaded Databases!");
     }
 
     private async loadCommands(){
@@ -68,19 +45,17 @@ class BotClient extends Discord.Client{
                 try{
                     const commandImport=await import(`./${file.substr(5, file.length)}`);
                     const {default: cClass}=commandImport;
-                    if(isClass(cClass)){
-                        const command=new cClass();
-                        if(!command.deprecated){
-                            const name=path.basename(file).slice(0,-3);
-                            this.Commands.set(name, command);
-                            switch(this.botOptions.logLoading){
-                                case 'complex':
-                                case 'all':
-                                    Logger.Log(`Loaded Command: ${name}`);
-                                    break;
-                            }
-                            loaded++;
+                    const command=new cClass();
+                    if(!command.deprecated){
+                        const name=path.basename(file).slice(0,-3);
+                        this.Commands.set(name, command);
+                        switch(this.botOptions.logLoading){
+                            case 'complex':
+                            case 'all':
+                                console.log(`Loaded Command: ${name}`);
+                                break;
                         }
+                        loaded++;
                     }
                 }catch{}
             }
@@ -88,9 +63,20 @@ class BotClient extends Discord.Client{
         switch(this.botOptions.logLoading){
             case 'simplified':
             case 'all':
-                Logger.Log(`Loaded ${loaded} commands!`);
+                console.log(`Loaded ${loaded} commands!`);
                 break;
         }
+    }
+    
+    private loadDatabases(){
+        if(!fs.existsSync(DATABASE_FOLDER)){
+            fs.mkdirSync(DATABASE_FOLDER);
+        }
+
+        const values = Object.values(DatabaseType);
+        values.forEach((value, index)=>{
+            this.databases.set(<DatabaseType>value, new Keyv(`sqlite://${DATABASE_FOLDER}/${value}.sqlite`));
+        });
     }
 
     private async loadEvents(){
@@ -107,12 +93,12 @@ class BotClient extends Discord.Client{
                     continue;
                 }
 
-                func(this);
+                func();
 
                 switch(this.botOptions.logLoading){
                     case 'complex':
                     case 'all':
-                        Logger.Log(`Loaded Event: ${name}`);
+                        console.log(`Loaded Event: ${name}`);
                         break;
                 }
                 loaded++;
@@ -121,48 +107,22 @@ class BotClient extends Discord.Client{
         switch(this.botOptions.logLoading){
             case 'simplified':
             case 'all':
-                Logger.Log(`Loaded ${loaded} events!`);
+                console.log(`Loaded ${loaded} events!`);
                 break;
         }
     }
 
-    private async loadSlashes(){
-        const files=loadFiles("dist/slashes");
-        if(!files) return;
-        let loaded=0;
-        for(const file of files){
-            if(file.endsWith(".js")){
-                try{
-                    const slash=await import(`./${file.substr(5, file.length)}`);
-                    const {data, onRun}=slash;
-                    const name=(data&&data.name)?data.name:path.basename(file).slice(0,-3);
-                    data.name=name;
-
-                    const command=new SlashCommand(data||{}, onRun);
-                    this.Slashes.set(name, command);
-
-                    switch(this.botOptions.logLoading){
-                        case 'complex':
-                        case 'all':
-                            Logger.Log(`Loaded Slash: ${name}`);
-                            break;
-                    }
-
-                    loaded++;
-                }catch{}
-            }
-        }
-        switch(this.botOptions.logLoading){
-            case 'simplified':
-            case 'all':
-                Logger.Log(`Loaded ${loaded} slashes!`);
-                break;
-        }
-    }
-
-    public getDatabase(name : DatabaseType) : Keyv{
-        return this.Tables.get(name);
+    public getDatabase(databaseType : DatabaseType) : Keyv{
+        return this.databases.get(databaseType);
     }
 }
 
-export=BotClient;
+const intents=new Intents(Intents.NON_PRIVILEGED);
+intents.add('GUILD_MEMBERS');
+export const BotUser=new BotClient({
+    clientOptions: {ws: {intents: intents}},
+    logLoading: 'simplified',
+    loadCommands: true,
+    loadEvents: true,
+    loadSlashes: true
+});

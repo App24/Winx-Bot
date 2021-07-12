@@ -1,55 +1,100 @@
-import Discord from 'discord.js';
-import { Settings } from '../../Category';
-import Command from '../../Command';
-import DatabaseType from '../../DatabaseTypes';
-import * as Utils from '../../Utils';
+import { Message, MessageEmbed } from "discord.js";
+import { BotUser } from "../../BotClient";
+import { getChannelByID, getChannelFromMention } from "../../GetterUtilts";
+import { Settings } from "../../structs/Category";
+import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { DatabaseType } from "../../structs/DatabaseTypes";
+import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
+import { SubCommand } from "../../structs/SubCommand";
+import { asyncForEach, getBotRoleColor, getServerDatabase } from "../../Utils";
 
-class ExcludeChannel extends Command{
-    constructor(){
-        super();
-        this.permissions=["MANAGE_GUILD"];
-        this.minArgsLength=1;
-        this.maxArgsLength=2;
-        this.usage="<channel/list> [remove]";
-        this.description="Excludes a channel from being used for leveling";
+class ExcludeChannelCommand extends Command{
+    public constructor(){
+        super("Excludes a channel from being used to earn xp");
         this.category=Settings;
+        this.minArgs=1;
+        this.maxArgs=2;
+        this.usage="<add/remove/list> [channel]";
+        this.access=CommandAccess.Moderators;
+        this.availability=CommandAvailability.Guild;
+        this.subCommands=[new AddSubCommand(), new RemoveSubCommand(), new ListSubCommand()];
     }
 
-    public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const Excludes=bot.getDatabase(DatabaseType.Excludes);
-        const excludes=await Utils.getServerDatabase(Excludes, message.guild.id);
-        if(args[0].toLowerCase()==="list"){
-            if(excludes.length<=0) return message.channel.send("No excluded channels!");
-            var text="";
-            await Utils.asyncForEach(excludes, async(exclude)=>{
-                const channel=await Utils.getTextChannelByID(exclude["id"], message.guild);
-                if(channel)text+=`${channel}\n`;
-            });
-            if(text.length<=0) return;
-            return message.channel.send(text);
-        }
-        const channel=await Utils.getTextChannelFromMention(args[0], message.guild);
-        if(!channel) return message.reply("You must provide a channel!");
-        let excludedChannel=await excludes.find(c=>c["id"]===channel.id);
-        if(args[1]&&args[1].toLowerCase()==="remove"){
-            if(!excludes){
-                return message.channel.send("This guild does not contain any excluded channels");
-            }
-            if(!excludedChannel){
-                return message.channel.send(`The channel ${channel.name} is not excluded!`);
-            }
-            const index=excludes.indexOf(excludedChannel);
-            if(index>-1) excludes.splice(index,1);
-            await Excludes.set(message.guild.id, excludes);
-            return message.channel.send(`${channel} is no longer excluded!`);
-        }
-        if(excludedChannel){
-            return message.channel.send(`${channel} is already excluded!`);
-        }
-        excludes.push({"id":channel.id});
-        await Excludes.set(message.guild.id, excludes);
-        return message.channel.send(`${channel} is now excluded!`);
+    public async onRun(message : Message, args : string[]){
+        this.onRunSubCommands(message, args.shift(), args, true);
     }
 }
 
-module.exports=ExcludeChannel;
+class AddSubCommand extends SubCommand{
+    public constructor(){
+        super("add");
+        this.minArgs=1;
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        
+        if(!serverInfo.excludeChannels) serverInfo.excludeChannels=[];
+
+        const channel=await getChannelFromMention(args[0], message.guild);
+        if(!channel) return message.reply("That is not a valid channel!");
+        
+        if(serverInfo.excludeChannels.find(c=>c===channel.id)) return message.reply("That channel is already excluded!");
+
+        serverInfo.excludeChannels.push(channel.id);
+
+        await ServerInfo.set(message.guild.id, serverInfo);
+        message.channel.send(`Excluded channel ${channel}`);
+    }
+}
+
+class RemoveSubCommand extends SubCommand{
+    public constructor(){
+        super("remove");
+        this.minArgs=1;
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+
+        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return message.reply("There are not excluded channels!");
+
+        const channel=await getChannelFromMention(args[0], message.guild);
+        if(!channel) return message.reply("That is not a valid channel!");
+
+        if(!serverInfo.excludeChannels.find(c=>c===channel.id)) return message.reply("That channel is not excluded!");
+
+        const index=serverInfo.excludeChannels.findIndex(c=>c===channel.id);
+        if(index>=0) serverInfo.excludeChannels.splice(index, 1);
+
+        await ServerInfo.set(message.guild.id, serverInfo);
+        message.channel.send(`Channel ${channel} is no longer excluded!`);
+    }
+}
+
+class ListSubCommand extends SubCommand{
+    public constructor(){
+        super("list");
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return message.reply("There are not excluded channels!");
+        const data=[];
+        await asyncForEach(serverInfo.excludeChannels, async(excludedChannel:string)=>{
+            const channel=await getChannelByID(excludedChannel, message.guild);
+            if(channel){
+                data.push(`${channel}`);
+            }
+        });
+        const embed=new MessageEmbed();
+        embed.setDescription(data);
+        embed.setColor((await getBotRoleColor(message.guild)));
+        message.channel.send(embed);
+    }
+}
+
+export=ExcludeChannelCommand;

@@ -1,49 +1,34 @@
 import { Message } from "discord.js";
-import Command from "../../Command";
-import * as Utils from '../../Utils';
-import {MAX_MESSAGE_LENGTH, MIN_MESSAGE_LENGTH} from '../../Constants';
-import DatabaseType from "../../DatabaseTypes";
-import { Settings } from "../../Category";
+import { BotUser } from "../../BotClient";
+import { Settings } from "../../structs/Category";
+import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { DatabaseType } from "../../structs/DatabaseTypes";
+import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
+import { getServerDatabase } from "../../Utils";
 
-class SetMinLength extends Command{
-    constructor(){
-        super();
+class SetMinLengthCommand extends Command{
+    public constructor(){
+        super("Set minimum length of message to give XP");
+        this.maxArgs=1;
         this.usage="[amount above 0]";
-        this.maxArgsLength=1;
-        // this.permissions=["MANAGE_GUILD"];
-        this.guildOwnerOnly=true;
         this.category=Settings;
-        this.description="Set minimum length of message to give XP";
+        this.access=CommandAccess.GuildOwner;
+        this.availability=CommandAvailability.Guild
     }
 
-    public async onRun(bot: import("../../BotClient"), message: Message, args: string[]) {
-        const ServerInfo=bot.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo=await Utils.getServerDatabase(ServerInfo, message.guild.id, {});
+    public async onRun(message : Message, args : string[]){
+        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
         if(args.length){
-            const messageLength=parseInt(args[0]);
-            if(isNaN(messageLength)||messageLength<=0) return message.reply(`\`${args[0]}\` does not seem to be a valid number!`);
-            if(!serverInfo["maxMessageLength"]){
-                serverInfo["maxMessageLength"]=MAX_MESSAGE_LENGTH;
-            }
-            if(messageLength>serverInfo["maxMessageLength"]) return message.reply("The minimum length can't be higher than the maximum length!");
-            serverInfo["minMessageLength"]=messageLength;
+            const len=parseInt(args[0]);
+            if(isNaN(len)||len<=0) return message.reply("That is not a valid number!");
+            if(len>serverInfo.maxMessageLength) return message.reply("The minimum length can't be higher than the maximum length!");
+            serverInfo.minMessageLength=len;
             await ServerInfo.set(message.guild.id, serverInfo);
-            const logChannel=await Utils.getLogChannel(bot, message.guild);
-            if(logChannel){
-                const embed=Utils.createLogEmbed("Minimum message length", message.author, messageLength);
-                const botMember=await Utils.getMemberByID(bot.user.id, message.guild);
-                if(botMember.roles&&botMember.roles.color)
-                    embed.setColor(botMember.roles.color.color);
-                logChannel.send(embed);
-            }
-            return message.channel.send(`Minimum message length is now \`${messageLength}\``);
+            return message.channel.send(`Minimum message length is now \`${serverInfo.minMessageLength}\``);
         }
-        
-        if(!serverInfo["minMessageLength"]){
-            serverInfo["minMessageLength"]=MIN_MESSAGE_LENGTH;
-        }
-        return message.channel.send(`The minimum message length is \`${serverInfo["minMessageLength"]}\``);
+        return message.channel.send(`Minimum message length is \`${serverInfo.minMessageLength}\``)
     }
 }
 
-module.exports=SetMinLength;
+export=SetMinLengthCommand;

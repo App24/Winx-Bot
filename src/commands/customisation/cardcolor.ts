@@ -1,71 +1,90 @@
-import Canvas from 'canvas';
-import Discord from 'discord.js';
-import { Custom } from '../../Category';
-import Command from '../../Command';
-import { CARD_HEX } from '../../Constants';
-import DatabaseType from '../../DatabaseTypes';
-import * as Utils from '../../Utils';
+import { createCanvas } from "canvas";
+import { Channel, Message, MessageAttachment, NewsChannel, TextChannel } from "discord.js";
+import { BotUser } from "../../BotClient";
+import { Customisation } from "../../structs/Category";
+import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { DatabaseType } from "../../structs/DatabaseTypes";
+import { copyUserSetting, DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
+import { SubCommand } from "../../structs/SubCommand";
+import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../Utils";
 
-class CardColor extends Command{
-    constructor(){
-        super();
-        this.paid=true;
-        this.maxArgsLength=1;
-        this.description="Set the background color of your card!";
-        this.category=Custom;
-        this.usage="[hex/reset]";
+class CardColorCommand extends Command{
+    public constructor(){
+        super("Set the color of your card!");
+        this.access=CommandAccess.Patreon;
+        this.availability=CommandAvailability.Guild;
+        this.category=Customisation;
+        this.usage="<get/set/reset> [hex color]";
+        this.minArgs=0;
+        this.maxArgs=2;
+        this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }
 
-    public async onRun(bot: import("../../BotClient"), message: Discord.Message, args: string[]) {
-        const UserSettings=bot.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings=await Utils.getServerDatabase(UserSettings, message.guild.id);
-        let userSettings=await serverUserSettings.find(settings=>settings["id"]===message.author.id);
-        if(!userSettings){
-            await serverUserSettings.push({"id": message.author.id, "settings":[]});
-            userSettings=await serverUserSettings.find(settings=>settings["id"]===message.author.id);
-        }
-        if(args.length<=0){
-            let cardColor=await userSettings["settings"].find(setting=>setting["id"]==="cardColor");
-            if(!cardColor){
-                return message.channel.send(`You not have a custom background color!`);
-            }
-            this.showColor(message, cardColor["color"]);
-            return;
-        }
-        let cardColor=await userSettings["settings"].find(setting=>setting["id"]==="cardColor");
-        if(!cardColor){
-            await userSettings["settings"].push({"id": "cardColor", "color": CARD_HEX});
-            cardColor=await userSettings["settings"].find(setting=>setting["id"]==="cardColor");
-        }
-        if(args[0].toLowerCase()==="reset"){
-            cardColor["color"]=CARD_HEX;
-            await UserSettings.set(message.guild.id, serverUserSettings);
-            return message.channel.send(`Resetted color to default: #${cardColor["color"]}`);
-        }else{
-            let hex=args[0];
-            if(hex.startsWith("#")){
-                hex=hex.substring(1);
-            }
-            if(hex.length!==6){
-                return message.reply("That is not a valid color!");
-            }
-            cardColor["color"]=hex;
-            message.channel.send("Settings Updated!");
-            this.showColor(message, cardColor["color"]);
-            await UserSettings.set(message.guild.id, serverUserSettings);
-        }
+    public async onRun(message : Message, args : string[]){
+        await this.onRunSubCommands(message, args.shift(), args, true);
     }
-
-    private showColor(message, color){
-        const canvas = Canvas.createCanvas(700, 320);
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle="#"+color;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-        const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'color.png');
-        message.channel.send(`#${color}`, attachment);
-    }
-
 }
 
-module.exports=CardColor;
+class GetSubCommand extends SubCommand{
+    public constructor(){
+        super("get");
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
+            await UserSettings.set(message.guild.id, serverUserSettings);
+        }
+        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+        message.channel.send(`#${userSettings.cardColor}`, canvasToMessageAttachment(canvasColor(userSettings.cardColor)));
+    }
+}
+
+class SetSubCommand extends SubCommand{
+    public constructor(){
+        super("set");
+        this.minArgs=1;
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
+            await UserSettings.set(message.guild.id, serverUserSettings);
+        }
+        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+
+        let color=args[0].toLowerCase();
+        if(color.startsWith("#")){
+            color=color.substring(1);
+        }
+        if(!isHexColor(color)) return message.reply("That is not a valid hex color");
+        userSettings.cardColor=color;
+        await UserSettings.set(message.guild.id, serverUserSettings);
+        message.channel.send(`Set the card colour to #${color}`);
+    }
+}
+
+class ResetSubCommand extends SubCommand{
+    public constructor(){
+        super("reset");
+    }
+
+    public async onRun(message : Message, args : string[]){
+        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
+            await UserSettings.set(message.guild.id, serverUserSettings);
+        }
+        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+        userSettings.cardColor=DEFAULT_USER_SETTING.cardColor;
+        await UserSettings.set(message.guild.id, serverUserSettings);
+        message.channel.send("Resetted card color!");
+    }
+}
+
+export=CardColorCommand;
