@@ -15,8 +15,9 @@ class CircleColorCommand extends Command{
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
         this.usage="<get/set/reset> [hex color]";
-        this.minArgs=0;
+        this.minArgs=1;
         this.maxArgs=2;
+        this.aliases=["circlecolour"];
         this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }
 

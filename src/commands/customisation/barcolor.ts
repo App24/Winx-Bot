@@ -16,6 +16,7 @@ class BarColorCommand extends Command{
         this.minArgs=2;
         this.maxArgs=3;
         this.usage="<get/set/reset> <start/end/both> [hex color]";
+        this.aliases=["barcolour"];
         this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }
 

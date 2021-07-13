@@ -14,8 +14,9 @@ class NameColorCommand extends Command{
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
         this.usage="<get/set/reset> [hex color]";
-        this.minArgs=0;
+        this.minArgs=1;
         this.maxArgs=2;
+        this.aliases=["namecolour"]
         this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }
 
@@ -64,7 +65,7 @@ class SetSubCommand extends SubCommand{
         if(!isHexColor(color)) return message.reply("That is not a valid hex color");
         userSettings.nameColor=color;
         await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send(`Set the card colour to #${color}`);
+        message.channel.send(`Set the name colour to #${color}`);
     }
 }
 

@@ -126,7 +126,7 @@ class MagicLevelsCommand extends Command{
         //Draw name and level info
         ctx.font=`${nameFontSize}px sans-serif`;
         if(userSetting.nameColor===DEFAULT_USER_SETTING.nameColor){
-            ctx.fillStyle=textColor;
+            if(member.roles&&member.roles.color&&member.roles.color.color) ctx.fillStyle=member.roles.color.hexColor;
         }else{
             ctx.fillStyle=`#${userSetting.nameColor}`;
         }
