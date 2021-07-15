@@ -9,7 +9,7 @@ import { BotUser } from "./BotClient";
 
     (<any>BotUser).api.webhooks(BotUser.user.id, interaction.token).messages("@original").patch({
         data:{
-            content: "These have been disabled for the time being!"
+            content: "These have been disabled for the time being! Sorry"
         }
     });
 });

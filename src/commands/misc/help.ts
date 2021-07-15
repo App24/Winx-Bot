@@ -1,9 +1,10 @@
 import { Message, MessageEmbed } from "discord.js";
-import { BotUser } from "../BotClient";
-import { OWNER_ID, PREFIX } from "../Constants";
-import { Categories, Category, Info } from "../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../structs/Command";
-import { asyncForEach, getBotRoleColor, isDM } from "../Utils";
+import { BotUser } from "../../BotClient";
+import { OWNER_ID, PREFIX } from "../../Constants";
+import { Info, Categories, Category } from "../../structs/Category";
+import { Command, CommandAvailability, CommandAccess } from "../../structs/Command";
+import { isDM, getBotRoleColor } from "../../Utils";
+
 
 class HelpCommand extends Command{
     public constructor(){

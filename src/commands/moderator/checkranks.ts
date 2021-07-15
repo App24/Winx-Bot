@@ -23,16 +23,17 @@ class CheckRanksCommand extends Command{
         const ranks:RankLevel[]=await getServerDatabase(Ranks, message.guild.id);
         if(!levels||!ranks) return message.reply("There are no levels in this server!");
         const members=await message.guild.members.fetch().then(promise=>promise.array());
+        await message.channel.send("Started checking...");
         await asyncForEach(members, async(member:GuildMember)=>{
             const user=levels.find(u=>u.userId===member.id);
             if(user){
                 await asyncForEach(ranks, async(rank : RankLevel)=>{
                     const role=await getRoleByID(rank.roleId, message.guild);
                     if(!role) return;
-                    if(user.level>=rank.level){
-                        member.roles.add(role);
-                    }else if(user.level<rank.level){
-                        member.roles.remove(role);
+                    if(user.level>=rank.level&&!member.roles.cache.has(role.id)){
+                        await member.roles.add(role);
+                    }else if(user.level<rank.level&&member.roles.cache.has(role.id)){
+                        await member.roles.remove(role);
                     }
                 });
             }

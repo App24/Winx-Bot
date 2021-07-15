@@ -8,6 +8,18 @@ import { addXP } from "../XPUtils";
 
 const levelCooldowns = new Collection<string, Collection<string, number>>();
 
+const capXp=new Collection<string, XpCap[]>();
+
+class XpCap{
+    public id : string;
+    public cap : number[];
+
+    public constructor(id : string){
+        this.id=id;
+        this.cap=[];
+    }
+}
+
 export=()=>{
     BotUser.on("message", async(message)=>{
         if(message.content.toLowerCase().startsWith(PREFIX)||message.author.bot||message.channel.type==="dm") return;
@@ -37,6 +49,26 @@ export=()=>{
 
         timestamps.set(message.author.id, now);
         setTimeout(()=>timestamps.delete(message.author.id), cooldownAmount);
+
+        if(!capXp.has(message.guild.id)){
+            capXp.set(message.guild.id, []);
+        }
+    
+        const data=capXp.get(message.guild.id);
+        if(!data.find(other=>other.id===message.author.id)){
+            const temp=capXp.get(message.guild.id);
+            temp.push(new XpCap(message.author.id));
+            capXp.set(message.guild.id, temp);
+        }
+    
+        const xpData=capXp.get(message.guild.id).find(other=>other.id===message.author.id).cap;
+        if(xpData.length>=serverInfo.maxMessagePerMinute) return;
+        const newDate=Date.now();
+        xpData.push(newDate);
+        setTimeout(()=>{
+            const index=xpData.indexOf(newDate);
+            xpData.splice(index, 1);
+        }, 60*1000);
 
         const xp=Math.ceil((Math.min(message.content.length, serverInfo.maxMessageLength)/serverInfo.maxMessageLength)*serverInfo.maxXpPerMessage);
         await addXP(message.author, message.guild, message.channel, xp);

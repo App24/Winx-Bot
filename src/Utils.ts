@@ -1,13 +1,14 @@
 import {join} from 'path';
 import fs from 'fs';
 import Keyv from './keyv-index';
-import { APIMessage, Channel, Guild, GuildChannel, GuildMember, Message, MessageAttachment, NewsChannel, Role, TextChannel, User } from 'discord.js';
+import { Channel, Guild, GuildMember, Message, MessageAttachment, NewsChannel, TextChannel } from 'discord.js';
 import { BotUser } from './BotClient';
 import { DatabaseType } from './structs/DatabaseTypes';
 import { PatreonInfo } from './structs/databaseTypes/PatreonInfo';
 import { Canvas, createCanvas } from 'canvas';
-import { getMemberByID, getUserByID } from './GetterUtilts';
+import { getMemberByID } from './GetterUtilts';
 import { RankLevel } from './structs/databaseTypes/RankLevel';
+import { UserLevel } from './structs/databaseTypes/UserLevel';
 
 export async function asyncForEach(array:Array<any>, callback:Function) {
     for(let i =0; i < array.length; i++){
@@ -81,15 +82,14 @@ export function capitalise(s : string) : string{
 }
 
 export function secondsToTime(time : number){
-    var minutes = Math.floor(time / 60);
-    var seconds = time - minutes * 60;
-    var hours = Math.floor(time / 3600);
-    time = time - hours * 3600;
+    let hours = Math.floor(time/3600);
+    let minutes = Math.floor(time%3600/60);
+    let seconds = Math.floor(time%3600%60);
 
     const times=[];
     if(hours>0) times.push(hours.toFixed(0)+" hour(s)");
     if(minutes>0) times.push(minutes.toFixed(0)+" minute(s)");
-    times.push(seconds.toFixed(0)+" second(s)");
+    if(seconds>0||!times.length) times.push(seconds.toFixed(0)+" second(s)");
 
     return times.join(" and ");
 }
@@ -209,4 +209,43 @@ export function hexToRGB(hex : string){
 
 export function blend(a : number, b : number, w : number) : number{
     return (a*w)+(b*(1-w));
+}
+
+export async function getAllMessages(channel : TextChannel|NewsChannel){
+    const messages:Message[][]=[];
+    let msgs=await channel.messages.fetch({limit: 100}).then(promise=>{
+        return promise.array();
+    });
+    let lastMessage;
+    while(msgs.length){
+        messages.push(msgs);
+        lastMessage=msgs[msgs.length-1].id;
+        msgs=await channel.messages.fetch({limit: 100, before: lastMessage}).then(promise=>{
+            return promise.array();
+        });
+    }
+    return messages;
+}
+
+export async function getLeaderboardMembers(guild : Guild){
+    const Levels=BotUser.getDatabase(DatabaseType.Levels);
+    const levels:UserLevel[]=await getServerDatabase(Levels, guild.id)
+    levels.sort((a,b)=>{
+        if(a.level===b.level){
+            return b.xp-a.xp;
+        }
+        return b.level-a.level;
+    });
+    const leaderboardLevels:{userLevel: UserLevel, member: GuildMember}[]=[];
+    let userIndex=0;
+    await asyncForEach(levels, async(level : UserLevel)=>{
+        const user=await getMemberByID(level.userId, guild);
+        if(user){
+            leaderboardLevels.push({userLevel: level, member: user});
+            userIndex++;
+            if(userIndex>=15)
+                return true;
+        }
+    });
+    return leaderboardLevels;
 }

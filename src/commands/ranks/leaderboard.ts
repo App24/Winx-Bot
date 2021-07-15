@@ -1,11 +1,11 @@
 import { GuildMember, Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getUserByID, getMemberByID } from "../../GetterUtilts";
+import { getMemberByID, getUserFromMention } from "../../GetterUtilts";
 import { Rank } from "../../structs/Category";
 import { Command, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, asyncForEach, getLevelXP, getBotRoleColor } from "../../Utils";
+import { getServerDatabase, asyncForEach, getLevelXP, getBotRoleColor, getLeaderboardMembers } from "../../Utils";
 
 class RankCommand extends Command{
     public constructor(){
@@ -13,7 +13,7 @@ class RankCommand extends Command{
         this.category=Rank;
         this.usage="[user]";
         this.maxArgs=1;
-        this.aliases=["leaderboard", "lb"];
+        this.aliases=["rank", "lb"];
         this.availability=CommandAvailability.Guild;
     }
 
@@ -23,7 +23,7 @@ class RankCommand extends Command{
         if(!levels) return message.reply("There are no levels in this server!");
         let _user=message.author;
         if(args.length){
-            const temp=await getUserByID(args[0]);
+            const temp=await getUserFromMention(args[0]);
             if(!temp) return message.reply("That is not a valid user!");
             _user=temp;
         }
@@ -38,22 +38,11 @@ class RankCommand extends Command{
             return b.level-a.level;
         });
 
-        //Gets first 15 places in the leaderboard
-        const topLevels:{userLevel: UserLevel, member: GuildMember}[]=[];
-        let userIndex=0;
-        await asyncForEach(levels, async(level : UserLevel)=>{
-            const user=await getMemberByID(level.userId, message.guild);
-            if(user){
-                topLevels.push({userLevel: level, member: user});
-                userIndex++;
-                if(userIndex>=15)
-                    return true;
-            }
-        });
+        const leaderboardLevels=await getLeaderboardMembers(message.guild);
 
         const data=[];
         let i=1;
-        await asyncForEach(topLevels, async(element:{userLevel: UserLevel, member: GuildMember})=>{
+        await asyncForEach(leaderboardLevels, async(element:{userLevel: UserLevel, member: GuildMember})=>{
             const user=element.member.user;
             let text=`${i}. **`;
             if(user.id===_user.id)
@@ -70,7 +59,7 @@ class RankCommand extends Command{
         });
 
         //Gets the position of the user if they are not in the top 15
-        const index=topLevels.findIndex(u=>u.userLevel.userId===_user.id);
+        const index=leaderboardLevels.findIndex(u=>u.userLevel.userId===_user.id);
         if(index<0){
             const userLevel=levels.find(u=>u.userId===_user.id);
             if(userLevel){

@@ -1,10 +1,10 @@
 import { Message, MessageEmbed } from "discord.js";
-import { BotUser } from "../BotClient";
-import { CREATORS_ID, VERSION } from "../Constants";
-import { getUserByID } from "../GetterUtilts";
-import { Info } from "../structs/Category";
-import { Command } from "../structs/Command";
-import { asyncForEach, getBotMember, getBotRoleColor } from "../Utils";
+import { BotUser } from "../../BotClient";
+import { CREATORS_ID, VERSION } from "../../Constants";
+import { getUserByID } from "../../GetterUtilts";
+import { Info } from "../../structs/Category";
+import { Command } from "../../structs/Command";
+import { asyncForEach, getBotMember, getBotRoleColor } from "../../Utils";
 
 class AboutCommand extends Command{
     public constructor(){

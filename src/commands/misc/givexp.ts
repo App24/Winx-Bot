@@ -1,10 +1,11 @@
 import { Message, NewsChannel, TextChannel } from "discord.js";
-import { BotUser } from "../BotClient";
-import { Command, CommandAvailability } from "../structs/Command";
-import { DatabaseType } from "../structs/DatabaseTypes";
-import { UserLevel } from "../structs/databaseTypes/UserLevel";
-import { getLevelXP, getServerDatabase } from "../Utils";
-import { addXP } from "../XPUtils";
+import { BotUser } from "../../BotClient";
+import { Command, CommandAvailability } from "../../structs/Command";
+import { DatabaseType } from "../../structs/DatabaseTypes";
+import { UserLevel } from "../../structs/databaseTypes/UserLevel";
+import { getServerDatabase, getLevelXP } from "../../Utils";
+import { addXP } from "../../XPUtils";
+
 
 class GiveXPCommand extends Command{
     constructor(){

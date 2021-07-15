@@ -21,7 +21,7 @@ class SuggestionsCommand extends Command{
     }
 
     public onRun(message : Message, args : string[]){
-        this.onRunSubCommands(message, args.shift(), args, true);
+        this.onRunSubCommands(message, args.shift(), args);
     }
 }
 

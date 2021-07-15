@@ -1,14 +1,13 @@
 import { createCanvas, loadImage } from "canvas";
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { OWNER_ID } from "../../Constants";
-import { getUserByID, getMemberByID, getRoleByID } from "../../GetterUtilts";
+import { getUserFromMention, getMemberByID, getRoleByID } from "../../GetterUtilts";
 import { Rank } from "../../structs/Category";
 import { Command, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { copyUserSetting, DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
-import { blend, canvasToMessageAttachment, capitalise, getCurrentRank, getLevelXP, getNextRank, getPreviousRank, getServerDatabase, hexToRGB, isPatreon } from "../../Utils";
+import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { getServerDatabase, getCurrentRank, getNextRank, capitalise, hexToRGB, getLevelXP, blend, canvasToMessageAttachment } from "../../Utils";
 
 class MagicLevelsCommand extends Command{
     public constructor(){
@@ -25,10 +24,9 @@ class MagicLevelsCommand extends Command{
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
         const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
-
         let user=message.author;
         if(args.length){
-            const temp=await getUserByID(args[0]);
+            const temp=await getUserFromMention(args[0]);
             if(!temp) return message.reply("That is not a valid user!");
             user=temp;
         }

@@ -37,24 +37,29 @@ export abstract class Command{
         this.subCommands=[];
     }
 
-    protected async onRunSubCommands(message : Message, name : string, args : string[], showError:boolean=false){
-        let ran=false;
+    protected async onRunSubCommands(message : Message, subCommandName : string, args : string[], showError:boolean=true){
+        let found=false;
         await asyncForEach(this.subCommands, async(subCommand : SubCommand)=>{
-            if(subCommand.name.toLowerCase()===name.toLowerCase()||(subCommand.aliases&&subCommand.aliases.includes(name.toLowerCase()))){
+            if(subCommand.name.toLowerCase()===subCommandName.toLowerCase()||(subCommand.aliases&&subCommand.aliases.includes(subCommandName.toLowerCase()))){
                 if(args.length<subCommand.minArgs){
-                    return message.reply(`You didn't provide enough arguments`);
+                    message.reply(`You didn't provide enough arguments`);
                 }else if(args.length>subCommand.maxArgs){
-                    return message.reply(`You provide too many arguments`);
+                    message.reply(`You provide too many arguments`);
+                }else{
+                    await subCommand.onRun(message, args);
                 }
-                await subCommand.onRun(message, args);
-                ran=true;
+                found=true;
                 return true;
             }
         });
-        if(showError&&!ran){
-            message.reply("That is not a valid option!");
+        if(showError&&!found){
+            let reply="That is not a valid option!";
+            if(this.usage){
+                reply+=`\nThe proper usage would be: \`${this.usage}\``;
+            }
+            message.reply(reply);
         }
-        return ran;
+        return found;
     }
 
     public abstract onRun(message : Message, args : string[]);

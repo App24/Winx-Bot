@@ -21,7 +21,7 @@ class NameColorCommand extends Command{
     }
 
     public async onRun(message : Message, args : string[]){
-        await this.onRunSubCommands(message, args.shift(), args, true);
+        await this.onRunSubCommands(message, args.shift(), args);
     }
 }
 

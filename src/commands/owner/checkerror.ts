@@ -19,7 +19,7 @@ class CheckErrorCommand extends Command{
 
     public async onRun(message : Message, args : string[]){
         const code=args.shift().toLowerCase();
-        if(!(await this.onRunSubCommands(message, code, args))){
+        if(!(await this.onRunSubCommands(message, code, args, false))){
             const Errors=BotUser.getDatabase(DatabaseType.Errors);
             const error:ErrorStruct=await Errors.get(code);
                 if(!error) return message.reply("That is not a valid error code!");

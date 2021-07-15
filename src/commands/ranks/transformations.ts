@@ -9,9 +9,10 @@ import { asyncForEach, getBotRoleColor } from "../../Utils";
 
 class RanksCommand extends Command{
     public constructor(){
-        super("Shows the ranks available");
+        super("Shows the transformations available");
         this.availability=CommandAvailability.Guild;
         this.category=Rank;
+        this.aliases=["ranks"];
     }
 
     public async onRun(message : Message, args : string[]){

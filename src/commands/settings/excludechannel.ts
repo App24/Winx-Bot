@@ -21,7 +21,7 @@ class ExcludeChannelCommand extends Command{
     }
 
     public async onRun(message : Message, args : string[]){
-        this.onRunSubCommands(message, args.shift(), args, true);
+        this.onRunSubCommands(message, args.shift(), args);
     }
 }
 

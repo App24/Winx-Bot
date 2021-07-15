@@ -1,12 +1,11 @@
-import { createCanvas } from "canvas";
-import { Channel, Message, MessageAttachment, NewsChannel, TextChannel } from "discord.js";
+import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Customisation } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { copyUserSetting, DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
+import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../Utils";
+import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor } from "../../Utils";
 
 class CircleColorCommand extends Command{
     public constructor(){
@@ -22,7 +21,7 @@ class CircleColorCommand extends Command{
     }
 
     public async onRun(message : Message, args : string[]){
-        await this.onRunSubCommands(message, args.shift(), args, true);
+        await this.onRunSubCommands(message, args.shift(), args);
     }
 }
 
