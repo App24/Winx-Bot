@@ -13,7 +13,7 @@ import { addXP } from "../../XPUtils";
 class CheckLBLevelsCommand extends Command{
     public constructor(){
         super("Checks the levels of all the users in the leaderboad");
-        this.access=CommandAccess.BotOwner;
+        this.access=CommandAccess.GuildOwner;
         this.availability=CommandAvailability.Guild;
         this.category=Moderator;
     }
