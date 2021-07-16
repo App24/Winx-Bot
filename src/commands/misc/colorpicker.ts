@@ -1,10 +1,11 @@
 import { Message } from "discord.js";
+import { Localisation } from "../../localisation";
 import { Command } from "../../structs/Command";
 import { isHexColor, canvasToMessageAttachment, canvasColor } from "../../Utils";
 
 class ColorPickerCommand extends Command{
     public constructor(){
-        super("Get color from hex");
+        super();
         this.minArgs=1;
         this.usage="<hex>";
         this.aliases=["colourpicker"];
@@ -15,8 +16,8 @@ class ColorPickerCommand extends Command{
         if(color.startsWith("#")){
             color=color.substring(1);
         }
-        if(!isHexColor(color)) return message.reply("That is not a valid hex color");
-        message.channel.send(`#${color}`, canvasToMessageAttachment(canvasColor(color)));
+        if(!isHexColor(color)) return message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
+        message.channel.send(Localisation.getTranslation("generic.hexcolor", color), canvasToMessageAttachment(canvasColor(color)));
     }
 }
 

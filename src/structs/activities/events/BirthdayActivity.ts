@@ -1,3 +1,4 @@
+import { Localisation } from "../../../localisation";
 import { capitalise } from "../../../Utils";
 import { EventActivity } from "../EventActivity"
 
@@ -10,6 +11,6 @@ export class BirthdayActivity extends EventActivity{
     }
 
     public getActivity(): string | Promise<string> {
-        return `Happy Birthday ${capitalise(this.name)} 🥳🎉`;
+        return Localisation.getTranslation("activity.event.birthday", capitalise(this.name));
     }
 }

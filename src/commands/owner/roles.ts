@@ -5,7 +5,7 @@ import { getBotRoleColor } from "../../Utils";
 
 class RolesCommand extends Command{
     public constructor(){
-        super("Gets all roles");
+        super();
         this.access=CommandAccess.BotOwner;
         this.availability=CommandAvailability.Guild;
         this.category=Owner;

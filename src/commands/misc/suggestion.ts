@@ -1,6 +1,7 @@
 import { Guild, Message, MessageEmbed, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID, SUGGESTION_CHANNEL } from "../../Constants";
+import { Localisation } from "../../localisation";
 import { Command } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { SuggestionState, SuggestionStruct } from "../../structs/databaseTypes/SuggestionStruct";
@@ -8,7 +9,7 @@ import { genRanHex, getBotRoleColor } from "../../Utils";
 
 class SuggestionCommand extends Command{
     public constructor(){
-        super("Suggest a feature for the bot!");
+        super();
         this.minArgs=1;
         this.usage="<suggestion>";
         this.aliases=["suggest"];
@@ -24,13 +25,13 @@ class SuggestionCommand extends Command{
             const channel=new TextChannel(new Guild(BotUser, {id:channeld["guild"]}), {id:channeld["id"]});
             const user=message.author;
             const request=args.join(" ");
-            const text=`**Request by ${user}**\n${request}`;
+            const text=Localisation.getTranslation("suggestion.request", user, request);
             const embed=new MessageEmbed();
             embed.setDescription(text);
             embed.setTimestamp();
             embed.setFooter(user.tag, user.displayAvatarURL());
             embed.setColor((await getBotRoleColor(message.guild)));
-            message.channel.send("Suggestion Sent!");
+            message.channel.send(Localisation.getTranslation("generic.sent"));
             channel.send(embed).then(async(msg)=>{
                 msg.react('✅');
                 msg.react('❌');
@@ -43,7 +44,7 @@ class SuggestionCommand extends Command{
                 await collector.on("collect", async(reaction)=>{
                     if(reaction.emoji.name==="✅"){
                         const embed2=msg.embeds[0];
-                        embed2.setTitle("Accepted");
+                        embed2.setTitle(Localisation.getTranslation("generic.accepted"));
                         msg.edit(embed2);
                         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
                         let hex=genRanHex(16);
@@ -61,7 +62,7 @@ class SuggestionCommand extends Command{
                         await Suggestions.set(hex, suggestion);
                     }else if(reaction.emoji.name==='❌'){
                         const embed2=msg.embeds[0];
-                        embed2.setTitle("Rejected");
+                        embed2.setTitle(Localisation.getTranslation("generic.rejected"));
                         msg.edit(embed2);
                     }
                 });

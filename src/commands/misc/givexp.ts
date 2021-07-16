@@ -1,5 +1,6 @@
 import { Message, NewsChannel, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Command, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
@@ -9,7 +10,7 @@ import { addXP } from "../../XPUtils";
 
 class GiveXPCommand extends Command{
     constructor(){
-        super("Gives you free xp");
+        super();
         this.cooldown=60*5;
         this.availability=CommandAvailability.Guild;
     }
@@ -28,9 +29,9 @@ class GiveXPCommand extends Command{
         if(rand<=per){
             const xp=Math.floor(getLevelXP(userLevel.level)*0.1);
             await addXP(message.author, message.guild, <NewsChannel|TextChannel>message.channel, xp);
-            return message.channel.send(`You have earned ${xp} XP!`);
+            return message.channel.send(Localisation.getTranslation("givexp.success.output", xp));
         }
-        message.channel.send("As Iffffff i'm gonna give out free xp");
+        message.channel.send(Localisation.getTranslation("givexp.fail.output"));
     }
 }
 

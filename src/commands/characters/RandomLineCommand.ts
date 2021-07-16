@@ -4,12 +4,13 @@ import { Command } from "../../structs/Command";
 import { capitalise } from "../../Utils";
 import fs from 'fs';
 import readline from 'readline';
+import { Localisation } from "../../localisation";
 
 export class RandomLineCommand extends Command{
     private name : string;
     
     public constructor(name : string){
-        super(`${capitalise(name)} Tingz`);
+        super(Localisation.getTranslation("tingz.command.description", capitalise(name)));
         this.name=name;
         this.category=Characters;
     }

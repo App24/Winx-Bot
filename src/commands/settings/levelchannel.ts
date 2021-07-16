@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getChannelFromMention } from "../../GetterUtilts";
+import { getChannelByID, getChannelFromMention } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -10,7 +11,7 @@ import { getServerDatabase } from "../../Utils";
 
 class LevelChannelCommand extends Command{
     public constructor(){
-        super("Excludes a channel from being used to earn xp");
+        super();
         this.category=Settings;
         this.minArgs=1;
         this.maxArgs=2;
@@ -36,12 +37,12 @@ class SetSubCommand extends SubCommand{
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
 
         const channel=await getChannelFromMention(args[0], message.guild);
-        if(!channel) return message.reply("That is not a valid channel!");
+        if(!channel) return message.reply(Localisation.getTranslation("error.invalid.channel"));
 
         serverInfo.levelChannel=channel.id;
 
         await ServerInfo.set(message.guild.id, serverInfo);
-        message.channel.send(`Set ${channel} as level channel!`);
+        message.channel.send(Localisation.getTranslation("levelchannel.set", channel));
     }
 }
 
@@ -54,13 +55,13 @@ class ClearSubCommand extends SubCommand{
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
 
-        if(!serverInfo.levelChannel) return message.reply("There is no level channel!");
+        if(!serverInfo.levelChannel) return message.reply(Localisation.getTranslation("error.empty.levelchannel"));
 
         serverInfo.levelChannel="";
 
         await ServerInfo.set(message.guild.id, serverInfo);
 
-        message.channel.send(`Removed level channel!`);
+        message.channel.send(Localisation.getTranslation("levelchannel.remove"));
     }
 }
 
@@ -72,8 +73,10 @@ class ListSubCommand extends SubCommand{
     public async onRun(message : Message, args : string[]){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
-        if(!serverInfo.levelChannel) return message.reply("There is no level channel!");
-        message.channel.send(`<#${serverInfo.levelChannel}>`);
+        if(!serverInfo.levelChannel) return message.reply(Localisation.getTranslation("error.empty.levelchannel"));
+        const channel=await getChannelByID(serverInfo.levelChannel, message.guild);
+        if(!channel) return message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
+        message.channel.send(`${channel}`);
     }
 }
 

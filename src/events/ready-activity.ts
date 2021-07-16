@@ -1,5 +1,6 @@
 import { BotUser } from "../BotClient";
 import { PREFIX, VERSION } from "../Constants";
+import { Localisation } from "../localisation";
 import { BasicActivity } from "../structs/activities/BasicActivity";
 import { BirthdayActivity } from "../structs/activities/events/BirthdayActivity";
 import { ChristmasActivity } from "../structs/activities/events/ChristmasActivity";
@@ -9,11 +10,11 @@ import { UsersActivity } from "../structs/activities/UsersActivity";
 
 let i=-1;
 const activities=[
-    new BasicActivity(`Version: ${VERSION}`),
-    new BasicActivity(`${PREFIX}help for help!`),
-    new BasicActivity(`${PREFIX}suggestion for your suggestion!`),
+    new BasicActivity(Localisation.getTranslation("activity.basic.version", VERSION)),
+    new BasicActivity(Localisation.getTranslation("activity.basic.help", PREFIX)),
+    new BasicActivity(Localisation.getTranslation("activity.basic.suggestion", PREFIX)),
     new UsersActivity(),
-    new BasicActivity(`${PREFIX}contactcreator to contact the creator of the bot!`),
+    new BasicActivity(Localisation.getTranslation("activity.basic.contact", PREFIX)),
     new PrideMonthActivity(),
     new ChristmasActivity(),
     new NewYearActivity(),

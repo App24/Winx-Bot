@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -9,7 +10,7 @@ import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor }
 
 class CircleColorCommand extends Command{
     public constructor(){
-        super("Set the color of your card circle!");
+        super();
         this.access=CommandAccess.Patreon;
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
@@ -38,7 +39,7 @@ class GetSubCommand extends SubCommand{
             await UserSettings.set(message.guild.id, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
-        message.channel.send(`#${userSettings.specialCircleColor}`, canvasToMessageAttachment(canvasColor(userSettings.specialCircleColor)));
+        message.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.specialCircleColor), canvasToMessageAttachment(canvasColor(userSettings.specialCircleColor)));
     }
 }
 
@@ -61,10 +62,10 @@ class SetSubCommand extends SubCommand{
         if(color.startsWith("#")){
             color=color.substring(1);
         }
-        if(!isHexColor(color)) return message.reply("That is not a valid hex color");
+        if(!isHexColor(color)) return message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         userSettings.specialCircleColor=color;
         await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send(`Set the circle colour to #${color}`);
+        message.channel.send(Localisation.getTranslation("circlecolor.set.output", color));
     }
 }
 
@@ -83,7 +84,7 @@ class ResetSubCommand extends SubCommand{
         const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
         userSettings.specialCircleColor=DEFAULT_USER_SETTING.specialCircleColor;
         await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send("Resetted circle color!");
+        message.channel.send(Localisation.getTranslation("circlecolor.resetset.output"));
     }
 }
 

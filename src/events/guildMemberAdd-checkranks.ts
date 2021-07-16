@@ -15,13 +15,13 @@ export=()=>{
         if(!levels||!ranks) return;
         const user=levels.find(u=>u.userId===member.id);
         if(user){
-            asyncForEach(ranks, async(rank : RankLevel)=>{
+            await asyncForEach(ranks, async(rank : RankLevel)=>{
                 const role=await getRoleByID(rank.roleId, member.guild);
                 if(!role) return;
-                if(user.level>=rank.level){
-                    member.roles.add(role);
-                }else if(user.level<rank.level){
-                    member.roles.remove(role);
+                if(user.level>=rank.level&&!member.roles.cache.has(role.id)){
+                    await member.roles.add(role);
+                }else if(user.level<rank.level&&member.roles.cache.has(role.id)){
+                    await member.roles.remove(role);
                 }
             });
         }

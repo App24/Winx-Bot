@@ -1,3 +1,4 @@
+import { Localisation } from "../../../localisation";
 import { EventActivity } from "../EventActivity";
 
 export class PrideMonthActivity extends EventActivity{
@@ -6,7 +7,7 @@ export class PrideMonthActivity extends EventActivity{
     }
 
     public getActivity(): string {
-        return "Happy Pride Month 🌈";
+        return Localisation.getTranslation("activity.event.pride");
     }
 
 }

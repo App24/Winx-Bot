@@ -1,6 +1,7 @@
 import { GuildMember, Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { getMemberByID, getUserFromMention } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -9,7 +10,7 @@ import { getServerDatabase, asyncForEach, getLevelXP, getBotRoleColor, getLeader
 
 class RankCommand extends Command{
     public constructor(){
-        super("Shows the leaderboard");
+        super();
         this.category=Rank;
         this.usage="[user]";
         this.maxArgs=1;
@@ -20,15 +21,16 @@ class RankCommand extends Command{
     public async onRun(message : Message, args : string[]){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
-        if(!levels) return message.reply("There are no levels in this server!");
+        if(!levels) return message.reply(Localisation.getTranslation("error.empty.levels"));
         let _user=message.author;
         if(args.length){
             const temp=await getUserFromMention(args[0]);
-            if(!temp) return message.reply("That is not a valid user!");
+            if(!temp) return message.reply(Localisation.getTranslation("error.invalid.user"));
             _user=temp;
         }
+        if(_user.bot) return message.reply(Localisation.getTranslation("error.user.bot"));
         const member=await getMemberByID(_user.id, message.guild);
-        if(!member) return message.reply(`${_user} is not a member of this server!`);
+        if(!member) return message.reply(Localisation.getTranslation("error.invalid.member"));
 
         //Sorts levels list
         levels.sort((a,b)=>{
@@ -54,7 +56,7 @@ class RankCommand extends Command{
                 text+=`__`;
             text+=`**`;
             data.push(text);
-            data.push(`Level: ${element.userLevel.level} XP: ${element.userLevel.xp}/${getLevelXP(element.userLevel.level)}`);
+            data.push(Localisation.getTranslation("leaderboard.output", element.userLevel.level, element.userLevel.xp, getLevelXP(element.userLevel.level)));
             i++;
         });
 
@@ -75,9 +77,9 @@ class RankCommand extends Command{
                     text+=`__`;
                 text+=`**`;
                 data.push(text);
-                data.push(`Level: ${userLevel.level} XP: ${userLevel.xp}/${getLevelXP(userLevel.level)}`);
+                data.push(Localisation.getTranslation("leaderboard.output", userLevel.level, userLevel.xp, getLevelXP(userLevel.level)));
             }else{
-                return message.reply(`${_user} does not have any levels!`);
+                return message.reply(Localisation.getTranslation("error.null.userLevel"));
             }
         }
         const embed=new MessageEmbed();

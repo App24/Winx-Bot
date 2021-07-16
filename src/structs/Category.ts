@@ -17,12 +17,12 @@ export class Category{
 
 export const Categories:Category[]=[];
 
-export const Owner=         new Category("Owner",           ":crown:",              CommandAvailability.Both, CommandAccess.BotOwner);
-export const Moderator=     new Category("Moderator",       ":crossed_swords:",     CommandAvailability.Guild, CommandAccess.Moderators);
-export const Settings=      new Category("Settings",        ":gear:",               CommandAvailability.Guild, CommandAccess.Moderators);
-export const Info=          new Category("Info",            ":question:");
-export const Characters=    new Category("Characters",      ":person_curly_hair:");
-export const Rank=          new Category("Ranking",         ":1234:",               CommandAvailability.Guild);
-export const Customisation= new Category("Customisation",   ":wrench:",             CommandAvailability.Guild);
+export const Owner=new Category("category.owner", "👑", CommandAvailability.Both, CommandAccess.BotOwner);
+export const Moderator=new Category("category.moderator", "⚔", CommandAvailability.Guild, CommandAccess.Moderators);
+export const Settings=new Category("category.settings", "⚙", CommandAvailability.Guild, CommandAccess.Moderators);
+export const Info=new Category("category.info", "❓");
+export const Characters=new Category("category.characters", "👨");
+export const Rank=new Category("category.ranking", "🔢", CommandAvailability.Guild);
+export const Customisation=new Category("category.customisation", "🔧", CommandAvailability.Guild);
 
-export const Other=new Category("Other", ":recycle:");
+export const Other=new Category("category.other", "♻");

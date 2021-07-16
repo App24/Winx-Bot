@@ -1,4 +1,5 @@
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Activity } from "./Activity";
 
 export class UsersActivity extends Activity{
@@ -6,6 +7,6 @@ export class UsersActivity extends Activity{
         const numUsers=await BotUser.shard.broadcastEval('this.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)').then(results=>{
             return results[0];
         });
-        return `${numUsers} users earning their transformations!`;
+        return Localisation.getTranslation("activity.users", numUsers);
     }
 }

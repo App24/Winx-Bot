@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -9,7 +10,7 @@ import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor }
 
 class BarColorCommand extends Command{
     public constructor(){
-        super("Sets the color of your bar!");
+        super();
         this.access=CommandAccess.Patreon;
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
@@ -49,14 +50,14 @@ class GetSubCommand extends SubCommand{
         }else if(op==="both"){
             mod=BarMode.Start|BarMode.End;
         }else{
-            return message.reply("That is not a valid option!");
+            return message.reply(Localisation.getTranslation("error.invalid.option"));
         }
 
         if((mod&BarMode.Start)===BarMode.Start){
-            await message.channel.send(`Start: #${userSettings.barStartColor}`, canvasToMessageAttachment(canvasColor(userSettings.barStartColor)));
+            await message.channel.send(Localisation.getTranslation("barcolor.hexcolor.output", "Start", userSettings.barStartColor), canvasToMessageAttachment(canvasColor(userSettings.barStartColor)));
         }
         if((mod&BarMode.End)===BarMode.End){
-            await message.channel.send(`End: #${userSettings.barEndColor}`, canvasToMessageAttachment(canvasColor(userSettings.barEndColor)));
+            await message.channel.send(Localisation.getTranslation("barcolor.hexcolor.output", "End", userSettings.barEndColor), canvasToMessageAttachment(canvasColor(userSettings.barEndColor)));
         }
     }
 }
@@ -80,23 +81,23 @@ class SetSubCommand extends SubCommand{
         let mod:BarMode;
         let append="";
         if(op==="start"){
-            append="start of";
+            append=Localisation.getTranslation("barcolor.start");
             mod=BarMode.Start;
         }else if(op==="end"){
-            append="end of";
+            append=Localisation.getTranslation("barcolor.end");
             mod=BarMode.End;
         }else if(op==="both"){
-            append="both start and end of";
+            append=Localisation.getTranslation("barcolor.both");
             mod=BarMode.Start|BarMode.End;
         }else{
-            return message.reply("That is not a valid option!");
+            return message.reply(Localisation.getTranslation("error.invalid.option"));
         }
 
         let color=args[1].toLowerCase();
         if(color.startsWith("#")){
             color=color.substring(1);
         }
-        if(!isHexColor(color)) return message.reply("That is not a valid hex color");
+        if(!isHexColor(color)) return message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         if((mod&BarMode.Start)===BarMode.Start){
             userSettings.barStartColor=color;
         }
@@ -104,7 +105,7 @@ class SetSubCommand extends SubCommand{
             userSettings.barEndColor=color;
         }
         await UserSettings.set(message.guild.id, serverUserSettings);
-        return message.channel.send(`Set the ${append} bar color to #${color}!`);
+        return message.channel.send(Localisation.getTranslation("barcolor.set.output", append, color));
     }
 }
 
@@ -127,16 +128,16 @@ class ResetSubCommand extends SubCommand{
         let mod:BarMode;
         let append="";
         if(op==="start"){
-            append="start of";
+            append=Localisation.getTranslation("barcolor.start");
             mod=BarMode.Start;
         }else if(op==="end"){
-            append="end of";
+            append=Localisation.getTranslation("barcolor.end");
             mod=BarMode.End;
         }else if(op==="both"){
-            append="both start and end of";
+            append=Localisation.getTranslation("barcolor.both");
             mod=BarMode.Start|BarMode.End;
         }else{
-            return message.reply("That is not a valid option!");
+            return message.reply(Localisation.getTranslation("error.invalid.option"));
         }
 
         if((mod&BarMode.Start)===BarMode.Start){
@@ -146,7 +147,7 @@ class ResetSubCommand extends SubCommand{
             userSettings.barEndColor=DEFAULT_USER_SETTING.barEndColor;
         }
         await UserSettings.set(message.guild.id, serverUserSettings);
-        return message.channel.send(`Resetted ${append} bar color!`);
+        return message.channel.send(Localisation.getTranslation("barcolor.reset.output", append));
     }
 }
 

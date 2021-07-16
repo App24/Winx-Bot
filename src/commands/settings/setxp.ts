@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -8,12 +9,12 @@ import { getServerDatabase } from "../../Utils";
 
 class SetXPCommand extends Command{
     public constructor(){
-        super("Set XP per message");
+        super();
         this.maxArgs=1;
         this.usage="[amount above 0]";
         this.category=Settings;
         this.access=CommandAccess.GuildOwner;
-        this.availability=CommandAvailability.Guild
+        this.availability=CommandAvailability.Guild;
     }
 
     public async onRun(message : Message, args : string[]){
@@ -21,12 +22,12 @@ class SetXPCommand extends Command{
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
         if(args.length){
             const xp=parseInt(args[0]);
-            if(isNaN(xp)||xp<=0) return message.reply("That is not a valid number!");
+            if(isNaN(xp)||xp<=0) return message.reply(Localisation.getTranslation("error.invalid.xp"));
             serverInfo.maxXpPerMessage=xp;
             await ServerInfo.set(message.guild.id, serverInfo);
-            return message.channel.send(`XP per message is now \`${serverInfo.maxXpPerMessage}\``);
+            return message.channel.send(Localisation.getTranslation("setxp.set", serverInfo.maxXpPerMessage));
         }
-        return message.channel.send(`XP per message is \`${serverInfo.maxXpPerMessage}\``)
+        return message.channel.send(Localisation.getTranslation("setxp.get", serverInfo.maxXpPerMessage));
     }
 }
 

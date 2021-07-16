@@ -3,7 +3,7 @@ import { Command } from "../../structs/Command";
 
 class RandomChoiceClass extends Command{
     public constructor(){
-        super("Choose a random option");
+        super();
         this.minArgs=2;
         this.usage="<choice1> <choice2> [choice3] ...";
     }

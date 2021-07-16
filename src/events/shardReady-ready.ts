@@ -1,7 +1,8 @@
 import { BotUser } from "../BotClient";
+import { Localisation } from "../localisation";
 
 export=()=>{
     BotUser.on("shardReady", (shardId)=>{
-        console.log(`Shard ${shardId} is ready!`);
+        console.log(Localisation.getTranslation("shard.ready", shardId));
     });
 }

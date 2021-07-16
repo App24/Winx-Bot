@@ -2,6 +2,7 @@ import { Message, GuildChannel, TextChannel, NewsChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
 import { getMemberFromMention, getChannelByID } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -12,7 +13,7 @@ import { addXP } from "../../XPUtils";
 
 class CheckLevelsCommand extends Command{
     public constructor(){
-        super("Checks the levels of a specific user");
+        super();
         this.access=CommandAccess.GuildOwner;
         this.availability=CommandAvailability.Guild;
         this.minArgs=1;
@@ -32,12 +33,15 @@ class CheckLevelsCommand extends Command{
         
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
+
+        if(!levels||!levels.length) return message.reply(Localisation.getTranslation("error.empty.levels"));
+
         const user=levels.find(u=>u.userId===member.id);
         user.level=0;
         user.xp=0;
         await Levels.set(message.guild.id, levels);
 
-        await message.channel.send("Started checking each channel! This may take a very, very long time!");
+        await message.channel.send(Localisation.getTranslation("checklevels.start"));
         const NTChannels=[];
         await asyncForEach(channels, async(channel:GuildChannel)=>{
             if((<any>channel).messages){
@@ -49,7 +53,7 @@ class CheckLevelsCommand extends Command{
             }
         });
         await asyncForEach(NTChannels, async(channel:TextChannel | NewsChannel, index:number)=>{
-            await message.channel.send(`Started checking channel: ${channel} ${index+1}/${NTChannels.length}`);
+            await message.channel.send(Localisation.getTranslation("checklevels.start.channel", channel, index+1, NTChannels.length));
             const startTime=new Date().getTime();
             const messages=await getAllMessages(channel);
             let totalXp=0;
@@ -66,9 +70,9 @@ class CheckLevelsCommand extends Command{
             });
             await addXP(member.user, message.guild, <TextChannel|NewsChannel>message.channel, totalXp, false);
             const timeDifferent=new Date().getTime()-startTime;
-            await message.channel.send(`Finished checking channel: ${channel} ${index+1}/${NTChannels.length}. Took ${secondsToTime(timeDifferent/1000)}`);
+            await message.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/100)));
         })
-        message.channel.send("Done!");
+        message.channel.send(Localisation.getTranslation("command.common.done"));
     }
 }
 

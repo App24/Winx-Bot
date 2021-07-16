@@ -2,6 +2,7 @@ import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID } from "../../Constants";
 import { getUserByID } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -11,7 +12,7 @@ import { asyncForEach, capitalise, getBotRoleColor } from "../../Utils";
 
 class SuggestionsCommand extends Command{
     public constructor(){
-        super("Gets suggestions");
+        super();
         this.access=CommandAccess.BotOwner;
         this.minArgs=1;
         this.maxArgs=2;
@@ -55,11 +56,11 @@ class ListSubCommand extends SubCommand{
             const suggestion=request.value;
             if(suggestionState===undefined||suggestionState===suggestion.state){;
                 const user=await getUserByID(suggestion.userId);
-                data.push(`__**${key}**__ - Suggested by ${user||suggestion.userId} - State: ${capitalise(suggestion.state)}`);
+                data.push(Localisation.getTranslation("suggestions.list.suggestion", key, user||suggestion.userId, capitalise(suggestion.state)));
             }
         });
 
-        if(!data.length) return message.reply("There are no suggestions!");
+        if(!data.length) return message.reply(Localisation.getTranslation("error.empty.suggestions"));
 
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(message.guild)));
@@ -78,10 +79,10 @@ class CompleteSubCommand extends SubCommand{
     public async onRun(message : Message, args : string[]){
         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
         const suggestion:SuggestionStruct=await Suggestions.get(args[0].toLowerCase());
-        if(!suggestion) return message.reply("That is not a valid ID!");
-        if(suggestion.state===SuggestionState.Completed) return message.reply("That suggestion is already completed!");
+        if(!suggestion) return message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
+        if(suggestion.state===SuggestionState.Completed) return message.reply(Localisation.getTranslation("suggestions.already.completed"));
         const user=await getUserByID(suggestion.userId);
-        const text=`**Request by ${user||suggestion.userId}**\n${suggestion.request}\n\nYou sure you want to complete this?`;
+        const text=Localisation.getTranslation("suggestions.complete", user||suggestion.userId, suggestion.request);
         const embed=new MessageEmbed();
         embed.setDescription(text);
         embed.setTimestamp();
@@ -99,7 +100,7 @@ class CompleteSubCommand extends SubCommand{
             await collector.on("collect", async(reaction)=>{
                 if(reaction.emoji.name==="✅"){
                     const embed2=msg.embeds[0];
-                    embed2.setDescription(embed2.description+"\n__**Completed**__");
+                    embed2.setDescription(Localisation.getTranslation("suggestions.completed", embed2.description));
                     msg.edit(embed2);
                     suggestion.state=SuggestionState.Completed;
                     await Suggestions.set(args[0], suggestion);
@@ -119,10 +120,10 @@ class RejectSubCommand extends SubCommand{
     public async onRun(message : Message, args : string[]){
         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
         const suggestion:SuggestionStruct=await Suggestions.get(args[0].toLowerCase());
-        if(!suggestion) return message.reply("That is not a valid ID!");
-        if(suggestion.state===SuggestionState.Rejected) return message.reply("That suggestion is already rejected!");
+        if(!suggestion) return message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
+        if(suggestion.state===SuggestionState.Rejected) return message.reply(Localisation.getTranslation("suggestions.already.rejected"));
         const user=await getUserByID(suggestion.userId);
-        const text=`**Request by ${user||suggestion.userId}**\n${suggestion.request}\n\nYou sure you want to reject this?`;
+        const text=Localisation.getTranslation("suggestions.reject", user||suggestion.userId, suggestion.request);
         const embed=new MessageEmbed();
         embed.setDescription(text);
         embed.setTimestamp();
@@ -140,7 +141,7 @@ class RejectSubCommand extends SubCommand{
             await collector.on("collect", async(reaction)=>{
                 if(reaction.emoji.name==="✅"){
                     const embed2=msg.embeds[0];
-                    embed2.setDescription(embed2.description+"\n__**Rejected**__");
+                    embed2.setDescription(Localisation.getTranslation("suggestions.rejected", embed2.description));
                     msg.edit(embed2);
                     suggestion.state=SuggestionState.Rejected;
                     await Suggestions.set(args[0], suggestion);
@@ -160,9 +161,9 @@ class GetSubCommand extends SubCommand{
     public async onRun(message : Message, args : string[]){
         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
         const suggestion:SuggestionStruct=await Suggestions.get(args[0].toLowerCase());
-        if(!suggestion) return message.reply("That is not a valid ID!");
+        if(!suggestion) return message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
         const user=await getUserByID(suggestion.userId);
-        const text=`**Request by ${user||suggestion.userId}** - State: ${capitalise(suggestion.state)}\n${suggestion.request}`;
+        const text=Localisation.getTranslation("suggestions.suggestion", user||suggestion.userId, capitalise(suggestion.state), suggestion.request);
         const embed=new MessageEmbed();
         embed.setDescription(text);
         embed.setTimestamp();

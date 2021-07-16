@@ -1,5 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -9,7 +10,7 @@ import { asyncForEach, getBotRoleColor, getStringTime } from "../../Utils";
 
 class CheckErrorCommand extends Command{
     public constructor(){
-        super("Checks logged errors");
+        super();
         this.access=CommandAccess.BotOwner;
         this.minArgs=1;
         this.category=Owner;
@@ -22,8 +23,8 @@ class CheckErrorCommand extends Command{
         if(!(await this.onRunSubCommands(message, code, args, false))){
             const Errors=BotUser.getDatabase(DatabaseType.Errors);
             const error:ErrorStruct=await Errors.get(code);
-                if(!error) return message.reply("That is not a valid error code!");
-                message.channel.send(`${getStringTime(error.time)}\n\`\`\`${error.error}\`\`\``);
+            if(!error) return message.reply(Localisation.getTranslation("error.invalid.errorCode"));
+            message.channel.send(Localisation.getTranslation("checkerror.error", getStringTime(error.time), error.error));
         }
     }
 }
@@ -36,7 +37,7 @@ class ClearSubCommand extends SubCommand{
     public async onRun(message : Message, args : string[]){
         const Errors=BotUser.getDatabase(DatabaseType.Errors);
         await Errors.clear();
-        return message.channel.send("Cleared all errors!");
+        return message.channel.send(Localisation.getTranslation("checkerror.clear"));
     }
 }
 
@@ -49,10 +50,10 @@ class ListSubCommand extends SubCommand{
         const Errors=BotUser.getDatabase(DatabaseType.Errors);
 
         const errors:{key:string, value:ErrorStruct}[]=await Errors.entries();
-        if(!errors||!errors.length) return message.reply("There are no errors!");
+        if(!errors||!errors.length) return message.reply(Localisation.getTranslation("error.empty.errors"));
         const data=[];
         errors.forEach(error=>{
-            data.push(`**${error.key}**: ${getStringTime(error.value.time)}`);
+            data.push(Localisation.getTranslation("checkerror.list", error.key, getStringTime(error.value.time)));
         });
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(message.guild)));
@@ -70,7 +71,7 @@ class PruneSubCommand extends SubCommand{
         const Errors=BotUser.getDatabase(DatabaseType.Errors);
 
         const errors:{key:string, value:ErrorStruct}[]=await Errors.entries();
-        if(!errors||!errors.length) return message.reply("There are no errors!");
+        if(!errors||!errors.length) return message.reply(Localisation.getTranslation("error.empty.errors"));
 
         const msPerMinute = 60 * 1000;
         const msPerHour = msPerMinute * 60;
@@ -82,7 +83,7 @@ class PruneSubCommand extends SubCommand{
                 await Errors.delete(error.key);
             }
         });
-        return message.channel.send("Pruned 2+ week old errors!");
+        return message.channel.send(Localisation.getTranslation("checkerror.prune"));
     }
 }
 

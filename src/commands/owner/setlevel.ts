@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { getMemberFromMention } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -9,7 +10,7 @@ import { getLevelXP, getServerDatabase } from "../../Utils";
 
 class SetLevelCommand extends Command{
     public constructor(){
-        super("Sets level for user");
+        super();
         this.category=Owner;
         this.access=CommandAccess.BotOwner;
         this.availability=CommandAvailability.Guild;
@@ -20,9 +21,9 @@ class SetLevelCommand extends Command{
 
     public async onRun(message : Message, args : string[]){
         const member=await getMemberFromMention(args[0], message.guild);
-        if(!member) return message.reply("That is not a member of this server!");
+        if(!member) return message.reply(Localisation.getTranslation("error.invalid.member"));
         const level=parseInt(args[1]);
-        if(isNaN(level)||level<0) return message.reply("That is not a valid level!");
+        if(isNaN(level)||level<0) return message.reply(Localisation.getTranslation("error.invalid.level"));
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
         let userLevel=levels.find(user=>user.userId===member.id);
@@ -34,13 +35,13 @@ class SetLevelCommand extends Command{
         let xp=Math.round((userLevel.xp/getLevelXP(userLevel.level))*getLevelXP(level));
         if(args[2]){
             xp=parseInt(args[2]);
-            if(isNaN(xp)||xp<0||xp>=getLevelXP(level)) return message.reply("That is not a valid amount of xp!");
+            if(isNaN(xp)||xp<0||xp>=getLevelXP(level)) return message.reply(Localisation.getTranslation("error.invalid.xp"));
         }
         userLevel.level=level;
         userLevel.xp=xp;
         levels[index]=userLevel;
         await Levels.set(message.guild.id, levels);
-        message.channel.send(`Set the level of ${member} to ${level} and xp to ${xp}`);
+        message.channel.send(Localisation.getTranslation("setlevel.output", member, level, xp));
     }
 }
 

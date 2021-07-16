@@ -1,11 +1,12 @@
 import { Message } from "discord.js";
 import { getUserFromMention } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess } from "../../structs/Command";
 
 class MessageUserCommand extends Command{
     public constructor(){
-        super("Message user");
+        super();
         this.access=CommandAccess.BotOwner;
         this.usage="<user> <message>";
         this.minArgs=2;
@@ -14,13 +15,13 @@ class MessageUserCommand extends Command{
 
     public async onRun(message : Message, args : string[]){
         const user=await getUserFromMention(args.shift());
-        if(!user) return message.reply("That is not a valid user!");
+        if(!user) return message.reply(Localisation.getTranslation("error.invalid.user"));
         const msg=args.join(" ");
         user.createDM().then(channel=>{
             channel.send(msg);
-            message.channel.send("Sent!");
+            message.channel.send(Localisation.getTranslation("generic.sent"));
         }).catch(()=>{
-            message.reply("Cannot DM user!");
+            message.reply(Localisation.getTranslation("error.unable.dm"));
         });
     }
 }

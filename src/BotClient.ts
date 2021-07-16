@@ -6,6 +6,7 @@ import path from 'path';
 import { DATABASE_FOLDER } from "./Constants";
 import { loadFiles } from "./Utils";
 import { Command } from "./structs/Command";
+import { Localisation } from "./localisation";
 
 interface BotOptions{
     clientOptions? : ClientOptions;
@@ -24,6 +25,8 @@ class BotClient extends Client{
     public constructor(options: BotOptions){
         super(options.clientOptions);
         this.botOptions=options;
+        
+        this.loadLocalisation();
 
         this.loadDatabases();
         ;(async()=>{
@@ -48,11 +51,13 @@ class BotClient extends Client{
                     const command=new cClass();
                     if(!command.deprecated){
                         const name=path.basename(file).slice(0,-3);
+                        if(!command.description)
+                            command.description=`${name}.command.description`;
                         this.Commands.set(name, command);
                         switch(this.botOptions.logLoading){
                             case 'complex':
                             case 'all':
-                                console.log(`Loaded Command: ${name}`);
+                                console.log(Localisation.getTranslation("bot.load.command.complex", name));
                                 break;
                         }
                         loaded++;
@@ -63,7 +68,7 @@ class BotClient extends Client{
         switch(this.botOptions.logLoading){
             case 'simplified':
             case 'all':
-                console.log(`Loaded ${loaded} commands!`);
+                console.log(Localisation.getTranslation("bot.load.command.simple", loaded));
                 break;
         }
     }
@@ -98,7 +103,7 @@ class BotClient extends Client{
                 switch(this.botOptions.logLoading){
                     case 'complex':
                     case 'all':
-                        console.log(`Loaded Event: ${name}`);
+                        console.log(Localisation.getTranslation("bot.load.event.complex", name));
                         break;
                 }
                 loaded++;
@@ -107,13 +112,17 @@ class BotClient extends Client{
         switch(this.botOptions.logLoading){
             case 'simplified':
             case 'all':
-                console.log(`Loaded ${loaded} events!`);
+                console.log(Localisation.getTranslation("bot.load.event.simple", loaded));
                 break;
         }
     }
 
     public getDatabase(databaseType : DatabaseType) : Keyv{
         return this.databases.get(databaseType);
+    }
+
+    public loadLocalisation(){
+        Localisation.loadLocalisation("lang/en.json");
     }
 }
 

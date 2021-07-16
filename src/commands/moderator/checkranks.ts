@@ -1,6 +1,7 @@
 import { GuildMember, Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { getRoleByID } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -10,7 +11,7 @@ import { asyncForEach, getServerDatabase } from "../../Utils";
 
 class CheckRanksCommand extends Command{
     public constructor(){
-        super("Check ranks");
+        super();
         this.category=Moderator;
         this.access=CommandAccess.Moderators;
         this.availability=CommandAvailability.Guild;
@@ -21,9 +22,12 @@ class CheckRanksCommand extends Command{
         const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
         const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
         const ranks:RankLevel[]=await getServerDatabase(Ranks, message.guild.id);
-        if(!levels||!ranks) return message.reply("There are no levels in this server!");
+
+        if(!levels) return message.reply(Localisation.getTranslation("error.empty.levels"));
+        if(!ranks) return message.reply(Localisation.getTranslation("error.empty.ranks"));
+
         const members=await message.guild.members.fetch().then(promise=>promise.array());
-        await message.channel.send("Started checking...");
+        await message.channel.send(Localisation.getTranslation("checkranks.start"));
         await asyncForEach(members, async(member:GuildMember)=>{
             const user=levels.find(u=>u.userId===member.id);
             if(user){
@@ -38,7 +42,7 @@ class CheckRanksCommand extends Command{
                 });
             }
         });
-        message.channel.send("Done");
+        message.channel.send(Localisation.getTranslation("generic.done"));
     }
 }
 

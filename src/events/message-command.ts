@@ -3,6 +3,7 @@ import { Collection } from "discord.js";
 import { BotUser } from "../BotClient"
 import { OWNER_ID, PREFIX } from "../Constants";
 import { getUserByID, getMemberByID } from "../GetterUtilts";
+import { Localisation } from "../localisation";
 import { CommandAccess, CommandAvailability } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
@@ -25,33 +26,33 @@ export=()=>{
 
         if(!isDM(message.channel)&&command.guildIds&&!command.guildIds.includes(message.guild.id)) return;
 
-        if(!command.enabled) return message.reply("This command is disabled!");
+        if(!command.enabled) return message.reply(Localisation.getTranslation("command.disabled"));
 
         if(command.availability===CommandAvailability.Guild&&(message.channel.type!=="text"&&message.channel.type!=="news")){
-            return message.reply("This is a server only command!");
+            return message.reply(Localisation.getTranslation("command.available.server"));
         }else if(command.availability===CommandAvailability.DM&&message.channel.type!=="dm"){
-            return message.reply("This is a DM only command!");
+            return message.reply(Localisation.getTranslation("command.available.dm"));
         }
 
         switch(command.access){
             case CommandAccess.Patreon:{
                 if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
-                    return message.reply("You cannot run this command! It is a patreon only feature! Contact a mod to find out how to gain access to it!");
+                    return message.reply(Localisation.getTranslation("command.access.patreon"));
                 }
             }break;
             case CommandAccess.Moderators:{
                 if(isDM(message.channel)||!message.member.hasPermission("MANAGE_GUILD")){
-                    return message.reply("You cannot run this command!");
+                    return message.reply(Localisation.getTranslation("command.access.moderator"));
                 }
             }break;
             case CommandAccess.GuildOwner:{
                 if(isDM(message.channel)||message.author.id!==message.guild.ownerID){
-                    return message.reply("You cannot run this command!");
+                    return message.reply(Localisation.getTranslation("command.access.guildOwner"));
                 }
             }break;
             case CommandAccess.BotOwner:{
                 if(message.author.id!==OWNER_ID){
-                    return message.reply("You cannot run this command!");
+                    return message.reply(Localisation.getTranslation("command.access.botOwner"));
                 }
             }break;
         }
@@ -69,7 +70,7 @@ export=()=>{
 
             if(now < expirationTime){
                 const timeLeft=(expirationTime-now)/1000;
-                return message.reply(`please wait ${secondsToTime(timeLeft)} before reusing the \`${commandName}\` command.`);
+                return message.reply(Localisation.getTranslation("command.cooldown", secondsToTime(timeLeft), commandName));
             }
         }
 
@@ -77,18 +78,18 @@ export=()=>{
         setTimeout(()=>timestamps.delete(message.author.id), cooldownAmount);
 
         if(args.length<command.minArgs){
-            let reply=`You didn't provide enough arguments`;
+            let reply=Localisation.getTranslation("error.arguments.few");
 
             if(command.usage){
-                reply+=`\nThe proper usage would be: \`${PREFIX}${commandName} ${command.usage}\``;
+                reply+=`\n${Localisation.getTranslation("command.usage", PREFIX, commandName, command.usage)}`;
             }
 
             return message.reply(reply);
         }else if(args.length>command.maxArgs){
-            let reply=`You provide too many arguments`;
+            let reply=Localisation.getTranslation("error.arguments.many");
 
             if(command.usage){
-                reply+=`\nThe proper usage would be: \`${PREFIX}${commandName} ${command.usage}\``;
+                reply+=`\n${Localisation.getTranslation("command.usage", PREFIX, commandName, command.usage)}`;
             }
 
             return message.reply(reply);
@@ -118,7 +119,7 @@ export=()=>{
                 text+=`\nURL: ${message.url}`;
             }
             (await owner.createDM()).send(text);
-            message.reply(`There was a problem executing that command!`);
+            message.reply(Localisation.getTranslation("error.execution"));
         }
     });
 }

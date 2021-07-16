@@ -2,16 +2,17 @@ import { createCanvas, loadImage } from "canvas";
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { getUserFromMention, getMemberByID, getRoleByID } from "../../GetterUtilts";
+import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
-import { getServerDatabase, getCurrentRank, getNextRank, capitalise, hexToRGB, getLevelXP, blend, canvasToMessageAttachment } from "../../Utils";
+import { getServerDatabase, getCurrentRank, getNextRank, capitalise, hexToRGB, getLevelXP, blend, canvasToMessageAttachment, isHexColor } from "../../Utils";
 
 class MagicLevelsCommand extends Command{
     public constructor(){
-        super("Get your level");
+        super();
         this.maxArgs=1;
         this.usage="[user]";
         this.availability=CommandAvailability.Guild;
@@ -27,13 +28,13 @@ class MagicLevelsCommand extends Command{
         let user=message.author;
         if(args.length){
             const temp=await getUserFromMention(args[0]);
-            if(!temp) return message.reply("That is not a valid user!");
+            if(!temp) return message.reply(Localisation.getTranslation("error.invalid.user"));
             user=temp;
         }
-        if(user.bot) return message.reply(`${user} is a a bot and therefore has no levels!`);
+        if(user.bot) return message.reply(Localisation.getTranslation("error.bot.user", user));
 
         const member=await getMemberByID(user.id, message.guild);
-        if(!member) return message.reply(`${user} is not a member of this server!`);
+        if(!member) return message.reply(Localisation.getTranslation("error.invalid.member"));
 
         let userLevel = levels.find(u=>u.userId===user.id);
         if(!userLevel){
@@ -49,37 +50,35 @@ class MagicLevelsCommand extends Command{
         const currentRank=await getCurrentRank(userLevel.level, message.guild.id);
         const nextRank=await getNextRank(userLevel.level, message.guild.id);
 
-        let currentRankText="Current Transformation: "
+        let currentRankText=Localisation.getTranslation("generic.none");
         if(currentRank){
             const role=await getRoleByID(currentRank.roleId, message.guild);
             if(role){
-                currentRankText+=capitalise(role.name);
+                currentRankText=capitalise(role.name);
             }else{
-                currentRankText+="Unknown"
+                currentRankText=Localisation.getTranslation("generic.unknown");
             }
-        }else{
-            currentRankText+="None"
         }
+        currentRankText=Localisation.getTranslation("magiclevels.transformation.current", currentRankText);
 
-        let nextRankText="Next Transformation: "
-        if(nextRank){
+        let nextRankText=Localisation.getTranslation("generic.none");
+        if(currentRank){
             const role=await getRoleByID(nextRank.roleId, message.guild);
             if(role){
-                nextRankText+=capitalise(role.name);
+                nextRankText=capitalise(role.name);
             }else{
-                nextRankText+="Unknown"
+                nextRankText=Localisation.getTranslation("generic.unknown");
             }
-        }else{
-            nextRankText+="None"
         }
+        nextRankText=Localisation.getTranslation("magiclevels.transformation.next", nextRankText);
 
         const canvas=createCanvas(10,10);
         const ctx=canvas.getContext("2d");
 
-        let name=`${user.username}`;
+        let name=Localisation.getTranslation("magiclevels.username", user.username);
         if(member.nickname)
-            name+=` (${member.nickname})`;
-        let levelsText=`: Level: ${userLevel.level}`;
+            name+=Localisation.getTranslation("magiclevels.nickname", member.nickname);
+        let levelsText=Localisation.getTranslation("magiclevels.level", userLevel.level);
         
         const nameFontSize=70;
         const pfpRadius=nameFontSize*2;
@@ -98,9 +97,13 @@ class MagicLevelsCommand extends Command{
         const brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
         const textColor = (brightness > 125) ? 'black' : 'white';
 
-        ctx.font=`${nameFontSize}px sans-serif`;
+        const newHeight=pfpY+(pfpRadius*2)+pfpY;
+        const transformationFontSize=newHeight*0.2068965517241379;
 
+        ctx.font=`${nameFontSize}px sans-serif`;
         let extraWidth=ctx.measureText(name+levelsText).width;
+
+        ctx.font=`${transformationFontSize}px sans-serif`;
         if(ctx.measureText(currentRankText).width>extraWidth){
             extraWidth=ctx.measureText(currentRankText).width;
         }
@@ -109,11 +112,10 @@ class MagicLevelsCommand extends Command{
         }
 
         canvas.width=pfpX+(pfpRadius*2)+pfpX+extraWidth+pfpX;
-        canvas.height=pfpY+(pfpRadius*2)+pfpY;
+        canvas.height=newHeight;
 
         const barHeight=canvas.height*0.15;
         const levelFont=`${barHeight}px sans-serif`;
-        const transformationFontSize=canvas.height*0.2068965517241379;
 
         const textPos=nameFontSize+((canvas.height-(nameFontSize+(transformationFontSize*3.5)))/2.0);
 
@@ -123,7 +125,7 @@ class MagicLevelsCommand extends Command{
 
         //Draw name and level info
         ctx.font=`${nameFontSize}px sans-serif`;
-        if(userSetting.nameColor===DEFAULT_USER_SETTING.nameColor){
+        if(userSetting.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSetting.nameColor)){
             if(member.roles&&member.roles.color&&member.roles.color.color) ctx.fillStyle=member.roles.color.hexColor;
         }else{
             ctx.fillStyle=`#${userSetting.nameColor}`;
@@ -145,9 +147,9 @@ class MagicLevelsCommand extends Command{
         //Draw level text
         ctx.font=levelFont;
         ctx.fillStyle="#ffffff";
-        ctx.textBaseline='middle';
+        ctx.textBaseline="middle";
         ctx.textAlign="center";
-        ctx.fillText(`${userLevel.xp}/${getLevelXP(userLevel.level)}`, (pfpX+(pfpRadius*2)+pfpX)+(barWidth/2.0), textPos+10+(barHeight*0.5));
+        ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (pfpX+(pfpRadius*2)+pfpX)+(barWidth/2.0), textPos+10+(barHeight*0.5));
 
         //Draw transformation info text
         ctx.font=`${transformationFontSize}px sans-serif`;

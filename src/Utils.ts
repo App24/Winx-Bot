@@ -249,3 +249,9 @@ export async function getLeaderboardMembers(guild : Guild){
     });
     return leaderboardLevels;
 }
+
+export function formatString(str : string, ...args){
+    return str.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined' ? args[number] : match;
+    });
+}

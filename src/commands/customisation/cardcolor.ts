@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -9,7 +10,7 @@ import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor }
 
 class CardColorCommand extends Command{
     public constructor(){
-        super("Set the color of your card!");
+        super();
         this.access=CommandAccess.Patreon;
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
@@ -38,7 +39,7 @@ class GetSubCommand extends SubCommand{
             await UserSettings.set(message.guild.id, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
-        message.channel.send(`#${userSettings.cardColor}`, canvasToMessageAttachment(canvasColor(userSettings.cardColor)));
+        message.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.cardColor), canvasToMessageAttachment(canvasColor(userSettings.cardColor)));
     }
 }
 
@@ -61,10 +62,10 @@ class SetSubCommand extends SubCommand{
         if(color.startsWith("#")){
             color=color.substring(1);
         }
-        if(!isHexColor(color)) return message.reply("That is not a valid hex color");
+        if(!isHexColor(color)) return message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         userSettings.cardColor=color;
         await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send(`Set the card colour to #${color}`);
+        message.channel.send(Localisation.getTranslation("cardcolor.set.output", color));
     }
 }
 
@@ -83,7 +84,7 @@ class ResetSubCommand extends SubCommand{
         const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
         userSettings.cardColor=DEFAULT_USER_SETTING.cardColor;
         await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send("Resetted card color!");
+        message.channel.send(Localisation.getTranslation("cardcolor.reset.output"));
     }
 }
 

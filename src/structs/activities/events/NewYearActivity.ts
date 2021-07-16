@@ -1,3 +1,4 @@
+import { Localisation } from "../../../localisation";
 import { EventActivity } from "../EventActivity";
 
 export class NewYearActivity extends EventActivity{
@@ -6,7 +7,7 @@ export class NewYearActivity extends EventActivity{
     }
 
     public getActivity(): string | Promise<string> {
-        return "Happy New Year 🎉🎉";
+        return Localisation.getTranslation("activity.event.newyear");
     }
 
 }

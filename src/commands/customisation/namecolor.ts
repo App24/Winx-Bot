@@ -1,5 +1,6 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -9,14 +10,14 @@ import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor }
 
 class NameColorCommand extends Command{
     public constructor(){
-        super("Set the color of your name!");
+        super();
         this.access=CommandAccess.Patreon;
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
         this.usage="<get/set/reset> [hex color]";
         this.minArgs=1;
         this.maxArgs=2;
-        this.aliases=["namecolour"]
+        this.aliases=["namecolour"];
         this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }
 
@@ -38,8 +39,8 @@ class GetSubCommand extends SubCommand{
             await UserSettings.set(message.guild.id, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
-        if(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor) return message.reply("You do not have a custom name color!");
-        message.channel.send(`#${userSettings.nameColor}`, canvasToMessageAttachment(canvasColor(userSettings.nameColor)));
+        if(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSettings.nameColor)) return message.reply(Localisation.getTranslation("error.invalid.namecolor"));
+        message.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), canvasToMessageAttachment(canvasColor(userSettings.nameColor)));
     }
 }
 
@@ -62,10 +63,10 @@ class SetSubCommand extends SubCommand{
         if(color.startsWith("#")){
             color=color.substring(1);
         }
-        if(!isHexColor(color)) return message.reply("That is not a valid hex color");
+        if(!isHexColor(color)) return message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         userSettings.nameColor=color;
         await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send(`Set the name colour to #${color}`);
+        message.channel.send(Localisation.getTranslation("namecolor.set.output", color));
     }
 }
 
@@ -84,7 +85,7 @@ class ResetSubCommand extends SubCommand{
         const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
         userSettings.nameColor=DEFAULT_USER_SETTING.nameColor;
         await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send("Resetted name color!");
+        message.channel.send(Localisation.getTranslation("namecolor.reset.output"));
     }
 }
 

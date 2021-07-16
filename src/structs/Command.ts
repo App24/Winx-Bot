@@ -1,4 +1,5 @@
 import { Message } from "discord.js";
+import { Localisation } from "../localisation";
 import { asyncForEach } from "../Utils";
 import { Category, Other } from "./Category";
 import { SubCommand } from "./SubCommand";
@@ -27,7 +28,7 @@ export abstract class Command{
 
     public subCommands : SubCommand[];
 
-    public constructor(description : string){
+    public constructor(description? : string){
         this.description=description;
         this.enabled=true;
         this.category=Other;
@@ -42,9 +43,9 @@ export abstract class Command{
         await asyncForEach(this.subCommands, async(subCommand : SubCommand)=>{
             if(subCommand.name.toLowerCase()===subCommandName.toLowerCase()||(subCommand.aliases&&subCommand.aliases.includes(subCommandName.toLowerCase()))){
                 if(args.length<subCommand.minArgs){
-                    message.reply(`You didn't provide enough arguments`);
+                    message.reply(Localisation.getTranslation("error.arguments.few"));
                 }else if(args.length>subCommand.maxArgs){
-                    message.reply(`You provide too many arguments`);
+                    message.reply(Localisation.getTranslation("error.arguments.many"));
                 }else{
                     await subCommand.onRun(message, args);
                 }
@@ -53,9 +54,9 @@ export abstract class Command{
             }
         });
         if(showError&&!found){
-            let reply="That is not a valid option!";
+            let reply=Localisation.getTranslation("error.invalid.option");
             if(this.usage){
-                reply+=`\nThe proper usage would be: \`${this.usage}\``;
+                reply+=`\n${Localisation.getTranslation("subCommand.usage", this.usage)}`;
             }
             message.reply(reply);
         }
