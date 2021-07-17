@@ -10,7 +10,7 @@ import { getMemberByID } from './GetterUtilts';
 import { RankLevel } from './structs/databaseTypes/RankLevel';
 import { UserLevel } from './structs/databaseTypes/UserLevel';
 
-export async function asyncForEach(array:Array<any>, callback:Function) {
+export async function asyncForEach(array:any[], callback:Function) {
     for(let i =0; i < array.length; i++){
         let exit=await callback(array[i], i, array);
         if(exit===true)break;
@@ -18,15 +18,15 @@ export async function asyncForEach(array:Array<any>, callback:Function) {
 }
 
 export function loadFiles(directory : string){
-    const files:Array<string>=[];
-    const dirs:Array<string>=[];
+    const files:string[]=[];
+    const dirs:string[]=[];
 
     try{
         if(fs.existsSync(directory)){
             let dirContent=fs.readdirSync(directory);
 
-            dirContent.forEach(path=>{
-                const fullPath=join(directory, path);
+            dirContent.forEach(file=>{
+                const fullPath=join(directory, file);
 
                 if(fs.statSync(fullPath).isFile())
                     files.push(fullPath);
@@ -39,7 +39,7 @@ export function loadFiles(directory : string){
             });
         }
     }catch(ex){
-        console.log(ex);
+        console.error(ex);
         return;
     }
 
@@ -50,21 +50,21 @@ export function getLevelXP(level : number){
     return Math.abs(level)*2*100+50;
 }
 
-export function clamp(value : number, min : number, max : number) : number{
+export function clamp(value : number, min : number, max : number){
     return Math.max(min, Math.min(value, max));
 }
 
-export function genRanHex(size : number) : string{
+export function genRanHex(size : number){
     return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 }
 
-export function toHexString(byteArray : Array<number>) : string{
+export function toHexString(byteArray : Array<number>){
     return Array.from(byteArray, function(byte){
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
     }).join('');
 }
 
-export async function getServerDatabase(database : Keyv, guildId : string, defaultValue : any =[]){
+export async function getServerDatabase<U>(database : Keyv, guildId : string, defaultValue : any =[]):Promise<U>{
     let serverDatabase=await database.get(guildId);
     if(!serverDatabase){
         await database.set(guildId, defaultValue);
@@ -73,7 +73,7 @@ export async function getServerDatabase(database : Keyv, guildId : string, defau
     return serverDatabase;
 }
 
-export function capitalise(s : string) : string{
+export function capitalise(s : string){
     var splitStr = s.toLowerCase().split(' ');
     for (var i = 0; i < splitStr.length; i++) {
         splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
@@ -98,11 +98,11 @@ export function isDM(channel : Channel){
     return channel.type==="dm";
 }
 
-export function getBotMember(guild : Guild) : Promise<GuildMember>{
+export function getBotMember(guild : Guild){
     return getMemberByID(BotUser.user.id, guild);
 }
 
-export async function getBotRoleColor(guild : Guild) : Promise<number>{
+export async function getBotRoleColor(guild : Guild){
     const defaultcolor=5793266;
     if(!guild) return defaultcolor;
     const member=await getBotMember(guild);
@@ -116,7 +116,7 @@ export function getStringTime(time : number, sliceAmount : number=19){
     return new Date(time).toISOString().replace("T", " ").slice(0, sliceAmount);
 }
 
-export async function isPatreon(userId : string, guildId : string) : Promise<boolean>{
+export async function isPatreon(userId : string, guildId : string){
     if(!userId||!guildId) return false;
     const Patreon=BotUser.getDatabase(DatabaseType.Paid);
     const patreon:PatreonInfo[]=await Patreon.get(guildId);
@@ -141,10 +141,10 @@ export function isHexColor(str : string){
     return new RegExp(/[a-f0-9]{6}/g).test(str);
 }
 
-export async function getNextRank(currentLevel : number, guildId : string) : Promise<RankLevel>{
+export async function getNextRank(currentLevel : number, guildId : string){
     const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
     const ranks:RankLevel[]=await getServerDatabase(Ranks, guildId);
-    if(!ranks||!ranks.length) return undefined;
+    if(!ranks||!ranks.length) return;
     ranks.sort((a,b)=>{
         return a.level-b.level;
     })
@@ -157,10 +157,10 @@ export async function getNextRank(currentLevel : number, guildId : string) : Pro
     return rankToReturn;
 }
 
-export async function getCurrentRank(currentLevel : number, guildId : string) : Promise<RankLevel>{
+export async function getCurrentRank(currentLevel : number, guildId : string){
     const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
     const ranks:RankLevel[]=await getServerDatabase(Ranks, guildId);
-    if(!ranks||!ranks.length) return undefined;
+    if(!ranks||!ranks.length) return;
     ranks.sort((a,b)=>{
         return a.level-b.level;
     })
@@ -174,10 +174,10 @@ export async function getCurrentRank(currentLevel : number, guildId : string) : 
     return rankToReturn;
 }
 
-export async function getPreviousRank(currentLevel : number, guildId : string) : Promise<RankLevel>{
+export async function getPreviousRank(currentLevel : number, guildId : string){
     const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
     const ranks:RankLevel[]=await getServerDatabase(Ranks, guildId);
-    if(!ranks||!ranks.length) return undefined;
+    if(!ranks||!ranks.length) return;
     ranks.sort((a,b)=>{
         return a.level-b.level;
     })
@@ -207,22 +207,18 @@ export function hexToRGB(hex : string){
     } : null;
 }
 
-export function blend(a : number, b : number, w : number) : number{
+export function blend(a : number, b : number, w : number){
     return (a*w)+(b*(1-w));
 }
 
 export async function getAllMessages(channel : TextChannel|NewsChannel){
-    const messages:Message[][]=[];
-    let msgs=await channel.messages.fetch({limit: 100}).then(promise=>{
-        return promise.array();
-    });
+    const messages:Message[]=[];
+    let msgs=await channel.messages.fetch().then(promise=>promise.array());
     let lastMessage;
     while(msgs.length){
-        messages.push(msgs);
+        messages.push(...msgs);
         lastMessage=msgs[msgs.length-1].id;
-        msgs=await channel.messages.fetch({limit: 100, before: lastMessage}).then(promise=>{
-            return promise.array();
-        });
+        msgs=await channel.messages.fetch({before: lastMessage}).then(promise=>promise.array());
     }
     return messages;
 }

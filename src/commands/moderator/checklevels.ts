@@ -57,22 +57,20 @@ class CheckLevelsCommand extends Command{
             const startTime=new Date().getTime();
             const messages=await getAllMessages(channel);
             let totalXp=0;
-            await asyncForEach(messages, async(msgs : Message[])=>{
-                await asyncForEach(msgs, async(msg:Message)=>{
-                    if(msg.deleted) return;
-                    if(msg.content.toLowerCase().startsWith(PREFIX)) return;
-                    if(msg.author.id===member.id){
-                        if(msg.content.length<serverInfo.minMessageLength) return;
-                        const xp=Math.ceil((Math.min(msg.content.length, serverInfo.maxMessageLength)/serverInfo.maxMessageLength)*serverInfo.maxXpPerMessage);
-                        totalXp+=xp;
-                    }
-                });
+            await asyncForEach(messages, async(msg : Message)=>{
+                if(msg.deleted) return;
+                if(msg.content.toLowerCase().startsWith(PREFIX)) return;
+                if(msg.author.id===member.id){
+                    if(msg.content.length<serverInfo.minMessageLength) return;
+                    const xp=Math.ceil((Math.min(msg.content.length, serverInfo.maxMessageLength)/serverInfo.maxMessageLength)*serverInfo.maxXpPerMessage);
+                    totalXp+=xp;
+                }
             });
             await addXP(member.user, message.guild, <TextChannel|NewsChannel>message.channel, totalXp, false);
             const timeDifferent=new Date().getTime()-startTime;
-            await message.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/100)));
+            await message.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/1000)));
         })
-        message.channel.send(Localisation.getTranslation("command.common.done"));
+        message.channel.send(Localisation.getTranslation("generic.done"));
     }
 }
 
