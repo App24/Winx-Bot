@@ -73,7 +73,7 @@ class BotClient extends Client{
         }
     }
     
-    private loadDatabases(){
+    public loadDatabases(){
         if(!fs.existsSync(DATABASE_FOLDER)){
             fs.mkdirSync(DATABASE_FOLDER);
         }

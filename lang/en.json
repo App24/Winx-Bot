@@ -56,7 +56,7 @@
     "activity.users": "{0} users are earning their transformations!",
     "activity.basic.contact": "{0}contactcreator to contact the creator of the bot!",
     "activity.event.pride": "Happy Pride Month 🌈",
-    "activity.event.christmas": "Merry Holidays/Christmas 🎁",
+    "activity.event.christmas": "Merry Holidays/Christmas 🎁🎅",
     "activity.event.newyear": "Happy New Year 🎉",
     "activity.event.birthday": "Happy Birthday {0} 🥳🎉",
 
@@ -222,7 +222,11 @@
     "setrank.list.gifs": "__GIFs__",
     "setrank.list.role": "**Role**: <@&{0}>",
 
-    "__comment__": "Command Description",
+    "restoredb.empty.backups": "There are no backups",
+
+    "downloaddb.wait": "Zipping databases...",
+
+    "__comment__": "Category Description",
     "category.owner": "Owner",
     "category.moderator": "Moderator",
     "category.settings": "Settings",
@@ -266,5 +270,7 @@
     "setminlength.command.description": "Set minimum length of message to give XP!",
     "setrank.command.description": "Set rank for each level!",
     "setxp.command.description": "Set XP per message!",
-    "backupdb.command.description": "Backs up databases!"
+    "backupdb.command.description": "Backs up databases!",
+    "restoredb.command.description": "Restores the databases!",
+    "downloaddb.command.description": "Download the databases!"
 }

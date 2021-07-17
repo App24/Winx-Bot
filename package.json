@@ -20,6 +20,7 @@
   "homepage": "https://github.com/App24/Winx-Bot#readme",
   "dependencies": {
     "@keyv/sqlite": "^2.0.2",
+    "archiver": "^5.3.0",
     "canvas": "2.7.0",
     "discord-command-parser": "^1.5.3",
     "discord.js": "^12.5.3",

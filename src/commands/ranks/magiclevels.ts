@@ -62,7 +62,7 @@ class MagicLevelsCommand extends Command{
         currentRankText=Localisation.getTranslation("magiclevels.transformation.current", currentRankText);
 
         let nextRankText=Localisation.getTranslation("generic.none");
-        if(currentRank){
+        if(nextRank){
             const role=await getRoleByID(nextRank.roleId, message.guild);
             if(role){
                 nextRankText=capitalise(role.name);
@@ -161,6 +161,7 @@ class MagicLevelsCommand extends Command{
 
         drawSpecialCircle(ctx, pfpX, pfpY, pfpRadius, `#${userSetting.specialCircleColor||DEFAULT_USER_SETTING.specialCircleColor}`);
 
+        //Draw Profile Picture
         ctx.save();
         ctx.beginPath();
         ctx.arc(newpfpRadius+pfpX+borderThickness, newpfpRadius+pfpY+borderThickness, newpfpRadius, 0, Math.PI*2, true);

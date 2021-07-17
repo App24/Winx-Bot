@@ -1,6 +1,7 @@
-export const VERSION="2.1.1";
+export const VERSION="2.1.2";
 
 export const DATABASE_FOLDER="databases";
+export const DATABASE_BACKUP_FOLDER="backupDatabases";
 
 export const PREFIX="w!";
 export const OWNER_ID="156160013981712384";
