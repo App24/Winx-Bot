@@ -3,14 +3,14 @@ import { OWNER_ID } from "../../Constants";
 import { getUserByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Info } from "../../structs/Category";
-import { Command } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 
 class ContactCreatorCommand extends Command{
     public constructor(){
         super();
         this.minArgs=1;
         this.category=Info;
-        this.usage="<message content>";
+        this.usage=[new CommandUsage(true, "argument.message")];
     }
 
     public async onRun(message : Message, args : string[]){

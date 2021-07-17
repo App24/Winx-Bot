@@ -4,7 +4,7 @@ import { PREFIX } from "../../Constants";
 import { getMemberFromMention, getChannelByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
@@ -17,7 +17,7 @@ class CheckLevelsCommand extends Command{
         this.access=CommandAccess.GuildOwner;
         this.availability=CommandAvailability.Guild;
         this.minArgs=1;
-        this.usage="<user>";
+        this.usage=[new CommandUsage(true, "argument.user")];
         this.category=Moderator;
     }
 

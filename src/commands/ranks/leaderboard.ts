@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getMemberByID, getUserFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, asyncForEach, getLevelXP, getBotRoleColor, getLeaderboardMembers } from "../../Utils";
@@ -12,7 +12,7 @@ class RankCommand extends Command{
     public constructor(){
         super();
         this.category=Rank;
-        this.usage="[user]";
+        this.usage=[new CommandUsage(false, "argument.user")];
         this.maxArgs=1;
         this.aliases=["rank", "lb"];
         this.availability=CommandAvailability.Guild;

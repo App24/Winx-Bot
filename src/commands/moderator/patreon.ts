@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getMemberFromMention, getMemberByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { PatreonInfo } from "../../structs/databaseTypes/PatreonInfo";
 import { SubCommand } from "../../structs/SubCommand";
@@ -13,7 +13,7 @@ class PatreonCommand extends Command{
     public constructor(){
         super();
         this.category=Moderator;
-        this.usage="<add/remove/list> [user]";
+        this.usage=[new CommandUsage(true, "argument.add", "argument.remove", "argument.list"), new CommandUsage(false, "argument.user")];
         this.minArgs=1;
         this.maxArgs=2;
         this.access=CommandAccess.Moderators;

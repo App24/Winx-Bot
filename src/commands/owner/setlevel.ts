@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getMemberFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getLevelXP, getServerDatabase } from "../../Utils";
@@ -14,7 +14,7 @@ class SetLevelCommand extends Command{
         this.category=Owner;
         this.access=CommandAccess.BotOwner;
         this.availability=CommandAvailability.Guild;
-        this.usage="<user> <level> [xp]";
+        this.usage=[new CommandUsage(true, "argument.user"), new CommandUsage(true, "argument.level"), new CommandUsage(false, "argument.xp")];
         this.minArgs=2;
         this.maxArgs=3;
     }

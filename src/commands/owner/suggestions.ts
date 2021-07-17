@@ -4,7 +4,7 @@ import { OWNER_ID } from "../../Constants";
 import { getUserByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess } from "../../structs/Command";
+import { Command, CommandAccess, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { SuggestionState, SuggestionStruct } from "../../structs/databaseTypes/SuggestionStruct";
 import { SubCommand } from "../../structs/SubCommand";
@@ -16,7 +16,7 @@ class SuggestionsCommand extends Command{
         this.access=CommandAccess.BotOwner;
         this.minArgs=1;
         this.maxArgs=2;
-        this.usage="<list/complete/reject/get> [request id/rejected/completed/non]";
+        this.usage=[new CommandUsage(true, "argument.list", "argument.complete", "argument.reject", "argument.get"), new CommandUsage(false, "argument.requestid", "argument.rejected", "argument.completed", "argument.non")];
         this.category=Owner;
         this.subCommands=[new ListSubCommand(), new CompleteSubCommand(), new RejectSubCommand(), new GetSubCommand()];
     }

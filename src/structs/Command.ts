@@ -12,7 +12,7 @@ export abstract class Command{
     public category : Category;
 
     public description : string;
-    public usage : string;
+    public usage : CommandUsage[];
 
     public availability : CommandAvailability;
     public access : CommandAccess;
@@ -56,7 +56,7 @@ export abstract class Command{
         if(showError&&!found){
             let reply=Localisation.getTranslation("error.invalid.option");
             if(this.usage){
-                reply+=`\n${Localisation.getTranslation("subCommand.usage", this.usage)}`;
+                reply+=`\n${Localisation.getTranslation("subCommand.usage", this.getUsage())}`;
             }
             message.reply(reply);
         }
@@ -64,6 +64,28 @@ export abstract class Command{
     }
 
     public abstract onRun(message : Message, args : string[]);
+
+    public getUsage(){
+        let text="";
+        if(this.usage){
+            this.usage.forEach((use, index)=>{
+                if(use.required){
+                    text+="<";
+                }else{
+                    text+="[";
+                }
+                text+=use.usages.map((value)=>Localisation.getTranslation(value)).join("/");
+                if(use.required){
+                    text+=">";
+                }else{
+                    text+="]";
+                }
+                if(index<this.usage.length-1)
+                    text+=" ";
+            });
+        }
+        return text;
+    }
 }
 
 export enum CommandAvailability{
@@ -77,4 +99,14 @@ export enum CommandAccess{
     Moderators,
     GuildOwner,
     BotOwner
+}
+
+export class CommandUsage{
+    public required : boolean;
+    public usages : string[];
+
+    public constructor(required : boolean, ...usages : string[]){
+        this.required=required;
+        this.usages=usages;
+    }
 }

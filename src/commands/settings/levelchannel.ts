@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getChannelByID, getChannelFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { SubCommand } from "../../structs/SubCommand";
@@ -15,7 +15,7 @@ class LevelChannelCommand extends Command{
         this.category=Settings;
         this.minArgs=1;
         this.maxArgs=2;
-        this.usage="<set/clear/list> [channel]";
+        this.usage=[new CommandUsage(true, "argument.set", "argument.clear", "argument.list"), new CommandUsage(false, "argument.channel")];
         this.access=CommandAccess.Moderators;
         this.availability=CommandAvailability.Guild;
         this.subCommands=[new SetSubCommand(), new ClearSubCommand(), new ListSubCommand()];

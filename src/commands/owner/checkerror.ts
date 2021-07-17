@@ -2,7 +2,7 @@ import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess } from "../../structs/Command";
+import { Command, CommandAccess, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
 import { SubCommand } from "../../structs/SubCommand";
@@ -14,7 +14,7 @@ class CheckErrorCommand extends Command{
         this.access=CommandAccess.BotOwner;
         this.minArgs=1;
         this.category=Owner;
-        this.usage="<error id/clear/list/prune>";
+        this.usage=[new CommandUsage(true, "argument.errorid", "argument.clear", "argument.list", "argument.prune")];
         this.subCommands=[new ClearSubCommand(), new ListSubCommand(), new PruneSubCommand()];
     }
 

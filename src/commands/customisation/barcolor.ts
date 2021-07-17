@@ -2,7 +2,7 @@ import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
@@ -16,7 +16,7 @@ class BarColorCommand extends Command{
         this.category=Customisation;
         this.minArgs=2;
         this.maxArgs=3;
-        this.usage="<get/set/reset> <start/end/both> [hex color]";
+        this.usage=[new CommandUsage(true, "argument.get", "argument.set", "argument.reset"), new CommandUsage(true, "argument.start", "argument.end", "argument.both"), new CommandUsage(false, "argument.hexcolor")];
         this.aliases=["barcolour"];
         this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }

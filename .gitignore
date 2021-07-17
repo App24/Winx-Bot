@@ -1,5 +1,6 @@
 .env
 databases/
+backupDatabases/
 node_modules/
 package-lock.json
 dist/

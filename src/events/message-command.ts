@@ -81,7 +81,7 @@ export=()=>{
             let reply=Localisation.getTranslation("error.arguments.few");
 
             if(command.usage){
-                reply+=`\n${Localisation.getTranslation("command.usage", PREFIX, commandName, command.usage)}`;
+                reply+=`\n${Localisation.getTranslation("command.usage", PREFIX, commandName, command.getUsage())}`;
             }
 
             return message.reply(reply);
@@ -89,7 +89,7 @@ export=()=>{
             let reply=Localisation.getTranslation("error.arguments.many");
 
             if(command.usage){
-                reply+=`\n${Localisation.getTranslation("command.usage", PREFIX, commandName, command.usage)}`;
+                reply+=`\n${Localisation.getTranslation("command.usage", PREFIX, commandName, command.getUsage())}`;
             }
 
             return message.reply(reply);

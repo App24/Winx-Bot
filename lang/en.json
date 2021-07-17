@@ -60,6 +60,36 @@
     "activity.event.newyear": "Happy New Year 🎉",
     "activity.event.birthday": "Happy Birthday {0} 🥳🎉",
 
+    "__comment__": "Arguments",
+    "argument.set": "set",
+    "argument.get": "get",
+    "argument.list": "list",
+    "argument.clear": "clear",
+    "argument.prune": "prune",
+    "argument.remove": "remove",
+    "argument.add": "add",
+    "argument.reset": "reset",
+
+    "argument.channel": "channel",
+    "argument.errorid": "error id",
+    "argument.requestid": "request id",
+    "argument.user": "user",
+    "argument.message": "message",
+    "argument.level": "level",
+    "argument.xp": "xp",
+    "argument.complete": "complete",
+    "argument.completed": "completed",
+    "argument.reject": "reject",
+    "argument.rejected": "rejected",
+    "argument.non": "non",
+    "argument.above.value.0": "value above 0",
+    "argument.category": "category",
+    "argument.hexcolor": "hex color",
+    "argument.suggestion": "suggestion",
+    "argument.start": "start",
+    "argument.end": "end",
+    "argument.both": "both",
+
     "__comment__": "Command Errors/Warnings",
     "command.disabled": "This command is disabled!",
 
@@ -235,5 +265,6 @@
     "setmaxmessage.command.description": "Set maximum of messages per minute!",
     "setminlength.command.description": "Set minimum length of message to give XP!",
     "setrank.command.description": "Set rank for each level!",
-    "setxp.command.description": "Set XP per message!"
+    "setxp.command.description": "Set XP per message!",
+    "backupdb.command.description": "Backs up databases!"
 }

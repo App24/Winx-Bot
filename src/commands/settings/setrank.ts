@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getRoleByID, getRoleFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { SubCommand } from "../../structs/SubCommand";
@@ -16,7 +16,7 @@ class SetRankCommand extends Command{
         this.minArgs=1;
         this.availability=CommandAvailability.Guild;
         this.access=CommandAccess.Moderators;
-        this.usage="<set/remove/get/list> [level above 0] [role/gif links]";
+        this.usage=[new CommandUsage(true, "argument.set", "argument.remove", "argument.get", "argument.list"), new CommandUsage(false, "argument.level"), new CommandUsage(false, "argument.role", "argument.gif")];
         this.subCommands=[new SetSubCommand(), new RemoveSubCommand(), new GetSubCommand(), new ListSubCommand()];
     }
 

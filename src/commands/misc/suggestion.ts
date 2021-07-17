@@ -2,7 +2,7 @@ import { Guild, Message, MessageEmbed, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID, SUGGESTION_CHANNEL } from "../../Constants";
 import { Localisation } from "../../localisation";
-import { Command } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { SuggestionState, SuggestionStruct } from "../../structs/databaseTypes/SuggestionStruct";
 import { genRanHex, getBotRoleColor } from "../../Utils";
@@ -11,7 +11,7 @@ class SuggestionCommand extends Command{
     public constructor(){
         super();
         this.minArgs=1;
-        this.usage="<suggestion>";
+        this.usage=[new CommandUsage(true, "argument.suggestion")];
         this.aliases=["suggest"];
     }
 

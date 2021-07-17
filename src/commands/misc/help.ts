@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { OWNER_ID, PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
 import { Info, Categories, Category } from "../../structs/Category";
-import { Command, CommandAvailability, CommandAccess } from "../../structs/Command";
+import { Command, CommandAvailability, CommandAccess, CommandUsage } from "../../structs/Command";
 import { isDM, getBotRoleColor } from "../../Utils";
 
 
@@ -11,7 +11,7 @@ class HelpCommand extends Command{
     public constructor(){
         super();
         this.maxArgs=1;
-        this.usage="[category]";
+        this.usage=[new CommandUsage(false, "argument.category")];
         this.category=Info;
     }
 
@@ -75,7 +75,7 @@ class HelpCommand extends Command{
 
         let category : Category=undefined;
         for(var _category of Categories){
-            if(_category.name.toLowerCase()===args[0].toLowerCase()){
+            if(_category.getNames.map(value=>value.toLowerCase()).includes(args[0].toLowerCase())){
                 category=_category;
                 break;
             }
@@ -121,7 +121,7 @@ async function getCommands(category : Category, available : CommandAvailability,
                     if(!command.enabled) title+=` - ${Localisation.getTranslation("help.command.disabled")}`;
                     let description=Localisation.getTranslation(command.description);
                     if(command.aliases) description+=`\n${Localisation.getTranslation("help.command.aliases", command.aliases.join(", "))}`;
-                    if(command.usage) description+=`\n${Localisation.getTranslation("help.command.usage", command.usage)}`;
+                    if(command.usage) description+=`\n${Localisation.getTranslation("help.command.usage", command.getUsage())}`;
                     if(command.access===CommandAccess.Patreon) description+=`\n${Localisation.getTranslation("help.command.patreon")}`;
                     embed.addField(title, description);
                 }

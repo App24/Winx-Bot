@@ -2,13 +2,13 @@ import { Message } from "discord.js";
 import { getUserFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess } from "../../structs/Command";
+import { Command, CommandAccess, CommandUsage } from "../../structs/Command";
 
 class MessageUserCommand extends Command{
     public constructor(){
         super();
         this.access=CommandAccess.BotOwner;
-        this.usage="<user> <message>";
+        this.usage=[new CommandUsage(true, "argument.user"), new CommandUsage(true, "argument.message")];
         this.minArgs=2;
         this.category=Owner;
     }

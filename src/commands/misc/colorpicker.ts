@@ -1,13 +1,13 @@
 import { Message } from "discord.js";
 import { Localisation } from "../../localisation";
-import { Command } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { isHexColor, canvasToMessageAttachment, canvasColor } from "../../Utils";
 
 class ColorPickerCommand extends Command{
     public constructor(){
         super();
         this.minArgs=1;
-        this.usage="<hex>";
+        this.usage=[new CommandUsage(true, "argument.hexcolor")];
         this.aliases=["colourpicker"];
     }
 

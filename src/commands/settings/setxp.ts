@@ -2,7 +2,7 @@ import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase } from "../../Utils";
@@ -11,7 +11,7 @@ class SetXPCommand extends Command{
     public constructor(){
         super();
         this.maxArgs=1;
-        this.usage="[amount above 0]";
+        this.usage=[new CommandUsage(false, "argument.above.value.0")];
         this.category=Settings;
         this.access=CommandAccess.GuildOwner;
         this.availability=CommandAvailability.Guild;
