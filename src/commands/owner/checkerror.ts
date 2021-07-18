@@ -6,7 +6,7 @@ import { Command, CommandAccess, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
 import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach, getBotRoleColor, getStringTime } from "../../Utils";
+import { asyncForEach, dateToString, getBotRoleColor } from "../../Utils";
 
 class CheckErrorCommand extends Command{
     public constructor(){
@@ -24,7 +24,7 @@ class CheckErrorCommand extends Command{
             const Errors=BotUser.getDatabase(DatabaseType.Errors);
             const error:ErrorStruct=await Errors.get(code);
             if(!error) return message.reply(Localisation.getTranslation("error.invalid.errorCode"));
-            message.channel.send(Localisation.getTranslation("checkerror.error", getStringTime(error.time), error.error));
+            message.channel.send(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
         }
     }
 }
@@ -53,7 +53,7 @@ class ListSubCommand extends SubCommand{
         if(!errors||!errors.length) return message.reply(Localisation.getTranslation("error.empty.errors"));
         const data=[];
         errors.forEach(error=>{
-            data.push(Localisation.getTranslation("checkerror.list", error.key, getStringTime(error.value.time)));
+            data.push(Localisation.getTranslation("checkerror.list", error.key, dateToString(new Date(error.value.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
         });
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(message.guild)));

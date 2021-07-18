@@ -167,7 +167,7 @@
 
     "checkerror.clear": "Cleared all errors!",
     "checkerror.error": "{0}\n```{1}```",
-    "checkerror.list": "**{0}**: ${1}",
+    "checkerror.list": "**{0}**: {1}",
     "checkerror.prune": "Pruned 2+ week old errors",
 
     "suggestions.already.completed": "That suggestion is already completed!",

@@ -6,9 +6,12 @@ import { BotUser } from './BotClient';
 import { DatabaseType } from './structs/DatabaseTypes';
 import { PatreonInfo } from './structs/databaseTypes/PatreonInfo';
 import { Canvas, createCanvas } from 'canvas';
-import { getMemberByID } from './GetterUtilts';
+import { getMemberByID, getUserByID } from './GetterUtilts';
 import { RankLevel } from './structs/databaseTypes/RankLevel';
 import { UserLevel } from './structs/databaseTypes/UserLevel';
+import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from './Constants';
+import { ErrorStruct } from './structs/databaseTypes/ErrorStruct';
+import { Localisation } from './localisation';
 
 export async function asyncForEach(array:any[], callback:Function) {
     for(let i =0; i < array.length; i++){
@@ -58,7 +61,7 @@ export function genRanHex(size : number){
     return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 }
 
-export function toHexString(byteArray : Array<number>){
+export function toHexString(byteArray : number[]){
     return Array.from(byteArray, function(byte){
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
     }).join('');
@@ -112,8 +115,31 @@ export async function getBotRoleColor(guild : Guild){
     return member.roles.color.color;
 }
 
-export function getStringTime(time : number, sliceAmount : number=19){
-    return new Date(time).toISOString().replace("T", " ").slice(0, sliceAmount);
+export function dateToString(date : Date, format : string){
+    function pad(num:number, size:number) {
+        let numStr = num.toString();
+        while (numStr.length < size) numStr = "0" + numStr;
+        return numStr;
+    }
+
+    return format.replace(/{\w+}/g, (match)=>{
+        match=match.replace(/({|})/g, "");
+        switch(match){
+            case "dd":
+                return pad(date.getDate(), 2);
+            case "MM":
+                return pad(date.getMonth()+1, 2);
+            case "YYYY":
+                return date.getFullYear().toString();
+            case "HH":
+                return pad(date.getHours(), 2);
+            case "mm":
+                return pad(date.getMinutes(), 2)
+            case "ss":
+                return pad(date.getSeconds(), 2)
+        }
+        return match;
+    })
 }
 
 export async function isPatreon(userId : string, guildId : string){
@@ -138,7 +164,7 @@ export function canvasColor(color : string, width : number=700, height : number=
 }
 
 export function isHexColor(str : string){
-    return new RegExp(/[a-f0-9]{6}/g).test(str);
+    return new RegExp(/[a-f\d]{6}/g).test(str);
 }
 
 export async function getNextRank(currentLevel : number, guildId : string){
@@ -250,4 +276,39 @@ export function formatString(str : string, ...args){
     return str.replace(/{(\d+)}/g, function(match, number) {
         return typeof args[number] != 'undefined' ? args[number] : match;
     });
+}
+
+export function backupDatabases(){
+    if(!fs.existsSync(DATABASE_BACKUP_FOLDER)){
+        fs.mkdirSync(DATABASE_BACKUP_FOLDER);
+    }
+
+    const values = Object.values(DatabaseType);
+    values.forEach((value, index)=>{
+        fs.copyFileSync(`${DATABASE_FOLDER}/${value}.sqlite`, `${DATABASE_BACKUP_FOLDER}/${value}.sqlite`);
+    });
+}
+
+export async function reportError(error, message : Message){
+    const Errors=BotUser.getDatabase(DatabaseType.Errors);
+    let hex=genRanHex(16);
+    let errors=await Errors.get(hex);
+    while(errors){
+        hex=genRanHex(16);
+        errors=await Errors.get(hex);
+    }
+    console.error(`Code: ${hex}\n${error}`);
+    const errorObj=new ErrorStruct();
+    errorObj.time=new Date().getTime();
+    errorObj.error=error;
+    await Errors.set(hex, errorObj);
+    const owner = await getUserByID(OWNER_ID);
+    const ownerMember=await getMemberByID(owner.id, message.guild);
+    let text=`Error: \`${hex}\``;
+    if(ownerMember){
+        text+=`\nServer: ${message.guild.name}`;
+        text+=`\nURL: ${message.url}`;
+    }
+    (await owner.createDM()).send(text);
+    message.reply(Localisation.getTranslation("error.execution"));
 }

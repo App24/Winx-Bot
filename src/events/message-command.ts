@@ -7,7 +7,7 @@ import { Localisation } from "../localisation";
 import { CommandAccess, CommandAvailability } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
-import { genRanHex, isDM, isPatreon, secondsToTime } from "../Utils";
+import { genRanHex, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -98,28 +98,7 @@ export=()=>{
         try{
             await command.onRun(message, args);
         }catch(error){
-            const Errors=BotUser.getDatabase(DatabaseType.Errors);
-            let hex=genRanHex(16);
-            let errors=await Errors.get(hex);
-            while(errors){
-                hex=genRanHex(16);
-                errors=await Errors.get(hex);
-            }
-            console.error(`Code: ${hex}\n${error.stack}`);
-            var datetime = new Date();
-            const errorObj=new ErrorStruct();
-            errorObj.time=datetime.getTime();
-            errorObj.error=error.stack;
-            await Errors.set(hex, errorObj);
-            const owner = await getUserByID(OWNER_ID);
-            const ownerMember=await getMemberByID(owner.id, message.guild);
-            let text=`Error: \`${hex}\``;
-            if(ownerMember){
-                text+=`\nServer: ${message.guild.name}`;
-                text+=`\nURL: ${message.url}`;
-            }
-            (await owner.createDM()).send(text);
-            message.reply(Localisation.getTranslation("error.execution"));
+            await reportError(error.stack, message);
         }
     });
 }

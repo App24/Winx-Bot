@@ -5,6 +5,7 @@ import fs from "fs";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
+import { backupDatabases } from "../../../Utils";
 
 class BackupDBCommand extends Command{
     public constructor(){
@@ -14,14 +15,7 @@ class BackupDBCommand extends Command{
     }
 
     public async onRun(message : Message, args : string[]){
-        if(!fs.existsSync(DATABASE_BACKUP_FOLDER)){
-            fs.mkdirSync(DATABASE_BACKUP_FOLDER);
-        }
-
-        const values = Object.values(DatabaseType);
-        values.forEach((value, index)=>{
-            fs.copyFileSync(`${DATABASE_FOLDER}/${value}.sqlite`, `${DATABASE_BACKUP_FOLDER}/${value}.sqlite`);
-        });
+        backupDatabases();
         message.channel.send(Localisation.getTranslation("generic.done"));
     }
 }

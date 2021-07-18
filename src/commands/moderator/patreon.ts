@@ -7,7 +7,7 @@ import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../..
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { PatreonInfo } from "../../structs/databaseTypes/PatreonInfo";
 import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach, getBotRoleColor, getServerDatabase, getStringTime } from "../../Utils";
+import { asyncForEach, dateToString, getBotRoleColor, getServerDatabase } from "../../Utils";
 
 class PatreonCommand extends Command{
     public constructor(){
@@ -87,7 +87,7 @@ class ListSubCommand extends SubCommand{
         await asyncForEach(patreons, async(patreon : PatreonInfo)=>{
             const member=await getMemberByID(patreon.userId, message.guild);
             if(!member) return;
-            data.push(Localisation.getTranslation("patreon.list", member, getStringTime(patreon.date, 10)));
+            data.push(Localisation.getTranslation("patreon.list", member, dateToString(new Date(patreon.date), "{dd}/{MM}/{YYYY}")));
         });
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(message.guild)));
