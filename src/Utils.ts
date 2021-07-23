@@ -261,9 +261,9 @@ export async function getLeaderboardMembers(guild : Guild){
     const leaderboardLevels:{userLevel: UserLevel, member: GuildMember}[]=[];
     let userIndex=0;
     await asyncForEach(levels, async(level : UserLevel)=>{
-        const user=await getMemberByID(level.userId, guild);
-        if(user){
-            leaderboardLevels.push({userLevel: level, member: user});
+        const member=await getMemberByID(level.userId, guild);
+        if(member){
+            leaderboardLevels.push({userLevel: level, member});
             userIndex++;
             if(userIndex>=15)
                 return true;

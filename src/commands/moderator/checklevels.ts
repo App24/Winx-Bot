@@ -1,7 +1,7 @@
 import { Message, GuildChannel, TextChannel, NewsChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
-import { getMemberFromMention, getChannelByID } from "../../GetterUtilts";
+import { getMemberFromMention, getGuildChannelByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
@@ -48,7 +48,7 @@ class CheckLevelsCommand extends Command{
                 if(excluded){
                     if(excluded.find(c=>c===channel.id)) return;
                 }
-                const NTChannel=await getChannelByID(channel.id, message.guild);
+                const NTChannel=await getGuildChannelByID(channel.id, message.guild);
                 NTChannels.push(NTChannel);
             }
         });

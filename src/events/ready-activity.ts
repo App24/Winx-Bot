@@ -44,7 +44,7 @@ async function setActivity(){
     if(activities[i].canRun()){
         let activityText="";
         activityText=await activities[i].getActivity();
-        BotUser.user.setActivity(activityText);
+        BotUser.user.setActivity(activityText, {type: activities[i].type});
     }else{
         setActivity();
     }

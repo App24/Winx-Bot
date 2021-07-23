@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getChannelByID, getChannelFromMention } from "../../GetterUtilts";
+import { getGuildChannelByID, getGuildChannelFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
@@ -38,7 +38,7 @@ class AddSubCommand extends SubCommand{
         
         if(!serverInfo.excludeChannels) serverInfo.excludeChannels=[];
 
-        const channel=await getChannelFromMention(args[0], message.guild);
+        const channel=await getGuildChannelFromMention(args[0], message.guild);
         if(!channel) return message.reply(Localisation.getTranslation("error.invalid.channel"));
         
         if(serverInfo.excludeChannels.find(c=>c===channel.id)) return message.reply(Localisation.getTranslation("excludechannel.channel.already"));
@@ -62,7 +62,7 @@ class RemoveSubCommand extends SubCommand{
 
         if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
 
-        const channel=await getChannelFromMention(args[0], message.guild);
+        const channel=await getGuildChannelFromMention(args[0], message.guild);
         if(!channel) return message.reply(Localisation.getTranslation("error.invalid.channel"));
 
         if(!serverInfo.excludeChannels.find(c=>c===channel.id)) return message.reply(Localisation.getTranslation("excludechannel.channel.not"));
@@ -86,7 +86,7 @@ class ListSubCommand extends SubCommand{
         if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
         const data=[];
         await asyncForEach(serverInfo.excludeChannels, async(excludedChannel:string)=>{
-            const channel=await getChannelByID(excludedChannel, message.guild);
+            const channel=await getGuildChannelByID(excludedChannel, message.guild);
             if(channel){
                 data.push(channel);
             }

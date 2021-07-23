@@ -110,10 +110,12 @@
     "generic.hexcolor": "#{0}",
     "generic.sent" :"Sent!",
     "generic.done" :"Done!",
+    "generic.canceled": "Canceled!",
     "generic.accepted": "Accepted",
     "generic.rejected": "Rejected",
     "generic.none": "None",
     "generic.unknown": "Unknown",
+    "generic.confirmation": "You sure you want to do this?",
 
     "__comment__": "Specific Commands",
     "barcolor.hexcolor.output": "{0} #{1}",
@@ -132,6 +134,10 @@
     "namecolor.set.output": "Set the color name to #{0}!",
     "namecolor.resetset.output": "Resetted the name color!",
 
+    "about.title.about": "About",
+    "about.title.creators": "Creators",
+    "about.title.version": "Version",
+    "about.title.github": "Source Code",
     "about.description.output": "This bot was created by and for Winx fans, it allows for users to level up and earn new transformations, it is entirely customisable from transformation names to when you get each!",
 
     "givexp.success.output": "You have earned {0} xp!",
@@ -182,6 +188,7 @@
     "leaderboard.output": "Level: {0} XP: {1}/{2}",
 
     "transformations.list": "Level {0}: {1}",
+    "transformations.title": "Transformations",
 
     "magiclevels.transformation.current": "Current Transformation: {0}",
     "magiclevels.transformation.next": "Next Transformation: {0}",
@@ -189,6 +196,7 @@
     "magiclevels.nickname": " ({0})",
     "magiclevels.level": ": Level: {0}",
     "magiclevels.levels": "{0}/{1}",
+    "magiclevels.lb.position": "Leaderboard Position: {0}",
 
     "setxp.get": "XP per message is `{0}`!",
     "setxp.set": "XP per message is now `{0}`!",
@@ -272,5 +280,6 @@
     "setxp.command.description": "Set XP per message!",
     "backupdb.command.description": "Backs up databases!",
     "restoredb.command.description": "Restores the databases!",
-    "downloaddb.command.description": "Download the databases!"
+    "downloaddb.command.description": "Download the databases!",
+    "fakeerror.command.description": "Create a fake error!"
 }

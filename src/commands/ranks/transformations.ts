@@ -29,6 +29,7 @@ class RanksCommand extends Command{
             }
         });
         const embed=new MessageEmbed();
+        embed.setTitle(Localisation.getTranslation("transformations.title"));
         embed.setDescription(data);
         embed.setColor((await getBotRoleColor(message.guild)));
         message.channel.send(embed);

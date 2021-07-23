@@ -25,6 +25,12 @@ class MagicLevelsCommand extends Command{
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
         const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
+        levels.sort((a,b)=>{
+            if(a.level===b.level){
+                return b.xp-a.xp;
+            }
+            return b.level-a.level;
+        });
         let user=message.author;
         if(args.length){
             const temp=await getUserFromMention(args[0]);
@@ -72,6 +78,8 @@ class MagicLevelsCommand extends Command{
         }
         nextRankText=Localisation.getTranslation("magiclevels.transformation.next", nextRankText);
 
+        const lbPosition=Localisation.getTranslation("magiclevels.lb.position", levels.findIndex(u=>u.userId===user.id)+1);
+
         const canvas=createCanvas(10,10);
         const ctx=canvas.getContext("2d");
 
@@ -80,7 +88,7 @@ class MagicLevelsCommand extends Command{
             name+=Localisation.getTranslation("magiclevels.nickname", member.nickname);
         let levelsText=Localisation.getTranslation("magiclevels.level", userLevel.level);
         
-        const nameFontSize=70;
+        const nameFontSize=80;
         const pfpRadius=nameFontSize*2;
         const pfpX=5;
         const pfpY=5;
@@ -98,7 +106,7 @@ class MagicLevelsCommand extends Command{
         const textColor = (brightness > 125) ? 'black' : 'white';
 
         const newHeight=pfpY+(pfpRadius*2)+pfpY;
-        const transformationFontSize=newHeight*0.2068965517241379;
+        const transformationFontSize=newHeight*(0.2068965517241379*0.75);
 
         ctx.font=`${nameFontSize}px sans-serif`;
         let extraWidth=ctx.measureText(name+levelsText).width;
@@ -110,6 +118,9 @@ class MagicLevelsCommand extends Command{
         if(ctx.measureText(nextRankText).width>extraWidth){
             extraWidth=ctx.measureText(nextRankText).width;
         }
+        if(ctx.measureText(lbPosition).width>extraWidth){
+            extraWidth=ctx.measureText(lbPosition).width;
+        }
 
         canvas.width=pfpX+(pfpRadius*2)+pfpX+extraWidth+pfpX;
         canvas.height=newHeight;
@@ -117,7 +128,8 @@ class MagicLevelsCommand extends Command{
         const barHeight=canvas.height*0.15;
         const levelFont=`${barHeight}px sans-serif`;
 
-        const textPos=nameFontSize+((canvas.height-(nameFontSize+(transformationFontSize*3.5)))/2.0);
+        const extraInfoAmount=3;
+        const textPos=nameFontSize+((canvas.height-(nameFontSize+(transformationFontSize*(extraInfoAmount*1.75))))/2.0);
 
         //Draw background
         ctx.fillStyle=`#${userSetting.cardColor}`;
@@ -158,6 +170,7 @@ class MagicLevelsCommand extends Command{
         ctx.fillStyle=textColor;
         ctx.fillText(currentRankText, pfpX+(pfpRadius*2)+pfpX, textPos+10+barHeight);
         ctx.fillText(nextRankText, pfpX+(pfpRadius*2)+pfpX, textPos+10+barHeight+transformationFontSize+5);
+        ctx.fillText(lbPosition, pfpX+(pfpRadius*2)+pfpX, textPos+10+barHeight+(transformationFontSize+5)*2);
 
         drawSpecialCircle(ctx, pfpX, pfpY, pfpRadius, `#${userSetting.specialCircleColor||DEFAULT_USER_SETTING.specialCircleColor}`);
 

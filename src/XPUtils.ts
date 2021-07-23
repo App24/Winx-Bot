@@ -4,7 +4,7 @@ import { DatabaseType } from "./structs/DatabaseTypes";
 import { RankLevel } from "./structs/databaseTypes/RankLevel";
 import { UserLevel } from "./structs/databaseTypes/UserLevel";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "./structs/databaseTypes/ServerInfo";
-import { getChannelByID, getMemberByID, getRoleByID } from "./GetterUtilts";
+import { getGuildChannelByID, getMemberByID, getRoleByID } from "./GetterUtilts";
 import { getServerDatabase, getLevelXP, capitalise } from "./Utils";
 import { Localisation } from "./localisation";
 
@@ -14,21 +14,22 @@ export async function removeXP(user : User, guild : Guild, channel : TextChannel
     const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
 
     const serverInfo : ServerInfo=await getServerDatabase(ServerInfo, guild.id, DEFAULT_SERVER_INFO);
-    const ranks : RankLevel[]=await Ranks.get(guild.id);
+    const ranks:RankLevel[]=await getServerDatabase(Ranks, guild.id);
     const levels : UserLevel[]=await getServerDatabase(Levels, guild.id);
+
+    const member=await getMemberByID(user.id, guild);
+    if(!member) return;
 
     let userLevel=levels.find(u=>u.userId===user.id);
     if(!userLevel){
         levels.push(new UserLevel(user.id));
         userLevel=levels.find(u=>u.userId===user.id);
     }
-    const member=await getMemberByID(user.id, guild);
-    if(!member) return;
 
     userLevel.xp-=xp;
     let levelChannel=channel;
     if(serverInfo.levelChannel){
-        const temp=await getChannelByID(serverInfo.levelChannel, guild);
+        const temp=await getGuildChannelByID(serverInfo.levelChannel, guild);
         if(temp) levelChannel=temp;
     }
 
@@ -39,7 +40,7 @@ export async function removeXP(user : User, guild : Guild, channel : TextChannel
         }
         userLevel.level--;
         userLevel.xp+=getLevelXP(userLevel.level);
-        levelChannel.send(Localisation.getTranslation("xp.level.down", user, userLevel.level));
+        await levelChannel.send(Localisation.getTranslation("xp.level.down", user, userLevel.level));
         if(ranks){
             const rankLevel=ranks.find(rank=>rank.level===userLevel.level+1);
             if(rankLevel){
@@ -63,21 +64,22 @@ export async function addXP(user : User, guild : Guild, channel : TextChannel | 
     const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
 
     const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, guild.id, DEFAULT_SERVER_INFO);
-    const ranks:RankLevel[]=await Ranks.get(guild.id);
+    const ranks:RankLevel[]=await getServerDatabase(Ranks, guild.id);
     const levels:UserLevel[]=await getServerDatabase(Levels, guild.id);
+
+    const member=await getMemberByID(user.id, guild);
+    if(!member) return;
 
     let userLevel=levels.find(u=>u.userId===user.id);
     if(!userLevel){
         levels.push(new UserLevel(user.id));
         userLevel=levels.find(u=>u.userId===user.id);
     }
-    const member=await getMemberByID(user.id, guild);
-    if(!member) return;
 
     userLevel.xp+=xp;
     let levelChannel=channel;
     if(serverInfo.levelChannel){
-        const temp=await getChannelByID(serverInfo.levelChannel, guild);
+        const temp=await getGuildChannelByID(serverInfo.levelChannel, guild);
         if(temp) levelChannel=temp;
     }
 
@@ -85,7 +87,7 @@ export async function addXP(user : User, guild : Guild, channel : TextChannel | 
         userLevel.xp-=getLevelXP(userLevel.level);
         userLevel.level++;
         if(levelUpMessage)
-            levelChannel.send(Localisation.getTranslation("xp.level.up", user, userLevel.level));
+            await levelChannel.send(Localisation.getTranslation("xp.level.up", user, userLevel.level));
         if(ranks){
             const rankLevel=ranks.find(rank=>rank.level===userLevel.level);
             if(rankLevel){

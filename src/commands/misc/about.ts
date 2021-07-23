@@ -22,9 +22,10 @@ class AboutCommand extends Command{
         });
         const botMember=await getBotMember(message.guild);
         embed.setAuthor((botMember&&botMember.nickname)||BotUser.user.username, BotUser.user.avatarURL());
-        embed.addField("About", Localisation.getTranslation("about.description.output"));
-        embed.addField("Creators", data.join(", "));
-        embed.addField("Version", VERSION);
+        embed.addField(Localisation.getTranslation("about.title.about"), Localisation.getTranslation("about.description.output"));
+        embed.addField(Localisation.getTranslation("about.title.creators"), data.join(", "));
+        embed.addField(Localisation.getTranslation("about.title.version"), VERSION);
+        embed.addField(Localisation.getTranslation("about.title.github"), "https://github.com/App24/Winx-Bot");
         embed.setColor((await getBotRoleColor(message.guild)));
         message.channel.send(embed);
     }

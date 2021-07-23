@@ -48,6 +48,10 @@ export function getMemberByID(id : string, guild : Guild) : Promise<GuildMember>
 
 //#region ServerChannels
 
+export function getGuildByID(id:string) : Promise<Guild>{
+    return BotUser.guilds.fetch(id).catch(()=>undefined);
+}
+
 export function getTextChannelByID(id : string, guild : Guild) : TextChannel{
     if(!id||!guild) return undefined;
     return <TextChannel>guild.channels.cache.find(channel=>channel.id===id&&channel.type==="text");
@@ -58,7 +62,7 @@ export function getNewsChannelByID(id : string, guild : Guild) : NewsChannel{
     return <NewsChannel>guild.channels.cache.find(channel=>channel.id===id&&channel.type==="news");
 }
 
-export function getChannelByID(id : string, guild : Guild) : NewsChannel | TextChannel{
+export function getGuildChannelByID(id : string, guild : Guild) : NewsChannel | TextChannel{
     if(!id||!guild) return undefined;
     const textChannel=getTextChannelByID(id, guild);
     if(textChannel) return textChannel;
@@ -89,15 +93,15 @@ export function getNewsChannelFromMention(mention : string, guild : Guild) : New
     return getNewsChannelByID(matches[1], guild);
 }
 
-export function getChannelFromMention(mention : string, guild : Guild) : NewsChannel | TextChannel{
+export function getGuildChannelFromMention(mention : string, guild : Guild) : NewsChannel | TextChannel{
     if(!mention||!guild) return;
     const matches=mention.match(/^<#!?(\d+)>$/);
 
     if(!matches){
-        return getChannelByID(mention, guild);
+        return getGuildChannelByID(mention, guild);
     }
     
-    return getChannelByID(matches[1], guild);
+    return getGuildChannelByID(matches[1], guild);
 }
 
 //#endregion
@@ -106,7 +110,7 @@ export function getChannelFromMention(mention : string, guild : Guild) : NewsCha
 
 export function getRoleFromMention(mention : string, guild : Guild) : Promise<Role>{
     if(!mention||!guild) return;
-    const matches=mention.match(/^<@&?(\d+)>$/);
+    const matches=mention.match(/^<@&(\d+)>$/);
 
     if(!matches){
         return getRoleByID(mention, guild);

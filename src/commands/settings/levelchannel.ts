@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getChannelByID, getChannelFromMention } from "../../GetterUtilts";
+import { getGuildChannelByID, getGuildChannelFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
@@ -36,7 +36,7 @@ class SetSubCommand extends SubCommand{
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
 
-        const channel=await getChannelFromMention(args[0], message.guild);
+        const channel=await getGuildChannelFromMention(args[0], message.guild);
         if(!channel) return message.reply(Localisation.getTranslation("error.invalid.channel"));
 
         serverInfo.levelChannel=channel.id;
@@ -74,7 +74,7 @@ class ListSubCommand extends SubCommand{
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
         if(!serverInfo.levelChannel) return message.reply(Localisation.getTranslation("error.empty.levelchannel"));
-        const channel=await getChannelByID(serverInfo.levelChannel, message.guild);
+        const channel=await getGuildChannelByID(serverInfo.levelChannel, message.guild);
         if(!channel) return message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
         message.channel.send(`${channel}`);
     }
