@@ -54,7 +54,9 @@ export=()=>{
                 }break;
             }
 
-            message.channel.send(customCommand.outputs[Math.floor(Math.random()*customCommand.outputs.length)]);
+            const outputs=customCommand.outputs;
+            const randomMsg=outputs[Math.floor(outputs.length*Math.random())];
+            message.channel.send(randomMsg);
             return;
         }
 
