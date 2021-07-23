@@ -44,7 +44,7 @@ class CustomCommandEditCommand extends Command{
                 op=EditSettings.Output;
             }break
             default:{
-                return cmdArgs.message.reply(Localisation.getTranslation("customcommands.invalid.type", "description, output and access"))
+                return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.type", "description, output and access"))
             }break;
         }
 
@@ -70,15 +70,17 @@ class CustomCommandEditCommand extends Command{
                         access=CommandAccess.Patreon;
                     }break;
                     default:{
-                        return cmdArgs.message.reply(Localisation.getTranslation("customcommands.invalid.access", "moderator, owner, botowner and patreon"))
+                        return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.access", "moderator, owner, botowner and patreon"))
                     }break;
                 }
                 customCommand.access=access;
             }break;
             case EditSettings.Output:{
-                if(!cmdArgs.args[3])
-                    return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.newvalue"));
-                customCommand.outputs[customCommand.outputs.findIndex(output=>output.toLowerCase()===value.toLowerCase())]=cmdArgs.args[3];
+                if(cmdArgs.args[3]){
+                    customCommand.outputs[customCommand.outputs.findIndex(output=>output.toLowerCase()===value.toLowerCase())]=cmdArgs.args[3];
+                }else{
+                    customCommand.outputs.push(value);
+                }
             }break;
         }
         await CustomCommands.set(cmdArgs.guild.id, customCommands);

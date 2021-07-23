@@ -1,4 +1,4 @@
-export const VERSION="2.2.0";
+export const VERSION="2.2.1";
 
 export const DATABASE_FOLDER="databases";
 export const DATABASE_BACKUP_FOLDER="backupDatabases";

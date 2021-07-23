@@ -252,8 +252,8 @@
     "customcommand.success.remove": "Successfully removed command!",
     "customcommand.success.edit": "Successfully edited command!",
     "customcommand.list.title": "Custom Commands",
-    "customcommands.invalid.type": "That is an invalid setting type! Valid setting types are {0}",
-    "customcommands.invalid.access": "That is an invalid access type! Valid access types are {0}",
+    "customcommand.invalid.type": "That is an invalid setting type! Valid setting types are {0}",
+    "customcommand.invalid.access": "That is an invalid access type! Valid access types are {0}",
     "customcommand.invalid.newvalue": "You must provide a new value!",
 
     "__comment__": "Category Names",
@@ -309,5 +309,5 @@
     "customcommandadd.command.description": "Add custom commands!",
     "customcommandremove.command.description": "Remove custom commands!",
     "customcommandedit.command.description": "Edit custom commands!",
-    "customcommandlist.command.description": "List custom commands!"
+    "customcommandlist.command.description": "List custom commands or messages of a custom command!"
 }
