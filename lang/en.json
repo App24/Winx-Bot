@@ -35,6 +35,9 @@
 
     "error.user.bot": "That user is a bot!",
 
+    "error.missing.character.lines": "Character file: {0} is missing!",
+    "error.empty.character.lines": "Character file: {0} is empty!",
+
     "__comment__": "Miscs",
     "bot.load.command.simple": "Loaded {0} Commands!",
     "bot.load.command.complex": "Loaded Command: {0}",

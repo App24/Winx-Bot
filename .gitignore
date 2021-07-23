@@ -6,3 +6,4 @@ package-lock.json
 dist/
 src/commands/guildSpecific
 src/events/guildSpecific
+lines/
