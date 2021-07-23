@@ -2,7 +2,7 @@ import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
 import { SubCommand } from "../../structs/SubCommand";
@@ -18,13 +18,13 @@ class CheckErrorCommand extends Command{
         this.subCommands=[new ClearSubCommand(), new ListSubCommand(), new PruneSubCommand()];
     }
 
-    public async onRun(message : Message, args : string[]){
-        const code=args.shift().toLowerCase();
-        if(!(await this.onRunSubCommands(message, code, args, false))){
+    public async onRun(cmdArgs : CommandArguments){
+        const code=cmdArgs.args.shift().toLowerCase();
+        if(!(await this.onRunSubCommands(cmdArgs, code, false))){
             const Errors=BotUser.getDatabase(DatabaseType.Errors);
             const error:ErrorStruct=await Errors.get(code);
-            if(!error) return message.reply(Localisation.getTranslation("error.invalid.errorCode"));
-            message.channel.send(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
+            if(!error) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.errorCode"));
+            cmdArgs.channel.send(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
         }
     }
 }
@@ -34,10 +34,10 @@ class ClearSubCommand extends SubCommand{
         super("clear");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Errors=BotUser.getDatabase(DatabaseType.Errors);
         await Errors.clear();
-        return message.channel.send(Localisation.getTranslation("checkerror.clear"));
+        return cmdArgs.channel.send(Localisation.getTranslation("checkerror.clear"));
     }
 }
 
@@ -46,19 +46,19 @@ class ListSubCommand extends SubCommand{
         super("list");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Errors=BotUser.getDatabase(DatabaseType.Errors);
 
         const errors:{key:string, value:ErrorStruct}[]=await Errors.entries();
-        if(!errors||!errors.length) return message.reply(Localisation.getTranslation("error.empty.errors"));
+        if(!errors||!errors.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.errors"));
         const data=[];
         errors.forEach(error=>{
             data.push(Localisation.getTranslation("checkerror.list", error.key, dateToString(new Date(error.value.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
         });
         const embed=new MessageEmbed();
-        embed.setColor((await getBotRoleColor(message.guild)));
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
         embed.setDescription(data);
-        return message.channel.send(embed);
+        return cmdArgs.channel.send(embed);
     }
 }
 
@@ -67,11 +67,11 @@ class PruneSubCommand extends SubCommand{
         super("prune");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Errors=BotUser.getDatabase(DatabaseType.Errors);
 
         const errors:{key:string, value:ErrorStruct}[]=await Errors.entries();
-        if(!errors||!errors.length) return message.reply(Localisation.getTranslation("error.empty.errors"));
+        if(!errors||!errors.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.errors"));
 
         const msPerMinute = 60 * 1000;
         const msPerHour = msPerMinute * 60;
@@ -83,7 +83,7 @@ class PruneSubCommand extends SubCommand{
                 await Errors.delete(error.key);
             }
         });
-        return message.channel.send(Localisation.getTranslation("checkerror.prune"));
+        return cmdArgs.channel.send(Localisation.getTranslation("checkerror.prune"));
     }
 }
 

@@ -4,7 +4,7 @@ import { BotUser } from "../../../BotClient";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from "../../../Constants";
 import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess } from "../../../structs/Command";
+import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 
 class RestoreDBCommand extends Command{
@@ -14,12 +14,12 @@ class RestoreDBCommand extends Command{
         this.category=Owner;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         if(!fs.existsSync(DATABASE_BACKUP_FOLDER)){
-            return message.reply(Localisation.getTranslation("restoredb.empty.backups"));
+            return cmdArgs.message.reply(Localisation.getTranslation("restoredb.empty.backups"));
         }
         
-        message.channel.send(Localisation.getTranslation("generic.confirmation")).then(async(msg)=>{
+        cmdArgs.channel.send(Localisation.getTranslation("generic.confirmation")).then(async(msg)=>{
             msg.react('✅');
             msg.react('❌');
             const collector=msg.createReactionCollector((reaction, user)=>(['✅', "❌"].includes(reaction.emoji.name) && user.id===OWNER_ID), {max: 1});
@@ -37,9 +37,9 @@ class RestoreDBCommand extends Command{
 
                     BotUser.loadDatabases();
 
-                    message.channel.send(Localisation.getTranslation("generic.done"));
+                    cmdArgs.channel.send(Localisation.getTranslation("generic.done"));
                 }else if(reaction.emoji.name==="❌"){
-                    message.channel.send(Localisation.getTranslation("generic.canceled"));
+                    cmdArgs.channel.send(Localisation.getTranslation("generic.canceled"));
                 }
             });
         });

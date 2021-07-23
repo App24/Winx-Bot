@@ -4,7 +4,7 @@ import { BotUser } from "../../BotClient";
 import { getUserFromMention, getMemberByID, getRoleByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
@@ -20,27 +20,27 @@ class MagicLevelsCommand extends Command{
         this.aliases=["ml", "levels"];
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
-        const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
         levels.sort((a,b)=>{
             if(a.level===b.level){
                 return b.xp-a.xp;
             }
             return b.level-a.level;
         });
-        let user=message.author;
-        if(args.length){
-            const temp=await getUserFromMention(args[0]);
-            if(!temp) return message.reply(Localisation.getTranslation("error.invalid.user"));
+        let user=cmdArgs.message.author;
+        if(cmdArgs.args.length){
+            const temp=await getUserFromMention(cmdArgs.args[0]);
+            if(!temp) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));
             user=temp;
         }
-        if(user.bot) return message.reply(Localisation.getTranslation("error.bot.user", user));
+        if(user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.bot.user", user));
 
-        const member=await getMemberByID(user.id, message.guild);
-        if(!member) return message.reply(Localisation.getTranslation("error.invalid.member"));
+        const member=await getMemberByID(user.id, cmdArgs.guild);
+        if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
         let userLevel = levels.find(u=>u.userId===user.id);
         if(!userLevel){
@@ -51,14 +51,14 @@ class MagicLevelsCommand extends Command{
         if(!userSetting){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, user.id));
             userSetting=serverUserSettings.find(u=>u.userId===user.id);
-            await UserSettings.set(message.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
-        const currentRank=await getCurrentRank(userLevel.level, message.guild.id);
-        const nextRank=await getNextRank(userLevel.level, message.guild.id);
+        const currentRank=await getCurrentRank(userLevel.level, cmdArgs.guild.id);
+        const nextRank=await getNextRank(userLevel.level, cmdArgs.guild.id);
 
         let currentRankText=Localisation.getTranslation("generic.none");
         if(currentRank){
-            const role=await getRoleByID(currentRank.roleId, message.guild);
+            const role=await getRoleByID(currentRank.roleId, cmdArgs.guild);
             if(role){
                 currentRankText=capitalise(role.name);
             }else{
@@ -69,7 +69,7 @@ class MagicLevelsCommand extends Command{
 
         let nextRankText=Localisation.getTranslation("generic.none");
         if(nextRank){
-            const role=await getRoleByID(nextRank.roleId, message.guild);
+            const role=await getRoleByID(nextRank.roleId, cmdArgs.guild);
             if(role){
                 nextRankText=capitalise(role.name);
             }else{
@@ -185,7 +185,7 @@ class MagicLevelsCommand extends Command{
         ctx.drawImage(avatar, pfpX+borderThickness, pfpY+borderThickness, newpfpRadius*2, newpfpRadius*2);
         ctx.restore();
 
-        message.channel.send(canvasToMessageAttachment(canvas, "magiclevels"));
+        cmdArgs.channel.send(canvasToMessageAttachment(canvas, "magiclevels"));
     }
 }
 

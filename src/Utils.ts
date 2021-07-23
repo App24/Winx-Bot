@@ -20,6 +20,13 @@ export async function asyncForEach(array:any[], callback:Function) {
     }
 }
 
+export async function asyncMapForEach(array:Map<any,any>, callback:Function) {
+    for(let i =0; i < array.size; i++){
+        let exit=await callback(array.keys()[i], array.values()[i], array);
+        if(exit===true)break;
+    }
+}
+
 export function loadFiles(directory : string){
     const files:string[]=[];
     const dirs:string[]=[];

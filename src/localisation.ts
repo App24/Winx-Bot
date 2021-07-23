@@ -5,6 +5,7 @@ export class Localisation{
     private static localisation;
 
     public static loadLocalisation(file : string){
+        if(!fs.existsSync(file)) return;
         const jsonData:any=fs.readFileSync(file);
         const langData=JSON.parse(jsonData);
         this.localisation=langData;

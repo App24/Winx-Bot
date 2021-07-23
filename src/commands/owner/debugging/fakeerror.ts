@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess } from "../../../structs/Command";
+import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
 import { reportError } from "../../../Utils";
 
 class FakeErrorCommand extends Command{
@@ -10,8 +10,8 @@ class FakeErrorCommand extends Command{
         this.access=CommandAccess.BotOwner;
     }
 
-    public async onRun(message : Message, args : string[]){
-        reportError("Test", message)
+    public async onRun(cmdArgs : CommandArguments){
+        reportError("Test", cmdArgs.message);
     }
 }
 

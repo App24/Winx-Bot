@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { DMChannel, Guild, Message, NewsChannel, TextChannel } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "../Utils";
 import { Category, Other } from "./Category";
@@ -38,16 +38,16 @@ export abstract class Command{
         this.subCommands=[];
     }
 
-    protected async onRunSubCommands(message : Message, subCommandName : string, args : string[], showError:boolean=true){
+    protected async onRunSubCommands(cmdArgs : CommandArguments, subCommandName : string, showError:boolean=true){
         let found=false;
         await asyncForEach(this.subCommands, async(subCommand : SubCommand)=>{
             if(subCommand.name.toLowerCase()===subCommandName.toLowerCase()||(subCommand.aliases&&subCommand.aliases.includes(subCommandName.toLowerCase()))){
-                if(args.length<subCommand.minArgs){
-                    message.reply(Localisation.getTranslation("error.arguments.few"));
-                }else if(args.length>subCommand.maxArgs){
-                    message.reply(Localisation.getTranslation("error.arguments.many"));
+                if(cmdArgs.args.length<subCommand.minArgs){
+                    cmdArgs.message.reply(Localisation.getTranslation("error.arguments.few"));
+                }else if(cmdArgs.args.length>subCommand.maxArgs){
+                    cmdArgs.message.reply(Localisation.getTranslation("error.arguments.many"));
                 }else{
-                    await subCommand.onRun(message, args);
+                    await subCommand.onRun(cmdArgs);
                 }
                 found=true;
                 return true;
@@ -58,12 +58,12 @@ export abstract class Command{
             if(this.usage){
                 reply+=`\n${Localisation.getTranslation("subCommand.usage", this.getUsage())}`;
             }
-            message.reply(reply);
+            cmdArgs.message.reply(reply);
         }
         return found;
     }
 
-    public abstract onRun(message : Message, args : string[]);
+    public abstract onRun(cmdArgs : CommandArguments);
 
     public getUsage(){
         let text="";
@@ -95,6 +95,7 @@ export enum CommandAvailability{
 }
 
 export enum CommandAccess{
+    None=1,
     Patreon,
     Moderators,
     GuildOwner,
@@ -108,5 +109,19 @@ export class CommandUsage{
     public constructor(required : boolean, ...usages : string[]){
         this.required=required;
         this.usages=usages;
+    }
+}
+
+export class CommandArguments{
+    public readonly message : Message;
+    public args : string[];
+    public readonly guild : Guild;
+    public readonly channel : TextChannel | DMChannel | NewsChannel;
+
+    public constructor(message : Message, guild : Guild, args : string[]){
+        this.message=message;
+        this.guild=guild;
+        this.channel=message.channel;
+        this.args=args;
     }
 }

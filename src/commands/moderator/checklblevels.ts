@@ -4,7 +4,7 @@ import { PREFIX } from "../../Constants";
 import { getGuildChannelByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
@@ -19,19 +19,19 @@ class CheckLBLevelsCommand extends Command{
         this.category=Moderator;
     }
 
-    public async onRun(message : Message, args : string[]){
-        const channels=message.guild.channels.cache.array();
+    public async onRun(cmdArgs : CommandArguments){
+        const channels=cmdArgs.guild.channels.cache.array();
 
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
         const excluded=serverInfo.excludeChannels;
         
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
 
-        if(!levels||!levels.length) return message.reply(Localisation.getTranslation("error.empty.levels"));
+        if(!levels||!levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
         
-        const leaderboardLevels=await getLeaderboardMembers(message.guild);
+        const leaderboardLevels=await getLeaderboardMembers(cmdArgs.guild);
 
         await asyncForEach(leaderboardLevels, async(topLevel:{userLevel: UserLevel, member: GuildMember})=>{
             topLevel.userLevel.level=0;
@@ -41,21 +41,21 @@ class CheckLBLevelsCommand extends Command{
             const index=levels.findIndex(u=>u.userId===level.userLevel.userId);
             levels[index]=level.userLevel;
         });
-        await Levels.set(message.guild.id, levels);
+        await Levels.set(cmdArgs.guild.id, levels);
 
-        await message.channel.send(Localisation.getTranslation("checklevels.start"));
+        await cmdArgs.channel.send(Localisation.getTranslation("checklevels.start"));
         const NTChannels=[];
         await asyncForEach(channels, async(channel:GuildChannel)=>{
             if((<any>channel).messages){
                 if(excluded){
                     if(excluded.find(c=>c===channel.id)) return;
                 }
-                const NTChannel=await getGuildChannelByID(channel.id, message.guild);
+                const NTChannel=await getGuildChannelByID(channel.id, cmdArgs.guild);
                 NTChannels.push(NTChannel);
             }
         });
         await asyncForEach(NTChannels, async(channel:TextChannel | NewsChannel, index:number)=>{
-            await message.channel.send(Localisation.getTranslation("checklevels.start.channel", channel, index+1, NTChannels.length));
+            await cmdArgs.channel.send(Localisation.getTranslation("checklevels.start.channel", channel, index+1, NTChannels.length));
             const startTime=new Date().getTime();
             const messages=await getAllMessages(channel);
             await asyncForEach(leaderboardLevels, async(topLevel:{userLevel: UserLevel, member: GuildMember})=>{
@@ -69,12 +69,12 @@ class CheckLBLevelsCommand extends Command{
                         totalXp+=xp;
                     }
                 });
-                await addXP(topLevel.member.user, message.guild, <TextChannel|NewsChannel>message.channel, totalXp, false);
+                await addXP(topLevel.member.user, cmdArgs.guild, <TextChannel|NewsChannel>cmdArgs.channel, totalXp, false);
             });
             const timeDifferent=new Date().getTime()-startTime;
-            await message.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/1000)));
+            await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/1000)));
         })
-        message.channel.send(Localisation.getTranslation("generic.done"));
+        cmdArgs.channel.send(Localisation.getTranslation("generic.done"));
     }
 }
 

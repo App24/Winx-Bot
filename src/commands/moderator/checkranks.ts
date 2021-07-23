@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getRoleByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
@@ -17,22 +17,22 @@ class CheckRanksCommand extends Command{
         this.availability=CommandAvailability.Guild;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
-        const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
-        const ranks:RankLevel[]=await getServerDatabase(Ranks, message.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guild.id);
 
-        if(!levels) return message.reply(Localisation.getTranslation("error.empty.levels"));
-        if(!ranks) return message.reply(Localisation.getTranslation("error.empty.ranks"));
+        if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
+        if(!ranks) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
 
-        const members=await message.guild.members.fetch().then(promise=>promise.array());
-        await message.channel.send(Localisation.getTranslation("checkranks.start"));
+        const members=await cmdArgs.guild.members.fetch().then(promise=>promise.array());
+        await cmdArgs.channel.send(Localisation.getTranslation("checkranks.start"));
         await asyncForEach(members, async(member:GuildMember)=>{
             const user=levels.find(u=>u.userId===member.id);
             if(user){
                 await asyncForEach(ranks, async(rank : RankLevel)=>{
-                    const role=await getRoleByID(rank.roleId, message.guild);
+                    const role=await getRoleByID(rank.roleId, cmdArgs.guild);
                     if(!role) return;
                     if(user.level>=rank.level&&!member.roles.cache.has(role.id)){
                         await member.roles.add(role);
@@ -42,7 +42,7 @@ class CheckRanksCommand extends Command{
                 });
             }
         });
-        message.channel.send(Localisation.getTranslation("generic.done"));
+        cmdArgs.channel.send(Localisation.getTranslation("generic.done"));
     }
 }
 

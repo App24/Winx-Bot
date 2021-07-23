@@ -2,7 +2,7 @@ import { Guild, Message, MessageEmbed, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID, SUGGESTION_CHANNEL } from "../../Constants";
 import { Localisation } from "../../localisation";
-import { Command, CommandUsage } from "../../structs/Command";
+import { Command, CommandArguments, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { SuggestionState, SuggestionStruct } from "../../structs/databaseTypes/SuggestionStruct";
 import { genRanHex, getBotRoleColor } from "../../Utils";
@@ -15,7 +15,7 @@ class SuggestionCommand extends Command{
         this.aliases=["suggest"];
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const promises = [
             BotUser.shard.broadcastEval(`this.channels.fetch('${SUGGESTION_CHANNEL}').catch(console.error);`),
         ];
@@ -23,15 +23,15 @@ class SuggestionCommand extends Command{
         Promise.all(promises).then(async(results)=>{
             const channeld=results[0].reduce((acc,curr)=>{if(curr!==undefined) acc=curr;});
             const channel=new TextChannel(new Guild(BotUser, {id:channeld["guild"]}), {id:channeld["id"]});
-            const user=message.author;
-            const request=args.join(" ");
+            const user=cmdArgs.message.author;
+            const request=cmdArgs.args.join(" ");
             const text=Localisation.getTranslation("suggestion.request", user, request);
             const embed=new MessageEmbed();
             embed.setDescription(text);
             embed.setTimestamp();
             embed.setFooter(user.tag, user.displayAvatarURL());
-            embed.setColor((await getBotRoleColor(message.guild)));
-            message.channel.send(Localisation.getTranslation("generic.sent"));
+            embed.setColor((await getBotRoleColor(cmdArgs.guild)));
+            cmdArgs.channel.send(Localisation.getTranslation("generic.sent"));
             channel.send(embed).then(async(msg)=>{
                 msg.react('✅');
                 msg.react('❌');

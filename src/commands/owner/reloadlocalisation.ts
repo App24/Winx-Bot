@@ -2,7 +2,7 @@ import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments } from "../../structs/Command";
 
 class ReloadLocalisationCommand extends Command{
     public constructor(){
@@ -12,9 +12,9 @@ class ReloadLocalisationCommand extends Command{
         this.aliases=["reloadlocal", "relocal"];
     }
 
-    public onRun(message : Message, args : string[]){
+    public onRun(cmdArgs : CommandArguments){
         BotUser.loadLocalisation();
-        message.channel.send(Localisation.getTranslation("reloadlocalisation.reload"));
+        cmdArgs.channel.send(Localisation.getTranslation("reloadlocalisation.reload"));
     }
 }
 

@@ -2,7 +2,7 @@ import { Message } from "discord.js";
 import { getUserFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandUsage } from "../../structs/Command";
 
 class MessageUserCommand extends Command{
     public constructor(){
@@ -13,15 +13,15 @@ class MessageUserCommand extends Command{
         this.category=Owner;
     }
 
-    public async onRun(message : Message, args : string[]){
-        const user=await getUserFromMention(args.shift());
-        if(!user) return message.reply(Localisation.getTranslation("error.invalid.user"));
-        const msg=args.join(" ");
+    public async onRun(cmdArgs : CommandArguments){
+        const user=await getUserFromMention(cmdArgs.args.shift());
+        if(!user) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));
+        const msg=cmdArgs.args.join(" ");
         user.createDM().then(channel=>{
             channel.send(msg);
-            message.channel.send(Localisation.getTranslation("generic.sent"));
+            cmdArgs.channel.send(Localisation.getTranslation("generic.sent"));
         }).catch(()=>{
-            message.reply(Localisation.getTranslation("error.unable.dm"));
+            cmdArgs.message.reply(Localisation.getTranslation("error.unable.dm"));
         });
     }
 }

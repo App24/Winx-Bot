@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
 import { getBotRoleColor } from "../../Utils";
 
 class RolesCommand extends Command{
@@ -12,16 +12,16 @@ class RolesCommand extends Command{
         this.deprecated=true;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const data=[];
-        message.guild.roles.cache.forEach(role=>{
+        cmdArgs.guild.roles.cache.forEach(role=>{
             data.push(`${role}: ${role.id}`);
         });
 
         const embed=new MessageEmbed();
-        embed.setColor((await getBotRoleColor(message.guild)));
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
         embed.setDescription(data);
-        message.channel.send(embed);
+        cmdArgs.channel.send(embed);
     }
 }
 

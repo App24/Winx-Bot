@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getGuildChannelByID, getGuildChannelFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { SubCommand } from "../../structs/SubCommand";
@@ -21,8 +21,9 @@ class LevelChannelCommand extends Command{
         this.subCommands=[new SetSubCommand(), new ClearSubCommand(), new ListSubCommand()];
     }
 
-    public async onRun(message : Message, args : string[]){
-        this.onRunSubCommands(message, args.shift(), args);
+    public async onRun(cmdArgs : CommandArguments){
+        const name=cmdArgs.args.shift();
+        this.onRunSubCommands(cmdArgs, name);
     }
 }
 
@@ -32,17 +33,17 @@ class SetSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
 
-        const channel=await getGuildChannelFromMention(args[0], message.guild);
-        if(!channel) return message.reply(Localisation.getTranslation("error.invalid.channel"));
+        const channel=await getGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
+        if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.channel"));
 
         serverInfo.levelChannel=channel.id;
 
-        await ServerInfo.set(message.guild.id, serverInfo);
-        message.channel.send(Localisation.getTranslation("levelchannel.set", channel));
+        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+        cmdArgs.channel.send(Localisation.getTranslation("levelchannel.set", channel));
     }
 }
 
@@ -51,17 +52,17 @@ class ClearSubCommand extends SubCommand{
         super("clear");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
 
-        if(!serverInfo.levelChannel) return message.reply(Localisation.getTranslation("error.empty.levelchannel"));
+        if(!serverInfo.levelChannel) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
 
         serverInfo.levelChannel="";
 
-        await ServerInfo.set(message.guild.id, serverInfo);
+        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
 
-        message.channel.send(Localisation.getTranslation("levelchannel.remove"));
+        cmdArgs.channel.send(Localisation.getTranslation("levelchannel.remove"));
     }
 }
 
@@ -70,13 +71,13 @@ class ListSubCommand extends SubCommand{
         super("list");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
-        if(!serverInfo.levelChannel) return message.reply(Localisation.getTranslation("error.empty.levelchannel"));
-        const channel=await getGuildChannelByID(serverInfo.levelChannel, message.guild);
-        if(!channel) return message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
-        message.channel.send(`${channel}`);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
+        if(!serverInfo.levelChannel) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
+        const channel=await getGuildChannelByID(serverInfo.levelChannel, cmdArgs.guild);
+        if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
+        cmdArgs.channel.send(`${channel}`);
     }
 }
 

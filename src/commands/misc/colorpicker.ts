@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { Localisation } from "../../localisation";
-import { Command, CommandUsage } from "../../structs/Command";
+import { Command, CommandArguments, CommandUsage } from "../../structs/Command";
 import { isHexColor, canvasToMessageAttachment, canvasColor } from "../../Utils";
 
 class ColorPickerCommand extends Command{
@@ -11,13 +11,13 @@ class ColorPickerCommand extends Command{
         this.aliases=["colourpicker"];
     }
 
-    public async onRun(message : Message, args : string[]){
-        let color=args[0].toLowerCase();
+    public async onRun(cmdArgs : CommandArguments){
+        let color=cmdArgs.args[0].toLowerCase();
         if(color.startsWith("#")){
             color=color.substring(1);
         }
-        if(!isHexColor(color)) return message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
-        message.channel.send(Localisation.getTranslation("generic.hexcolor", color), canvasToMessageAttachment(canvasColor(color)));
+        if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
+        cmdArgs.channel.send(Localisation.getTranslation("generic.hexcolor", color), canvasToMessageAttachment(canvasColor(color)));
     }
 }
 

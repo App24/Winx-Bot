@@ -1,4 +1,5 @@
 import { Message } from "discord.js";
+import { CommandArguments } from "./Command";
 
 export abstract class SubCommand{
 
@@ -15,5 +16,5 @@ export abstract class SubCommand{
         this.maxArgs=Number.MAX_SAFE_INTEGER;
     }
 
-    public abstract onRun(message : Message, args : string[]);
+    public abstract onRun(cmdArgs : CommandArguments);
 }

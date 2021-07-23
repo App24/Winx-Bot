@@ -4,7 +4,7 @@ import { OWNER_ID } from "../../Constants";
 import { getUserByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { SuggestionState, SuggestionStruct } from "../../structs/databaseTypes/SuggestionStruct";
 import { SubCommand } from "../../structs/SubCommand";
@@ -21,8 +21,9 @@ class SuggestionsCommand extends Command{
         this.subCommands=[new ListSubCommand(), new CompleteSubCommand(), new RejectSubCommand(), new GetSubCommand()];
     }
 
-    public onRun(message : Message, args : string[]){
-        this.onRunSubCommands(message, args.shift(), args);
+    public onRun(cmdArgs : CommandArguments){
+        const name=cmdArgs.args.shift();
+        this.onRunSubCommands(cmdArgs, name);
     }
 }
 
@@ -32,12 +33,12 @@ class ListSubCommand extends SubCommand{
         this.maxArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
         const requests:{key:string, value:SuggestionStruct}[]=await Suggestions.entries();
         let suggestionState : SuggestionState=undefined;
-        if(args[0]){
-            switch(args[0].toLowerCase()){
+        if(cmdArgs.args[0]){
+            switch(cmdArgs.args[0].toLowerCase()){
                 case "non":
                     suggestionState=SuggestionState.Non;
                     break;
@@ -60,12 +61,12 @@ class ListSubCommand extends SubCommand{
             }
         });
 
-        if(!data.length) return message.reply(Localisation.getTranslation("error.empty.suggestions"));
+        if(!data.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.suggestions"));
 
         const embed=new MessageEmbed();
-        embed.setColor((await getBotRoleColor(message.guild)));
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
         embed.setDescription(data);
-        message.channel.send(embed);
+        cmdArgs.channel.send(embed);
     }
 }
 
@@ -76,19 +77,19 @@ class CompleteSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
-        const suggestion:SuggestionStruct=await Suggestions.get(args[0].toLowerCase());
-        if(!suggestion) return message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
-        if(suggestion.state===SuggestionState.Completed) return message.reply(Localisation.getTranslation("suggestions.already.completed"));
+        const suggestion:SuggestionStruct=await Suggestions.get(cmdArgs.args[0].toLowerCase());
+        if(!suggestion) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
+        if(suggestion.state===SuggestionState.Completed) return cmdArgs.message.reply(Localisation.getTranslation("suggestions.already.completed"));
         const user=await getUserByID(suggestion.userId);
         const text=Localisation.getTranslation("suggestions.complete", user||suggestion.userId, suggestion.request);
         const embed=new MessageEmbed();
         embed.setDescription(text);
         embed.setTimestamp();
         embed.setFooter(user.tag||suggestion.userId, user.displayAvatarURL()||"");
-        embed.setColor((await getBotRoleColor(message.guild)));
-        message.channel.send(embed).then(async(msg)=>{
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
+        cmdArgs.channel.send(embed).then(async(msg)=>{
             msg.react('✅');
             msg.react('❌');
             const collector=msg.createReactionCollector((reaction, user)=>(['✅', "❌"].includes(reaction.emoji.name) && user.id===OWNER_ID), {max: 1});
@@ -103,7 +104,7 @@ class CompleteSubCommand extends SubCommand{
                     embed2.setDescription(Localisation.getTranslation("suggestions.completed", embed2.description));
                     msg.edit(embed2);
                     suggestion.state=SuggestionState.Completed;
-                    await Suggestions.set(args[0], suggestion);
+                    await Suggestions.set(cmdArgs.args[0], suggestion);
                 }
             });
         });
@@ -117,19 +118,19 @@ class RejectSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
-        const suggestion:SuggestionStruct=await Suggestions.get(args[0].toLowerCase());
-        if(!suggestion) return message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
-        if(suggestion.state===SuggestionState.Rejected) return message.reply(Localisation.getTranslation("suggestions.already.rejected"));
+        const suggestion:SuggestionStruct=await Suggestions.get(cmdArgs.args[0].toLowerCase());
+        if(!suggestion) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
+        if(suggestion.state===SuggestionState.Rejected) return cmdArgs.message.reply(Localisation.getTranslation("suggestions.already.rejected"));
         const user=await getUserByID(suggestion.userId);
         const text=Localisation.getTranslation("suggestions.reject", user||suggestion.userId, suggestion.request);
         const embed=new MessageEmbed();
         embed.setDescription(text);
         embed.setTimestamp();
         embed.setFooter(user.tag||suggestion.userId, user.displayAvatarURL()||"");
-        embed.setColor((await getBotRoleColor(message.guild)));
-        message.channel.send(embed).then(async(msg)=>{
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
+        cmdArgs.channel.send(embed).then(async(msg)=>{
             msg.react('✅');
             msg.react('❌');
             const collector=msg.createReactionCollector((reaction, user)=>(['✅', "❌"].includes(reaction.emoji.name) && user.id===OWNER_ID), {max: 1});
@@ -144,7 +145,7 @@ class RejectSubCommand extends SubCommand{
                     embed2.setDescription(Localisation.getTranslation("suggestions.rejected", embed2.description));
                     msg.edit(embed2);
                     suggestion.state=SuggestionState.Rejected;
-                    await Suggestions.set(args[0], suggestion);
+                    await Suggestions.set(cmdArgs.args[0], suggestion);
                 }
             });
         });
@@ -158,18 +159,18 @@ class GetSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Suggestions=BotUser.getDatabase(DatabaseType.Suggestions);
-        const suggestion:SuggestionStruct=await Suggestions.get(args[0].toLowerCase());
-        if(!suggestion) return message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
+        const suggestion:SuggestionStruct=await Suggestions.get(cmdArgs.args[0].toLowerCase());
+        if(!suggestion) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.suggestionId"));
         const user=await getUserByID(suggestion.userId);
         const text=Localisation.getTranslation("suggestions.suggestion", user||suggestion.userId, capitalise(suggestion.state), suggestion.request);
         const embed=new MessageEmbed();
         embed.setDescription(text);
         embed.setTimestamp();
         embed.setFooter(user.tag||suggestion.userId, user.displayAvatarURL()||"");
-        embed.setColor((await getBotRoleColor(message.guild)));
-        message.channel.send(embed);
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
+        cmdArgs.channel.send(embed);
     }
 }
 

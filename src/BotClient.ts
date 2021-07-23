@@ -124,6 +124,10 @@ class BotClient extends Client{
     public loadLocalisation(){
         Localisation.loadLocalisation("lang/en.json");
     }
+
+    public getCommand(commandName : string){
+        return this.Commands.get(commandName)||this.Commands.find(cmd=>cmd.aliases&&cmd.aliases.includes(commandName));
+    }
 }
 
 const intents=new Intents(Intents.NON_PRIVILEGED);

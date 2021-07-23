@@ -2,7 +2,7 @@ import fs from "fs";
 import archiver from "archiver";
 import { Message, MessageAttachment } from "discord.js";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess } from "../../../structs/Command";
+import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
 import { DATABASE_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
 
@@ -13,7 +13,7 @@ class DownloadDBCommand extends Command{
         this.category=Owner;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const file="databases.zip";
         const output=fs.createWriteStream(file);
         const archive=archiver("zip");
@@ -21,7 +21,7 @@ class DownloadDBCommand extends Command{
             throw err;
         });
         
-        const msg=await message.channel.send(Localisation.getTranslation("downloaddb.wait"));
+        const msg=await cmdArgs.channel.send(Localisation.getTranslation("downloaddb.wait"));
 
         archive.directory(DATABASE_FOLDER, false);
 
@@ -30,7 +30,7 @@ class DownloadDBCommand extends Command{
         await archive.finalize();
 
         await msg.delete();
-        await message.channel.send(new MessageAttachment(file));
+        await cmdArgs.channel.send(new MessageAttachment(file));
         fs.unlinkSync(file);
     }
 }

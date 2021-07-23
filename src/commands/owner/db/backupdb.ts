@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess } from "../../../structs/Command";
+import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
 import fs from "fs";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER } from "../../../Constants";
@@ -14,9 +14,9 @@ class BackupDBCommand extends Command{
         this.category=Owner;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         backupDatabases();
-        message.channel.send(Localisation.getTranslation("generic.done"));
+        cmdArgs.channel.send(Localisation.getTranslation("generic.done"));
     }
 }
 

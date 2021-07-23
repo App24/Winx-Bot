@@ -28,6 +28,7 @@
     "error.empty.suggestions": "There are no suggestions!",
     "error.empty.excludedchannels": "There are no excluded channels!",
     "error.empty.levelchannel": "There is no level channel!",
+    "error.empty.customcommands": "There are no custom commands!",
 
     "error.null.userLevel": "That user has no levels!",
 
@@ -72,6 +73,7 @@
     "argument.remove": "remove",
     "argument.add": "add",
     "argument.reset": "reset",
+    "argument.edit": "edit",
 
     "argument.channel": "channel",
     "argument.errorid": "error id",
@@ -92,6 +94,13 @@
     "argument.start": "start",
     "argument.end": "end",
     "argument.both": "both",
+    "argument.name": "name",
+    "argument.description": "description",
+    "argument.type": "setting",
+    "argument.outputs": "outputs",
+    "argument.value": "value",
+    "argument.oldvalue": "old value",
+    "argument.newvalue": "new value",
 
     "__comment__": "Command Errors/Warnings",
     "command.disabled": "This command is disabled!",
@@ -237,7 +246,17 @@
 
     "downloaddb.wait": "Zipping databases...",
 
-    "__comment__": "Category Description",
+    "customcommand.error.command.exist": "That command already exists!",
+    "customcommand.error.command.not.exist": "That command does not exist!",
+    "customcommand.success.add": "Successfully added command `{0}`!",
+    "customcommand.success.remove": "Successfully removed command!",
+    "customcommand.success.edit": "Successfully edited command!",
+    "customcommand.list.title": "Custom Commands",
+    "customcommands.invalid.type": "That is an invalid setting type! Valid setting types are {0}",
+    "customcommands.invalid.access": "That is an invalid access type! Valid access types are {0}",
+    "customcommand.invalid.newvalue": "You must provide a new value!",
+
+    "__comment__": "Category Names",
     "category.owner": "Owner",
     "category.moderator": "Moderator",
     "category.settings": "Settings",
@@ -246,6 +265,8 @@
     "category.ranking": "Ranking",
     "category.customisation": "Customisation",
     "category.other": "Other",
+    "category.customcommands": "Custom Commands",
+    "category.customcommandsettings": "Custom Command Settings",
 
     "__comment__": "Command Description",
     "tingz.command.description": "{0} Tingz",
@@ -284,5 +305,9 @@
     "backupdb.command.description": "Backs up databases!",
     "restoredb.command.description": "Restores the databases!",
     "downloaddb.command.description": "Download the databases!",
-    "fakeerror.command.description": "Create a fake error!"
+    "fakeerror.command.description": "Create a fake error!",
+    "customcommandadd.command.description": "Add custom commands!",
+    "customcommandremove.command.description": "Remove custom commands!",
+    "customcommandedit.command.description": "Edit custom commands!",
+    "customcommandlist.command.description": "List custom commands!"
 }

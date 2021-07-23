@@ -2,7 +2,7 @@ import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { copyUserSetting, DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
@@ -21,8 +21,9 @@ class NameColorCommand extends Command{
         this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
     }
 
-    public async onRun(message : Message, args : string[]){
-        await this.onRunSubCommands(message, args.shift(), args);
+    public async onRun(cmdArgs : CommandArguments){
+        const name=cmdArgs.args.shift();
+        await this.onRunSubCommands(cmdArgs, name);
     }
 }
 
@@ -31,16 +32,16 @@ class GetSubCommand extends SubCommand{
         super("get");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
-        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
-            await UserSettings.set(message.guild.id, serverUserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.message.author.id));
+            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
-        if(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSettings.nameColor)) return message.reply(Localisation.getTranslation("error.invalid.namecolor"));
-        message.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), canvasToMessageAttachment(canvasColor(userSettings.nameColor)));
+        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id);
+        if(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSettings.nameColor)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.namecolor"));
+        cmdArgs.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), canvasToMessageAttachment(canvasColor(userSettings.nameColor)));
     }
 }
 
@@ -50,23 +51,23 @@ class SetSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
-        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
-            await UserSettings.set(message.guild.id, serverUserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.message.author.id));
+            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id);
 
-        let color=args[0].toLowerCase();
+        let color=cmdArgs.args[0].toLowerCase();
         if(color.startsWith("#")){
             color=color.substring(1);
         }
-        if(!isHexColor(color)) return message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
+        if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         userSettings.nameColor=color;
-        await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send(Localisation.getTranslation("namecolor.set.output", color));
+        await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+        cmdArgs.channel.send(Localisation.getTranslation("namecolor.set.output", color));
     }
 }
 
@@ -75,17 +76,17 @@ class ResetSubCommand extends SubCommand{
         super("reset");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, message.guild.id);
-        if(!serverUserSettings.find(u=>u.userId===message.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, message.author.id));
-            await UserSettings.set(message.guild.id, serverUserSettings);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        if(!serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.message.author.id));
+            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===message.author.id);
+        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id);
         userSettings.nameColor=DEFAULT_USER_SETTING.nameColor;
-        await UserSettings.set(message.guild.id, serverUserSettings);
-        message.channel.send(Localisation.getTranslation("namecolor.reset.output"));
+        await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+        cmdArgs.channel.send(Localisation.getTranslation("namecolor.reset.output"));
     }
 }
 

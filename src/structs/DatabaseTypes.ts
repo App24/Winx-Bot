@@ -5,5 +5,6 @@ export enum DatabaseType{
     ServerInfo="serverInfo",
     UserSettings="userSettings",
     Suggestions="suggestions",
-    Paid="paid"
+    Paid="paid",
+    CustomCommands="customCommands"
 }

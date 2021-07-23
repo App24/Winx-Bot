@@ -4,10 +4,11 @@ import { BotUser } from "../BotClient"
 import { OWNER_ID, PREFIX } from "../Constants";
 import { getUserByID, getMemberByID } from "../GetterUtilts";
 import { Localisation } from "../localisation";
-import { CommandAccess, CommandAvailability } from "../structs/Command";
+import { CommandAccess, CommandArguments, CommandAvailability } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";
+import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
-import { genRanHex, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
+import { genRanHex, getServerDatabase, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -20,9 +21,42 @@ export=()=>{
         const commandName=parsed.command.toLowerCase();
         const args=parsed.arguments;
 
-        const command=BotUser.Commands.get(commandName)||BotUser.Commands.find(cmd=>cmd.aliases&&cmd.aliases.includes(commandName));
+        const command=BotUser.getCommand(commandName);
 
-        if(!command) return;
+        if(!command){
+            if(isDM(message.channel))
+                return;
+            const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
+            const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, message.guild.id);
+            const customCommand=customCommands.find(c=>c.name===commandName);
+            if(!customCommand)
+                return;
+            switch(customCommand.access){
+                case CommandAccess.Patreon:{
+                    if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
+                        return message.reply(Localisation.getTranslation("command.access.patreon"));
+                    }
+                }break;
+                case CommandAccess.Moderators:{
+                    if(isDM(message.channel)||!message.member.hasPermission("MANAGE_GUILD")){
+                        return message.reply(Localisation.getTranslation("command.access.moderator"));
+                    }
+                }break;
+                case CommandAccess.GuildOwner:{
+                    if(isDM(message.channel)||message.author.id!==message.guild.ownerID){
+                        return message.reply(Localisation.getTranslation("command.access.guildOwner"));
+                    }
+                }break;
+                case CommandAccess.BotOwner:{
+                    if(message.author.id!==OWNER_ID){
+                        return message.reply(Localisation.getTranslation("command.access.botOwner"));
+                    }
+                }break;
+            }
+
+            message.channel.send(customCommand.outputs[Math.floor(Math.random()*customCommand.outputs.length)]);
+            return;
+        }
 
         if(!isDM(message.channel)&&command.guildIds&&!command.guildIds.includes(message.guild.id)) return;
 
@@ -96,7 +130,8 @@ export=()=>{
         }
 
         try{
-            await command.onRun(message, args);
+            const cmdArgs=new CommandArguments(message, message.guild, args);
+            await command.onRun(cmdArgs);
         }catch(error){
             await reportError(error.stack, message);
         }

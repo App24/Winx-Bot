@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getMemberByID, getUserFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, asyncForEach, getLevelXP, getBotRoleColor, getLeaderboardMembers } from "../../Utils";
@@ -18,19 +18,19 @@ class RankCommand extends Command{
         this.availability=CommandAvailability.Guild;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, message.guild.id);
-        if(!levels) return message.reply(Localisation.getTranslation("error.empty.levels"));
-        let _user=message.author;
-        if(args.length){
-            const temp=await getUserFromMention(args[0]);
-            if(!temp) return message.reply(Localisation.getTranslation("error.invalid.user"));
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
+        let _user=cmdArgs.message.author;
+        if(cmdArgs.args.length){
+            const temp=await getUserFromMention(cmdArgs.args[0]);
+            if(!temp) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));
             _user=temp;
         }
-        if(_user.bot) return message.reply(Localisation.getTranslation("error.user.bot"));
-        const member=await getMemberByID(_user.id, message.guild);
-        if(!member) return message.reply(Localisation.getTranslation("error.invalid.member"));
+        if(_user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.user.bot"));
+        const member=await getMemberByID(_user.id, cmdArgs.guild);
+        if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
         //Sorts levels list
         levels.sort((a,b)=>{
@@ -40,7 +40,7 @@ class RankCommand extends Command{
             return b.level-a.level;
         });
 
-        const leaderboardLevels=await getLeaderboardMembers(message.guild);
+        const leaderboardLevels=await getLeaderboardMembers(cmdArgs.guild);
 
         const data=[];
         let i=1;
@@ -79,13 +79,13 @@ class RankCommand extends Command{
                 data.push(text);
                 data.push(Localisation.getTranslation("leaderboard.output", userLevel.level, userLevel.xp, getLevelXP(userLevel.level)));
             }else{
-                return message.reply(Localisation.getTranslation("error.null.userLevel"));
+                return cmdArgs.message.reply(Localisation.getTranslation("error.null.userLevel"));
             }
         }
         const embed=new MessageEmbed();
-        embed.setColor((await getBotRoleColor(message.guild)));
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
         embed.setDescription(data);
-        message.channel.send(embed);
+        cmdArgs.channel.send(embed);
     }
 }
 

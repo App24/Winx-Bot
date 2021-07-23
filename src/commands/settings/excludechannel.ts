@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getGuildChannelByID, getGuildChannelFromMention } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { SubCommand } from "../../structs/SubCommand";
@@ -21,8 +21,9 @@ class ExcludeChannelCommand extends Command{
         this.subCommands=[new AddSubCommand(), new RemoveSubCommand(), new ListSubCommand()];
     }
 
-    public async onRun(message : Message, args : string[]){
-        this.onRunSubCommands(message, args.shift(), args);
+    public async onRun(cmdArgs : CommandArguments){
+        const name=cmdArgs.args.shift();
+        this.onRunSubCommands(cmdArgs, name);
     }
 }
 
@@ -32,21 +33,21 @@ class AddSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
         
         if(!serverInfo.excludeChannels) serverInfo.excludeChannels=[];
 
-        const channel=await getGuildChannelFromMention(args[0], message.guild);
-        if(!channel) return message.reply(Localisation.getTranslation("error.invalid.channel"));
+        const channel=await getGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
+        if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.channel"));
         
-        if(serverInfo.excludeChannels.find(c=>c===channel.id)) return message.reply(Localisation.getTranslation("excludechannel.channel.already"));
+        if(serverInfo.excludeChannels.find(c=>c===channel.id)) return cmdArgs.message.reply(Localisation.getTranslation("excludechannel.channel.already"));
 
         serverInfo.excludeChannels.push(channel.id);
 
-        await ServerInfo.set(message.guild.id, serverInfo);
-        message.channel.send(Localisation.getTranslation("excludechannel.add", channel));
+        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+        cmdArgs.channel.send(Localisation.getTranslation("excludechannel.add", channel));
     }
 }
 
@@ -56,22 +57,22 @@ class RemoveSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
 
-        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
+        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
 
-        const channel=await getGuildChannelFromMention(args[0], message.guild);
-        if(!channel) return message.reply(Localisation.getTranslation("error.invalid.channel"));
+        const channel=await getGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
+        if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.channel"));
 
-        if(!serverInfo.excludeChannels.find(c=>c===channel.id)) return message.reply(Localisation.getTranslation("excludechannel.channel.not"));
+        if(!serverInfo.excludeChannels.find(c=>c===channel.id)) return cmdArgs.message.reply(Localisation.getTranslation("excludechannel.channel.not"));
 
         const index=serverInfo.excludeChannels.findIndex(c=>c===channel.id);
         if(index>=0) serverInfo.excludeChannels.splice(index, 1);
 
-        await ServerInfo.set(message.guild.id, serverInfo);
-        message.channel.send(Localisation.getTranslation("excludechannel.remove", channel));
+        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+        cmdArgs.channel.send(Localisation.getTranslation("excludechannel.remove", channel));
     }
 }
 
@@ -80,21 +81,21 @@ class ListSubCommand extends SubCommand{
         super("list");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
-        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
+        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
         const data=[];
         await asyncForEach(serverInfo.excludeChannels, async(excludedChannel:string)=>{
-            const channel=await getGuildChannelByID(excludedChannel, message.guild);
+            const channel=await getGuildChannelByID(excludedChannel, cmdArgs.guild);
             if(channel){
                 data.push(channel);
             }
         });
         const embed=new MessageEmbed();
         embed.setDescription(data);
-        embed.setColor((await getBotRoleColor(message.guild)));
-        message.channel.send(embed);
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
+        cmdArgs.channel.send(embed);
     }
 }
 

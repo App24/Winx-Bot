@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getMemberFromMention, getMemberByID } from "../../GetterUtilts";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { PatreonInfo } from "../../structs/databaseTypes/PatreonInfo";
 import { SubCommand } from "../../structs/SubCommand";
@@ -21,8 +21,9 @@ class PatreonCommand extends Command{
         this.subCommands=[new AddSubCommand(), new RemoveSubCommand(), new ListSubCommand()];
     }
 
-    public async onRun(message : Message, args : string[]){
-        this.onRunSubCommands(message, args.shift(), args);
+    public async onRun(cmdArgs : CommandArguments){
+        const name=cmdArgs.args.shift();
+        this.onRunSubCommands(cmdArgs, name);
     }
 }
 
@@ -32,19 +33,19 @@ class AddSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Patreon=BotUser.getDatabase(DatabaseType.Paid);
-        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, message.guild.id);
+        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guild.id);
 
-        const member=await getMemberFromMention(args[0], message.guild);
-        if(!member) return message.reply(Localisation.getTranslation("error.invalid.member"));
+        const member=await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
+        if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
-        if(patreons.find(u=>u.userId===member.id)) return message.reply(Localisation.getTranslation("patreon.user.already"));
+        if(patreons.find(u=>u.userId===member.id)) return cmdArgs.message.reply(Localisation.getTranslation("patreon.user.already"));
 
         const patreon=new PatreonInfo(member.id, new Date().getTime());
         patreons.push(patreon);
-        await Patreon.set(message.guild.id, patreons);
-        return message.channel.send(Localisation.getTranslation("patreon.add", member));
+        await Patreon.set(cmdArgs.guild.id, patreons);
+        return cmdArgs.channel.send(Localisation.getTranslation("patreon.add", member));
     }
 }
 
@@ -54,21 +55,21 @@ class RemoveSubCommand extends SubCommand{
         this.minArgs=1;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Patreon=BotUser.getDatabase(DatabaseType.Paid);
-        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, message.guild.id);
+        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guild.id);
 
-        if(!patreons||!patreons.length) return message.reply(Localisation.getTranslation("error.empty.patreon"));
+        if(!patreons||!patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
 
-        const member=await getMemberFromMention(args[0], message.guild);
-        if(!member) return message.reply(Localisation.getTranslation("error.invalid.member"));
+        const member=await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
+        if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
-        if(!patreons.find(u=>u.userId===member.id)) return message.reply(Localisation.getTranslation("patreon.user.not"));
+        if(!patreons.find(u=>u.userId===member.id)) return cmdArgs.message.reply(Localisation.getTranslation("patreon.user.not"));
 
         const index=patreons.findIndex(u=>u.userId===member.id);
         if(index>=0) patreons.splice(index, 1);
-        await Patreon.set(message.guild.id, patreons);
-        return message.channel.send(Localisation.getTranslation("patreon.remove", member));
+        await Patreon.set(cmdArgs.guild.id, patreons);
+        return cmdArgs.channel.send(Localisation.getTranslation("patreon.remove", member));
     }
 }
 
@@ -77,22 +78,22 @@ class ListSubCommand extends SubCommand{
         super("list");
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         const Patreon=BotUser.getDatabase(DatabaseType.Paid);
-        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, message.guild.id);
+        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guild.id);
 
-        if(!patreons||!patreons.length) return message.reply(Localisation.getTranslation("error.empty.patreon"));
+        if(!patreons||!patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
 
         const data=[];
         await asyncForEach(patreons, async(patreon : PatreonInfo)=>{
-            const member=await getMemberByID(patreon.userId, message.guild);
+            const member=await getMemberByID(patreon.userId, cmdArgs.guild);
             if(!member) return;
             data.push(Localisation.getTranslation("patreon.list", member, dateToString(new Date(patreon.date), "{dd}/{MM}/{YYYY}")));
         });
         const embed=new MessageEmbed();
-        embed.setColor((await getBotRoleColor(message.guild)));
+        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
         embed.setDescription(data);
-        return message.channel.send(embed);
+        return cmdArgs.channel.send(embed);
     }
 }
 

@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { Characters } from "../../structs/Category";
-import { Command } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
 import { capitalise, reportError } from "../../Utils";
 import fs from 'fs';
 import readline from 'readline';
@@ -15,9 +15,9 @@ export class RandomLineCommand extends Command{
         this.category=Characters;
     }
 
-    public async onRun(message : Message, args : string[]){
+    public async onRun(cmdArgs : CommandArguments){
         if(!fs.existsSync(`lines/${this.name}.txt`)){
-            reportError(Localisation.getTranslation("error.missing.character.lines", this.name), message);
+            reportError(Localisation.getTranslation("error.missing.character.lines", this.name), cmdArgs.message);
             return;
         }
 
@@ -35,10 +35,10 @@ export class RandomLineCommand extends Command{
         }
 
         if(!data.length){
-            reportError(Localisation.getTranslation("error.empty.character.lines", this.name), message);
+            reportError(Localisation.getTranslation("error.empty.character.lines", this.name), cmdArgs.message);
             return;
         }
 
-        message.channel.send(data[Math.floor(data.length*Math.random())]);
+        cmdArgs.channel.send(data[Math.floor(data.length*Math.random())]);
     }
 }
