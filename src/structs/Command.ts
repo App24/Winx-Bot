@@ -118,9 +118,9 @@ export class CommandArguments{
     public readonly guild : Guild;
     public readonly channel : TextChannel | DMChannel | NewsChannel;
 
-    public constructor(message : Message, guild : Guild, args : string[]){
+    public constructor(message : Message, args : string[]){
         this.message=message;
-        this.guild=guild;
+        this.guild=message.guild;
         this.channel=message.channel;
         this.args=args;
     }

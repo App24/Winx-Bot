@@ -132,7 +132,7 @@ export=()=>{
         }
 
         try{
-            const cmdArgs=new CommandArguments(message, message.guild, args);
+            const cmdArgs=new CommandArguments(message, args);
             await command.onRun(cmdArgs);
         }catch(error){
             await reportError(error.stack, message);

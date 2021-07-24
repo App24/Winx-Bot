@@ -10,10 +10,9 @@ import { Localisation } from "./localisation";
 
 interface BotOptions{
     clientOptions? : ClientOptions;
-    logLoading? : 'none' | 'simplified' | 'complex' | 'all';
-    loadEvents? : boolean;
-    loadCommands? : boolean;
-    loadSlashes? : boolean;
+    logLoading : 'none' | 'simplified' | 'complex' | 'all';
+    loadEvents : boolean;
+    loadCommands : boolean;
 }
 
 class BotClient extends Client{
@@ -32,8 +31,6 @@ class BotClient extends Client{
         ;(async()=>{
             if(this.botOptions.loadCommands)
                 await this.loadCommands();
-            // if(this.botOptions.loadSlashes)
-            //     await this.loadSlashes();
             if(this.botOptions.loadEvents)
                 await this.loadEvents();
         })();
@@ -136,6 +133,5 @@ export const BotUser=new BotClient({
     clientOptions: {ws: {intents: intents}},
     logLoading: 'simplified',
     loadCommands: true,
-    loadEvents: true,
-    loadSlashes: true
+    loadEvents: true
 });

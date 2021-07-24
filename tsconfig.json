@@ -1,17 +1,17 @@
 {
-    "compilerOptions": {
-      "rootDir": "src",
-      "outDir": "dist",
-      "lib": ["ESNext"],
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "target": "ESNext",
-      "esModuleInterop": true,
-      "resolveJsonModule": true,
-      "experimentalDecorators": true,
-      "emitDecoratorMetadata": true,
-      "allowSyntheticDefaultImports": true,
-      "skipLibCheck": true,
-      "typeRoots": ["./node_modules/@types"]
-    }
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "lib": ["ESNext"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types"]
   }
+}

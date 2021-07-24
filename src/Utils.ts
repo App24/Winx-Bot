@@ -13,16 +13,18 @@ import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from './Constants';
 import { ErrorStruct } from './structs/databaseTypes/ErrorStruct';
 import { Localisation } from './localisation';
 
-export async function asyncForEach(array:any[], callback:Function) {
+export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: number, array: readonly U[])=>Promise<any>|any) {
     for(let i =0; i < array.length; i++){
-        let exit=await callback(array[i], i, array);
+        let exit=await callbackFn(array[i], i, array);
         if(exit===true)break;
     }
 }
 
-export async function asyncMapForEach(array:Map<any,any>, callback:Function) {
-    for(let i =0; i < array.size; i++){
-        let exit=await callback(array.keys()[i], array.values()[i], array);
+export async function asyncMapForEach<U,T>(map:Map<U,T>, callbackFn: (key:U, value:T, index:number, map:ReadonlyMap<U,T>)=>Promise<any>|any) {
+    const keys=Array.from(map.keys());
+    const values=Array.from(map.values());
+    for(let i =0; i < map.size; i++){
+        let exit=await callbackFn(keys[i], values[i], i, map);
         if(exit===true)break;
     }
 }

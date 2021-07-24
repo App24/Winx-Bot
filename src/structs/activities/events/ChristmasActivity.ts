@@ -1,9 +1,9 @@
 import { Localisation } from "../../../localisation";
-import { EventActivity } from "../EventActivity";
+import { OneDayEventActivity } from "../OneDayEventActivity";
 
-export class ChristmasActivity extends EventActivity{
+export class ChristmasActivity extends OneDayEventActivity{
     public constructor(){
-        super(new Date(2, 11, 25), new Date(2,11,26));
+        super(new Date(2, 11, 25));
     }
 
     public getActivity(): string | Promise<string> {

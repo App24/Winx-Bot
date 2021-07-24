@@ -1,12 +1,12 @@
 import { Localisation } from "../../../localisation";
 import { capitalise } from "../../../Utils";
-import { EventActivity } from "../EventActivity"
+import { OneDayEventActivity } from "../OneDayEventActivity";
 
-export class BirthdayActivity extends EventActivity{
+export class BirthdayActivity extends OneDayEventActivity{
     public name : string;
 
-    public constructor(startTime:Date, endTime:Date, name : string){
-        super(startTime, endTime);
+    public constructor(startTime:Date, name : string){
+        super(startTime);
         this.name=name;
     }
 
