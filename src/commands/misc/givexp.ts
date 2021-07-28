@@ -18,17 +18,17 @@ class GiveXPCommand extends Command{
     public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
-        let userLevel = levels.find(u=>u.userId===cmdArgs.message.author.id);
+        let userLevel = levels.find(u=>u.userId===cmdArgs.author.id);
         if(!userLevel){
-            await levels.push(new UserLevel(cmdArgs.message.author.id));
-            userLevel = levels.find(u=>u.userId===cmdArgs.message.author.id);
+            await levels.push(new UserLevel(cmdArgs.author.id));
+            userLevel = levels.find(u=>u.userId===cmdArgs.author.id);
         }
         const level=Math.max(1, Math.abs(userLevel.level));
         const per=Math.pow(level, -1.75)*100;
         const rand=Math.random()*100;
         if(rand<=per){
             const xp=Math.floor(getLevelXP(userLevel.level)*0.1);
-            await addXP(cmdArgs.message.author, cmdArgs.guild, <NewsChannel|TextChannel>cmdArgs.channel, xp);
+            await addXP(cmdArgs.author, cmdArgs.guild, <NewsChannel|TextChannel>cmdArgs.channel, xp);
             return cmdArgs.channel.send(Localisation.getTranslation("givexp.success.output", xp));
         }
         cmdArgs.channel.send(Localisation.getTranslation("givexp.fail.output"));

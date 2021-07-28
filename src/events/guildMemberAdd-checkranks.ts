@@ -1,6 +1,6 @@
 import { GuildMember } from "discord.js";
 import { BotUser } from "../BotClient";
-import { getRoleByID } from "../GetterUtilts";
+import { getRoleByID } from "../GetterUtils";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { RankLevel } from "../structs/databaseTypes/RankLevel";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";

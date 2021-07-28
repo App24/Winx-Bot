@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getRoleByID } from "../../GetterUtilts";
+import { getRoleByID } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandArguments, CommandAvailability } from "../../structs/Command";

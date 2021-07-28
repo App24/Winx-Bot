@@ -35,11 +35,11 @@ class GetSubCommand extends SubCommand{
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.message.author.id));
+        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
             await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id);
+        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
         cmdArgs.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.cardColor), canvasToMessageAttachment(canvasColor(userSettings.cardColor)));
     }
 }
@@ -53,11 +53,11 @@ class SetSubCommand extends SubCommand{
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.message.author.id));
+        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
             await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id);
+        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
 
         let color=cmdArgs.args[0].toLowerCase();
         if(color.startsWith("#")){
@@ -78,11 +78,11 @@ class ResetSubCommand extends SubCommand{
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.message.author.id));
+        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
+            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
             await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.message.author.id);
+        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
         userSettings.cardColor=DEFAULT_USER_SETTING.cardColor;
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         cmdArgs.channel.send(Localisation.getTranslation("cardcolor.reset.output"));

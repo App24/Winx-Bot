@@ -31,17 +31,17 @@ class CustomCommandListCommand extends Command{
             customCommands.forEach(customCommand=>{
                 switch(customCommand.access){
                     case CommandAccess.Moderators:{
-                        if(!cmdArgs.message.member.hasPermission("MANAGE_GUILD")){
+                        if(!cmdArgs.member.hasPermission("MANAGE_GUILD")){
                             return;
                         }
                     }break;
                     case CommandAccess.GuildOwner:{
-                        if(cmdArgs.message.author.id!==cmdArgs.guild.ownerID){
+                        if(cmdArgs.author.id!==cmdArgs.guild.ownerID){
                             return;
                         }
                     }break;
                     case CommandAccess.BotOwner:{
-                        if(cmdArgs.message.author.id!==OWNER_ID){
+                        if(cmdArgs.author.id!==OWNER_ID){
                             return;
                         }
                     }break;
@@ -58,7 +58,7 @@ class CustomCommandListCommand extends Command{
             embed.setTitle(capitalise(customCommand.name));
             embed.setDescription(customCommand.outputs);
             embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-            cmdArgs.message.channel.send(embed);
+            cmdArgs.channel.send(embed);
         }
     }
 }

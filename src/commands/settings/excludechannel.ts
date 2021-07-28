@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getGuildChannelByID, getGuildChannelFromMention } from "../../GetterUtilts";
+import { getGuildChannelByID, getGuildChannelFromMention } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
 import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";

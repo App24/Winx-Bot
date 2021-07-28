@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { getUserFromMention } from "../../GetterUtilts";
+import { getUserFromMention } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess, CommandArguments, CommandUsage } from "../../structs/Command";

@@ -1,0 +1,56 @@
+{
+    "error.execution": "There was a problem executing that command!",
+    "error.arguments.few": "You provided too few arguments",
+    "error.arguments.many": "You provided too many arguments",
+    "error.slashcommand": "These have been disabled for the time being! Sorry!",
+
+    "error.invalid.option": "That is not a valid option!",
+    "error.invalid.hexcolor": "That is not a valid hex color!",
+    "error.invalid.category": "That is not a valid category!",
+    "error.invalid.category.commands": "That category has no commands!",
+    "error.invalid.namecolor": "You do not have a custom name color!",
+    "error.invalid.member": "That is not a member of this server!",
+    "error.invalid.channel": "That is a valid channel!",
+    "error.invalid.user": "That is not a valid user!",
+    "error.invalid.role": "That is not a valid role!",
+
+    "error.invalid.level": "That is not a valid level!",
+    "error.invalid.xp": "That is not a valid amount of xp!",
+    "error.invalid.errorCode": "That is an invalid error code!",
+    "error.invalid.suggestionId": "That is an invalid suggestion ID!",
+    "error.invalid.number": "That is an invalid number",
+
+    "error.empty.levels": "There are no levels in this server!",
+    "error.empty.ranks": "There are no ranks in this server!",
+    "error.empty.patreon": "There are no patreons in this server!",
+    "error.empty.errors": "There are no errors!",
+    "error.empty.suggestions": "There are no suggestions!",
+    "error.empty.excludedchannels": "There are no excluded channels!",
+    "error.empty.levelchannel": "There is no level channel!",
+    "error.empty.customcommands": "There are no custom commands!",
+
+    "error.null.userLevel": "That user has no levels!",
+
+    "error.unable.dm": "Unable to DM that user!",
+
+    "error.user.bot": "That user is a bot!",
+
+    "error.missing.character.lines": "Character file: {0} is missing!",
+    "error.empty.character.lines": "Character file: {0} is empty!",
+
+
+    "command.disabled": "This command is disabled!",
+
+    "command.available.server": "This is a server only command!",
+    "command.available.dm": "This is a DM only command!",
+
+    "command.access.patreon": "You cannot run this command! It is a patreon only feature! Contact a mod to find out how to gain access to it!",
+    "command.access.moderator": "You cannot run this command!",
+    "command.access.guildOwner": "You cannot run this command!",
+    "command.access.botOwner": "You cannot run this command!",
+
+    "command.cooldown": "Please wait {0} before using the `{1}` command!",
+
+    "command.usage": "The proper usage would be: `{0}{1} {2}`!",
+    "subCommand.usage": "The proper usage would be: `{0}`"
+}

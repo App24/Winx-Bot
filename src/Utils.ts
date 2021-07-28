@@ -6,13 +6,18 @@ import { BotUser } from './BotClient';
 import { DatabaseType } from './structs/DatabaseTypes';
 import { PatreonInfo } from './structs/databaseTypes/PatreonInfo';
 import { Canvas, createCanvas } from 'canvas';
-import { getMemberByID, getUserByID } from './GetterUtilts';
+import { getMemberByID, getUserByID } from './GetterUtils';
 import { RankLevel } from './structs/databaseTypes/RankLevel';
 import { UserLevel } from './structs/databaseTypes/UserLevel';
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from './Constants';
 import { ErrorStruct } from './structs/databaseTypes/ErrorStruct';
 import { Localisation } from './localisation';
 
+/**
+ * 
+ * @param array list of items to iterate through
+ * @param callbackFn callback function to run
+ */
 export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: number, array: readonly U[])=>Promise<any>|any) {
     for(let i =0; i < array.length; i++){
         let exit=await callbackFn(array[i], i, array);
@@ -20,6 +25,11 @@ export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: n
     }
 }
 
+/**
+ * 
+ * @param map map to iterate through
+ * @param callbackFn callback function to run
+ */
 export async function asyncMapForEach<U,T>(map:Map<U,T>, callbackFn: (key:U, value:T, index:number, map:ReadonlyMap<U,T>)=>Promise<any>|any) {
     const keys=Array.from(map.keys());
     const values=Array.from(map.values());
@@ -29,6 +39,11 @@ export async function asyncMapForEach<U,T>(map:Map<U,T>, callbackFn: (key:U, val
     }
 }
 
+/**
+ * Get all files in a folder and its subfolders
+ * @param directory the parent directory to get all files from
+ * @returns all files found in all sub-directories
+ */
 export function loadFiles(directory : string){
     const files:string[]=[];
     const dirs:string[]=[];
@@ -58,14 +73,31 @@ export function loadFiles(directory : string){
     return files;
 }
 
+/**
+ * 
+ * @param level 
+ * @returns Amount of xp this level needs
+ */
 export function getLevelXP(level : number){
     return Math.abs(level)*2*100+50;
 }
 
+/**
+ * 
+ * @param value 
+ * @param min minimum value that the value can be
+ * @param max maximum value that the value can be
+ * @returns clamped valued
+ */
 export function clamp(value : number, min : number, max : number){
     return Math.max(min, Math.min(value, max));
 }
 
+/**
+ * 
+ * @param size the length of the string
+ * @returns hex string
+ */
 export function genRanHex(size : number){
     return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 }
@@ -76,6 +108,13 @@ export function toHexString(byteArray : number[]){
     }).join('');
 }
 
+/**
+ * 
+ * @param database Database to get the data from
+ * @param guildId Guild ID of the server
+ * @param defaultValue The default value to set if there isn't any
+ * @returns Data stored in database
+ */
 export async function getServerDatabase<U>(database : Keyv, guildId : string, defaultValue : any =[]):Promise<U>{
     let serverDatabase=await database.get(guildId);
     if(!serverDatabase){
@@ -85,6 +124,11 @@ export async function getServerDatabase<U>(database : Keyv, guildId : string, de
     return serverDatabase;
 }
 
+/**
+ * 
+ * @param s String to capitalise
+ * @returns Capitalised string
+ */
 export function capitalise(s : string){
     var splitStr = s.toLowerCase().split(' ');
     for (var i = 0; i < splitStr.length; i++) {
@@ -93,6 +137,11 @@ export function capitalise(s : string){
     return splitStr.join(' '); 
 }
 
+/**
+ * 
+ * @param time Time in seconds
+ * @returns stringified time
+ */
 export function secondsToTime(time : number){
     let hours = Math.floor(time/3600);
     let minutes = Math.floor(time%3600/60);
@@ -106,6 +155,11 @@ export function secondsToTime(time : number){
     return times.join(" and ");
 }
 
+/**
+ * 
+ * @param channel 
+ * @returns True if the chanell is DM, false if not
+ */
 export function isDM(channel : Channel){
     return channel.type==="dm";
 }
@@ -114,6 +168,11 @@ export function getBotMember(guild : Guild){
     return getMemberByID(BotUser.user.id, guild);
 }
 
+/**
+ * 
+ * @param guild 
+ * @returns Color of the role color of bot as a number
+ */
 export async function getBotRoleColor(guild : Guild){
     const defaultcolor=5793266;
     if(!guild) return defaultcolor;
@@ -151,6 +210,12 @@ export function dateToString(date : Date, format : string){
     })
 }
 
+/**
+ * 
+ * @param userId The ID of the user
+ * @param guildId The ID of the guild
+ * @returns True if the user is a patreon, false if the user is not a patreon
+ */
 export async function isPatreon(userId : string, guildId : string){
     if(!userId||!guildId) return false;
     const Patreon=BotUser.getDatabase(DatabaseType.Paid);
@@ -159,10 +224,23 @@ export async function isPatreon(userId : string, guildId : string){
     return patreon.find(user=>user.userId===userId)!==undefined;
 }
 
+/**
+ * 
+ * @param canvas Canvas to convert
+ * @param fileName Name of file to send to discord
+ * @returns Message Attachment
+ */
 export function canvasToMessageAttachment(canvas : Canvas, fileName:string="color"){
     return new MessageAttachment(canvas.toBuffer(), `${fileName}.png`);
 }
 
+/**
+ * Fill a canvas with a specific color
+ * @param color hex string of color
+ * @param width width of the canvas
+ * @param height height of the canvas
+ * @returns A Canvas with the color
+ */
 export function canvasColor(color : string, width : number=700, height : number=320){
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -172,9 +250,15 @@ export function canvasColor(color : string, width : number=700, height : number=
     return canvas;
 }
 
+/**
+ * Check if a string is a valid hex color
+ * @param str String to compare
+ * @returns True if it is a hex color, false if it isn't
+ */
 export function isHexColor(str : string){
     return new RegExp(/[a-f\d]{6}/g).test(str);
 }
+
 
 export async function getNextRank(currentLevel : number, guildId : string){
     const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
@@ -242,6 +326,13 @@ export function hexToRGB(hex : string){
     } : null;
 }
 
+/**
+ * 
+ * @param a Initial Value
+ * @param b End Value
+ * @param w Amount to blend
+ * @returns Value between `a` and `b`
+ */
 export function blend(a : number, b : number, w : number){
     return (a*w)+(b*(1-w));
 }

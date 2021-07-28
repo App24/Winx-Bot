@@ -1,6 +1,6 @@
 import { GuildMember, Message } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getRoleByID } from "../../GetterUtilts";
+import { getRoleByID } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";

@@ -4,7 +4,7 @@ import { DatabaseType } from "./structs/DatabaseTypes";
 import { RankLevel } from "./structs/databaseTypes/RankLevel";
 import { UserLevel } from "./structs/databaseTypes/UserLevel";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "./structs/databaseTypes/ServerInfo";
-import { getGuildChannelByID, getMemberByID, getRoleByID } from "./GetterUtilts";
+import { getGuildChannelByID, getMemberByID, getRoleByID } from "./GetterUtils";
 import { getServerDatabase, getLevelXP, capitalise } from "./Utils";
 import { Localisation } from "./localisation";
 

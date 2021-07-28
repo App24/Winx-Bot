@@ -2,7 +2,7 @@ import { parse } from "discord-command-parser";
 import { Collection } from "discord.js";
 import { BotUser } from "../BotClient"
 import { OWNER_ID, PREFIX } from "../Constants";
-import { getUserByID, getMemberByID } from "../GetterUtilts";
+import { getUserByID, getMemberByID } from "../GetterUtils";
 import { Localisation } from "../localisation";
 import { CommandAccess, CommandArguments, CommandAvailability } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";

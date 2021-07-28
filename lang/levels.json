@@ -1,0 +1,6 @@
+{
+    "xp.level.up": "{0} has leveled up to level {1}!",
+    "xp.level.down": "{0} has leveled down to level {1}!",
+    "xp.transformation.earn": "{0} has earned a new transformation called {1}. Amazing work!",
+    "xp.transformation.lost": "{0} has lost a transformation called {1}. Laugh at them!"
+}

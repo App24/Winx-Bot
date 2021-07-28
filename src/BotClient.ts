@@ -119,7 +119,17 @@ class BotClient extends Client{
     }
 
     public loadLocalisation(){
-        Localisation.loadLocalisation("lang/en.json");
+        Localisation.clearLocalisation();
+
+        Localisation.loadLocalisation("lang/activities.json");
+        Localisation.loadLocalisation("lang/arguments.json");
+        Localisation.loadLocalisation("lang/categories.json");
+        Localisation.loadLocalisation("lang/commandDescriptions.json");
+        Localisation.loadLocalisation("lang/commands.json");
+        Localisation.loadLocalisation("lang/errors.json");
+        Localisation.loadLocalisation("lang/generics.json");
+        Localisation.loadLocalisation("lang/levels.json");
+        Localisation.loadLocalisation("lang/miscs.json");
     }
 
     public getCommand(commandName : string){

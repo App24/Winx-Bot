@@ -1,6 +1,6 @@
 import { GuildMember, Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getMemberByID, getUserFromMention } from "../../GetterUtilts";
+import { getMemberByID, getUserFromMention } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
@@ -22,7 +22,7 @@ class RankCommand extends Command{
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
         if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
-        let _user=cmdArgs.message.author;
+        let _user=cmdArgs.author;
         if(cmdArgs.args.length){
             const temp=await getUserFromMention(cmdArgs.args[0]);
             if(!temp) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));

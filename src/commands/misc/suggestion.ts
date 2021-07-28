@@ -23,7 +23,7 @@ class SuggestionCommand extends Command{
         Promise.all(promises).then(async(results)=>{
             const channeld=results[0].reduce((acc,curr)=>{if(curr!==undefined) acc=curr;});
             const channel=new TextChannel(new Guild(BotUser, {id:channeld["guild"]}), {id:channeld["id"]});
-            const user=cmdArgs.message.author;
+            const user=cmdArgs.author;
             const request=cmdArgs.args.join(" ");
             const text=Localisation.getTranslation("suggestion.request", user, request);
             const embed=new MessageEmbed();

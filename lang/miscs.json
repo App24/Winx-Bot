@@ -1,0 +1,8 @@
+{
+    "bot.load.command.simple": "Loaded {0} Commands!",
+    "bot.load.command.complex": "Loaded Command: {0}",
+    "bot.load.event.simple": "Loaded {0} Events!",
+    "bot.load.event.complex": "Loaded Event: {0}",
+
+    "shard.ready": "Shard {0} is ready!"
+}

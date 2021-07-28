@@ -28,19 +28,19 @@ class HelpCommand extends Command{
                     if(category.access){
                         switch(category.access){
                             case CommandAccess.Patreon:{
-                                if(isDM(cmdArgs.channel)||!(await isPatreon(cmdArgs.message.author.id, cmdArgs.guild.id)))
+                                if(isDM(cmdArgs.channel)||!(await isPatreon(cmdArgs.author.id, cmdArgs.guild.id)))
                                     return;
                             }break;
                             case CommandAccess.BotOwner:{
-                                if(cmdArgs.message.author.id!==OWNER_ID)
+                                if(cmdArgs.author.id!==OWNER_ID)
                                     return;
                             }break;
                             case CommandAccess.Moderators:{
-                                if(isDM(cmdArgs.channel)||!cmdArgs.message.member.hasPermission("MANAGE_GUILD"))
+                                if(isDM(cmdArgs.channel)||!cmdArgs.member.hasPermission("MANAGE_GUILD"))
                                     return;
                             }break;
                             case CommandAccess.GuildOwner:{
-                                if(isDM(cmdArgs.channel)||cmdArgs.message.author.id!==cmdArgs.guild.ownerID)
+                                if(isDM(cmdArgs.channel)||cmdArgs.author.id!==cmdArgs.guild.ownerID)
                                     return;
                             }break;
                             case CommandAccess.None:{
@@ -67,7 +67,7 @@ class HelpCommand extends Command{
                     msg.react(emoji.emoji);
                 });
 
-                const collector=msg.createReactionCollector((reaction, _user)=>(categoryEmojis.findIndex(emoji=>emoji.emoji===reaction.emoji.name) >=0 && _user.id===cmdArgs.message.author.id), {max: 1, time: 1000*60*5});
+                const collector=msg.createReactionCollector((reaction, _user)=>(categoryEmojis.findIndex(emoji=>emoji.emoji===reaction.emoji.name) >=0 && _user.id===cmdArgs.author.id), {max: 1, time: 1000*60*5});
 
                 collector.once("end", ()=>{
                     msg.reactions.removeAll();
@@ -80,7 +80,7 @@ class HelpCommand extends Command{
                 collector.on("collect", async(reaction)=>{
                     const category=categoryEmojis.find(emoji=>emoji.emoji===reaction.emoji.name).category;
                     if(category){
-                        const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.message.member, cmdArgs.message.author);
+                        const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
                         if(!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
                         return cmdArgs.channel.send(embed);
                     }
@@ -99,7 +99,7 @@ class HelpCommand extends Command{
 
         if(category.availability!==CommandAvailability.Both&&(category.availability!==available)) return cmdArgs.message.reply("That category is not available here!");
 
-        const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.message.member, cmdArgs.message.author);
+        const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
         if(!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
         return cmdArgs.channel.send(embed);
     }

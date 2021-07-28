@@ -1,0 +1,130 @@
+{
+    "barcolor.hexcolor.output": "{0} #{1}",
+    "barcolor.set.output": "Set the {0} bar color to #{1}!",
+    "barcolor.reset.output": "Resetted {0} bar color!",
+    "barcolor.start": "start of",
+    "barcolor.end": "end of",
+    "barcolor.both": "both start and end of",
+
+    "cardcolor.set.output": "Set the card color to #{0}!",
+    "cardcolor.reset.output": "Resetted the card color!",
+
+    "circlecolor.set.output": "Set the color circle to #{0}!",
+    "circlecolor.resetset.output": "Resetted the circle color!",
+
+    "namecolor.set.output": "Set the color name to #{0}!",
+    "namecolor.resetset.output": "Resetted the name color!",
+
+    "about.title.about": "About",
+    "about.title.creators": "Creators",
+    "about.title.version": "Version",
+    "about.title.github": "Source Code",
+    "about.description.output": "This bot was created by and for Winx fans, it allows for users to level up and earn new transformations, it is entirely customisable from transformation names to when you get each!",
+
+    "givexp.success.output": "You have earned {0} xp!",
+    "givexp.fail.output": "As Iffffff i'm gonna give out free xp!",
+
+    "help.title": "Categories",
+    "help.footer": "You can do {0}help [category] to get the commands in a certain category!",
+    "help.category": "{0}: {1}",
+    "help.command.disabled": "__Disabled__",
+    "help.command.patreon": "__Patreon Only__",
+    "help.command.aliases": "Aliases: {0}",
+    "help.command.usage": "Usage: {0}",
+
+    "suggestion.request": "**Request by {0}**\n{1}",
+
+    "checkbans.bans": "Deleted {0} banned user(s) from levels database!",
+
+    "checklevels.start": "Started checking! This may take a very, very long time!",
+    "checklevels.start.channel": "Started checking channel: {0} {1}/{2}",
+    "checklevels.end.channel": "Finished checking channel: {0} {1}/{2}. Took {3}!",
+
+    "checkranks.start": "Started Checking...",
+
+    "patreon.remove": "Removed {0} as patreon!",
+    "patreon.list": "{0}: Patreon since: {1}",
+    "patreon.add": "Added {0} as patreon!",
+    "patreon.user.not": "That user is not a patreon!",
+    "patreon.user.already": "That user is already a patreon!",
+
+    "setlevel.output": "Set the level of {0} to {1} and xp to {2}!",
+
+    "reloadlocalisation.reload": "Localisation Reloaded!",
+
+    "checkerror.clear": "Cleared all errors!",
+    "checkerror.error": "{0}\n```{1}```",
+    "checkerror.list": "**{0}**: {1}",
+    "checkerror.prune": "Pruned 2+ week old errors",
+
+    "suggestions.already.completed": "That suggestion is already completed!",
+    "suggestions.already.rejected": "That suggestion is already rejected!",
+    "suggestions.list.suggestion": "__**{0}**__ - Suggested By {1} - State: {2}",
+    "suggestions.suggestion": "**Request by {0}** - State: {1}\n{2}",
+    "suggestions.complete": "**Request by {0}**\n{1}\n\nYou sure you want to complete this?",
+    "suggestions.reject": "**Request by {0}**\n{1}\n\nYou sure you want to reject this?",
+    "suggestions.completed": "{0}\n__**Completed**__",
+    "suggestions.rejected": "{0}\n__**Rejected**__",
+
+    "leaderboard.output": "Level: {0} XP: {1}/{2}",
+
+    "transformations.list": "Level {0}: {1}",
+    "transformations.title": "Transformations",
+
+    "magiclevels.transformation.current": "Current Transformation: {0}",
+    "magiclevels.transformation.next": "Next Transformation: {0}",
+    "magiclevels.username": "{0}",
+    "magiclevels.nickname": " ({0})",
+    "magiclevels.level": ": Level: {0}",
+    "magiclevels.levels": "{0}/{1}",
+    "magiclevels.lb.position": "Leaderboard Position: {0}",
+
+    "setxp.get": "XP per message is `{0}`!",
+    "setxp.set": "XP per message is now `{0}`!",
+
+    "excludechannel.channel.already": "That channel is already excluded!",
+    "excludechannel.channel.not": "That channel is not excluded!",
+    "excludechannel.add": "Excluded channel {0}!",
+    "excludechannel.remove": "{0} is no longer excluded!",
+
+    "levelchannel.set": "Set {0} as level channel!",
+    "levelchannel.remove": "Removed level channel!",
+    "levelchannel.missing.channel": "Levels channel is does not exist anymore!",
+
+    "setmaxlength.get": "Maximum message length is `{0}`",
+    "setmaxlength.set": "Maximum message length is now `{0}`",
+    "setmaxlength.error": "The maximum length can't be lower than the minimum length!",
+
+    "setminlength.get": "Minimum message length is `{0}`",
+    "setminlength.set": "Minimum message length is now `{0}`",
+    "setminlength.error": "The minimum length can't be higher than the maximum length!",
+
+    "setmaxmessage.get": "Max messages per minute is `{0}`",
+    "setmaxmessage.set": "Max messages per minute is now `{0}`",
+
+    "setrank.gifs.norole": "There is no role assigned to this level, cannot add gifs!",
+    "setrank.gifs.add": "Added GIFs!",
+    "setrank.role.set": "Setted rank!",
+    "setrank.rank.none": "There is no rank with this level!",
+    "setrank.gifs.remove": "Removed GIFs!",
+    "setrank.role.remove": "Removed rank!",
+    "setrank.list.gifs": "__GIFs__",
+    "setrank.list.role": "**Role**: <@&{0}>",
+
+    "restoredb.empty.backups": "There are no backups",
+
+    "downloaddb.wait": "Zipping databases...",
+
+    "customcommand.error.command.exist": "That command already exists!",
+    "customcommand.error.command.not.exist": "That command does not exist!",
+    "customcommand.success.add": "Successfully added command `{0}`!",
+    "customcommand.success.remove": "Successfully removed command!",
+    "customcommand.success.edit": "Successfully edited command!",
+    "customcommand.list.title": "Custom Commands",
+    "customcommand.invalid.type": "That is an invalid setting type! Valid setting types are description, access and message",
+    "customcommand.invalid.access": "That is an invalid access type! Valid access types are moderator, owner, botowner and patreon",
+    "customcommand.invalid.newvalue": "You must provide a new value!",
+    "customcommand.undefined.output": "The command does not output that message!",
+    "customcommand.success.output.remove": "Successfully removed output from command!",
+    "customcommand.success.output.add": "Successfully added output to command!"
+}

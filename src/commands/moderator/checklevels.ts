@@ -1,7 +1,7 @@
 import { Message, GuildChannel, TextChannel, NewsChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
-import { getMemberFromMention, getGuildChannelByID } from "../../GetterUtilts";
+import { getMemberFromMention, getGuildChannelByID } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";

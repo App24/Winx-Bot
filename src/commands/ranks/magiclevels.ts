@@ -1,7 +1,7 @@
 import { createCanvas, loadImage } from "canvas";
 import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getUserFromMention, getMemberByID, getRoleByID } from "../../GetterUtilts";
+import { getUserFromMention, getMemberByID, getRoleByID } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
@@ -31,7 +31,7 @@ class MagicLevelsCommand extends Command{
             }
             return b.level-a.level;
         });
-        let user=cmdArgs.message.author;
+        let user=cmdArgs.author;
         if(cmdArgs.args.length){
             const temp=await getUserFromMention(cmdArgs.args[0]);
             if(!temp) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));

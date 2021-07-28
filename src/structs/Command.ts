@@ -1,4 +1,4 @@
-import { DMChannel, Guild, Message, NewsChannel, TextChannel } from "discord.js";
+import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "../Utils";
 import { Category, Other } from "./Category";
@@ -7,7 +7,6 @@ import { SubCommand } from "./SubCommand";
 export abstract class Command{
     public enabled : boolean;
     public deprecated : boolean;
-    public hidden : boolean;
 
     public category : Category;
 
@@ -117,11 +116,15 @@ export class CommandArguments{
     public args : string[];
     public readonly guild : Guild;
     public readonly channel : TextChannel | DMChannel | NewsChannel;
+    public readonly author : User;
+    public readonly member : GuildMember;
 
     public constructor(message : Message, args : string[]){
         this.message=message;
         this.guild=message.guild;
         this.channel=message.channel;
         this.args=args;
+        this.author=message.author;
+        this.member=message.member;
     }
 }

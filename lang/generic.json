@@ -1,0 +1,11 @@
+{
+    "generic.hexcolor": "#{0}",
+    "generic.sent" :"Sent!",
+    "generic.done" :"Done!",
+    "generic.canceled": "Canceled!",
+    "generic.accepted": "Accepted",
+    "generic.rejected": "Rejected",
+    "generic.none": "None",
+    "generic.unknown": "Unknown",
+    "generic.confirmation": "You sure you want to do this?"
+}

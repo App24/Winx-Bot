@@ -2,7 +2,7 @@ import fs from "fs";
 import archiver from "archiver";
 import { BotUser } from "../BotClient";
 import { BACKUP_CHANNEL, DATABASE_FOLDER } from "../Constants";
-import { getGuildByID, getGuildChannelByID } from "../GetterUtilts";
+import { getGuildByID, getGuildChannelByID } from "../GetterUtils";
 import { backupDatabases, dateToString, secondsToTime } from "../Utils";
 import { MessageAttachment } from "discord.js";
 

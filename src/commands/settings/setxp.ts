@@ -27,7 +27,6 @@ class SetXPCommand extends Command{
             await ServerInfo.set(cmdArgs.guild.id, serverInfo);
             return cmdArgs.channel.send(Localisation.getTranslation("setxp.set", serverInfo.maxXpPerMessage));
         }
-        cmdArgs.message.guild
         return cmdArgs.channel.send(Localisation.getTranslation("setxp.get", serverInfo.maxXpPerMessage));
     }
 }

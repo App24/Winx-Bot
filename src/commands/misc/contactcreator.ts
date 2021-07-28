@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 import { OWNER_ID } from "../../Constants";
-import { getUserByID } from "../../GetterUtilts";
+import { getUserByID } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Info } from "../../structs/Category";
 import { Command, CommandArguments, CommandUsage } from "../../structs/Command";
@@ -16,7 +16,7 @@ class ContactCreatorCommand extends Command{
     public async onRun(cmdArgs : CommandArguments){
         const messageContent=cmdArgs.args.join(" ");
         const owner=await getUserByID(OWNER_ID);
-        (await owner.createDM()).send(`${cmdArgs.message.author}: ${messageContent}`);
+        (await owner.createDM()).send(`${cmdArgs.author}: ${messageContent}`);
         cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
     }
 }

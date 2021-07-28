@@ -1,7 +1,7 @@
 import { Message, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID } from "../../Constants";
-import { getUserByID } from "../../GetterUtilts";
+import { getUserByID } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess, CommandArguments, CommandUsage } from "../../structs/Command";
