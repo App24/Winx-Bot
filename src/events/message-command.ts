@@ -8,7 +8,7 @@ import { CommandAccess, CommandArguments, CommandAvailability } from "../structs
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
-import { genRanHex, getServerDatabase, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
+import { formatString, genRanHex, getServerDatabase, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -56,7 +56,7 @@ export=()=>{
 
             const outputs=customCommand.outputs;
             const randomMsg=outputs[Math.floor(outputs.length*Math.random())];
-            message.channel.send(randomMsg);
+            message.channel.send(formatString(randomMsg, ...args));
             return;
         }
 
