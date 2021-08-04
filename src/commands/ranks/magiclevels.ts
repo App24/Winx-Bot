@@ -90,20 +90,26 @@ class MagicLevelsCommand extends Command{
         
         const nameFontSize=80;
         const pfpRadius=nameFontSize*2;
-        const pfpX=5;
-        const pfpY=5;
-        const borderThickness=6;
+        const pfpX=8;
+        const pfpY=8;
+        const borderThickness=10;
         const newpfpRadius=pfpRadius-borderThickness;
 
-        let rgb=hexToRGB(userSetting.barStartColor);
-        const startHsl=rgbToHsl(rgb.r, rgb.g, rgb.b);
+        const filled=userLevel.xp/getLevelXP(userLevel.level);
 
-        rgb=hexToRGB(userSetting.barEndColor);
-        const endHsl=rgbToHsl(rgb.r, rgb.g, rgb.b);
+        const startRGB=hexToRGB(userSetting.barStartColor);
+        const startHsl=rgbToHsl(startRGB.r, startRGB.g, startRGB.b);
 
-        rgb=hexToRGB(userSetting.cardColor);
-        const brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+        const endRGB=hexToRGB(userSetting.barEndColor);
+        const endHsl=rgbToHsl(endRGB.r, endRGB.g, endRGB.b);
+
+        let rgb=hexToRGB(userSetting.cardColor);
+        let brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
         const textColor = (brightness > 125) ? 'black' : 'white';
+
+        rgb={r: blend(startRGB.r, endRGB.r, 1-filled), g: blend(startRGB.g, endRGB.g, 1-filled), b: blend(startRGB.b, endRGB.b, 1-filled)};
+        brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+        const levelColor=(brightness > 125) ? "black" : "white";
 
         const newHeight=pfpY+(pfpRadius*2)+pfpY;
         const transformationFontSize=newHeight*(0.2068965517241379*0.75);
@@ -133,7 +139,7 @@ class MagicLevelsCommand extends Command{
 
         //Draw background
         ctx.fillStyle=`#${userSetting.cardColor}`;
-        roundRect(ctx,0,0,canvas.width,canvas.height, 20).fill();
+        roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.width*0.01);
 
         //Draw name and level info
         ctx.font=`${nameFontSize}px sans-serif`;
@@ -148,20 +154,38 @@ class MagicLevelsCommand extends Command{
 
         //Draw Level bar background
         const barWidth=extraWidth;
-        const filled=userLevel.xp/getLevelXP(userLevel.level);
         ctx.fillStyle="#272822";
-        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth, barHeight, 20).fill();
+        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth, barHeight, 20)
 
         //Draw Level bar
         ctx.fillStyle=`hsla(${blend(startHsl[0], endHsl[0], 1-filled)*360}, ${blend(startHsl[1], endHsl[1], 1-filled)*100}%, ${blend(startHsl[2], endHsl[2], 1 - filled)*100}%, 1)`;
-        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth*filled, barHeight, 20).fill();
+        ctx.save();
+        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth, barHeight, 20, true);
+        ctx.fillRect(pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth*filled, barHeight);
+        ctx.restore();
 
         //Draw level text
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth*filled, barHeight);
+        ctx.clip();
+        ctx.font=levelFont;
+        ctx.fillStyle=levelColor;
+        ctx.textBaseline="middle";
+        ctx.textAlign="center";
+        ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (pfpX+(pfpRadius*2)+pfpX)+(barWidth/2.0), textPos+10+(barHeight*0.5));
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect((barWidth*filled)+pfpX+(pfpRadius*2)+pfpX, textPos+10, canvas.width, barHeight);
+        ctx.clip();
         ctx.font=levelFont;
         ctx.fillStyle="#ffffff";
         ctx.textBaseline="middle";
         ctx.textAlign="center";
         ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (pfpX+(pfpRadius*2)+pfpX)+(barWidth/2.0), textPos+10+(barHeight*0.5));
+        ctx.restore();
 
         //Draw transformation info text
         ctx.font=`${transformationFontSize}px sans-serif`;
@@ -200,17 +224,23 @@ function drawSpecialCircle(ctx : CanvasRenderingContext2D, x : number, y : numbe
     ctx.restore();
 }
 
-function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number){
-    if (width < 2 * radius) radius = width / 2;
-    if (height < 2 * radius) radius = height / 2;
+function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number, clip:boolean=false){
     ctx.beginPath();
-    ctx.moveTo(x+radius, y);
-    ctx.arcTo(x+width, y, x+width, y+height, radius);
-    ctx.arcTo(x+width, y+height, x, y+height, radius);
-    ctx.arcTo(x, y+height, x, y, radius);
-    ctx.arcTo(x, y, x+width, y, radius);
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
-    return ctx;
+    if(clip){
+      ctx.clip()
+    }else{
+        ctx.fill();
+    }
 }
 
 function rgbToHsl(r : number, g : number, b : number){

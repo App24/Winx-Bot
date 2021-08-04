@@ -22,6 +22,7 @@ export const Categories:Category[]=[];
 export const Owner=new Category("category.owner", "👑", ["owner"], CommandAvailability.Both, CommandAccess.BotOwner);
 export const Moderator=new Category("category.moderator", "⚔", ["moderator", "moderators"], CommandAvailability.Guild, CommandAccess.Moderators);
 export const Settings=new Category("category.settings", "⚙", ["setting", "settings"], CommandAvailability.Guild, CommandAccess.Moderators);
+export const Patreon=new Category("category.patreon", "🪙", ["patreon"], CommandAvailability.Guild, CommandAccess.Patreon);
 export const CustomCommandsSettings=new Category("category.customcommandsettings", "🛠", ["customcommandsettings", "command settings", "custom command settings"], CommandAvailability.Guild, CommandAccess.Moderators);
 export const Info=new Category("category.info", "❓", ["info", "information"]);
 export const Characters=new Category("category.characters", "👨", ["chars", "characters"]);

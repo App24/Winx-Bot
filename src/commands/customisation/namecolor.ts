@@ -60,14 +60,19 @@ class SetSubCommand extends SubCommand{
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
 
-        let color=cmdArgs.args[0].toLowerCase();
-        if(color.startsWith("#")){
-            color=color.substring(1);
+        if(cmdArgs.args[0].toLowerCase()===DEFAULT_USER_SETTING.nameColor){
+            userSettings.nameColor=DEFAULT_USER_SETTING.nameColor;
+            cmdArgs.channel.send(Localisation.getTranslation("namecolor.reset.output"));
+        }else{
+            let color=cmdArgs.args[0].toLowerCase();
+            if(color.startsWith("#")){
+                color=color.substring(1);
+            }
+            if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
+            userSettings.nameColor=color;
+            cmdArgs.channel.send(Localisation.getTranslation("namecolor.set.output", color));
         }
-        if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
-        userSettings.nameColor=color;
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
-        cmdArgs.channel.send(Localisation.getTranslation("namecolor.set.output", color));
     }
 }
 

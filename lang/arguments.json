@@ -25,6 +25,7 @@
     "argument.category": "category",
     "argument.hexcolor": "hex color",
     "argument.suggestion": "suggestion",
+    "argument.code": "code",
     "argument.start": "start",
     "argument.end": "end",
     "argument.both": "both",

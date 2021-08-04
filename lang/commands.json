@@ -42,9 +42,9 @@
 
     "checkranks.start": "Started Checking...",
 
-    "patreon.remove": "Removed {0} as patreon!",
+    "patreon.remove": "Removed {0} as a patreon!",
     "patreon.list": "{0}: Patreon since: {1}",
-    "patreon.add": "Added {0} as patreon!",
+    "patreon.add": "Added {0} as a patreon!",
     "patreon.user.not": "That user is not a patreon!",
     "patreon.user.already": "That user is already a patreon!",
 
@@ -126,5 +126,14 @@
     "customcommand.invalid.newvalue": "You must provide a new value!",
     "customcommand.undefined.output": "The command does not output that message!",
     "customcommand.success.output.remove": "Successfully removed output from command!",
-    "customcommand.success.output.add": "Successfully added output to command!"
+    "customcommand.success.output.add": "Successfully added output to command!",
+
+    "customisationsettings.cardColor": "Card Color",
+    "customisationsettings.nameColor": "Name Color",
+    "customisationsettings.barStartColor": "Beginning Bar Color",
+    "customisationsettings.barEndColor": "End Bar Color",
+    "customisationsettings.specialCircleColor": "Circle Color",
+
+    "customisationcode.get": "Here is your code: `{0}`",
+    "customisationcode.value.error": "That code is invalid!"
 }

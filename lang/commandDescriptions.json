@@ -40,5 +40,7 @@
     "customcommandremove.command.description": "Remove custom commands!",
     "customcommandedit.command.description": "Edit custom commands!",
     "customcommandlist.command.description": "List custom commands or messages of a custom command!",
-    "testlevel.command.description": "Test output of a level!"
+    "testlevel.command.description": "Test output of a level!",
+    "customisationsettings.command.description": "Get your customisation settings!",
+    "customisationcode.command.description": "Set your customisation settings to a code, or get your customisation code!"
 }
