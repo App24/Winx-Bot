@@ -1,5 +1,4 @@
-import { Message } from "discord.js";
-import { Command, CommandArguments, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
 
 class RandomChoiceClass extends Command{
     public constructor(){
@@ -9,7 +8,7 @@ class RandomChoiceClass extends Command{
     }
 
     public onRun(cmdArgs : CommandArguments){
-        cmdArgs.channel.send(cmdArgs.args[Math.floor(cmdArgs.args.length*Math.random())]);
+        cmdArgs.message.reply(cmdArgs.args[Math.floor(cmdArgs.args.length*Math.random())]);
     }
 }
 

@@ -1,13 +1,13 @@
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getGuildChannelByID, getGuildChannelFromMention } from "../../GetterUtils";
+import { GetTextNewsGuildChannelFromMention } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach, getBotRoleColor, getServerDatabase } from "../../Utils";
+import { getServerDatabase, asyncForEach, getBotRoleColor } from "../../Utils";
 
 class ExcludeChannelCommand extends Command{
     public constructor(){
@@ -39,7 +39,7 @@ class AddSubCommand extends SubCommand{
         
         if(!serverInfo.excludeChannels) serverInfo.excludeChannels=[];
 
-        const channel=await getGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
+        const channel=await GetTextNewsGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
         if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.channel"));
         
         if(serverInfo.excludeChannels.find(c=>c===channel.id)) return cmdArgs.message.reply(Localisation.getTranslation("excludechannel.channel.already"));
@@ -47,7 +47,7 @@ class AddSubCommand extends SubCommand{
         serverInfo.excludeChannels.push(channel.id);
 
         await ServerInfo.set(cmdArgs.guild.id, serverInfo);
-        cmdArgs.channel.send(Localisation.getTranslation("excludechannel.add", channel));
+        cmdArgs.message.reply(Localisation.getTranslation("excludechannel.add", channel));
     }
 }
 
@@ -63,7 +63,7 @@ class RemoveSubCommand extends SubCommand{
 
         if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
 
-        const channel=await getGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
+        const channel=await GetTextNewsGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
         if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.channel"));
 
         if(!serverInfo.excludeChannels.find(c=>c===channel.id)) return cmdArgs.message.reply(Localisation.getTranslation("excludechannel.channel.not"));
@@ -72,7 +72,7 @@ class RemoveSubCommand extends SubCommand{
         if(index>=0) serverInfo.excludeChannels.splice(index, 1);
 
         await ServerInfo.set(cmdArgs.guild.id, serverInfo);
-        cmdArgs.channel.send(Localisation.getTranslation("excludechannel.remove", channel));
+        cmdArgs.message.reply(Localisation.getTranslation("excludechannel.remove", channel));
     }
 }
 
@@ -87,15 +87,15 @@ class ListSubCommand extends SubCommand{
         if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
         const data=[];
         await asyncForEach(serverInfo.excludeChannels, async(excludedChannel:string)=>{
-            const channel=await getGuildChannelByID(excludedChannel, cmdArgs.guild);
+            const channel=await GetTextNewsGuildChannelFromMention(excludedChannel, cmdArgs.guild);
             if(channel){
                 data.push(channel);
             }
         });
         const embed=new MessageEmbed();
-        embed.setDescription(data);
+        embed.setDescription(data.join("\n"));
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        cmdArgs.channel.send(embed);
+        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 

@@ -1,4 +1,3 @@
-import { Message } from "discord.js";
 import { Owner } from "../../../structs/Category";
 import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
 import { reportError } from "../../../Utils";

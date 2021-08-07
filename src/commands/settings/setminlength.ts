@@ -1,8 +1,7 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase } from "../../Utils";
@@ -26,9 +25,9 @@ class SetMinLengthCommand extends Command{
             if(len>serverInfo.maxMessageLength) return cmdArgs.message.reply(Localisation.getTranslation("setminlength.error"));
             serverInfo.minMessageLength=len;
             await ServerInfo.set(cmdArgs.guild.id, serverInfo);
-            return cmdArgs.channel.send(Localisation.getTranslation("setminlength.set", serverInfo.minMessageLength));
+            return cmdArgs.message.reply(Localisation.getTranslation("setminlength.set", serverInfo.minMessageLength));
         }
-        return cmdArgs.channel.send(Localisation.getTranslation("setminlength.get", serverInfo.minMessageLength));
+        return cmdArgs.message.reply(Localisation.getTranslation("setminlength.get", serverInfo.minMessageLength));
     }
 }
 

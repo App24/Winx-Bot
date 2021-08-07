@@ -1,5 +1,5 @@
 import { BotUser } from "../BotClient";
-import { PREFIX, VERSION } from "../Constants";
+import { VERSION, PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
 import { BasicActivity } from "../structs/activities/BasicActivity";
 import { BirthdayActivity } from "../structs/activities/events/BirthdayActivity";
@@ -45,7 +45,7 @@ async function setActivity(){
     i++;
     if(i>=activities.length)
         i=0;
-    if(activities[i].canRun()){
+    if(activities[i].isShowable()){
         let activityText="";
         activityText=await activities[i].getActivity();
         BotUser.user.setActivity(activityText, {type: activities[i].type});

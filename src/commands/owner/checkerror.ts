@@ -1,12 +1,12 @@
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
 import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach, dateToString, getBotRoleColor } from "../../Utils";
+import { dateToString, getBotRoleColor, asyncForEach } from "../../Utils";
 
 class CheckErrorCommand extends Command{
     public constructor(){
@@ -24,7 +24,7 @@ class CheckErrorCommand extends Command{
             const Errors=BotUser.getDatabase(DatabaseType.Errors);
             const error:ErrorStruct=await Errors.get(code);
             if(!error) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.errorCode"));
-            cmdArgs.channel.send(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
+            cmdArgs.message.reply(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
         }
     }
 }
@@ -37,7 +37,7 @@ class ClearSubCommand extends SubCommand{
     public async onRun(cmdArgs : CommandArguments){
         const Errors=BotUser.getDatabase(DatabaseType.Errors);
         await Errors.clear();
-        return cmdArgs.channel.send(Localisation.getTranslation("checkerror.clear"));
+        return cmdArgs.message.reply(Localisation.getTranslation("checkerror.clear"));
     }
 }
 
@@ -57,8 +57,8 @@ class ListSubCommand extends SubCommand{
         });
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        embed.setDescription(data);
-        return cmdArgs.channel.send(embed);
+        embed.setDescription(data.join("\n"));
+        return cmdArgs.message.reply({embeds: [embed]});
     }
 }
 
@@ -83,7 +83,7 @@ class PruneSubCommand extends SubCommand{
                 await Errors.delete(error.key);
             }
         });
-        return cmdArgs.channel.send(Localisation.getTranslation("checkerror.prune"));
+        return cmdArgs.message.reply(Localisation.getTranslation("checkerror.prune"));
     }
 }
 

@@ -1,4 +1,4 @@
-import { DMChannel, Guild, GuildMember, Message, NewsChannel, TextChannel, User } from "discord.js";
+import { Guild, GuildMember, Message, TextBasedChannels, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "../Utils";
 import { Category, Other } from "./Category";
@@ -115,7 +115,7 @@ export class CommandArguments{
     public readonly message : Message;
     public args : string[];
     public readonly guild : Guild;
-    public readonly channel : TextChannel | DMChannel | NewsChannel;
+    public readonly channel : TextBasedChannels;
     public readonly author : User;
     public readonly member : GuildMember;
 

@@ -12,7 +12,7 @@ export abstract class EventActivity extends Activity{
         this.endTime.setFullYear(new Date().getFullYear());
     }
 
-    public canRun() : boolean{
+    public isShowable() : boolean{
         const currentDate=new Date();
         currentDate.setHours(0,0,0,0);
         if(currentDate>=this.startTime&&currentDate<=this.endTime){

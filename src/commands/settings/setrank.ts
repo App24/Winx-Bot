@@ -1,13 +1,13 @@
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getRoleByID, getRoleFromMention } from "../../GetterUtils";
+import { getRoleFromMention, getRoleById } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAvailability, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach, getBotRoleColor, getServerDatabase } from "../../Utils";
+import { getServerDatabase, getBotRoleColor, asyncForEach } from "../../Utils";
 
 class SetRankCommand extends Command{
     public constructor(){
@@ -46,7 +46,7 @@ class SetSubCommand extends SubCommand{
                 rankLevel.gifs.push(gif.toLowerCase());
             })
             await Ranks.set(cmdArgs.guild.id, ranks);
-            return cmdArgs.channel.send(Localisation.getTranslation("setrank.gifs.add"));
+            return cmdArgs.message.reply(Localisation.getTranslation("setrank.gifs.add"));
         }else{
             const role=await getRoleFromMention(cmdArgs.args[1], cmdArgs.guild);
             if(!role) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.role"));
@@ -60,7 +60,7 @@ class SetSubCommand extends SubCommand{
             }
             ranks.push(rankLevel);
             await Ranks.set(cmdArgs.guild.id, ranks);
-            return cmdArgs.channel.send(Localisation.getTranslation("setrank.role.set"));
+            return cmdArgs.message.reply(Localisation.getTranslation("setrank.role.set"));
         }
     }
 }
@@ -124,8 +124,8 @@ class GetSubCommand extends SubCommand{
                 data.push(gif);
             });
         }
-        embed.setDescription(data);
-        cmdArgs.channel.send(embed);
+        embed.setDescription(data.join("\n"));
+        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 
@@ -143,7 +143,7 @@ class ListSubCommand extends SubCommand{
         ranks.sort((a, b)=>a.level-b.level);
         const data=[];
         await asyncForEach(ranks, async(rank:RankLevel)=>{
-            const role=await getRoleByID(rank.roleId, cmdArgs.guild);
+            const role=await getRoleById(rank.roleId, cmdArgs.guild);
             if(role){
                 data.push(Localisation.getTranslation("transformations.list", rank.level, role));
             }
@@ -151,8 +151,8 @@ class ListSubCommand extends SubCommand{
 
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        embed.setDescription(data);
-        cmdArgs.channel.send(embed);
+        embed.setDescription(data.join("\n"));
+        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 

@@ -7,7 +7,7 @@ import { asyncForEach } from "../Utils";
 export=()=>{
     BotUser.on("ready", async()=>{
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        await BotUser.shard.broadcastEval("this.guilds.cache").then(async(results)=>{
+        await BotUser.shard.broadcastEval((c)=>c.guilds.cache).then(async(results)=>{
             await asyncForEach(results[0], async(server : Guild)=>{
                 if(!(await ServerInfo.get(server.id))){
                     await ServerInfo.set(server.id, DEFAULT_SERVER_INFO);

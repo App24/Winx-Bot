@@ -1,27 +1,11 @@
 import EventEmitter from 'events';
 import JSONB from 'json-buffer';
+import { KeyvSqlite } from './KeyvSqlite';
 
-const loadStore=opts=>{
-    const adapters={
-		redis: '@keyv/redis',
-		mongodb: '@keyv/mongo',
-		mongo: '@keyv/mongo',
-		sqlite: '@keyv/sqlite',
-		postgresql: '@keyv/postgres',
-		postgres: '@keyv/postgres',
-		mysql: '@keyv/mysql'
-    };
-	if (opts.adapter || opts.uri) {
-		const adapter = opts.adapter || /^[^:]*/.exec(opts.uri)[0];
-		return new (require(adapters[adapter]))(opts);
-	}
-	return new Map();
-};
+export class Keyv extends EventEmitter{
+    private opts:any;
 
-class Keyv extends EventEmitter{
-    private opts: any;
-
-    public constructor(uri : string | any, opts?){
+    public constructor(uri: string|any, opts?){
         super();
         this.opts=Object.assign({
             namespace: "keyv",
@@ -32,8 +16,7 @@ class Keyv extends EventEmitter{
         opts);
 
         if(!this.opts.store){
-            let adapterOpts=Object.assign({}, this.opts);
-			this.opts.store=loadStore(adapterOpts);
+            this.opts.store=new KeyvSqlite(this.opts);
         }
 
         if(typeof this.opts.store.on==="function"){
@@ -51,6 +34,8 @@ class Keyv extends EventEmitter{
 		let nsregexp = new RegExp('^' + this.opts.namespace + ':');
 		return fullKey.replace(nsregexp, '');
     }
+
+
 
     private parseValue(key, data, opts : object | any = {}) {
 		let value;
@@ -179,5 +164,3 @@ class Keyv extends EventEmitter{
 		});
 	}
 }
-
-export=Keyv;

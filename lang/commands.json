@@ -13,7 +13,7 @@
     "circlecolor.resetset.output": "Resetted the circle color!",
 
     "namecolor.set.output": "Set the color name to #{0}!",
-    "namecolor.resetset.output": "Resetted the name color!",
+    "namecolor.reset.output": "Resetted the name color!",
 
     "about.title.about": "About",
     "about.title.creators": "Creators",

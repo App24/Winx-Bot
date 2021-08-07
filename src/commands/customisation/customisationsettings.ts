@@ -2,10 +2,10 @@ import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Patreon } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { copyUserSetting, DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
-import { getBotRoleColor, getServerDatabase } from "../../Utils";
+import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { getServerDatabase, getBotRoleColor } from "../../Utils";
 
 class CustomisationSettingsCommand extends Command{
     public constructor(){
@@ -31,7 +31,7 @@ class CustomisationSettingsCommand extends Command{
         embed.addField(Localisation.getTranslation("customisationsettings.barEndColor"), `#${userSettings.barEndColor}`);
         embed.addField(Localisation.getTranslation("customisationsettings.specialCircleColor"), `#${userSettings.specialCircleColor}`);
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        cmdArgs.channel.send(embed);
+        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 

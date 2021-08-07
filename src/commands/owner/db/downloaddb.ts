@@ -1,10 +1,10 @@
 import fs from "fs";
 import archiver from "archiver";
-import { Message, MessageAttachment } from "discord.js";
-import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
+import { MessageAttachment } from "discord.js";
 import { DATABASE_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
+import { Owner } from "../../../structs/Category";
+import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
 
 class DownloadDBCommand extends Command{
     public constructor(){
@@ -21,7 +21,7 @@ class DownloadDBCommand extends Command{
             throw err;
         });
         
-        const msg=await cmdArgs.channel.send(Localisation.getTranslation("downloaddb.wait"));
+        const msg=await cmdArgs.message.reply(Localisation.getTranslation("downloaddb.wait"));
 
         archive.directory(DATABASE_FOLDER, false);
 
@@ -30,7 +30,7 @@ class DownloadDBCommand extends Command{
         await archive.finalize();
 
         await msg.delete();
-        await cmdArgs.channel.send(new MessageAttachment(file));
+        await cmdArgs.message.reply({files: [new MessageAttachment(file)]});
         fs.unlinkSync(file);
     }
 }

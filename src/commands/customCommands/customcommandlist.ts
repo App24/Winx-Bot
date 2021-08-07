@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { OWNER_ID } from "../../Constants";
 import { Localisation } from "../../localisation";
 import { CustomCommandsSettings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getServerDatabase, getBotRoleColor, capitalise } from "../../Utils";
@@ -31,12 +31,12 @@ class CustomCommandListCommand extends Command{
             customCommands.forEach(customCommand=>{
                 switch(customCommand.access){
                     case CommandAccess.Moderators:{
-                        if(!cmdArgs.member.hasPermission("MANAGE_GUILD")){
+                        if(!cmdArgs.member.permissions.has("MANAGE_GUILD")){
                             return;
                         }
                     }break;
                     case CommandAccess.GuildOwner:{
-                        if(cmdArgs.author.id!==cmdArgs.guild.ownerID){
+                        if(cmdArgs.author.id!==cmdArgs.guild.ownerId){
                             return;
                         }
                     }break;
@@ -48,17 +48,17 @@ class CustomCommandListCommand extends Command{
                 }
                 data.push(customCommand.name);
             });
-            embed.setDescription(data);
+            embed.setDescription(data.join("\n"));
             embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-            cmdArgs.channel.send(embed);
+            cmdArgs.message.reply({embeds: [embed]});
         }else{
             const customCommand=customCommands.find(c=>c.name.toLowerCase()===cmdArgs.args[0].toLowerCase());
             if(!customCommand) return cmdArgs.message.reply(Localisation.getTranslation("customcommand.error.command.not.exist"));
             const embed=new MessageEmbed();
             embed.setTitle(capitalise(customCommand.name));
-            embed.setDescription(customCommand.outputs);
+            embed.setDescription(customCommand.outputs.join("\n"));
             embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-            cmdArgs.channel.send(embed);
+            cmdArgs.message.reply({embeds: [embed]});
         }
     }
 }

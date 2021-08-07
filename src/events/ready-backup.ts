@@ -1,10 +1,10 @@
-import fs from "fs";
-import archiver from "archiver";
+import { MessageAttachment } from "discord.js";
 import { BotUser } from "../BotClient";
 import { BACKUP_CHANNEL, DATABASE_FOLDER } from "../Constants";
-import { getGuildByID, getGuildChannelByID } from "../GetterUtils";
-import { backupDatabases, dateToString, secondsToTime } from "../Utils";
-import { MessageAttachment } from "discord.js";
+import { getGuildByID, GetTextNewsGuildChannelById } from "../GetterUtils";
+import { dateToString, backupDatabases } from "../Utils";
+import fs from "fs";
+import archiver from "archiver";
 
 let backupChannel;
 
@@ -15,7 +15,7 @@ export=()=>{
         midnight.setMinutes(0);
         midnight.setSeconds(0);
         midnight.setMilliseconds(0);
-        backupChannel=await getGuildChannelByID(BACKUP_CHANNEL, (await getGuildByID("700663163699462205")));
+        backupChannel=await GetTextNewsGuildChannelById(BACKUP_CHANNEL, (await getGuildByID("700663163699462205")));
         setTimeout(()=>{
             backup();
             setInterval(()=>{

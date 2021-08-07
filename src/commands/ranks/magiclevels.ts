@@ -1,14 +1,13 @@
 import { createCanvas, loadImage } from "canvas";
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getUserFromMention, getMemberByID, getRoleByID } from "../../GetterUtils";
+import { getUserFromMention, getMemberById, getRoleById } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
-import { getServerDatabase, getCurrentRank, getNextRank, capitalise, hexToRGB, getLevelXP, blend, canvasToMessageAttachment, isHexColor } from "../../Utils";
+import { getServerDatabase, getCurrentRank, getNextRank, capitalise, getLevelXP, hexToRGB, blend, isHexColor, canvasToMessageAttachment } from "../../Utils";
 
 class MagicLevelsCommand extends Command{
     public constructor(){
@@ -39,7 +38,7 @@ class MagicLevelsCommand extends Command{
         }
         if(user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.bot.user", user));
 
-        const member=await getMemberByID(user.id, cmdArgs.guild);
+        const member=await getMemberById(user.id, cmdArgs.guild);
         if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
         let userLevel = levels.find(u=>u.userId===user.id);
@@ -58,7 +57,7 @@ class MagicLevelsCommand extends Command{
 
         let currentRankText=Localisation.getTranslation("generic.none");
         if(currentRank){
-            const role=await getRoleByID(currentRank.roleId, cmdArgs.guild);
+            const role=await getRoleById(currentRank.roleId, cmdArgs.guild);
             if(role){
                 currentRankText=capitalise(role.name);
             }else{
@@ -69,7 +68,7 @@ class MagicLevelsCommand extends Command{
 
         let nextRankText=Localisation.getTranslation("generic.none");
         if(nextRank){
-            const role=await getRoleByID(nextRank.roleId, cmdArgs.guild);
+            const role=await getRoleById(nextRank.roleId, cmdArgs.guild);
             if(role){
                 nextRankText=capitalise(role.name);
             }else{
@@ -209,7 +208,7 @@ class MagicLevelsCommand extends Command{
         ctx.drawImage(avatar, pfpX+borderThickness, pfpY+borderThickness, newpfpRadius*2, newpfpRadius*2);
         ctx.restore();
 
-        cmdArgs.channel.send(canvasToMessageAttachment(canvas, "magiclevels"));
+        cmdArgs.message.reply({files: [canvasToMessageAttachment(canvas, "magiclevels")]});
     }
 }
 

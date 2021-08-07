@@ -1,13 +1,12 @@
-import { Channel, Guild, GuildMember, Message, MessageEmbed, User } from "discord.js";
+import { MessageEmbed, Guild, GuildMember, User, TextBasedChannels, MessageActionRow, MessageButton } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID, PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
-import { Info, Categories, Category, CustomCommands } from "../../structs/Category";
-import { Command, CommandAvailability, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Info, Category, Categories, CustomCommands } from "../../structs/Category";
+import { Command, CommandUsage, CommandArguments, CommandAvailability, CommandAccess } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
-import { isDM, getBotRoleColor, isPatreon, asyncForEach, getServerDatabase } from "../../Utils";
-
+import { asyncForEach, isDM, isPatreon, getServerDatabase, getBotRoleColor } from "../../Utils";
 
 class HelpCommand extends Command{
     public constructor(){
@@ -17,7 +16,7 @@ class HelpCommand extends Command{
     }
 
     public async onRun(cmdArgs : CommandArguments) {
-        const available=cmdArgs.channel.type==="dm"?CommandAvailability.DM:CommandAvailability.Guild;
+        const available=isDM(cmdArgs.channel)?CommandAvailability.DM:CommandAvailability.Guild;
         if(!cmdArgs.args.length){
             const embed=new MessageEmbed();
             embed.setTitle(Localisation.getTranslation("help.title"));
@@ -36,11 +35,11 @@ class HelpCommand extends Command{
                                     return;
                             }break;
                             case CommandAccess.Moderators:{
-                                if(isDM(cmdArgs.channel)||!cmdArgs.member.hasPermission("MANAGE_GUILD"))
+                                if(isDM(cmdArgs.channel)||!cmdArgs.member.permissions.has("MANAGE_GUILD"))
                                     return;
                             }break;
                             case CommandAccess.GuildOwner:{
-                                if(isDM(cmdArgs.channel)||cmdArgs.author.id!==cmdArgs.guild.ownerID)
+                                if(isDM(cmdArgs.channel)||cmdArgs.author.id!==cmdArgs.guild.ownerId)
                                     return;
                             }break;
                             case CommandAccess.None:{
@@ -59,30 +58,28 @@ class HelpCommand extends Command{
                     categories.push(Localisation.getTranslation("help.category", category.emoji, Localisation.getTranslation(category.name)));
                 }
             });
-            embed.setDescription(categories);
+            embed.setDescription(categories.join("\n"));
             embed.setFooter(Localisation.getTranslation("help.footer", PREFIX));
             embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-            return cmdArgs.channel.send(embed).then(msg=>{
-                categoryEmojis.forEach(emoji=>{
-                    msg.react(emoji.emoji);
-                });
 
-                const collector=msg.createReactionCollector((reaction, _user)=>(categoryEmojis.findIndex(emoji=>emoji.emoji===reaction.emoji.name) >=0 && _user.id===cmdArgs.author.id), {max: 1, time: 1000*60*5});
+            const rows:MessageActionRow[]=[];
+            for(let i =0; i < Math.ceil(categoryEmojis.length/5); i++){
+                rows.push(new MessageActionRow());
+            }
 
-                collector.once("end", ()=>{
-                    msg.reactions.removeAll();
-                });
+            categoryEmojis.forEach((emoji, index)=>{
+                rows[Math.floor(index/5)].addComponents(new MessageButton({customId: emoji.category.name, style: "PRIMARY", emoji: emoji.emoji}));
+            })
 
-                collector.on("dispose", ()=>{
-                    msg.reactions.removeAll();
-                });
+            return cmdArgs.message.reply({embeds: [embed], components: rows}).then(msg=>{
+                const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===cmdArgs.author.id, max: 1, time: 1000*60*5});
 
-                collector.on("collect", async(reaction)=>{
-                    const category=categoryEmojis.find(emoji=>emoji.emoji===reaction.emoji.name).category;
+                collector.on("collect", async(interaction)=>{
+                    const category=categoryEmojis.find(emoji=>emoji.category.name===interaction.customId).category;
                     if(category){
                         const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
-                        if(!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
-                        return cmdArgs.channel.send(embed);
+                        if(!embed.fields.length) return <any> interaction.update({content: Localisation.getTranslation("error.invalid.category.commands"), components: []});
+                        return interaction.update({embeds: [embed], components: []});
                     }
                 });
             });
@@ -101,12 +98,12 @@ class HelpCommand extends Command{
 
         const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
         if(!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
-        return cmdArgs.channel.send(embed);
+        return cmdArgs.message.reply({embeds: [embed]});
     }
 
 }
 
-async function getCommands(category : Category, available : CommandAvailability, channel : Channel, guild : Guild, member : GuildMember, author : User){
+async function getCommands(category : Category, available : CommandAvailability, channel : TextBasedChannels, guild : Guild, member : GuildMember, author : User){
     const embed=new MessageEmbed();
     embed.setTitle(`${category.emoji}: ${Localisation.getTranslation(category.name)}`);
     if(category===CustomCommands){
@@ -119,12 +116,12 @@ async function getCommands(category : Category, available : CommandAvailability,
                         return;
                 }break;
                 case CommandAccess.Moderators:{
-                    if(isDM(channel)||!member.hasPermission("MANAGE_GUILD")){
+                    if(isDM(channel)||!member.permissions.has("MANAGE_GUILD")){
                         return;
                     }
                 }break;
                 case CommandAccess.GuildOwner:{
-                    if(isDM(channel)||author.id!==guild.ownerID){
+                    if(isDM(channel)||author.id!==guild.ownerId){
                         return;
                     }
                 }break;
@@ -144,12 +141,12 @@ async function getCommands(category : Category, available : CommandAvailability,
 
                         switch(command.access){
                             case CommandAccess.Moderators:{
-                                if(isDM(channel)||!member.hasPermission("MANAGE_GUILD")){
+                                if(isDM(channel)||!member.permissions.has("MANAGE_GUILD")){
                                     return;
                                 }
                             }break;
                             case CommandAccess.GuildOwner:{
-                                if(isDM(channel)||author.id!==guild.ownerID){
+                                if(isDM(channel)||author.id!==guild.ownerId){
                                     return;
                                 }
                             }break;

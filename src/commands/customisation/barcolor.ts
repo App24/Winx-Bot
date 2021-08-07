@@ -1,12 +1,11 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../Utils";
+import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor } from "../../Utils";
 
 class BarColorCommand extends Command{
     public constructor(){
@@ -55,10 +54,10 @@ class GetSubCommand extends SubCommand{
         }
 
         if((mod&BarMode.Start)===BarMode.Start){
-            await cmdArgs.channel.send(Localisation.getTranslation("barcolor.hexcolor.output", "Start", userSettings.barStartColor), canvasToMessageAttachment(canvasColor(userSettings.barStartColor)));
+            await cmdArgs.message.reply({content: Localisation.getTranslation("barcolor.hexcolor.output", "Start", userSettings.barStartColor), files: [canvasToMessageAttachment(canvasColor(userSettings.barStartColor))]});
         }
         if((mod&BarMode.End)===BarMode.End){
-            await cmdArgs.channel.send(Localisation.getTranslation("barcolor.hexcolor.output", "End", userSettings.barEndColor), canvasToMessageAttachment(canvasColor(userSettings.barEndColor)));
+            await cmdArgs.message.reply({content: Localisation.getTranslation("barcolor.hexcolor.output", "End", userSettings.barEndColor), files: [canvasToMessageAttachment(canvasColor(userSettings.barEndColor))]});
         }
     }
 }
@@ -106,7 +105,7 @@ class SetSubCommand extends SubCommand{
             userSettings.barEndColor=color;
         }
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
-        return cmdArgs.channel.send(Localisation.getTranslation("barcolor.set.output", append, color));
+        return cmdArgs.message.reply(Localisation.getTranslation("barcolor.set.output", append, color));
     }
 }
 
@@ -148,7 +147,7 @@ class ResetSubCommand extends SubCommand{
             userSettings.barEndColor=DEFAULT_USER_SETTING.barEndColor;
         }
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
-        return cmdArgs.channel.send(Localisation.getTranslation("barcolor.reset.output", append));
+        return cmdArgs.message.reply(Localisation.getTranslation("barcolor.reset.output", append));
     }
 }
 

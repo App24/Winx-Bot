@@ -1,47 +1,46 @@
-import { Guild, GuildMember, NewsChannel, Role, TextChannel, User } from "discord.js";
+import { BaseGuildTextChannel, Guild, GuildMember, NewsChannel, Role, TextChannel, ThreadChannel, User } from "discord.js";
 import { BotUser } from "./BotClient";
 
 //#region User/Member
 
-export function getUserFromMention(mention : string) : Promise<User>{
+export function getUserFromMention(mention : string){
     if(!mention) return;
     const matches=mention.match(/^<@!?(\d+)>$/);
 
     if(!matches){
-        return getUserByID(mention);
+        return getUserById(mention);
     }
-    
-    return getUserByID(matches[1]);
+
+    return getUserById(matches[1]);
 }
 
-export function getUserByID(id : string) : Promise<User>{
-    if(!id) return undefined;
-    
-    const member=BotUser.shard.broadcastEval(`this.users.fetch('${id}')`)
-    .then(sentArray=>{
+export function getUserById(id : string):Promise<User>{
+    if(!id) return;
+
+    const member=BotUser.shard.broadcastEval((client, {id})=>client.users.fetch(id), {context:{id}})
+    .then((sentArray:any[])=>{
         if(!sentArray[0]) return undefined;
 
         return new User(BotUser, sentArray[0]);
-    }).catch(()=>{
-        return undefined;
-    });
+    }).catch(()=>undefined);
+
     return member;
 }
 
-export function getMemberFromMention(mention : string, guild : Guild) : Promise<GuildMember>{
+export function getMemberFromMention(mention : string, guild : Guild){
     if(!mention||!guild) return;
     const matches=mention.match(/^<@!?(\d+)>$/);
 
     if(!matches){
-        return getMemberByID(mention, guild);
+        return getMemberById(mention, guild);
     }
-    
-    return getMemberByID(matches[1], guild);
+
+    return getMemberById(matches[1], guild);
 }
 
-export function getMemberByID(id : string, guild : Guild) : Promise<GuildMember>{
-    if(!id||!guild) return undefined;
-    return guild.members.fetch(id).catch(()=>undefined);
+export function getMemberById(id : string, guild : Guild):Promise<GuildMember>{
+    if(!id||!guild) return;
+    return guild.members.fetch(id).catch(undefined);
 }
 
 //#endregion
@@ -52,74 +51,70 @@ export function getGuildByID(id:string) : Promise<Guild>{
     return BotUser.guilds.fetch(id).catch(()=>undefined);
 }
 
-export function getTextChannelByID(id : string, guild : Guild) : TextChannel{
-    if(!id||!guild) return undefined;
-    return <TextChannel>guild.channels.cache.find(channel=>channel.id===id&&channel.type==="text");
-}
-
-export function getNewsChannelByID(id : string, guild : Guild) : NewsChannel{
-    if(!id||!guild) return undefined;
-    return <NewsChannel>guild.channels.cache.find(channel=>channel.id===id&&channel.type==="news");
-}
-
-export function getGuildChannelByID(id : string, guild : Guild) : NewsChannel | TextChannel{
-    if(!id||!guild) return undefined;
-    const textChannel=getTextChannelByID(id, guild);
-    if(textChannel) return textChannel;
-    const newsChannel=getNewsChannelByID(id, guild);
-    if(newsChannel) return newsChannel;
-    return undefined;
-}
-
-export function getTextChannelFromMention(mention : string, guild : Guild) : TextChannel{
+export function GetTextNewsGuildChannelFromMention(mention : string, guild : Guild){
     if(!mention||!guild) return;
     const matches=mention.match(/^<#!?(\d+)>$/);
 
     if(!matches){
-        return getTextChannelByID(mention, guild);
+        return GetTextNewsGuildChannelById(mention, guild);
     }
     
-    return getTextChannelByID(matches[1], guild);
+    return GetTextNewsGuildChannelById(matches[1], guild);
 }
 
-export function getNewsChannelFromMention(mention : string, guild : Guild) : NewsChannel{
+export function GetTextNewsGuildChannelById(id : string, guild : Guild) : TextChannel | NewsChannel{
+    if(!id||!guild) return undefined;
+    return <TextChannel | NewsChannel> guild.channels.cache.find(channel=>channel.id===id&&channel.isText());
+}
+
+export function GetTextBasedGuildChannelFromMention(mention : string, guild : Guild){
     if(!mention||!guild) return;
     const matches=mention.match(/^<#!?(\d+)>$/);
 
     if(!matches){
-        return getNewsChannelByID(mention, guild);
+        return GetTextBasedGuildGuildChannelById(mention, guild);
     }
     
-    return getNewsChannelByID(matches[1], guild);
+    return GetTextBasedGuildGuildChannelById(matches[1], guild);
 }
 
-export function getGuildChannelFromMention(mention : string, guild : Guild) : NewsChannel | TextChannel{
+export function GetTextBasedGuildGuildChannelById(id : string, guild : Guild) : BaseGuildTextChannel{
+    if(!id||!guild) return undefined;
+    return <BaseGuildTextChannel> guild.channels.cache.find(channel=>channel.id===id&&channel.isText());
+}
+
+export function GetThreadChannelFromMention(mention : string, guild : Guild){
     if(!mention||!guild) return;
     const matches=mention.match(/^<#!?(\d+)>$/);
 
     if(!matches){
-        return getGuildChannelByID(mention, guild);
+        return GetThreadChannelById(mention, guild);
     }
     
-    return getGuildChannelByID(matches[1], guild);
+    return GetThreadChannelById(matches[1], guild);
+}
+
+export function GetThreadChannelById(id : string, guild : Guild) : ThreadChannel{
+    if(!id||!guild) return undefined;
+    return <ThreadChannel> guild.channels.cache.find(channel=>channel.id===id&&channel.isThread());
 }
 
 //#endregion
 
 //#region Role
 
-export function getRoleFromMention(mention : string, guild : Guild) : Promise<Role>{
+export function getRoleFromMention(mention : string, guild : Guild){
     if(!mention||!guild) return;
     const matches=mention.match(/^<@&(\d+)>$/);
 
     if(!matches){
-        return getRoleByID(mention, guild);
+        return getRoleById(mention, guild);
     }
     
-    return getRoleByID(matches[1], guild);
+    return getRoleById(matches[1], guild);
 }
 
-export function getRoleByID(id : string, guild : Guild) : Promise<Role>{
+export function getRoleById(id : string, guild : Guild) : Promise<Role>{
     if(!id||!guild) return undefined;
     return guild.roles.fetch(id).catch(()=>undefined);
 }

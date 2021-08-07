@@ -1,10 +1,6 @@
-import { Message } from "discord.js";
+import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
 import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
-import fs from "fs";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER } from "../../../Constants";
-import { Localisation } from "../../../localisation";
 import { backupDatabases } from "../../../Utils";
 
 class BackupDBCommand extends Command{
@@ -16,7 +12,7 @@ class BackupDBCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         backupDatabases();
-        cmdArgs.channel.send(Localisation.getTranslation("generic.done"));
+        cmdArgs.message.reply(Localisation.getTranslation("generic.done"));
     }
 }
 

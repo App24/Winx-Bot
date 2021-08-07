@@ -1,8 +1,7 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "../../Utils";
@@ -19,7 +18,7 @@ class CheckBansCommand extends Command{
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
         if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
-        const bans=await cmdArgs.guild.fetchBans();
+        const bans=await cmdArgs.guild.bans.fetch();
         let amount=0;
         bans.forEach(ban=>{
             const index=levels.findIndex(u=>u.userId===ban.user.id);
@@ -29,7 +28,7 @@ class CheckBansCommand extends Command{
             }
         });
         await Levels.set(cmdArgs.guild.id, levels);
-        cmdArgs.channel.send(Localisation.getTranslation("checkbans.bans", amount));
+        cmdArgs.message.reply(Localisation.getTranslation("checkbans.bans", amount));
     }
 }
 

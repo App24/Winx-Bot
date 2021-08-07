@@ -1,11 +1,11 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Patreon } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAvailability, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { copyUserSetting, DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
+import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { getServerDatabase, isHexColor } from "../../Utils";
+import { isHexColor, getServerDatabase } from "../../Utils";
 
 class CustomisationCodeCommand extends Command{
     public constructor(){
@@ -36,7 +36,7 @@ class SetSubCommand extends SubCommand{
 
         const values=code.split("|");
 
-        if(values.length<5) return cmdArgs.channel.send(Localisation.getTranslation("customisationcode.value.error"));
+        if(values.length<5) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
 
         const nameColor=values[0];
         const cardColor=values[1];
@@ -46,11 +46,11 @@ class SetSubCommand extends SubCommand{
 
         const nameEnabled=nameColor!=="??????";
 
-        if(nameEnabled&&!isHexColor(nameColor)) return cmdArgs.channel.send(Localisation.getTranslation("customisationcode.value.error"));
-        if(!isHexColor(cardColor)) return cmdArgs.channel.send(Localisation.getTranslation("customisationcode.value.error"));
-        if(!isHexColor(circleColor)) return cmdArgs.channel.send(Localisation.getTranslation("customisationcode.value.error"));
-        if(!isHexColor(barStartColor)) return cmdArgs.channel.send(Localisation.getTranslation("customisationcode.value.error"));
-        if(!isHexColor(barEndColor)) return cmdArgs.channel.send(Localisation.getTranslation("customisationcode.value.error"));
+        if(nameEnabled&&!isHexColor(nameColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if(!isHexColor(cardColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if(!isHexColor(circleColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if(!isHexColor(barStartColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if(!isHexColor(barEndColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
         
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings=await getServerDatabase<UserSetting[]>(UserSettings, cmdArgs.guild.id);
@@ -66,7 +66,7 @@ class SetSubCommand extends SubCommand{
         userSettings.barStartColor=barStartColor;
         userSettings.barEndColor=barEndColor;
 
-        cmdArgs.channel.send("Updated Customisation Settings!")
+        cmdArgs.message.reply("Updated Customisation Settings!")
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
     }
 }
@@ -91,7 +91,7 @@ class GetSubCommand extends SubCommand{
         code+=userSettings.barStartColor+"|";
         code+=userSettings.barEndColor;
 
-        cmdArgs.channel.send(Localisation.getTranslation("customisationcode.get", code));
+        cmdArgs.message.reply(Localisation.getTranslation("customisationcode.get", code));
     }
 }
 

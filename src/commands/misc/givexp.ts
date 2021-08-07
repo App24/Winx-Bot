@@ -1,12 +1,11 @@
-import { Message, NewsChannel, TextChannel } from "discord.js";
+import { NewsChannel, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { Command, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, getLevelXP } from "../../Utils";
 import { addXP } from "../../XPUtils";
-
 
 class GiveXPCommand extends Command{
     constructor(){
@@ -28,10 +27,10 @@ class GiveXPCommand extends Command{
         const rand=Math.random()*100;
         if(rand<=per){
             const xp=Math.floor(getLevelXP(userLevel.level)*0.1);
-            await addXP(cmdArgs.author, cmdArgs.guild, <NewsChannel|TextChannel>cmdArgs.channel, xp);
-            return cmdArgs.channel.send(Localisation.getTranslation("givexp.success.output", xp));
+            await addXP(xp, cmdArgs.author, cmdArgs.guild, <NewsChannel|TextChannel>cmdArgs.channel);
+            return cmdArgs.message.reply(Localisation.getTranslation("givexp.success.output", xp));
         }
-        cmdArgs.channel.send(Localisation.getTranslation("givexp.fail.output"));
+        cmdArgs.message.reply(Localisation.getTranslation("givexp.fail.output"));
     }
 }
 

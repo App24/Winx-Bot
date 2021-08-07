@@ -1,4 +1,3 @@
-import { Message } from "discord.js";
 import { CommandArguments } from "./Command";
 
 export abstract class SubCommand{

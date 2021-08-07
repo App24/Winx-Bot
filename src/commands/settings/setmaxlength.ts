@@ -1,8 +1,7 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase } from "../../Utils";
@@ -26,9 +25,9 @@ class SetMaxLengthCommand extends Command{
             if(len<serverInfo.minMessageLength) return cmdArgs.message.reply(Localisation.getTranslation("setmaxlength.error"));
             serverInfo.maxMessageLength=len;
             await ServerInfo.set(cmdArgs.guild.id, serverInfo);
-            return cmdArgs.channel.send(Localisation.getTranslation("setmaxlength.set", serverInfo.maxMessageLength));
+            return cmdArgs.message.reply(Localisation.getTranslation("setmaxlength.set", serverInfo.maxMessageLength));
         }
-        return cmdArgs.channel.send(Localisation.getTranslation("setmaxlength.get", serverInfo.maxMessageLength));
+        return cmdArgs.message.reply(Localisation.getTranslation("setmaxlength.get", serverInfo.maxMessageLength));
     }
 }
 

@@ -1,12 +1,12 @@
-import { GuildMember, Message, MessageEmbed } from "discord.js";
+import { GuildMember, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getMemberByID, getUserFromMention } from "../../GetterUtils";
+import { getUserFromMention, getMemberById } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, asyncForEach, getLevelXP, getBotRoleColor, getLeaderboardMembers } from "../../Utils";
+import { getServerDatabase, getLeaderboardMembers, asyncForEach, getLevelXP, getBotRoleColor } from "../../Utils";
 
 class RankCommand extends Command{
     public constructor(){
@@ -29,7 +29,7 @@ class RankCommand extends Command{
             _user=temp;
         }
         if(_user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.user.bot"));
-        const member=await getMemberByID(_user.id, cmdArgs.guild);
+        const member=await getMemberById(_user.id, cmdArgs.guild);
         if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
         //Sorts levels list
@@ -84,8 +84,8 @@ class RankCommand extends Command{
         }
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        embed.setDescription(data);
-        cmdArgs.channel.send(embed);
+        embed.setDescription(data.join("\n"));
+        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 

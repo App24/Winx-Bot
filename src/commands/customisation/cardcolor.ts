@@ -1,8 +1,7 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
@@ -40,7 +39,7 @@ class GetSubCommand extends SubCommand{
             await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
-        cmdArgs.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.cardColor), canvasToMessageAttachment(canvasColor(userSettings.cardColor)));
+        cmdArgs.message.reply({content: Localisation.getTranslation("generic.hexcolor", userSettings.cardColor), files: [canvasToMessageAttachment(canvasColor(userSettings.cardColor))]});
     }
 }
 
@@ -66,7 +65,7 @@ class SetSubCommand extends SubCommand{
         if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         userSettings.cardColor=color;
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
-        cmdArgs.channel.send(Localisation.getTranslation("cardcolor.set.output", color));
+        cmdArgs.message.reply(Localisation.getTranslation("cardcolor.set.output", color));
     }
 }
 
@@ -85,7 +84,7 @@ class ResetSubCommand extends SubCommand{
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
         userSettings.cardColor=DEFAULT_USER_SETTING.cardColor;
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
-        cmdArgs.channel.send(Localisation.getTranslation("cardcolor.reset.output"));
+        cmdArgs.message.reply(Localisation.getTranslation("cardcolor.reset.output"));
     }
 }
 

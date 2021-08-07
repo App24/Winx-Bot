@@ -1,10 +1,10 @@
-import { Message, GuildChannel, TextChannel, NewsChannel } from "discord.js";
+import { GuildChannel, Message, BaseGuildTextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
-import { getMemberFromMention, getGuildChannelByID } from "../../GetterUtils";
+import { getMemberFromMention, GetTextBasedGuildChannelFromMention } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
@@ -25,7 +25,7 @@ class CheckLevelsCommand extends Command{
         const member=await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
         if(!member) return cmdArgs.message.reply("That is not a member of this server!");
         if(member.user.bot) return cmdArgs.message.reply("That is a bot, and therefore has no levels!");
-        const channels=cmdArgs.guild.channels.cache.array();
+        const channels=Array.from(cmdArgs.guild.channels.cache.values());
 
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
@@ -41,18 +41,18 @@ class CheckLevelsCommand extends Command{
         user.xp=0;
         await Levels.set(cmdArgs.guild.id, levels);
 
-        await cmdArgs.channel.send(Localisation.getTranslation("checklevels.start"));
+        await cmdArgs.message.reply(Localisation.getTranslation("checklevels.start"));
         const NTChannels=[];
         await asyncForEach(channels, async(channel:GuildChannel)=>{
             if((<any>channel).messages){
                 if(excluded){
                     if(excluded.find(c=>c===channel.id)) return;
                 }
-                const NTChannel=await getGuildChannelByID(channel.id, cmdArgs.guild);
+                const NTChannel=await GetTextBasedGuildChannelFromMention(channel.id, cmdArgs.guild);
                 NTChannels.push(NTChannel);
             }
         });
-        await asyncForEach(NTChannels, async(channel:TextChannel | NewsChannel, index:number)=>{
+        await asyncForEach(NTChannels, async(channel:BaseGuildTextChannel, index:number)=>{
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.start.channel", channel, index+1, NTChannels.length));
             const startTime=new Date().getTime();
             const messages=await getAllMessages(channel);
@@ -66,11 +66,11 @@ class CheckLevelsCommand extends Command{
                     totalXp+=xp;
                 }
             });
-            await addXP(member.user, cmdArgs.guild, <TextChannel|NewsChannel>cmdArgs.channel, totalXp, false);
+            await addXP(totalXp, member.user, cmdArgs.guild, <BaseGuildTextChannel>cmdArgs.channel, false);
             const timeDifferent=new Date().getTime()-startTime;
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/1000)));
         })
-        cmdArgs.channel.send(Localisation.getTranslation("generic.done"));
+        cmdArgs.message.reply(Localisation.getTranslation("generic.done"));
     }
 }
 

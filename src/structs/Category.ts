@@ -1,4 +1,4 @@
-import { CommandAccess, CommandAvailability } from "./Command";
+import { CommandAvailability, CommandAccess } from "./Command";
 
 export class Category{
     public name : string;

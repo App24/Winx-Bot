@@ -1,8 +1,7 @@
-import { Message } from "discord.js";
 import { getUserFromMention } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
 
 class MessageUserCommand extends Command{
     public constructor(){
@@ -19,7 +18,7 @@ class MessageUserCommand extends Command{
         const msg=cmdArgs.args.join(" ");
         user.createDM().then(channel=>{
             channel.send(msg);
-            cmdArgs.channel.send(Localisation.getTranslation("generic.sent"));
+            cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
         }).catch(()=>{
             cmdArgs.message.reply(Localisation.getTranslation("error.unable.dm"));
         });

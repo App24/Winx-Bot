@@ -1,24 +1,24 @@
-import {join} from 'path';
-import fs from 'fs';
-import Keyv from './keyv-index';
-import { Channel, Guild, GuildMember, Message, MessageAttachment, NewsChannel, TextChannel } from 'discord.js';
-import { BotUser } from './BotClient';
-import { DatabaseType } from './structs/DatabaseTypes';
-import { PatreonInfo } from './structs/databaseTypes/PatreonInfo';
-import { Canvas, createCanvas } from 'canvas';
-import { getMemberByID, getUserByID } from './GetterUtils';
-import { RankLevel } from './structs/databaseTypes/RankLevel';
-import { UserLevel } from './structs/databaseTypes/UserLevel';
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from './Constants';
-import { ErrorStruct } from './structs/databaseTypes/ErrorStruct';
-import { Localisation } from './localisation';
+import { join } from "path";
+import fs from "fs";
+import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from "./Constants";
+import { DatabaseType } from "./structs/DatabaseTypes";
+import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, NewsChannel, TextBasedChannels, TextChannel } from "discord.js";
+import { BotUser } from "./BotClient";
+import { Localisation } from "./localisation";
+import { ErrorStruct } from "./structs/databaseTypes/ErrorStruct";
+import { getMemberById, getUserById } from "./GetterUtils";
+import { PatreonInfo } from "./structs/databaseTypes/PatreonInfo";
+import { Keyv } from "./keyv/keyv-index";
+import { Canvas, createCanvas } from "canvas";
+import { RankLevel } from "./structs/databaseTypes/RankLevel";
+import { UserLevel } from "./structs/databaseTypes/UserLevel";
 
 /**
  * 
  * @param array list of items to iterate through
  * @param callbackFn callback function to run
  */
-export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: number, array: readonly U[])=>Promise<any>|any) {
+ export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: number, array: readonly U[])=>Promise<any>|any) {
     for(let i =0; i < array.length; i++){
         let exit=await callbackFn(array[i], i, array);
         if(exit===true)break;
@@ -44,7 +44,7 @@ export async function asyncMapForEach<U,T>(map:Map<U,T>, callbackFn: (key:U, val
  * @param directory the parent directory to get all files from
  * @returns all files found in all sub-directories
  */
-export function loadFiles(directory : string){
+ export function loadFiles(directory : string){
     const files:string[]=[];
     const dirs:string[]=[];
 
@@ -78,7 +78,7 @@ export function loadFiles(directory : string){
  * @param level 
  * @returns Amount of xp this level needs
  */
-export function getLevelXP(level : number){
+ export function getLevelXP(level : number){
     return Math.abs(level)*2*100+50;
 }
 
@@ -160,12 +160,12 @@ export function secondsToTime(time : number){
  * @param channel 
  * @returns True if the chanell is DM, false if not
  */
-export function isDM(channel : Channel){
-    return channel.type==="dm";
+export function isDM(channel : TextBasedChannels){
+    return channel.type==="DM";
 }
 
 export function getBotMember(guild : Guild){
-    return getMemberByID(BotUser.user.id, guild);
+    return getMemberById(BotUser.user.id, guild);
 }
 
 /**
@@ -337,14 +337,14 @@ export function blend(a : number, b : number, w : number){
     return (a*w)+(b*(1-w));
 }
 
-export async function getAllMessages(channel : TextChannel|NewsChannel){
+export async function getAllMessages(channel : BaseGuildTextChannel){
     const messages:Message[]=[];
-    let msgs=await channel.messages.fetch().then(promise=>promise.array());
+    let msgs=await channel.messages.fetch().then(promise=>Array.from(promise.values()));
     let lastMessage;
     while(msgs.length){
         messages.push(...msgs);
         lastMessage=msgs[msgs.length-1].id;
-        msgs=await channel.messages.fetch({before: lastMessage}).then(promise=>promise.array());
+        msgs=await channel.messages.fetch({before: lastMessage}).then(promise=>Array.from(promise.values()));
     }
     return messages;
 }
@@ -361,7 +361,7 @@ export async function getLeaderboardMembers(guild : Guild){
     const leaderboardLevels:{userLevel: UserLevel, member: GuildMember}[]=[];
     let userIndex=0;
     await asyncForEach(levels, async(level : UserLevel)=>{
-        const member=await getMemberByID(level.userId, guild);
+        const member=await getMemberById(level.userId, guild);
         if(member){
             leaderboardLevels.push({userLevel: level, member});
             userIndex++;
@@ -402,8 +402,8 @@ export async function reportError(error, message : Message){
     errorObj.time=new Date().getTime();
     errorObj.error=error;
     await Errors.set(hex, errorObj);
-    const owner = await getUserByID(OWNER_ID);
-    const ownerMember=await getMemberByID(owner.id, message.guild);
+    const owner = await getUserById(OWNER_ID);
+    const ownerMember=await getMemberById(owner.id, message.guild);
     let text=`Error: \`${hex}\``;
     if(ownerMember){
         text+=`\nServer: ${message.guild.name}`;

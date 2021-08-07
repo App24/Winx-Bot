@@ -1,7 +1,6 @@
 import fs from "fs";
-import { Message } from "discord.js";
 import { BotUser } from "../../../BotClient";
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from "../../../Constants";
+import { DATABASE_BACKUP_FOLDER, OWNER_ID, DATABASE_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
 import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
@@ -19,10 +18,10 @@ class RestoreDBCommand extends Command{
             return cmdArgs.message.reply(Localisation.getTranslation("restoredb.empty.backups"));
         }
         
-        cmdArgs.channel.send(Localisation.getTranslation("generic.confirmation")).then(async(msg)=>{
+        cmdArgs.message.reply(Localisation.getTranslation("generic.confirmation")).then(async(msg)=>{
             msg.react('✅');
             msg.react('❌');
-            const collector=msg.createReactionCollector((reaction, user)=>(['✅', "❌"].includes(reaction.emoji.name) && user.id===OWNER_ID), {max: 1});
+            const collector=msg.createReactionCollector({filter: (reaction, user)=>(['✅', "❌"].includes(reaction.emoji.name) && user.id===OWNER_ID), max: 1});
 
             collector.on("end", async()=>{
                 msg.reactions.removeAll();

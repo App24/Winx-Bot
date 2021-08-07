@@ -1,12 +1,11 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { copyUserSetting, DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
+import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../Utils";
+import { getServerDatabase, isHexColor, canvasToMessageAttachment, canvasColor } from "../../Utils";
 
 class NameColorCommand extends Command{
     public constructor(){
@@ -41,7 +40,7 @@ class GetSubCommand extends SubCommand{
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
         if(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSettings.nameColor)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.namecolor"));
-        cmdArgs.channel.send(Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), canvasToMessageAttachment(canvasColor(userSettings.nameColor)));
+        cmdArgs.message.reply({content: Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), files: [canvasToMessageAttachment(canvasColor(userSettings.nameColor))]});
     }
 }
 
@@ -62,7 +61,7 @@ class SetSubCommand extends SubCommand{
 
         if(cmdArgs.args[0].toLowerCase()===DEFAULT_USER_SETTING.nameColor){
             userSettings.nameColor=DEFAULT_USER_SETTING.nameColor;
-            cmdArgs.channel.send(Localisation.getTranslation("namecolor.reset.output"));
+            cmdArgs.message.reply(Localisation.getTranslation("namecolor.reset.output"));
         }else{
             let color=cmdArgs.args[0].toLowerCase();
             if(color.startsWith("#")){
@@ -70,7 +69,7 @@ class SetSubCommand extends SubCommand{
             }
             if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
             userSettings.nameColor=color;
-            cmdArgs.channel.send(Localisation.getTranslation("namecolor.set.output", color));
+            cmdArgs.message.reply(Localisation.getTranslation("namecolor.set.output", color));
         }
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
     }
@@ -91,7 +90,7 @@ class ResetSubCommand extends SubCommand{
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
         userSettings.nameColor=DEFAULT_USER_SETTING.nameColor;
         await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
-        cmdArgs.channel.send(Localisation.getTranslation("namecolor.reset.output"));
+        cmdArgs.message.reply(Localisation.getTranslation("namecolor.reset.output"));
     }
 }
 

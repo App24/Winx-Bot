@@ -1,4 +1,3 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
@@ -14,7 +13,7 @@ class ReloadLocalisationCommand extends Command{
 
     public onRun(cmdArgs : CommandArguments){
         BotUser.loadLocalisation();
-        cmdArgs.channel.send(Localisation.getTranslation("reloadlocalisation.reload"));
+        cmdArgs.message.reply(Localisation.getTranslation("reloadlocalisation.reload"));
     }
 }
 

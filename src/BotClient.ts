@@ -1,12 +1,12 @@
 import { Client, ClientOptions, Collection, Intents } from "discord.js";
-import Keyv from "./keyv-index";
-import { DatabaseType } from "./structs/DatabaseTypes";
-import fs from 'fs';
-import path from 'path';
+import path from "path";
 import { DATABASE_FOLDER } from "./Constants";
-import { loadFiles } from "./Utils";
-import { Command } from "./structs/Command";
+import { Keyv } from "./keyv/keyv-index";
 import { Localisation } from "./localisation";
+import { DatabaseType } from "./structs/DatabaseTypes";
+import { loadFiles } from "./Utils";
+import fs from "fs";
+import { Command } from "./structs/Command";
 
 interface BotOptions{
     clientOptions? : ClientOptions;
@@ -19,21 +19,36 @@ class BotClient extends Client{
     private databases=new Collection<DatabaseType, Keyv>();
     public Commands = new Collection<string, Command>();
 
-    private botOptions : BotOptions;
+    private botOptions:BotOptions;
 
     public constructor(options: BotOptions){
         super(options.clientOptions);
+
         this.botOptions=options;
-        
+
         this.loadLocalisation();
 
         this.loadDatabases();
+
         ;(async()=>{
-            if(this.botOptions.loadCommands)
+            if(this.botOptions.loadCommands){
                 await this.loadCommands();
-            if(this.botOptions.loadEvents)
+            }
+            if(this.botOptions.loadEvents){
                 await this.loadEvents();
+            }
         })();
+    }
+    
+    public loadDatabases(){
+        if(!fs.existsSync(DATABASE_FOLDER)){
+            fs.mkdirSync(DATABASE_FOLDER);
+        }
+
+        const values = Object.values(DatabaseType);
+        values.forEach((value, index)=>{
+            this.databases.set(<DatabaseType>value, new Keyv(`sqlite://${DATABASE_FOLDER}/${value}.sqlite`));
+        });
     }
 
     private async loadCommands(){
@@ -69,17 +84,6 @@ class BotClient extends Client{
                 break;
         }
     }
-    
-    public loadDatabases(){
-        if(!fs.existsSync(DATABASE_FOLDER)){
-            fs.mkdirSync(DATABASE_FOLDER);
-        }
-
-        const values = Object.values(DatabaseType);
-        values.forEach((value, index)=>{
-            this.databases.set(<DatabaseType>value, new Keyv(`sqlite://${DATABASE_FOLDER}/${value}.sqlite`));
-        });
-    }
 
     private async loadEvents(){
         const files=loadFiles("dist/events");
@@ -89,33 +93,28 @@ class BotClient extends Client{
             if(file.endsWith(".js")){
                 const event=await import(`./${file.substr(5, file.length)}`);
                 const {default: func}=event;
-                const name=path.basename(file).slice(0,-3);
+                const name=path.basename(file).slice(0, -3);
 
-                if(typeof func !== "function"){
-                    continue;
-                }
+                if(typeof func !== "function") continue;
 
                 func();
 
                 switch(this.botOptions.logLoading){
-                    case 'complex':
-                    case 'all':
+                    case "complex":
+                    case "all":
                         console.log(Localisation.getTranslation("bot.load.event.complex", name));
                         break;
                 }
                 loaded++;
             }
         }
+
         switch(this.botOptions.logLoading){
-            case 'simplified':
-            case 'all':
+            case "simplified":
+            case "all":
                 console.log(Localisation.getTranslation("bot.load.event.simple", loaded));
                 break;
         }
-    }
-
-    public getDatabase(databaseType : DatabaseType) : Keyv{
-        return this.databases.get(databaseType);
     }
 
     public loadLocalisation(){
@@ -132,15 +131,18 @@ class BotClient extends Client{
         Localisation.loadLocalisation("lang/miscs.json");
     }
 
+    public getDatabase(databaseType : DatabaseType) : Keyv{
+        return this.databases.get(databaseType);
+    }
+
     public getCommand(commandName : string){
         return this.Commands.get(commandName)||this.Commands.find(cmd=>cmd.aliases&&cmd.aliases.includes(commandName));
     }
 }
 
-const intents=new Intents(Intents.NON_PRIVILEGED);
-intents.add('GUILD_MEMBERS');
+const intents=new Intents(Intents.FLAGS.DIRECT_MESSAGES|Intents.FLAGS.DIRECT_MESSAGE_REACTIONS|Intents.FLAGS.DIRECT_MESSAGE_TYPING|Intents.FLAGS.GUILDS|Intents.FLAGS.GUILD_BANS|Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS|Intents.FLAGS.GUILD_INTEGRATIONS|Intents.FLAGS.GUILD_INVITES|Intents.FLAGS.GUILD_MEMBERS|Intents.FLAGS.GUILD_MESSAGES|Intents.FLAGS.GUILD_MESSAGE_REACTIONS|Intents.FLAGS.GUILD_MESSAGE_TYPING|Intents.FLAGS.GUILD_VOICE_STATES|Intents.FLAGS.GUILD_WEBHOOKS);
 export const BotUser=new BotClient({
-    clientOptions: {ws: {intents: intents}},
+    clientOptions: {intents: intents, allowedMentions: {repliedUser: false}},
     logLoading: 'simplified',
     loadCommands: true,
     loadEvents: true

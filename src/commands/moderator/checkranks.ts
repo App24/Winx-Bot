@@ -1,13 +1,13 @@
-import { GuildMember, Message } from "discord.js";
+import { GuildMember } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getRoleByID } from "../../GetterUtils";
+import { getRoleById } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { asyncForEach, getServerDatabase } from "../../Utils";
+import { getServerDatabase, asyncForEach } from "../../Utils";
 
 class CheckRanksCommand extends Command{
     public constructor(){
@@ -26,13 +26,13 @@ class CheckRanksCommand extends Command{
         if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
         if(!ranks) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
 
-        const members=await cmdArgs.guild.members.fetch().then(promise=>promise.array());
-        await cmdArgs.channel.send(Localisation.getTranslation("checkranks.start"));
+        const members=await cmdArgs.guild.members.fetch().then(promise=>Array.from(promise.values()));
+        await cmdArgs.message.reply(Localisation.getTranslation("checkranks.start"));
         await asyncForEach(members, async(member:GuildMember)=>{
             const user=levels.find(u=>u.userId===member.id);
             if(user){
                 await asyncForEach(ranks, async(rank : RankLevel)=>{
-                    const role=await getRoleByID(rank.roleId, cmdArgs.guild);
+                    const role=await getRoleById(rank.roleId, cmdArgs.guild);
                     if(!role) return;
                     if(user.level>=rank.level&&!member.roles.cache.has(role.id)){
                         await member.roles.add(role);
@@ -42,7 +42,7 @@ class CheckRanksCommand extends Command{
                 });
             }
         });
-        cmdArgs.channel.send(Localisation.getTranslation("generic.done"));
+        cmdArgs.message.reply(Localisation.getTranslation("generic.done"));
     }
 }
 

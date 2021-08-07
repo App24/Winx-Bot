@@ -1,7 +1,7 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { CustomCommandsSettings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getServerDatabase } from "../../Utils";
@@ -87,16 +87,16 @@ class CustomCommandEditCommand extends Command{
                     const index=customCommand.outputs.findIndex(output=>output.toLowerCase()===value.toLowerCase());
                     if(index>-1){
                         customCommand.outputs.splice(index, 1);
-                        cmdArgs.channel.send(Localisation.getTranslation("customcommand.success.output.remove"));
+                        cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.output.remove"));
                     }else{
                         customCommand.outputs.push(value);
-                        cmdArgs.channel.send(Localisation.getTranslation("customcommand.success.output.add"));
+                        cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.output.add"));
                     }
                 }
             }break;
         }
         await CustomCommands.set(cmdArgs.guild.id, customCommands);
-        cmdArgs.channel.send(Localisation.getTranslation("customcommand.success.edit"));
+        cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.edit"));
     }
 }
 

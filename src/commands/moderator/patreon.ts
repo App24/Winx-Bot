@@ -1,13 +1,13 @@
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getMemberFromMention, getMemberByID } from "../../GetterUtils";
+import { getMemberFromMention, getMemberById } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { PatreonInfo } from "../../structs/databaseTypes/PatreonInfo";
 import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach, dateToString, getBotRoleColor, getServerDatabase } from "../../Utils";
+import { getServerDatabase, asyncForEach, dateToString, getBotRoleColor } from "../../Utils";
 
 class PatreonCommand extends Command{
     public constructor(){
@@ -45,7 +45,7 @@ class AddSubCommand extends SubCommand{
         const patreon=new PatreonInfo(member.id, new Date().getTime());
         patreons.push(patreon);
         await Patreon.set(cmdArgs.guild.id, patreons);
-        return cmdArgs.channel.send(Localisation.getTranslation("patreon.add", member));
+        return cmdArgs.message.reply(Localisation.getTranslation("patreon.add", member));
     }
 }
 
@@ -69,7 +69,7 @@ class RemoveSubCommand extends SubCommand{
         const index=patreons.findIndex(u=>u.userId===member.id);
         if(index>=0) patreons.splice(index, 1);
         await Patreon.set(cmdArgs.guild.id, patreons);
-        return cmdArgs.channel.send(Localisation.getTranslation("patreon.remove", member));
+        return cmdArgs.message.reply(Localisation.getTranslation("patreon.remove", member));
     }
 }
 
@@ -86,14 +86,14 @@ class ListSubCommand extends SubCommand{
 
         const data=[];
         await asyncForEach(patreons, async(patreon : PatreonInfo)=>{
-            const member=await getMemberByID(patreon.userId, cmdArgs.guild);
+            const member=await getMemberById(patreon.userId, cmdArgs.guild);
             if(!member) return;
             data.push(Localisation.getTranslation("patreon.list", member, dateToString(new Date(patreon.date), "{dd}/{MM}/{YYYY}")));
         });
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        embed.setDescription(data);
-        return cmdArgs.channel.send(embed);
+        embed.setDescription(data.join("\n"));
+        return cmdArgs.message.reply({embeds: [embed]});
     }
 }
 

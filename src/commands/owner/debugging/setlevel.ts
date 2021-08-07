@@ -1,12 +1,11 @@
-import { Message } from "discord.js";
 import { BotUser } from "../../../BotClient";
 import { getMemberFromMention } from "../../../GetterUtils";
 import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../../structs/Command";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
-import { getLevelXP, getServerDatabase } from "../../../Utils";
+import { getServerDatabase, getLevelXP } from "../../../Utils";
 
 class SetLevelCommand extends Command{
     public constructor(){
@@ -41,7 +40,7 @@ class SetLevelCommand extends Command{
         userLevel.xp=xp;
         levels[index]=userLevel;
         await Levels.set(cmdArgs.guild.id, levels);
-        cmdArgs.channel.send(Localisation.getTranslation("setlevel.output", member, level, xp));
+        cmdArgs.message.reply(Localisation.getTranslation("setlevel.output", member, level, xp));
     }
 }
 

@@ -1,10 +1,10 @@
 import { GuildMember } from "discord.js";
 import { BotUser } from "../BotClient";
-import { getRoleByID } from "../GetterUtils";
+import { getRoleById } from "../GetterUtils";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { RankLevel } from "../structs/databaseTypes/RankLevel";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
-import { asyncForEach, getServerDatabase } from "../Utils";
+import { getServerDatabase, asyncForEach } from "../Utils";
 
 export=()=>{
     BotUser.on("guildMemberAdd", async(member:GuildMember)=>{
@@ -16,7 +16,7 @@ export=()=>{
         const user=levels.find(u=>u.userId===member.id);
         if(user){
             await asyncForEach(ranks, async(rank : RankLevel)=>{
-                const role=await getRoleByID(rank.roleId, member.guild);
+                const role=await getRoleById(rank.roleId, member.guild);
                 if(!role) return;
                 if(user.level>=rank.level&&!member.roles.cache.has(role.id)){
                     await member.roles.add(role);

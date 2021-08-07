@@ -2,19 +2,17 @@ import { parse } from "discord-command-parser";
 import { Collection } from "discord.js";
 import { BotUser } from "../BotClient"
 import { OWNER_ID, PREFIX } from "../Constants";
-import { getUserByID, getMemberByID } from "../GetterUtils";
 import { Localisation } from "../localisation";
 import { CommandAccess, CommandArguments, CommandAvailability } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
-import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
-import { formatString, genRanHex, getServerDatabase, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
+import { formatString, getServerDatabase, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
 export=()=>{
-    BotUser.on("message", async(message)=>{
-        if(!message.content.toLowerCase().startsWith(PREFIX)||message.author.bot) return;
+    BotUser.on("messageCreate", async(message)=>{
+        if(!message.content.toLowerCase().startsWith(PREFIX)||message.author.bot) return <any> null;
 
         const parsed=parse(message, PREFIX, {allowSpaceBeforeCommand: true, ignorePrefixCase: true});
         if(!parsed.success) return;
@@ -38,12 +36,12 @@ export=()=>{
                     }
                 }break;
                 case CommandAccess.Moderators:{
-                    if(isDM(message.channel)||!message.member.hasPermission("MANAGE_GUILD")){
+                    if(isDM(message.channel)||!message.member.permissions.has("MANAGE_GUILD")){
                         return message.reply(Localisation.getTranslation("command.access.moderator"));
                     }
                 }break;
                 case CommandAccess.GuildOwner:{
-                    if(isDM(message.channel)||message.author.id!==message.guild.ownerID){
+                    if(isDM(message.channel)||message.author.id!==message.guild.ownerId){
                         return message.reply(Localisation.getTranslation("command.access.guildOwner"));
                     }
                 }break;
@@ -56,17 +54,20 @@ export=()=>{
 
             const outputs=customCommand.outputs;
             const randomMsg=outputs[Math.floor(outputs.length*Math.random())];
-            message.channel.send(formatString(randomMsg, ...args));
-            return;
+            let msgToReply=message;
+            if(message.reference){
+                msgToReply=await message.fetchReference();
+            }
+            return msgToReply.reply({content: formatString(randomMsg, ...args), failIfNotExists: false, allowedMentions: {repliedUser: msgToReply.author!==message.author}});
         }
-
-        if(!isDM(message.channel)&&command.guildIds&&!command.guildIds.includes(message.guild.id)) return;
 
         if(!command.enabled) return message.reply(Localisation.getTranslation("command.disabled"));
 
-        if(command.availability===CommandAvailability.Guild&&(message.channel.type!=="text"&&message.channel.type!=="news")){
+        if(!isDM(message.channel)&&command.guildIds&&!command.guildIds.includes(message.guild.id)) return;
+
+        if(command.availability===CommandAvailability.Guild&&isDM(message.channel)){
             return message.reply(Localisation.getTranslation("command.available.server"));
-        }else if(command.availability===CommandAvailability.DM&&message.channel.type!=="dm"){
+        }else if(command.availability===CommandAvailability.DM&&!isDM(message.channel)){
             return message.reply(Localisation.getTranslation("command.available.dm"));
         }
 
@@ -77,12 +78,12 @@ export=()=>{
                 }
             }break;
             case CommandAccess.Moderators:{
-                if(isDM(message.channel)||!message.member.hasPermission("MANAGE_GUILD")){
+                if(isDM(message.channel)||!message.member.permissions.has("MANAGE_GUILD")){
                     return message.reply(Localisation.getTranslation("command.access.moderator"));
                 }
             }break;
             case CommandAccess.GuildOwner:{
-                if(isDM(message.channel)||message.author.id!==message.guild.ownerID){
+                if(isDM(message.channel)||message.author.id!==message.guild.ownerId){
                     return message.reply(Localisation.getTranslation("command.access.guildOwner"));
                 }
             }break;
@@ -137,5 +138,6 @@ export=()=>{
         }catch(error){
             await reportError(error.stack, message);
         }
+
     });
 }

@@ -1,11 +1,11 @@
 import { BotUser } from "../../BotClient";
-import { getRoleByID } from "../../GetterUtils";
+import { getRoleById } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
-import { capitalise, getServerDatabase } from "../../Utils";
+import { getServerDatabase, capitalise } from "../../Utils";
 
 class TestLevelCommand extends Command{
     public constructor(){
@@ -26,7 +26,7 @@ class TestLevelCommand extends Command{
         const rankLevel=ranks.find(rank=>rank.level===level);
         if(rankLevel){
             const gifs=rankLevel.gifs;
-            const rank=await getRoleByID(rankLevel.roleId, cmdArgs.guild);
+            const rank=await getRoleById(rankLevel.roleId, cmdArgs.guild);
             await cmdArgs.channel.send(Localisation.getTranslation("xp.transformation.earn", cmdArgs.author, capitalise(rank.name)));
             if(gifs&&gifs.length){
                 await cmdArgs.channel.send(gifs[Math.floor(Math.random()*gifs.length)]);

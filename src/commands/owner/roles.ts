@@ -1,6 +1,6 @@
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { getBotRoleColor } from "../../Utils";
 
 class RolesCommand extends Command{
@@ -20,8 +20,8 @@ class RolesCommand extends Command{
 
         const embed=new MessageEmbed();
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        embed.setDescription(data);
-        cmdArgs.channel.send(embed);
+        embed.setDescription(data.join("\n"));
+        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 

@@ -1,7 +1,7 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { CustomCommandsSettings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability, CommandUsage } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getServerDatabase } from "../../Utils";
@@ -37,7 +37,7 @@ class CustomCommandAddCommand extends Command{
 
         await CustomCommands.set(cmdArgs.guild.id, customCommands);
 
-        cmdArgs.channel.send(Localisation.getTranslation("customcommand.success.add", cmdName));
+        cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.add", cmdName));
     }
 }
 

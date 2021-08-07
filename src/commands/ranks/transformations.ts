@@ -1,9 +1,9 @@
-import { Message, MessageEmbed } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getRoleByID } from "../../GetterUtils";
+import { getRoleById } from "../../GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { asyncForEach, getBotRoleColor } from "../../Utils";
@@ -23,16 +23,16 @@ class RanksCommand extends Command{
         const data=[];
         ranks.sort((a, b)=>a.level-b.level);
         await asyncForEach(ranks, async(rank:RankLevel)=>{
-            const role=await getRoleByID(rank.roleId, cmdArgs.guild);
+            const role=await getRoleById(rank.roleId, cmdArgs.guild);
             if(role){
                 data.push(Localisation.getTranslation("transformations.list", rank.level, role));
             }
         });
         const embed=new MessageEmbed();
         embed.setTitle(Localisation.getTranslation("transformations.title"));
-        embed.setDescription(data);
+        embed.setDescription(data.join("\n"));
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        cmdArgs.channel.send(embed);
+        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 
