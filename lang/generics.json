@@ -7,5 +7,8 @@
     "generic.rejected": "Rejected",
     "generic.none": "None",
     "generic.unknown": "Unknown",
-    "generic.confirmation": "You sure you want to do this?"
+    "generic.confirmation": "You sure you want to do this?",
+    "generic.whattodo": "What would you like to do?",
+    "generic.whattoadd": "What would you like to add?",
+    "generic.whattoremove": "What would you like to remove?"
 }

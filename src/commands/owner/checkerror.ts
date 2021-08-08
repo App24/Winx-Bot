@@ -6,7 +6,9 @@ import { Command, CommandAccess, CommandUsage, CommandArguments } from "../../st
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
 import { SubCommand } from "../../structs/SubCommand";
-import { dateToString, getBotRoleColor, asyncForEach } from "../../Utils";
+import { dateToString } from "../../utils/FormatUtils";
+import { getBotRoleColor } from "../../utils/GetterUtils";
+import { asyncForEach } from "../../utils/Utils";
 
 class CheckErrorCommand extends Command{
     public constructor(){

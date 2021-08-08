@@ -1,11 +1,12 @@
 import { BotUser } from "../../BotClient";
-import { getRoleById } from "../../GetterUtils";
+import { getRoleById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
-import { getServerDatabase, capitalise } from "../../Utils";
+import { getServerDatabase } from "../../utils/Utils";
+import { capitalise } from "../../utils/FormatUtils";
 
 class TestLevelCommand extends Command{
     public constructor(){

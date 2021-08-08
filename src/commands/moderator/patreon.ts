@@ -1,13 +1,14 @@
 import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getMemberFromMention, getMemberById } from "../../GetterUtils";
+import { getMemberFromMention, getMemberById, getBotRoleColor } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { PatreonInfo } from "../../structs/databaseTypes/PatreonInfo";
 import { SubCommand } from "../../structs/SubCommand";
-import { getServerDatabase, asyncForEach, dateToString, getBotRoleColor } from "../../Utils";
+import { getServerDatabase, asyncForEach } from "../../utils/Utils";
+import { dateToString } from "../../utils/FormatUtils";
 
 class PatreonCommand extends Command{
     public constructor(){

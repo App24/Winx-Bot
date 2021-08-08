@@ -5,7 +5,7 @@ import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArgum
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor } from "../../Utils";
+import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor } from "../../utils/Utils";
 
 class CircleColorCommand extends Command{
     public constructor(){

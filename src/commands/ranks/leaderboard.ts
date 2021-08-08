@@ -1,12 +1,13 @@
 import { GuildMember, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getUserFromMention, getMemberById } from "../../GetterUtils";
+import { getUserFromMention, getMemberById, getBotRoleColor } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandUsage, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, getLeaderboardMembers, asyncForEach, getLevelXP, getBotRoleColor } from "../../Utils";
+import { getServerDatabase, getLeaderboardMembers, asyncForEach } from "../../utils/Utils";
+import { getLevelXP } from "../../utils/XPUtils";
 
 class RankCommand extends Command{
     public constructor(){
@@ -46,15 +47,12 @@ class RankCommand extends Command{
         let i=1;
         await asyncForEach(leaderboardLevels, async(element:{userLevel: UserLevel, member: GuildMember})=>{
             const user=element.member.user;
-            let text=`${i}. **`;
-            if(user.id===_user.id)
-                text+=`__`;
-            text+=`${user.username}`;
+            let text=`${user.username}`;
             if(element.member.nickname)
                 text+=` (${element.member.nickname})`;
             if(user.id===_user.id)
-                text+=`__`;
-            text+=`**`;
+                text=`__${text}__`;
+            text=`${i}. **${text}**`;
             data.push(text);
             data.push(Localisation.getTranslation("leaderboard.output", element.userLevel.level, element.userLevel.xp, getLevelXP(element.userLevel.level)));
             i++;
@@ -67,15 +65,12 @@ class RankCommand extends Command{
             if(userLevel){
                 data.push("...");
                 const userIndex=levels.findIndex(u=>u.userId===_user.id);
-                let text=`${userIndex+1}. **`;
-                if(member.id===_user.id)
-                    text+=`__`;
-                text+=`${_user.username}`;
+                let text=`${_user.username}`;
                 if(member.nickname)
                     text+=` (${member.nickname})`;
                 if(member.id===_user.id)
-                    text+=`__`;
-                text+=`**`;
+                    text=`__${text}__`;
+                text=`${userIndex+1}. **${text}**`;
                 data.push(text);
                 data.push(Localisation.getTranslation("leaderboard.output", userLevel.level, userLevel.xp, getLevelXP(userLevel.level)));
             }else{

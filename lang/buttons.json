@@ -1,0 +1,24 @@
+{
+    "button.add": "Add",
+    "button.get": "Get",
+    "button.list": "List",
+    "button.set": "Set",
+    "button.remove": "Remove",
+    "button.clear": "Clear",
+
+    "button.rank": "Transformation",
+    "button.role": "Role",
+    "button.gif": "GIF",
+    
+    "button.accept": "Accept",
+    "button.confirm": "Confirm",
+    "button.deny": "Deny",
+    "button.cancel": "Cancel",
+
+    "button.backup": "Backup",
+    "button.restorebackup": "Restore Backup",
+    "button.downloadbackup": "Download Backup",
+    "button.downloaddatabase": "Download Database",
+
+    "button.cleardeletedchannels": "Clear Deleted Channels"
+}

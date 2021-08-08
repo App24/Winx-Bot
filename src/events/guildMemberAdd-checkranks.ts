@@ -1,10 +1,10 @@
 import { GuildMember } from "discord.js";
 import { BotUser } from "../BotClient";
-import { getRoleById } from "../GetterUtils";
+import { getRoleById } from "../utils/GetterUtils";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { RankLevel } from "../structs/databaseTypes/RankLevel";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
-import { getServerDatabase, asyncForEach } from "../Utils";
+import { getServerDatabase, asyncForEach } from "../utils/Utils";
 
 export=()=>{
     BotUser.on("guildMemberAdd", async(member:GuildMember)=>{

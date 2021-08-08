@@ -1,12 +1,22 @@
 import { BaseGuildTextChannel, Guild, User } from "discord.js";
-import { BotUser } from "./BotClient";
+import { BotUser } from "../BotClient";
 import { getMemberById, getRoleById, GetTextNewsGuildChannelById } from "./GetterUtils";
-import { Localisation } from "./localisation";
-import { DatabaseType } from "./structs/DatabaseTypes";
-import { RankLevel } from "./structs/databaseTypes/RankLevel";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "./structs/databaseTypes/ServerInfo";
-import { UserLevel } from "./structs/databaseTypes/UserLevel";
-import { getServerDatabase, getLevelXP, capitalise } from "./Utils";
+import { Localisation } from "../localisation";
+import { DatabaseType } from "../structs/DatabaseTypes";
+import { RankLevel } from "../structs/databaseTypes/RankLevel";
+import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/ServerInfo";
+import { UserLevel } from "../structs/databaseTypes/UserLevel";
+import { getServerDatabase } from "./Utils";
+import { capitalise } from "./FormatUtils";
+
+/**
+ * 
+ * @param level 
+ * @returns Amount of xp this level needs
+ */
+ export function getLevelXP(level : number){
+    return Math.abs(level)*2*100+50;
+}
 
 export async function removeXP(xp : number, user : User, guild : Guild, channel : BaseGuildTextChannel){
     const Levels=BotUser.getDatabase(DatabaseType.Levels);

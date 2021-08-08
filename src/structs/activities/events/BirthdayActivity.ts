@@ -1,5 +1,5 @@
 import { Localisation } from "../../../localisation";
-import { capitalise } from "../../../Utils";
+import { capitalise } from "../../../utils/FormatUtils";
 import { OneDayEventActivity } from "../OneDayEventActivity";
 
 export class BirthdayActivity extends OneDayEventActivity{

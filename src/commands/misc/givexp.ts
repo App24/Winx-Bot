@@ -4,8 +4,8 @@ import { Localisation } from "../../localisation";
 import { Command, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, getLevelXP } from "../../Utils";
-import { addXP } from "../../XPUtils";
+import { getServerDatabase } from "../../utils/Utils";
+import { addXP, getLevelXP } from "../../utils/XPUtils";
 
 class GiveXPCommand extends Command{
     constructor(){

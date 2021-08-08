@@ -1,7 +1,7 @@
 import { MessageEmbed } from "discord.js";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
-import { getBotRoleColor } from "../../Utils";
+import { getBotRoleColor } from "../../utils/GetterUtils";
 
 class RolesCommand extends Command{
     public constructor(){

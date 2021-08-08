@@ -4,7 +4,7 @@ import { DATABASE_FOLDER } from "./Constants";
 import { Keyv } from "./keyv/keyv-index";
 import { Localisation } from "./localisation";
 import { DatabaseType } from "./structs/DatabaseTypes";
-import { loadFiles } from "./Utils";
+import { loadFiles } from "./utils/Utils";
 import fs from "fs";
 import { Command } from "./structs/Command";
 
@@ -122,6 +122,7 @@ class BotClient extends Client{
 
         Localisation.loadLocalisation("lang/activities.json");
         Localisation.loadLocalisation("lang/arguments.json");
+        Localisation.loadLocalisation("lang/buttons.json");
         Localisation.loadLocalisation("lang/categories.json");
         Localisation.loadLocalisation("lang/commandDescriptions.json");
         Localisation.loadLocalisation("lang/commands.json");
@@ -142,7 +143,7 @@ class BotClient extends Client{
 
 const intents=new Intents(Intents.FLAGS.DIRECT_MESSAGES|Intents.FLAGS.DIRECT_MESSAGE_REACTIONS|Intents.FLAGS.DIRECT_MESSAGE_TYPING|Intents.FLAGS.GUILDS|Intents.FLAGS.GUILD_BANS|Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS|Intents.FLAGS.GUILD_INTEGRATIONS|Intents.FLAGS.GUILD_INVITES|Intents.FLAGS.GUILD_MEMBERS|Intents.FLAGS.GUILD_MESSAGES|Intents.FLAGS.GUILD_MESSAGE_REACTIONS|Intents.FLAGS.GUILD_MESSAGE_TYPING|Intents.FLAGS.GUILD_VOICE_STATES|Intents.FLAGS.GUILD_WEBHOOKS);
 export const BotUser=new BotClient({
-    clientOptions: {intents: intents, allowedMentions: {repliedUser: false}},
+    clientOptions: {intents: intents, allowedMentions: {repliedUser: false}, partials: ["CHANNEL"]},
     logLoading: 'simplified',
     loadCommands: true,
     loadEvents: true

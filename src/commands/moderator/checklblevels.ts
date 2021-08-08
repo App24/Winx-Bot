@@ -1,15 +1,16 @@
 import { GuildMember, GuildChannel, Message, BaseGuildTextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
-import { GetTextBasedGuildGuildChannelById } from "../../GetterUtils";
+import { GetTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, getLeaderboardMembers, asyncForEach, getAllMessages, secondsToTime } from "../../Utils";
-import { addXP } from "../../XPUtils";
+import { getServerDatabase, getLeaderboardMembers, asyncForEach, getAllMessages } from "../../utils/Utils";
+import { addXP } from "../../utils/XPUtils";
+import { secondsToTime } from "../../utils/FormatUtils";
 
 class CheckLBLevelsCommand extends Command{
     public constructor(){

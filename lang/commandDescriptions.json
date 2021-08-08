@@ -27,14 +27,12 @@
     "transformations.command.description": "Shows the transformations available!",
     "excludechannel.command.description": "Excludes a channel from earning xp!",
     "levelchannel.command.description": "Sets channel where level ups go to!",
-    "setmaxlength.command.description": "Set maximum length of message to give XP!",
-    "setmaxmessage.command.description": "Set maximum of messages per minute!",
-    "setminlength.command.description": "Set minimum length of message to give XP!",
-    "setrank.command.description": "Set rank for each level!",
-    "setxp.command.description": "Set XP per message!",
-    "backupdb.command.description": "Backs up databases!",
-    "restoredb.command.description": "Restores the databases!",
-    "downloaddb.command.description": "Download the databases!",
+    "messagemaxlength.command.description": "Set maximum length of message to give XP!",
+    "messagemax.command.description": "Set maximum of messages per minute!",
+    "messageminlength.command.description": "Set minimum length of message to give XP!",
+    "manageranks.command.description": "Set transformation for each level!",
+    "managexp.command.description": "Set XP per message!",
+    "databaseutil.command.description": "Manage the database!",
     "fakeerror.command.description": "Create a fake error!",
     "customcommandadd.command.description": "Add custom commands!",
     "customcommandremove.command.description": "Remove custom commands!",
@@ -42,5 +40,6 @@
     "customcommandlist.command.description": "List custom commands or messages of a custom command!",
     "testlevel.command.description": "Test output of a level!",
     "customisationsettings.command.description": "Get your customisation settings!",
-    "customisationcode.command.description": "Set your customisation settings to a code, or get your customisation code!"
+    "customisationcode.command.description": "Set your customisation settings to a code, or get your customisation code!",
+    "serversettings.command.description": "Get all the server settings!"
 }

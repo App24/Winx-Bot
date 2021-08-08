@@ -1,13 +1,13 @@
 import { GuildMember } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getRoleById } from "../../GetterUtils";
+import { getRoleById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, asyncForEach } from "../../Utils";
+import { getServerDatabase, asyncForEach } from "../../utils/Utils";
 
 class CheckRanksCommand extends Command{
     public constructor(){

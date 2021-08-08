@@ -37,5 +37,11 @@
     "argument.oldvalue": "old value",
     "argument.newvalue": "new value",
     "argument.gif": "gif",
-    "argument.role": "role"
+    "argument.role": "role",
+
+    "argument.reply.amount": "Reply to this message with the amount",
+    "argument.reply.channel": "Reply to this message with the channel",
+    "argument.reply.level": "Reply to this message with the level",
+    "argument.reply.gif": "Reply to this message with the GIF",
+    "argument.reply.role": "Reply to this message with the role"
 }

@@ -86,6 +86,7 @@
     "excludechannel.channel.not": "That channel is not excluded!",
     "excludechannel.add": "Excluded channel {0}!",
     "excludechannel.remove": "{0} is no longer excluded!",
+    "excludechannel.clear": "Cleared deleted channels",
 
     "levelchannel.set": "Set {0} as level channel!",
     "levelchannel.remove": "Removed level channel!",
@@ -104,10 +105,10 @@
 
     "setrank.gifs.norole": "There is no role assigned to this level, cannot add gifs!",
     "setrank.gifs.add": "Added GIFs!",
-    "setrank.role.set": "Setted rank!",
-    "setrank.rank.none": "There is no rank with this level!",
+    "setrank.role.set": "Transformaton set!",
+    "setrank.rank.none": "There is no transformation with this level!",
     "setrank.gifs.remove": "Removed GIFs!",
-    "setrank.role.remove": "Removed rank!",
+    "setrank.role.remove": "Removed transformation!",
     "setrank.list.gifs": "__GIFs__",
     "setrank.list.role": "**Role**: <@&{0}>",
 
@@ -135,5 +136,13 @@
     "customisationsettings.specialCircleColor": "Circle Color",
 
     "customisationcode.get": "Here is your code: `{0}`",
-    "customisationcode.value.error": "That code is invalid!"
+    "customisationcode.value.error": "That code is invalid!",
+
+    "serversettings.category.xp": "XP Amount",
+    "serversettings.category.messagemax": "Max messages per minute",
+    "serversettings.category.minmessagelength": "Minimum message length",
+    "serversettings.category.maxmessagelength": "Maximum message length",
+    "serversettings.category.levelchannel": "Level channel",
+    "serversettings.category.ranks": "Number of transformations",
+    "serversettings.category.excludechannels": "Number of excluded channels"
 }

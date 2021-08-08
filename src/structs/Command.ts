@@ -1,6 +1,6 @@
 import { Guild, GuildMember, Message, TextBasedChannels, User } from "discord.js";
 import { Localisation } from "../localisation";
-import { asyncForEach } from "../Utils";
+import { asyncForEach } from "../utils/Utils";
 import { Category, Other } from "./Category";
 import { SubCommand } from "./SubCommand";
 

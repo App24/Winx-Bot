@@ -6,7 +6,9 @@ import { CustomCommandsSettings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
-import { getServerDatabase, getBotRoleColor, capitalise } from "../../Utils";
+import { capitalise } from "../../utils/FormatUtils";
+import { getBotRoleColor } from "../../utils/GetterUtils";
+import { getServerDatabase } from "../../utils/Utils";
 
 class CustomCommandListCommand extends Command{
     public constructor(){

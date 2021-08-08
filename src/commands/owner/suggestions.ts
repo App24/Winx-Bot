@@ -1,14 +1,15 @@
 import { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, MessageSelectOptionData } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID } from "../../Constants";
-import { getUserById } from "../../GetterUtils";
+import { getBotRoleColor, getUserById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { SuggestionStruct, SuggestionState } from "../../structs/databaseTypes/SuggestionStruct";
 import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach, capitalise, getBotRoleColor } from "../../Utils";
+import { asyncForEach } from "../../utils/Utils";
+import { capitalise } from "../../utils/FormatUtils";
 
 class SuggestionsCommand extends Command{
     public constructor(){
@@ -92,8 +93,8 @@ class CompleteSubCommand extends SubCommand{
 
         const row=new MessageActionRow()
                   .addComponents(
-                        new MessageButton({customId: "complete", style: "SUCCESS", label: "Complete"}),
-                        new MessageButton({customId: "cancel", style: "SECONDARY", label: "Cancel"})
+                        new MessageButton({customId: "complete", style: "SUCCESS", label: Localisation.getTranslation("button.confirm")}),
+                        new MessageButton({customId: "cancel", style: "SECONDARY", label: Localisation.getTranslation("button.cancel")})
                   )
 
         cmdArgs.message.reply({embeds: [embed], components: [row]}).then(async(msg)=>{
@@ -135,8 +136,8 @@ class RejectSubCommand extends SubCommand{
 
         const row=new MessageActionRow()
                   .addComponents(
-                        new MessageButton({customId: "reject", style: "SUCCESS", label: "Reject"}),
-                        new MessageButton({customId: "cancel", style: "SECONDARY", label: "Cancel"})
+                        new MessageButton({customId: "reject", style: "SUCCESS", label: Localisation.getTranslation("button.confirm")}),
+                        new MessageButton({customId: "cancel", style: "SECONDARY", label: Localisation.getTranslation("button.cancel")})
                   )
 
         cmdArgs.message.reply({embeds: [embed], components: [row]}).then(async(msg)=>{

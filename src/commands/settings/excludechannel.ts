@@ -1,101 +1,99 @@
 import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { GetTextNewsGuildChannelFromMention } from "../../GetterUtils";
+import { getBotRoleColor, GetTextNewsGuildChannelFromMention } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { SubCommand } from "../../structs/SubCommand";
-import { getServerDatabase, asyncForEach, getBotRoleColor } from "../../Utils";
+import { getServerDatabase, asyncForEach } from "../../utils/Utils";
+import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
 
 class ExcludeChannelCommand extends Command{
     public constructor(){
         super();
         this.category=Settings;
-        this.minArgs=1;
-        this.maxArgs=2;
-        this.usage=[new CommandUsage(true, "argument.add", "argument.remove", "argument.list"), new CommandUsage(false, "argument.channel")];
         this.access=CommandAccess.Moderators;
         this.availability=CommandAvailability.Guild;
-        this.subCommands=[new AddSubCommand(), new RemoveSubCommand(), new ListSubCommand()];
-    }
-
-    public async onRun(cmdArgs : CommandArguments){
-        const name=cmdArgs.args.shift();
-        this.onRunSubCommands(cmdArgs, name);
-    }
-}
-
-class AddSubCommand extends SubCommand{
-    public constructor(){
-        super("add");
-        this.minArgs=1;
-    }
-
-    public async onRun(cmdArgs : CommandArguments){
-        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
-        
-        if(!serverInfo.excludeChannels) serverInfo.excludeChannels=[];
-
-        const channel=await GetTextNewsGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
-        if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.channel"));
-        
-        if(serverInfo.excludeChannels.find(c=>c===channel.id)) return cmdArgs.message.reply(Localisation.getTranslation("excludechannel.channel.already"));
-
-        serverInfo.excludeChannels.push(channel.id);
-
-        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
-        cmdArgs.message.reply(Localisation.getTranslation("excludechannel.add", channel));
-    }
-}
-
-class RemoveSubCommand extends SubCommand{
-    public constructor(){
-        super("remove");
-        this.minArgs=1;
     }
 
     public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
 
-        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
+        const collector=await createWhatToDoButtons(cmdArgs.message, cmdArgs.author, {max: 1, time: 1000*60*5},
+            {customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.add")},
+            {customId: "remove", style: "PRIMARY", label: Localisation.getTranslation("button.remove")},
+            {customId: "clear", style: "PRIMARY", label: Localisation.getTranslation("button.cleardeletedchannels")},
+            {customId: "list", style: "PRIMARY", label: Localisation.getTranslation("button.list")}
+        );
 
-        const channel=await GetTextNewsGuildChannelFromMention(cmdArgs.args[0], cmdArgs.guild);
-        if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.channel"));
+        collector.on("collect", async(interaction)=>{
+            await interaction.update({components: []});
+                if(interaction.customId==="set"){
+                    await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
+                    const reply=await interaction.fetchReply();
+                    cmdArgs.channel.createMessageCollector({filter: (m)=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max: 1, time:10000*60*5}).on("collect", async(msg)=>{
+                        if(!serverInfo.excludeChannels) serverInfo.excludeChannels=[];
 
-        if(!serverInfo.excludeChannels.find(c=>c===channel.id)) return cmdArgs.message.reply(Localisation.getTranslation("excludechannel.channel.not"));
+                        const channel=await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
+                        if(!channel) return <any> msg.reply(Localisation.getTranslation("error.invalid.channel"));
+                        
+                        if(serverInfo.excludeChannels.find(c=>c===channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.already"));
 
-        const index=serverInfo.excludeChannels.findIndex(c=>c===channel.id);
-        if(index>=0) serverInfo.excludeChannels.splice(index, 1);
+                        serverInfo.excludeChannels.push(channel.id);
 
-        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
-        cmdArgs.message.reply(Localisation.getTranslation("excludechannel.remove", channel));
-    }
-}
+                        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+                        cmdArgs.message.reply(Localisation.getTranslation("excludechannel.add", channel));
+                    });
+                }
+                else if(interaction.customId==="remove"){
+                    await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
+                    const reply=await interaction.fetchReply();
+                    cmdArgs.channel.createMessageCollector({filter: (m)=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max: 1, time:10000*60*5}).on("collect", async(msg)=>{
+                        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return <any> msg.reply(Localisation.getTranslation("error.empty.excludedchannels"));
 
-class ListSubCommand extends SubCommand{
-    public constructor(){
-        super("list");
-    }
+                        const channel=await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
+                        if(!channel) return msg.reply(Localisation.getTranslation("error.invalid.channel"));
 
-    public async onRun(cmdArgs : CommandArguments){
-        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
-        if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
-        const data=[];
-        await asyncForEach(serverInfo.excludeChannels, async(excludedChannel:string)=>{
-            const channel=await GetTextNewsGuildChannelFromMention(excludedChannel, cmdArgs.guild);
-            if(channel){
-                data.push(channel);
-            }
+                        if(!serverInfo.excludeChannels.find(c=>c===channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.not"));
+
+                        const index=serverInfo.excludeChannels.findIndex(c=>c===channel.id);
+                        if(index>=0) serverInfo.excludeChannels.splice(index, 1);
+
+                        await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+                        cmdArgs.message.reply(Localisation.getTranslation("excludechannel.remove", channel));
+                    });
+                }else if(interaction.customId==="clear"){
+                    if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return <any> cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
+                    const data=[];
+                    await asyncForEach(serverInfo.excludeChannels, async(excludedChannel:string)=>{
+                        const channel=await GetTextNewsGuildChannelFromMention(excludedChannel, cmdArgs.guild);
+                        if(!channel){
+                            data.push(excludedChannel);
+                        }
+                    });
+                    data.forEach(channel=>{
+                        const index=serverInfo.excludeChannels.findIndex(c=>c===channel);
+                        if(index>-1) serverInfo.excludeChannels.splice(index, 1);
+                    });
+                    await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+                    cmdArgs.message.reply(Localisation.getTranslation("excludechannel.clear"));
+                }else if(interaction.customId==="list"){
+                    if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return <any> cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
+                    const data=[];
+                    await asyncForEach(serverInfo.excludeChannels, async(excludedChannel:string)=>{
+                        const channel=await GetTextNewsGuildChannelFromMention(excludedChannel, cmdArgs.guild);
+                        if(channel){
+                            data.push(channel);
+                        }
+                    });
+                    const embed=new MessageEmbed();
+                    embed.setDescription(data.join("\n"));
+                    embed.setColor((await getBotRoleColor(cmdArgs.guild)));
+                    cmdArgs.message.reply({embeds: [embed]});
+                }
         });
-        const embed=new MessageEmbed();
-        embed.setDescription(data.join("\n"));
-        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        cmdArgs.message.reply({embeds: [embed]});
     }
 }
 

@@ -21,7 +21,7 @@
     "error.invalid.number": "That is an invalid number",
 
     "error.empty.levels": "There are no levels in this server!",
-    "error.empty.ranks": "There are no ranks in this server!",
+    "error.empty.ranks": "There are no transformations in this server!",
     "error.empty.patreon": "There are no patreons in this server!",
     "error.empty.errors": "There are no errors!",
     "error.empty.suggestions": "There are no suggestions!",
@@ -37,6 +37,8 @@
 
     "error.missing.character.lines": "Character file: {0} is missing!",
     "error.empty.character.lines": "Character file: {0} is empty!",
+
+    "error.missing.rank": "There is no transformation by that level",
 
 
     "command.disabled": "This command is disabled!",

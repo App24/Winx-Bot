@@ -4,7 +4,7 @@ import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase } from "../../Utils";
+import { getServerDatabase } from "../../utils/Utils";
 
 class CheckBansCommand extends Command{
     public constructor(){

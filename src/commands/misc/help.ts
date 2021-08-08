@@ -6,7 +6,8 @@ import { Info, Category, Categories, CustomCommands } from "../../structs/Catego
 import { Command, CommandUsage, CommandArguments, CommandAvailability, CommandAccess } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
-import { asyncForEach, isDM, isPatreon, getServerDatabase, getBotRoleColor } from "../../Utils";
+import { getBotRoleColor } from "../../utils/GetterUtils";
+import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator } from "../../utils/Utils";
 
 class HelpCommand extends Command{
     public constructor(){
@@ -35,7 +36,7 @@ class HelpCommand extends Command{
                                     return;
                             }break;
                             case CommandAccess.Moderators:{
-                                if(isDM(cmdArgs.channel)||!cmdArgs.member.permissions.has("MANAGE_GUILD"))
+                                if(isDM(cmdArgs.channel)||!isModerator(cmdArgs.member))
                                     return;
                             }break;
                             case CommandAccess.GuildOwner:{
@@ -73,6 +74,10 @@ class HelpCommand extends Command{
 
             return cmdArgs.message.reply({embeds: [embed], components: rows}).then(msg=>{
                 const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===cmdArgs.author.id, max: 1, time: 1000*60*5});
+
+                collector.on("end", _=>{
+                    msg.edit({components: []})
+                });
 
                 collector.on("collect", async(interaction)=>{
                     const category=categoryEmojis.find(emoji=>emoji.category.name===interaction.customId).category;
@@ -116,7 +121,7 @@ async function getCommands(category : Category, available : CommandAvailability,
                         return;
                 }break;
                 case CommandAccess.Moderators:{
-                    if(isDM(channel)||!member.permissions.has("MANAGE_GUILD")){
+                    if(isDM(channel)||!isModerator(member)){
                         return;
                     }
                 }break;
@@ -141,7 +146,7 @@ async function getCommands(category : Category, available : CommandAvailability,
 
                         switch(command.access){
                             case CommandAccess.Moderators:{
-                                if(isDM(channel)||!member.permissions.has("MANAGE_GUILD")){
+                                if(isDM(channel)||!isModerator(member)){
                                     return;
                                 }
                             }break;

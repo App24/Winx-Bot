@@ -3,8 +3,8 @@ import { BotUser } from "../BotClient";
 import { PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/ServerInfo";
-import { getServerDatabase, isDM } from "../Utils";
-import { addXP } from "../XPUtils";
+import { getServerDatabase, isDM } from "../utils/Utils";
+import { addXP } from "../utils/XPUtils";
 
 const levelCooldowns = new Collection<string, Collection<string, number>>();
 

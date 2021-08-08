@@ -2,7 +2,7 @@ import { Guild } from "discord.js";
 import { BotUser } from "../BotClient";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO } from "../structs/databaseTypes/ServerInfo";
-import { asyncForEach } from "../Utils";
+import { asyncForEach } from "../utils/Utils";
 
 export=()=>{
     BotUser.on("ready", async()=>{

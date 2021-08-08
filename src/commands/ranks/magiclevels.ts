@@ -1,13 +1,16 @@
 import { createCanvas, loadImage } from "canvas";
 import { BotUser } from "../../BotClient";
-import { getUserFromMention, getMemberById, getRoleById } from "../../GetterUtils";
+import { getUserFromMention, getMemberById, getRoleById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandUsage, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
-import { getServerDatabase, getCurrentRank, getNextRank, capitalise, getLevelXP, hexToRGB, blend, isHexColor, canvasToMessageAttachment } from "../../Utils";
+import { getServerDatabase, hexToRGB, blend, isHexColor, canvasToMessageAttachment } from "../../utils/Utils";
+import { getCurrentRank, getNextRank } from "../../utils/RankUtils";
+import { capitalise } from "../../utils/FormatUtils";
+import { getLevelXP } from "../../utils/XPUtils";
 
 class MagicLevelsCommand extends Command{
     public constructor(){

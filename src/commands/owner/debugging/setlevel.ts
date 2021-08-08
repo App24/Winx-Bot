@@ -1,11 +1,12 @@
 import { BotUser } from "../../../BotClient";
-import { getMemberFromMention } from "../../../GetterUtils";
+import { getMemberFromMention } from "../../../utils/GetterUtils";
 import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../../structs/Command";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, getLevelXP } from "../../../Utils";
+import { getServerDatabase } from "../../../utils/Utils";
+import { getLevelXP } from "../../../utils/XPUtils";
 
 class SetLevelCommand extends Command{
     public constructor(){

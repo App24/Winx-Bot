@@ -1,10 +1,11 @@
 import { MessageAttachment } from "discord.js";
 import { BotUser } from "../BotClient";
 import { BACKUP_CHANNEL, DATABASE_FOLDER } from "../Constants";
-import { getGuildByID, GetTextNewsGuildChannelById } from "../GetterUtils";
-import { dateToString, backupDatabases } from "../Utils";
+import { getGuildByID, GetTextNewsGuildChannelById } from "../utils/GetterUtils";
+import { backupDatabases } from "../utils/Utils";
 import fs from "fs";
 import archiver from "archiver";
+import { dateToString } from "../utils/FormatUtils";
 
 let backupChannel;
 
@@ -43,6 +44,6 @@ async function backup(){
 
     await archive.finalize();
 
-    await backupChannel.send(new MessageAttachment(file));
+    await backupChannel.send({files: [new MessageAttachment(file)]});
     fs.unlinkSync(file);
 }

@@ -1,10 +1,11 @@
 import { Localisation } from "../../localisation";
 import { Characters } from "../../structs/Category";
 import { Command, CommandArguments } from "../../structs/Command";
-import { capitalise, reportError } from "../../Utils";
+import { reportError } from "../../utils/Utils";
+import { createGenericButtons } from "../../utils/MessageButtonUtils";
 import fs from 'fs';
 import readline from 'readline';
-import { MessageActionRow, MessageButton } from "discord.js";
+import { capitalise } from "../../utils/FormatUtils";
 
 export abstract class RandomLineCommand extends Command{
     private name : string;
@@ -39,19 +40,12 @@ export abstract class RandomLineCommand extends Command{
             return;
         }
 
-        const row=new MessageActionRow()
-                  .addComponents(
-                      new MessageButton({customId: "reroll", style: "PRIMARY", emoji: "♻️"})
-                  )
+        const collector=await createGenericButtons(cmdArgs.message, this.getLine(data), {time: 1000*60*5}, {customId: "reroll", style: "PRIMARY", emoji: "♻️"});
 
-        cmdArgs.message.reply({content: this.getLine(data), components: [row]}).then(msg=>{
-            const collector=msg.createMessageComponentCollector({time: 1000*60*10});
-
-            collector.on("collect", async(interaction)=>{
-                if(interaction.customId==="reroll"){
-                    await interaction.update(this.getLine(data));
-                }
-            });
+        collector.on("collect", async(interaction)=>{
+            if(interaction.customId==="reroll"){
+                await interaction.update(this.getLine(data));
+            }
         });
     }
 

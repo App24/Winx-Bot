@@ -6,7 +6,8 @@ import { Localisation } from "../localisation";
 import { CommandAccess, CommandArguments, CommandAvailability } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
-import { formatString, getServerDatabase, isDM, isPatreon, reportError, secondsToTime } from "../Utils";
+import { formatString, secondsToTime } from "../utils/FormatUtils";
+import { getServerDatabase, isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -78,7 +79,7 @@ export=()=>{
                 }
             }break;
             case CommandAccess.Moderators:{
-                if(isDM(message.channel)||!message.member.permissions.has("MANAGE_GUILD")){
+                if(isDM(message.channel)||!isModerator(message.member)){
                     return message.reply(Localisation.getTranslation("command.access.moderator"));
                 }
             }break;

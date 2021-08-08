@@ -1,5 +1,5 @@
 import { BaseGuildTextChannel, Guild, GuildMember, NewsChannel, Role, TextChannel, ThreadChannel, User } from "discord.js";
-import { BotUser } from "./BotClient";
+import { BotUser } from "../BotClient";
 
 //#region User/Member
 
@@ -40,12 +40,31 @@ export function getMemberFromMention(mention : string, guild : Guild){
 
 export function getMemberById(id : string, guild : Guild):Promise<GuildMember>{
     if(!id||!guild) return;
-    return guild.members.fetch(id).catch(undefined);
+    return guild.members.fetch(id).catch(()=>undefined);
+}
+
+export function getBotMember(guild : Guild){
+    return getMemberById(BotUser.user.id, guild);
+}
+
+/**
+ * 
+ * @param guild 
+ * @returns Color of the role color of bot as a number
+ */
+export async function getBotRoleColor(guild : Guild){
+    const defaultcolor=5793266;
+    if(!guild) return defaultcolor;
+    const member=await getBotMember(guild);
+    if(!member) return defaultcolor;
+    if(!member.roles) return defaultcolor;
+    if(!member.roles.color) return defaultcolor;
+    return member.roles.color.color;
 }
 
 //#endregion
 
-//#region ServerChannels
+//#region Server Channels
 
 export function getGuildByID(id:string) : Promise<Guild>{
     return BotUser.guilds.fetch(id).catch(()=>undefined);

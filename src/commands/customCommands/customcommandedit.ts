@@ -4,7 +4,7 @@ import { CustomCommandsSettings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
-import { getServerDatabase } from "../../Utils";
+import { getServerDatabase } from "../../utils/Utils";
 
 class CustomCommandEditCommand extends Command{
     public constructor(){

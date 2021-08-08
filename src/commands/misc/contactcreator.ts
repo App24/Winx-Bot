@@ -1,5 +1,5 @@
 import { OWNER_ID } from "../../Constants";
-import { getUserById } from "../../GetterUtils";
+import { getUserById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Info } from "../../structs/Category";
 import { Command, CommandUsage, CommandArguments } from "../../structs/Command";

@@ -1,12 +1,12 @@
 import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getRoleById } from "../../GetterUtils";
+import { getBotRoleColor, getRoleById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
-import { asyncForEach, getBotRoleColor } from "../../Utils";
+import { asyncForEach } from "../../utils/Utils";
 
 class RanksCommand extends Command{
     public constructor(){
@@ -23,10 +23,7 @@ class RanksCommand extends Command{
         const data=[];
         ranks.sort((a, b)=>a.level-b.level);
         await asyncForEach(ranks, async(rank:RankLevel)=>{
-            const role=await getRoleById(rank.roleId, cmdArgs.guild);
-            if(role){
-                data.push(Localisation.getTranslation("transformations.list", rank.level, role));
-            }
+            data.push(Localisation.getTranslation("transformations.list", rank.level, `<@&${rank.roleId}>`));
         });
         const embed=new MessageEmbed();
         embed.setTitle(Localisation.getTranslation("transformations.title"));

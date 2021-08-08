@@ -5,7 +5,7 @@ import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArgum
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { getServerDatabase, isHexColor, canvasToMessageAttachment, canvasColor } from "../../Utils";
+import { getServerDatabase, isHexColor, canvasToMessageAttachment, canvasColor } from "../../utils/Utils";
 
 class NameColorCommand extends Command{
     public constructor(){

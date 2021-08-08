@@ -5,7 +5,8 @@ import { Patreon } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
-import { getServerDatabase, getBotRoleColor } from "../../Utils";
+import { getBotRoleColor } from "../../utils/GetterUtils";
+import { getServerDatabase } from "../../utils/Utils";
 
 class CustomisationSettingsCommand extends Command{
     public constructor(){

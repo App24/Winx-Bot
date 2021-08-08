@@ -5,7 +5,7 @@ import { Command, CommandAvailability, CommandAccess, CommandUsage, CommandArgum
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { isHexColor, getServerDatabase } from "../../Utils";
+import { isHexColor, getServerDatabase } from "../../utils/Utils";
 
 class CustomisationCodeCommand extends Command{
     public constructor(){
