@@ -6,6 +6,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
+import { createMessageCollector } from "../../utils/MessageUtils";
 
 class SetMinLengthCommand extends Command{
     public constructor(){
@@ -29,7 +30,7 @@ class SetMinLengthCommand extends Command{
             if(interaction.customId==="set"){
                 await interaction.editReply(Localisation.getTranslation("argument.reply.amount"));
                 const reply=await interaction.fetchReply();
-                cmdArgs.channel.createMessageCollector({filter: (m)=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max: 1, time:10000*60*5}).on("collect", async(msg)=>{
+                createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                     const len=parseInt(msg.content);
                     if(isNaN(len)||len<=0) return <any> msg.reply(Localisation.getTranslation("error.invalid.number"));
                     if(len>serverInfo.maxMessageLength) return cmdArgs.message.reply(Localisation.getTranslation("setminlength.error"));

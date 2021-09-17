@@ -41,5 +41,6 @@
     "testlevel.command.description": "Test output of a level!",
     "customisationsettings.command.description": "Get your customisation settings!",
     "customisationcode.command.description": "Set your customisation settings to a code, or get your customisation code!",
-    "serversettings.command.description": "Get all the server settings!"
+    "serversettings.command.description": "Get all the server settings!",
+    "leaderboardcolor.command.description": "Manage the leaderboard colors!"
 }

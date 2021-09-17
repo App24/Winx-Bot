@@ -8,6 +8,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { getServerDatabase, asyncForEach } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
+import { createMessageCollector } from "../../utils/MessageUtils";
 
 class SetRankCommand extends Command{
     public constructor(){
@@ -49,7 +50,7 @@ class SetRankCommand extends Command{
                     if(!ranks||!ranks.length) return interaction.update({content: "error.empty.ranks", components: []});
                     await interaction.update({content: Localisation.getTranslation("argument.reply.level"), components: []});
                     const reply=await interaction.fetchReply();
-                    cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                    createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                         const level=parseInt(msg.content);
                         if(isNaN(level)||level<0) return <any> msg.reply(Localisation.getTranslation("error.invalid.level"));
 
@@ -90,7 +91,7 @@ class SetRankCommand extends Command{
                 case "rRole":{
                     await interaction.update({content: Localisation.getTranslation("argument.reply.level"), components: []});
                     const reply=await interaction.fetchReply();
-                    cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                    createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                         const level=parseInt(msg.content);
                         if(isNaN(level)||level<0) return <any> msg.reply(Localisation.getTranslation("error.invalid.level"));
 
@@ -106,7 +107,7 @@ class SetRankCommand extends Command{
                 case "rGif":{
                     await interaction.update({content: Localisation.getTranslation("argument.reply.level"), components: []});
                     const reply=await interaction.fetchReply();
-                    cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                    createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                         const level=parseInt(msg.content);
                         if(isNaN(level)||level<0) return <any> msg.reply(Localisation.getTranslation("error.invalid.level"));
 
@@ -115,7 +116,7 @@ class SetRankCommand extends Command{
                         const rankLevel=ranks[rankLevelIndex];
                         
                         const reply=await msg.reply(Localisation.getTranslation("argument.reply.gif"));
-                        cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                             msg.content.split(" ").forEach(_gif=>{
                                 const index=rankLevel.gifs.findIndex(gif=>gif.toLowerCase()===_gif.toLowerCase());
                                 if(index>-1) rankLevel.gifs.splice(index, 1);
@@ -129,14 +130,14 @@ class SetRankCommand extends Command{
                 case "aRole":{
                     await interaction.update({content: Localisation.getTranslation("argument.reply.level"), components: []});
                     const reply=await interaction.fetchReply();
-                    cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                    createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                         const level=parseInt(msg.content);
                         if(isNaN(level)||level<0) return <any> msg.reply(Localisation.getTranslation("error.invalid.level"));
 
                         let rankLevel=ranks.find(rank=>rank.level===level);
                         
                         const reply=await msg.reply(Localisation.getTranslation("argument.reply.role"));
-                        cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                             const role=await getRoleFromMention(msg.content, cmdArgs.guild);
                             if(!role) return <any> msg.reply(Localisation.getTranslation("error.invalid.role"));
                             if(rankLevel){
@@ -156,7 +157,7 @@ class SetRankCommand extends Command{
                 case "aGif":{
                     await interaction.update({content: Localisation.getTranslation("argument.reply.level"), components: []});
                     const reply=await interaction.fetchReply();
-                    cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                    createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                         const level=parseInt(msg.content);
                         if(isNaN(level)||level<0) return <any> msg.reply(Localisation.getTranslation("error.invalid.level"));
 
@@ -164,7 +165,7 @@ class SetRankCommand extends Command{
                         if(!rankLevel) return msg.reply(Localisation.getTranslation("setrank.gifs.norole"));
                         
                         const reply=await msg.reply(Localisation.getTranslation("argument.reply.gif"));
-                        cmdArgs.channel.createMessageCollector({filter: m=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max:1, time:1000*60*5}).on("collect", async(msg)=>{
+                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                             msg.content.split(" ").forEach(gif=>{
                                 rankLevel.gifs.push(gif.toLowerCase());
                             })

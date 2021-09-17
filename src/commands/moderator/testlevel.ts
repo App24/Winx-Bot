@@ -7,6 +7,8 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { getServerDatabase } from "../../utils/Utils";
 import { capitalise } from "../../utils/FormatUtils";
+import { showLevelMessage } from "../../utils/XPUtils";
+import { BaseGuildTextChannel } from "discord.js";
 
 class TestLevelCommand extends Command{
     public constructor(){
@@ -21,18 +23,18 @@ class TestLevelCommand extends Command{
     public async onRun(cmdArgs : CommandArguments){
         const level=parseInt(cmdArgs.args[0]);
         if(isNaN(level)||level<0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
-        await cmdArgs.channel.send(Localisation.getTranslation("xp.level.up", cmdArgs.author, level));
         const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
         const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guild.id);
         const rankLevel=ranks.find(rank=>rank.level===level);
+        let rankDetails;
         if(rankLevel){
             const gifs=rankLevel.gifs;
             const rank=await getRoleById(rankLevel.roleId, cmdArgs.guild);
-            await cmdArgs.channel.send(Localisation.getTranslation("xp.transformation.earn", cmdArgs.author, capitalise(rank.name)));
-            if(gifs&&gifs.length){
-                await cmdArgs.channel.send(gifs[Math.floor(Math.random()*gifs.length)]);
+            if(rank){
+                rankDetails={rankLevel: rankLevel, rank: rank};
             }
         }
+        showLevelMessage(true, <BaseGuildTextChannel>cmdArgs.channel, cmdArgs.author, level, rankDetails);
     }
 }
 

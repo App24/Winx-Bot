@@ -1,4 +1,6 @@
-export const VERSION="3.0.1";
+export const VERSION="3.0.2";
+
+export const CANVAS_FONT="Comic Sans MS";
 
 export const DATABASE_FOLDER="databases";
 export const DATABASE_BACKUP_FOLDER="backupDatabases";

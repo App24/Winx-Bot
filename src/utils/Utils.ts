@@ -238,7 +238,7 @@ export function backupDatabases(){
     });
 }
 
-export async function reportError(error, message : Message){
+export async function reportError(error, message? : Message){
     const Errors=BotUser.getDatabase(DatabaseType.Errors);
     let hex=genRanHex(16);
     let errors=await Errors.get(hex);
@@ -252,14 +252,16 @@ export async function reportError(error, message : Message){
     errorObj.error=error;
     await Errors.set(hex, errorObj);
     const owner = await getUserById(OWNER_ID);
-    const ownerMember=await getMemberById(owner.id, message.guild);
     let text=`Error: \`${hex}\``;
-    if(ownerMember){
-        text+=`\nServer: ${message.guild.name}`;
-        text+=`\nURL: ${message.url}`;
+    if(message){
+        const ownerMember=await getMemberById(owner.id, message.guild);
+        if(ownerMember){
+            text+=`\nServer: ${message.guild.name}`;
+            text+=`\nURL: ${message.url}`;
+        }
+        message.reply(Localisation.getTranslation("error.execution"));
     }
     (await owner.createDM()).send(text);
-    message.reply(Localisation.getTranslation("error.execution"));
 }
 
 export function isModerator(member : GuildMember){

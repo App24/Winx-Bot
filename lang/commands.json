@@ -66,7 +66,7 @@
     "suggestions.completed": "{0}\n__**Completed**__",
     "suggestions.rejected": "{0}\n__**Rejected**__",
 
-    "leaderboard.output": "Level: {0} XP: {1}/{2}",
+    "leaderboard.output": "Level: {0}",
 
     "transformations.list": "Level {0}: {1}",
     "transformations.title": "Transformations",
@@ -144,5 +144,12 @@
     "serversettings.category.maxmessagelength": "Maximum message length",
     "serversettings.category.levelchannel": "Level channel",
     "serversettings.category.ranks": "Number of transformations",
-    "serversettings.category.excludechannels": "Number of excluded channels"
+    "serversettings.category.excludechannels": "Number of excluded channels",
+    "serversettings.category.leaderboardcolor": "Leaderboard Background Color",
+    "serversettings.category.leaderboardhighlight": "Leaderboard Highlight Color",
+
+    "leaderboardcolor.set.highlight": "Highlight color set!",
+    "leaderboardcolor.set.color": "Background color set!",
+    "leaderboardcolor.reset.highlight": "Highlight color reset!",
+    "leaderboardcolor.reset.color": "Background color reset!"
 }

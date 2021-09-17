@@ -14,7 +14,7 @@ export abstract class EventActivity extends Activity{
 
     public isShowable() : boolean{
         const currentDate=new Date();
-        currentDate.setHours(0,0,0,0);
+        currentDate.setHours(24, 0, 0, 0);
         if(currentDate>=this.startTime&&currentDate<=this.endTime){
             return true;
         }

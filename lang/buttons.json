@@ -5,6 +5,7 @@
     "button.set": "Set",
     "button.remove": "Remove",
     "button.clear": "Clear",
+    "button.reset": "Reset",
 
     "button.rank": "Transformation",
     "button.role": "Role",
@@ -20,5 +21,8 @@
     "button.downloadbackup": "Download Backup",
     "button.downloaddatabase": "Download Database",
 
-    "button.cleardeletedchannels": "Clear Deleted Channels"
+    "button.cleardeletedchannels": "Clear Deleted Channels",
+
+    "button.background": "Background",
+    "button.highlight": "Highlight"
 }

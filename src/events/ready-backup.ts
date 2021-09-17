@@ -2,7 +2,7 @@ import { MessageAttachment } from "discord.js";
 import { BotUser } from "../BotClient";
 import { BACKUP_CHANNEL, DATABASE_FOLDER } from "../Constants";
 import { getGuildByID, GetTextNewsGuildChannelById } from "../utils/GetterUtils";
-import { backupDatabases } from "../utils/Utils";
+import { backupDatabases, reportError } from "../utils/Utils";
 import fs from "fs";
 import archiver from "archiver";
 import { dateToString } from "../utils/FormatUtils";
@@ -31,19 +31,23 @@ async function backup(){
     console.log(`[${dateToString(newDate, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")}] Backing up...`);
     backupDatabases();
 
-    const file=`${dateToString(newDate, "{dd}_{MM}_{YYYY}")}.zip`;
-    const output=fs.createWriteStream(file);
-    const archive=archiver("zip");
-    archive.on("error", (err)=>{
-        throw err;
-    });
+    try{
+        const file=`${dateToString(newDate, "{dd}_{MM}_{YYYY}")}.zip`;
+        const output=fs.createWriteStream(file);
+        const archive=archiver("zip");
+        archive.on("error", (err)=>{
+            throw err;
+        });
 
-    archive.directory(DATABASE_FOLDER, false);
+        archive.directory(DATABASE_FOLDER, false);
 
-    archive.pipe(output);
+        archive.pipe(output);
 
-    await archive.finalize();
+        await archive.finalize();
 
-    await backupChannel.send({files: [new MessageAttachment(file)]});
-    fs.unlinkSync(file);
+        await backupChannel.send({files: [new MessageAttachment(file)]});
+        fs.unlinkSync(file);
+    }catch(error){
+        await reportError(error.stack);
+    }
 }

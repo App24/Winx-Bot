@@ -8,6 +8,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase, asyncForEach } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
+import { createMessageCollector } from "../../utils/MessageUtils";
 
 class ExcludeChannelCommand extends Command{
     public constructor(){
@@ -33,7 +34,7 @@ class ExcludeChannelCommand extends Command{
                 if(interaction.customId==="set"){
                     await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
                     const reply=await interaction.fetchReply();
-                    cmdArgs.channel.createMessageCollector({filter: (m)=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max: 1, time:10000*60*5}).on("collect", async(msg)=>{
+                    createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                         if(!serverInfo.excludeChannels) serverInfo.excludeChannels=[];
 
                         const channel=await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
@@ -50,7 +51,7 @@ class ExcludeChannelCommand extends Command{
                 else if(interaction.customId==="remove"){
                     await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
                     const reply=await interaction.fetchReply();
-                    cmdArgs.channel.createMessageCollector({filter: (m)=>m.reference&&m.reference.messageId===reply.id&&m.author.id===cmdArgs.author.id, max: 1, time:10000*60*5}).on("collect", async(msg)=>{
+                    createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
                         if(!serverInfo.excludeChannels||!serverInfo.excludeChannels.length) return <any> msg.reply(Localisation.getTranslation("error.empty.excludedchannels"));
 
                         const channel=await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);

@@ -11,6 +11,8 @@ import { getServerDatabase, hexToRGB, blend, isHexColor, canvasToMessageAttachme
 import { getCurrentRank, getNextRank } from "../../utils/RankUtils";
 import { capitalise } from "../../utils/FormatUtils";
 import { getLevelXP } from "../../utils/XPUtils";
+import { rgbToHsl, roundRect } from "../../utils/CanvasUtils";
+import { CANVAS_FONT } from "../../Constants";
 
 class MagicLevelsCommand extends Command{
     public constructor(){
@@ -24,15 +26,18 @@ class MagicLevelsCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
         const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+
         levels.sort((a,b)=>{
             if(a.level===b.level){
                 return b.xp-a.xp;
             }
             return b.level-a.level;
         });
+
         let user=cmdArgs.author;
         if(cmdArgs.args.length){
             const temp=await getUserFromMention(cmdArgs.args[0]);
@@ -116,10 +121,10 @@ class MagicLevelsCommand extends Command{
         const newHeight=pfpY+(pfpRadius*2)+pfpY;
         const transformationFontSize=newHeight*(0.2068965517241379*0.75);
 
-        ctx.font=`${nameFontSize}px sans-serif`;
+        ctx.font=`${nameFontSize}px ${CANVAS_FONT}`;
         let extraWidth=ctx.measureText(name+levelsText).width;
 
-        ctx.font=`${transformationFontSize}px sans-serif`;
+        ctx.font=`${transformationFontSize}px ${CANVAS_FONT}`;
         if(ctx.measureText(currentRankText).width>extraWidth){
             extraWidth=ctx.measureText(currentRankText).width;
         }
@@ -134,7 +139,7 @@ class MagicLevelsCommand extends Command{
         canvas.height=newHeight;
 
         const barHeight=canvas.height*0.15;
-        const levelFont=`${barHeight}px sans-serif`;
+        const levelFont=`${barHeight}px ${CANVAS_FONT}`;
 
         const extraInfoAmount=3;
         const textPos=nameFontSize+((canvas.height-(nameFontSize+(transformationFontSize*(extraInfoAmount*1.75))))/2.0);
@@ -144,7 +149,7 @@ class MagicLevelsCommand extends Command{
         roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.width*0.01);
 
         //Draw name and level info
-        ctx.font=`${nameFontSize}px sans-serif`;
+        ctx.font=`${nameFontSize}px ${CANVAS_FONT}`;
         if(userSetting.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSetting.nameColor)){
             if(member.roles&&member.roles.color&&member.roles.color.color) ctx.fillStyle=member.roles.color.hexColor;
         }else{
@@ -190,7 +195,7 @@ class MagicLevelsCommand extends Command{
         ctx.restore();
 
         //Draw transformation info text
-        ctx.font=`${transformationFontSize}px sans-serif`;
+        ctx.font=`${transformationFontSize}px ${CANVAS_FONT}`;
         ctx.textBaseline='top';
         ctx.textAlign="left";
         ctx.fillStyle=textColor;
@@ -224,49 +229,6 @@ function drawSpecialCircle(ctx : CanvasRenderingContext2D, x : number, y : numbe
     ctx.fillStyle=color;
     ctx.fillRect(x,y,radius*2,radius*2);
     ctx.restore();
-}
-
-function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number, clip:boolean=false){
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-    if(clip){
-      ctx.clip()
-    }else{
-        ctx.fill();
-    }
-}
-
-function rgbToHsl(r : number, g : number, b : number){
-    r /= 255, g /= 255, b /= 255;
-
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
-
-    if (max == min) {
-    h = s = 0; // achromatic
-    } else {
-    var d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-    switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-    }
-
-    h /= 6;
-    }
-
-    return [ h, s, l ];
 }
 
 export=MagicLevelsCommand;

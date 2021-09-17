@@ -43,5 +43,6 @@
     "argument.reply.channel": "Reply to this message with the channel",
     "argument.reply.level": "Reply to this message with the level",
     "argument.reply.gif": "Reply to this message with the GIF",
-    "argument.reply.role": "Reply to this message with the role"
+    "argument.reply.role": "Reply to this message with the role",
+    "argument.reply.hexcolor": "Reply to this message with the hex color"
 }

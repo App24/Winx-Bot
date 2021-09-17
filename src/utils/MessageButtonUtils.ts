@@ -1,4 +1,4 @@
-import { Message, MessageActionRow, MessageButton, MessageButtonOptions, User } from "discord.js";
+import { Message, MessageActionRow, MessageButton, MessageButtonOptions, MessageComponentInteraction, User } from "discord.js";
 import { Localisation } from "../localisation";
 
 export async function createButtons(message : Message, author : User, text : string, settings : {max?: number, time?:number}, ...buttons : MessageButtonOptions[]){
@@ -15,7 +15,7 @@ export async function createButtons(message : Message, author : User, text : str
 
     const msg=await message.reply({content: text, components: rows});
 
-    let filter=i=>true;
+    let filter=(i:MessageComponentInteraction)=>true;
 
     if(author)
         filter=i=>i.user.id===author.id;
