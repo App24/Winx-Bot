@@ -9,9 +9,9 @@ export async function getNextRank(currentLevel : number, guildId : string){
     if(!ranks||!ranks.length) return;
     ranks.sort((a,b)=>{
         return a.level-b.level;
-    })
+    });
     let rankToReturn:RankLevel;
-    for(let rank of ranks){
+    for(const rank of ranks){
         if(rank.level<=currentLevel) continue;
         rankToReturn=rank;
         break;
@@ -25,9 +25,9 @@ export async function getCurrentRank(currentLevel : number, guildId : string){
     if(!ranks||!ranks.length) return;
     ranks.sort((a,b)=>{
         return a.level-b.level;
-    })
+    });
     let rankToReturn:RankLevel;
-    for(let rank of ranks){
+    for(const rank of ranks){
         if(rank.level>currentLevel) break;
         if(rank.level<=currentLevel){
             rankToReturn=rank;
@@ -42,16 +42,16 @@ export async function getPreviousRank(currentLevel : number, guildId : string){
     if(!ranks||!ranks.length) return;
     ranks.sort((a,b)=>{
         return a.level-b.level;
-    })
+    });
     let currentRank:RankLevel;
-    for(let rank of ranks){
+    for(const rank of ranks){
         if(rank.level>currentLevel) break;
         if(rank.level<=currentLevel){
             currentRank=rank;
         }
     }
     let rankToReturn:RankLevel;
-    for(let rank of ranks){
+    for(const rank of ranks){
         if(rank.level>=currentLevel||rank.level===currentRank.level) break;
         if(rank.level<currentLevel){
             rankToReturn=rank;

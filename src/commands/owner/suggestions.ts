@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, MessageSelectOptionData } from "discord.js";
+import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID } from "../../Constants";
 import { getBotRoleColor, getUserById } from "../../utils/GetterUtils";
@@ -40,15 +40,15 @@ class ListSubCommand extends SubCommand{
         let suggestionState : SuggestionState=undefined;
         if(cmdArgs.args[0]){
             switch(cmdArgs.args[0].toLowerCase()){
-                case "non":
-                    suggestionState=SuggestionState.Non;
-                    break;
-                case "completed":
-                    suggestionState=SuggestionState.Completed;
-                    break;
-                case "rejected":
-                    suggestionState=SuggestionState.Rejected;
-                    break;
+            case "non":
+                suggestionState=SuggestionState.Non;
+                break;
+            case "completed":
+                suggestionState=SuggestionState.Completed;
+                break;
+            case "rejected":
+                suggestionState=SuggestionState.Rejected;
+                break;
             }
         }
 
@@ -56,7 +56,7 @@ class ListSubCommand extends SubCommand{
         await asyncForEach(requests, async(request:{key:string, value:SuggestionStruct})=>{
             const key=request.key;
             const suggestion=request.value;
-            if(suggestionState===undefined||suggestionState===suggestion.state){;
+            if(suggestionState===undefined||suggestionState===suggestion.state){
                 const user=await getUserById(suggestion.userId);
                 data.push(Localisation.getTranslation("suggestions.list.suggestion", key, user||suggestion.userId, capitalise(suggestion.state)));
             }
@@ -92,10 +92,10 @@ class CompleteSubCommand extends SubCommand{
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
 
         const row=new MessageActionRow()
-                  .addComponents(
-                        new MessageButton({customId: "complete", style: "SUCCESS", label: Localisation.getTranslation("button.confirm")}),
-                        new MessageButton({customId: "cancel", style: "SECONDARY", label: Localisation.getTranslation("button.cancel")})
-                  )
+            .addComponents(
+                new MessageButton({customId: "complete", style: "SUCCESS", label: Localisation.getTranslation("button.confirm")}),
+                new MessageButton({customId: "cancel", style: "SECONDARY", label: Localisation.getTranslation("button.cancel")})
+            );
 
         cmdArgs.message.reply({embeds: [embed], components: [row]}).then(async(msg)=>{
             const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===OWNER_ID, max: 1});
@@ -135,10 +135,10 @@ class RejectSubCommand extends SubCommand{
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
 
         const row=new MessageActionRow()
-                  .addComponents(
-                        new MessageButton({customId: "reject", style: "SUCCESS", label: Localisation.getTranslation("button.confirm")}),
-                        new MessageButton({customId: "cancel", style: "SECONDARY", label: Localisation.getTranslation("button.cancel")})
-                  )
+            .addComponents(
+                new MessageButton({customId: "reject", style: "SUCCESS", label: Localisation.getTranslation("button.confirm")}),
+                new MessageButton({customId: "cancel", style: "SECONDARY", label: Localisation.getTranslation("button.cancel")})
+            );
 
         cmdArgs.message.reply({embeds: [embed], components: [row]}).then(async(msg)=>{
             const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===OWNER_ID, max: 1});

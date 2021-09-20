@@ -16,7 +16,7 @@ class CheckBansCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
         if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
         const bans=await cmdArgs.guild.bans.fetch();
         let amount=0;
@@ -27,7 +27,7 @@ class CheckBansCommand extends Command{
                 amount++;
             }
         });
-        await Levels.set(cmdArgs.guild.id, levels);
+        await Levels.set(cmdArgs.guildId, levels);
         cmdArgs.message.reply(Localisation.getTranslation("checkbans.bans", amount));
     }
 }

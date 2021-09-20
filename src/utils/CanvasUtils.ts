@@ -1,4 +1,4 @@
-export function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number, clip:boolean=false){
+export function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number, clip=false){
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
@@ -11,7 +11,7 @@ export function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
     if(clip){
-      ctx.clip()
+        ctx.clip();
     }else{
         ctx.fill();
     }
@@ -20,22 +20,23 @@ export function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number
 export function rgbToHsl(r : number, g : number, b : number){
     r /= 255, g /= 255, b /= 255;
 
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s;
+    const l = (max + min) / 2;
 
     if (max == min) {
-    h = s = 0; // achromatic
+        h = s = 0; // achromatic
     } else {
-    var d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
-    switch (max) {
+        switch (max) {
         case r: h = (g - b) / d + (g < b ? 6 : 0); break;
         case g: h = (b - r) / d + 2; break;
         case b: h = (r - g) / d + 4; break;
-    }
+        }
 
-    h /= 6;
+        h /= 6;
     }
 
     return [ h, s, l ];

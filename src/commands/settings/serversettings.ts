@@ -19,10 +19,10 @@ class ServerSettingsCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
         const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
-        const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guild.id);
+        const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guildId);
 
         const channel=await GetTextNewsGuildChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
 

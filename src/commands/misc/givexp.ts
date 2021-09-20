@@ -16,7 +16,7 @@ class GiveXPCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
         let userLevel = levels.find(u=>u.userId===cmdArgs.author.id);
         if(!userLevel){
             await levels.push(new UserLevel(cmdArgs.author.id));

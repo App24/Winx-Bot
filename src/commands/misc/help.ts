@@ -7,7 +7,7 @@ import { Command, CommandUsage, CommandArguments, CommandAvailability, CommandAc
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getBotRoleColor } from "../../utils/GetterUtils";
-import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator } from "../../utils/Utils";
+import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator, createMessageEmbed } from "../../utils/Utils";
 
 class HelpCommand extends Command{
     public constructor(){
@@ -21,38 +21,38 @@ class HelpCommand extends Command{
         if(!cmdArgs.args.length){
             const embed=new MessageEmbed();
             embed.setTitle(Localisation.getTranslation("help.title"));
-            let categories=[];
-            let categoryEmojis:{emoji:string, category:Category}[]=[];
+            const categories=[];
+            const categoryEmojis:{emoji:string, category:Category}[]=[];
             await asyncForEach(Categories, async(category:Category)=>{
                 if(category.availability===CommandAvailability.Both||(category.availability===available)){
                     if(category.access){
                         switch(category.access){
-                            case CommandAccess.Patreon:{
-                                if(isDM(cmdArgs.channel)||!(await isPatreon(cmdArgs.author.id, cmdArgs.guild.id)))
+                        case CommandAccess.Patreon:{
+                            if(isDM(cmdArgs.channel)||!(await isPatreon(cmdArgs.author.id, cmdArgs.guildId)))
+                                return;
+                        }break;
+                        case CommandAccess.BotOwner:{
+                            if(cmdArgs.author.id!==OWNER_ID)
+                                return;
+                        }break;
+                        case CommandAccess.Moderators:{
+                            if(isDM(cmdArgs.channel)||!isModerator(cmdArgs.member))
+                                return;
+                        }break;
+                        case CommandAccess.GuildOwner:{
+                            if(isDM(cmdArgs.channel)||cmdArgs.author.id!==cmdArgs.guild.ownerId)
+                                return;
+                        }break;
+                        case CommandAccess.None:{
+                            switch(category){
+                            case CustomCommands:{
+                                const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
+                                const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
+                                if(!customCommands.length)
                                     return;
                             }break;
-                            case CommandAccess.BotOwner:{
-                                if(cmdArgs.author.id!==OWNER_ID)
-                                    return;
-                            }break;
-                            case CommandAccess.Moderators:{
-                                if(isDM(cmdArgs.channel)||!isModerator(cmdArgs.member))
-                                    return;
-                            }break;
-                            case CommandAccess.GuildOwner:{
-                                if(isDM(cmdArgs.channel)||cmdArgs.author.id!==cmdArgs.guild.ownerId)
-                                    return;
-                            }break;
-                            case CommandAccess.None:{
-                                switch(category){
-                                    case CustomCommands:{
-                                        const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
-                                        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guild.id);
-                                        if(!customCommands.length)
-                                            return;
-                                    }break;
-                                }
-                            }break;
+                            }
+                        }break;
                         }
                     }
                     categoryEmojis.push({"emoji": category.emoji, "category": category});
@@ -61,7 +61,6 @@ class HelpCommand extends Command{
             });
             embed.setDescription(categories.join("\n"));
             embed.setFooter(Localisation.getTranslation("help.footer", PREFIX));
-            embed.setColor((await getBotRoleColor(cmdArgs.guild)));
 
             const rows:MessageActionRow[]=[];
             for(let i =0; i < Math.ceil(categoryEmojis.length/5); i++){
@@ -70,13 +69,13 @@ class HelpCommand extends Command{
 
             categoryEmojis.forEach((emoji, index)=>{
                 rows[Math.floor(index/5)].addComponents(new MessageButton({customId: emoji.category.name, style: "PRIMARY", emoji: emoji.emoji}));
-            })
+            });
 
-            return cmdArgs.message.reply({embeds: [embed], components: rows}).then(msg=>{
+            return cmdArgs.message.reply({embeds: [await createMessageEmbed(embed, cmdArgs.guild)], components: rows}).then(msg=>{
                 const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===cmdArgs.author.id, max: 1, time: 1000*60*5});
 
-                collector.on("end", _=>{
-                    msg.edit({components: []})
+                collector.on("end", ()=>{
+                    msg.edit({components: []});
                 });
 
                 collector.on("collect", async(interaction)=>{
@@ -91,7 +90,7 @@ class HelpCommand extends Command{
         }
 
         let category : Category=undefined;
-        for(var _category of Categories){
+        for(const _category of Categories){
             if(_category.getNames.map(value=>value.toLowerCase()).includes(cmdArgs.args.join(" ").toLowerCase())){
                 category=_category;
                 break;
@@ -116,25 +115,25 @@ async function getCommands(category : Category, available : CommandAvailability,
         const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, guild.id);
         await asyncForEach(customCommands, async(customCommand:CustomCommand)=>{
             switch(customCommand.access){
-                case CommandAccess.Patreon:{
-                    if(isDM(channel)||!(await isPatreon(author.id, guild.id)))
-                        return;
-                }break;
-                case CommandAccess.Moderators:{
-                    if(isDM(channel)||!isModerator(member)){
-                        return;
-                    }
-                }break;
-                case CommandAccess.GuildOwner:{
-                    if(isDM(channel)||author.id!==guild.ownerId){
-                        return;
-                    }
-                }break;
-                case CommandAccess.BotOwner:{
-                    if(author.id!==OWNER_ID){
-                        return;
-                    }
-                }break;
+            case CommandAccess.Patreon:{
+                if(isDM(channel)||!(await isPatreon(author.id, guild.id)))
+                    return;
+            }break;
+            case CommandAccess.Moderators:{
+                if(isDM(channel)||!isModerator(member)){
+                    return;
+                }
+            }break;
+            case CommandAccess.GuildOwner:{
+                if(isDM(channel)||author.id!==guild.ownerId){
+                    return;
+                }
+            }break;
+            case CommandAccess.BotOwner:{
+                if(author.id!==OWNER_ID){
+                    return;
+                }
+            }break;
             }
             embed.addField(customCommand.name, customCommand.description);
         });
@@ -143,23 +142,22 @@ async function getCommands(category : Category, available : CommandAvailability,
             if(command.category===category){
                 if(command.availability===CommandAvailability.Both||(command.availability===available)){
                     if((command.guildIds&&command.guildIds.includes(guild.id))||(!command.guildIds||!command.guildIds.length)){
-
                         switch(command.access){
-                            case CommandAccess.Moderators:{
-                                if(isDM(channel)||!isModerator(member)){
-                                    return;
-                                }
-                            }break;
-                            case CommandAccess.GuildOwner:{
-                                if(isDM(channel)||author.id!==guild.ownerId){
-                                    return;
-                                }
-                            }break;
-                            case CommandAccess.BotOwner:{
-                                if(author.id!==OWNER_ID){
-                                    return;
-                                }
-                            }break;
+                        case CommandAccess.Moderators:{
+                            if(isDM(channel)||!isModerator(member)){
+                                return;
+                            }
+                        }break;
+                        case CommandAccess.GuildOwner:{
+                            if(isDM(channel)||author.id!==guild.ownerId){
+                                return;
+                            }
+                        }break;
+                        case CommandAccess.BotOwner:{
+                            if(author.id!==OWNER_ID){
+                                return;
+                            }
+                        }break;
                         }
 
                         let title=name;

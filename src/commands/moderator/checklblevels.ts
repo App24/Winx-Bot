@@ -24,11 +24,11 @@ class CheckLBLevelsCommand extends Command{
         const channels=Array.from(cmdArgs.guild.channels.cache.values());
 
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
         const excluded=serverInfo.excludeChannels;
         
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
 
         if(!levels||!levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
         
@@ -42,7 +42,7 @@ class CheckLBLevelsCommand extends Command{
             const index=levels.findIndex(u=>u.userId===level.userLevel.userId);
             levels[index]=level.userLevel;
         });
-        await Levels.set(cmdArgs.guild.id, levels);
+        await Levels.set(cmdArgs.guildId, levels);
 
         await cmdArgs.message.reply(Localisation.getTranslation("checklevels.start"));
         const NTChannels=[];
@@ -74,7 +74,7 @@ class CheckLBLevelsCommand extends Command{
             });
             const timeDifferent=new Date().getTime()-startTime;
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/1000)));
-        })
+        });
         cmdArgs.message.reply(Localisation.getTranslation("generic.done"));
     }
 }

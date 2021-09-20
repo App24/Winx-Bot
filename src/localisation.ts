@@ -18,7 +18,7 @@ export class Localisation{
     }
 
     public static getTranslation(key : string, ...args){
-        let toReturn=this.localisation[key];
+        const toReturn=this.localisation[key];
         if(!toReturn){ 
             console.log(`Couldn't find translation for key: '${key}'`);
             return key;

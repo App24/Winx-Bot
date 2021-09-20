@@ -20,8 +20,8 @@ class CheckRanksCommand extends Command{
     public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
         const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
-        const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
+        const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guildId);
 
         if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
         if(!ranks) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));

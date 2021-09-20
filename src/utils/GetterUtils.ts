@@ -18,11 +18,11 @@ export function getUserById(id : string):Promise<User>{
     if(!id) return;
 
     const member=BotUser.shard.broadcastEval((client, {id})=>client.users.fetch(id), {context:{id}})
-    .then((sentArray:any[])=>{
-        if(!sentArray[0]) return undefined;
+        .then((sentArray:any[])=>{
+            if(!sentArray[0]) return undefined;
 
-        return new User(BotUser, sentArray[0]);
-    }).catch(()=>undefined);
+            return new User(BotUser, sentArray[0]);
+        }).catch(()=>undefined);
 
     return member;
 }

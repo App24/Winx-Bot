@@ -1,10 +1,10 @@
 export class UserSetting{
     public userId : string;
-    public barStartColor : string="";
-    public barEndColor : string="";
-    public cardColor : string="";
-    public nameColor : string="";
-    public specialCircleColor : string="";
+    public barStartColor : string;
+    public barEndColor : string;
+    public cardColor : string;
+    public nameColor : string;
+    public specialCircleColor : string;
 }
 
 export function copyUserSetting(userSetting : UserSetting, userId : string){

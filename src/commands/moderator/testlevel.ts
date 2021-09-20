@@ -6,7 +6,6 @@ import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArgum
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { getServerDatabase } from "../../utils/Utils";
-import { capitalise } from "../../utils/FormatUtils";
 import { showLevelMessage } from "../../utils/XPUtils";
 import { BaseGuildTextChannel } from "discord.js";
 
@@ -24,11 +23,10 @@ class TestLevelCommand extends Command{
         const level=parseInt(cmdArgs.args[0]);
         if(isNaN(level)||level<0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
         const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
-        const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guild.id);
+        const ranks:RankLevel[]=await getServerDatabase(Ranks, cmdArgs.guildId);
         const rankLevel=ranks.find(rank=>rank.level===level);
         let rankDetails;
         if(rankLevel){
-            const gifs=rankLevel.gifs;
             const rank=await getRoleById(rankLevel.roleId, cmdArgs.guild);
             if(rank){
                 rankDetails={rankLevel: rankLevel, rank: rank};

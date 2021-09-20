@@ -73,11 +73,9 @@
 
     "magiclevels.transformation.current": "Current Transformation: {0}",
     "magiclevels.transformation.next": "Next Transformation: {0}",
-    "magiclevels.username": "{0}",
-    "magiclevels.nickname": " ({0})",
     "magiclevels.level": ": Level: {0}",
     "magiclevels.levels": "{0}/{1}",
-    "magiclevels.lb.position": "Leaderboard Position: {0}",
+    "magiclevels.lb.position": "Rank: #{0}",
 
     "setxp.get": "XP per message is `{0}`!",
     "setxp.set": "XP per message is now `{0}`!",
@@ -151,5 +149,11 @@
     "leaderboardcolor.set.highlight": "Highlight color set!",
     "leaderboardcolor.set.color": "Background color set!",
     "leaderboardcolor.reset.highlight": "Highlight color reset!",
-    "leaderboardcolor.reset.color": "Background color reset!"
+    "leaderboardcolor.reset.color": "Background color reset!",
+
+    "ramusage.output": "The bot is using {0} {1}!",
+
+    "tictactoe.turn": "<@{0}>, it is your turn!",
+    "tictactoe.win": "<@{0}> wins!",
+    "tictactoe.draw": "Draw!"
 }

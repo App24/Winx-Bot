@@ -19,7 +19,7 @@ class LevelChannelCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
         
         const collector=await createWhatToDoButtons(cmdArgs.message, cmdArgs.author, {time: 1000*60*5, max: 1},
             {customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set")},
@@ -38,7 +38,7 @@ class LevelChannelCommand extends Command{
 
                     serverInfo.levelChannel=channel.id;
 
-                    await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+                    await ServerInfo.set(cmdArgs.guildId, serverInfo);
                     cmdArgs.message.reply(Localisation.getTranslation("levelchannel.set", channel));
                 });
             }
@@ -52,7 +52,7 @@ class LevelChannelCommand extends Command{
 
                 serverInfo.levelChannel="";
 
-                await ServerInfo.set(cmdArgs.guild.id, serverInfo);
+                await ServerInfo.set(cmdArgs.guildId, serverInfo);
 
                 cmdArgs.message.reply(Localisation.getTranslation("levelchannel.remove"));
             }

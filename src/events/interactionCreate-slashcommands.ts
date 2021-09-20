@@ -1,4 +1,4 @@
-import { BotUser } from "../BotClient"
+import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 
 export=()=>{
@@ -6,5 +6,5 @@ export=()=>{
         if (!interaction.isCommand()) return;
 
         interaction.reply(Localisation.getTranslation("error.slashcommand"));
-    })
+    });
 }

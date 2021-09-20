@@ -1,6 +1,6 @@
 import { parse } from "discord-command-parser";
 import { Collection } from "discord.js";
-import { BotUser } from "../BotClient"
+import { BotUser } from "../BotClient";
 import { OWNER_ID, PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
 import { CommandAccess, CommandArguments, CommandAvailability } from "../structs/Command";
@@ -31,26 +31,26 @@ export=()=>{
             if(!customCommand)
                 return;
             switch(customCommand.access){
-                case CommandAccess.Patreon:{
-                    if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
-                        return message.reply(Localisation.getTranslation("command.access.patreon"));
-                    }
-                }break;
-                case CommandAccess.Moderators:{
-                    if(isDM(message.channel)||!message.member.permissions.has("MANAGE_GUILD")){
-                        return message.reply(Localisation.getTranslation("command.access.moderator"));
-                    }
-                }break;
-                case CommandAccess.GuildOwner:{
-                    if(isDM(message.channel)||message.author.id!==message.guild.ownerId){
-                        return message.reply(Localisation.getTranslation("command.access.guildOwner"));
-                    }
-                }break;
-                case CommandAccess.BotOwner:{
-                    if(message.author.id!==OWNER_ID){
-                        return message.reply(Localisation.getTranslation("command.access.botOwner"));
-                    }
-                }break;
+            case CommandAccess.Patreon:{
+                if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
+                    return message.reply(Localisation.getTranslation("command.access.patreon"));
+                }
+            }break;
+            case CommandAccess.Moderators:{
+                if(isDM(message.channel)||!message.member.permissions.has("MANAGE_GUILD")){
+                    return message.reply(Localisation.getTranslation("command.access.moderator"));
+                }
+            }break;
+            case CommandAccess.GuildOwner:{
+                if(isDM(message.channel)||message.author.id!==message.guild.ownerId){
+                    return message.reply(Localisation.getTranslation("command.access.guildOwner"));
+                }
+            }break;
+            case CommandAccess.BotOwner:{
+                if(message.author.id!==OWNER_ID){
+                    return message.reply(Localisation.getTranslation("command.access.botOwner"));
+                }
+            }break;
             }
 
             const outputs=customCommand.outputs;
@@ -73,26 +73,26 @@ export=()=>{
         }
 
         switch(command.access){
-            case CommandAccess.Patreon:{
-                if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
-                    return message.reply(Localisation.getTranslation("command.access.patreon"));
-                }
-            }break;
-            case CommandAccess.Moderators:{
-                if(isDM(message.channel)||!isModerator(message.member)){
-                    return message.reply(Localisation.getTranslation("command.access.moderator"));
-                }
-            }break;
-            case CommandAccess.GuildOwner:{
-                if(isDM(message.channel)||message.author.id!==message.guild.ownerId){
-                    return message.reply(Localisation.getTranslation("command.access.guildOwner"));
-                }
-            }break;
-            case CommandAccess.BotOwner:{
-                if(message.author.id!==OWNER_ID){
-                    return message.reply(Localisation.getTranslation("command.access.botOwner"));
-                }
-            }break;
+        case CommandAccess.Patreon:{
+            if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
+                return message.reply(Localisation.getTranslation("command.access.patreon"));
+            }
+        }break;
+        case CommandAccess.Moderators:{
+            if(isDM(message.channel)||!isModerator(message.member)){
+                return message.reply(Localisation.getTranslation("command.access.moderator"));
+            }
+        }break;
+        case CommandAccess.GuildOwner:{
+            if(isDM(message.channel)||message.author.id!==message.guild.ownerId){
+                return message.reply(Localisation.getTranslation("command.access.guildOwner"));
+            }
+        }break;
+        case CommandAccess.BotOwner:{
+            if(message.author.id!==OWNER_ID){
+                return message.reply(Localisation.getTranslation("command.access.botOwner"));
+            }
+        }break;
         }
 
         if(!cooldowns.has(commandName)){

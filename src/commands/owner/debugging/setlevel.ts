@@ -25,7 +25,7 @@ class SetLevelCommand extends Command{
         const level=parseInt(cmdArgs.args[1]);
         if(isNaN(level)||level<0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
         let userLevel=levels.find(user=>user.userId===member.id);
         if(!userLevel){
             levels.push(new UserLevel(member.id));
@@ -40,7 +40,7 @@ class SetLevelCommand extends Command{
         userLevel.level=level;
         userLevel.xp=xp;
         levels[index]=userLevel;
-        await Levels.set(cmdArgs.guild.id, levels);
+        await Levels.set(cmdArgs.guildId, levels);
         cmdArgs.message.reply(Localisation.getTranslation("setlevel.output", member, level, xp));
     }
 }

@@ -14,22 +14,22 @@ import { getLevelXP } from "../../utils/XPUtils";
 import { rgbToHsl, roundRect } from "../../utils/CanvasUtils";
 import { CANVAS_FONT } from "../../Constants";
 
-class MagicLevelsCommand extends Command{
+class LevelsCommand extends Command{
     public constructor(){
         super();
         this.maxArgs=1;
         this.usage=[new CommandUsage(false, "argument.user")];
         this.availability=CommandAvailability.Guild;
         this.category=Rank;
-        this.aliases=["ml", "levels"];
+        this.aliases=["ml", "magiclevels"];
     }
 
     public async onRun(cmdArgs : CommandArguments){
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
 
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
 
         levels.sort((a,b)=>{
             if(a.level===b.level){
@@ -58,10 +58,10 @@ class MagicLevelsCommand extends Command{
         if(!userSetting){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, user.id));
             userSetting=serverUserSettings.find(u=>u.userId===user.id);
-            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         }
-        const currentRank=await getCurrentRank(userLevel.level, cmdArgs.guild.id);
-        const nextRank=await getNextRank(userLevel.level, cmdArgs.guild.id);
+        const currentRank=await getCurrentRank(userLevel.level, cmdArgs.guildId);
+        const nextRank=await getNextRank(userLevel.level, cmdArgs.guildId);
 
         let currentRankText=Localisation.getTranslation("generic.none");
         if(currentRank){
@@ -90,10 +90,8 @@ class MagicLevelsCommand extends Command{
         const canvas=createCanvas(10,10);
         const ctx=canvas.getContext("2d");
 
-        let name=Localisation.getTranslation("magiclevels.username", user.username);
-        if(member.nickname)
-            name+=Localisation.getTranslation("magiclevels.nickname", member.nickname);
-        let levelsText=Localisation.getTranslation("magiclevels.level", userLevel.level);
+        const name=user.tag;
+        const levelsText=Localisation.getTranslation("magiclevels.level", userLevel.level);
         
         const nameFontSize=80;
         const pfpRadius=nameFontSize*2;
@@ -162,7 +160,7 @@ class MagicLevelsCommand extends Command{
         //Draw Level bar background
         const barWidth=extraWidth;
         ctx.fillStyle="#272822";
-        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth, barHeight, 20)
+        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth, barHeight, 20);
 
         //Draw Level bar
         ctx.fillStyle=`hsla(${blend(startHsl[0], endHsl[0], 1-filled)*360}, ${blend(startHsl[1], endHsl[1], 1-filled)*100}%, ${blend(startHsl[2], endHsl[2], 1 - filled)*100}%, 1)`;
@@ -231,4 +229,4 @@ function drawSpecialCircle(ctx : CanvasRenderingContext2D, x : number, y : numbe
     ctx.restore();
 }
 
-export=MagicLevelsCommand;
+export=LevelsCommand;

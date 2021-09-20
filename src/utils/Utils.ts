@@ -1,12 +1,12 @@
 import { join } from "path";
 import fs from "fs";
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, OWNER_ID } from "../Constants";
+import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, DONATE_LINK, OWNER_ID, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, TextBasedChannels } from "discord.js";
+import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannels } from "discord.js";
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
-import { getMemberById, getUserById } from "./GetterUtils";
+import { getBotRoleColor, getMemberById, getUserById } from "./GetterUtils";
 import { PatreonInfo } from "../structs/databaseTypes/PatreonInfo";
 import { Keyv } from "../keyv/keyv-index";
 import { Canvas, createCanvas } from "canvas";
@@ -19,7 +19,7 @@ import { UserLevel } from "../structs/databaseTypes/UserLevel";
  */
 export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: number, array: readonly U[])=>Promise<any>|any) {
     for(let i =0; i < array.length; i++){
-        let exit=await callbackFn(array[i], i, array);
+        const exit=await callbackFn(array[i], i, array);
         if(exit===true)break;
     }
 }
@@ -33,7 +33,7 @@ export async function asyncMapForEach<U,T>(map:Map<U,T>, callbackFn: (key:U, val
     const keys=Array.from(map.keys());
     const values=Array.from(map.values());
     for(let i =0; i < map.size; i++){
-        let exit=await callbackFn(keys[i], values[i], i, map);
+        const exit=await callbackFn(keys[i], values[i], i, map);
         if(exit===true)break;
     }
 }
@@ -49,7 +49,7 @@ export function loadFiles(directory : string){
 
     try{
         if(fs.existsSync(directory)){
-            let dirContent=fs.readdirSync(directory);
+            const dirContent=fs.readdirSync(directory);
 
             dirContent.forEach(file=>{
                 const fullPath=join(directory, file);
@@ -143,7 +143,7 @@ export async function isPatreon(userId : string, guildId : string){
  * @param fileName Name of file to send to discord
  * @returns Message Attachment
  */
-export function canvasToMessageAttachment(canvas : Canvas, fileName:string="color"){
+export function canvasToMessageAttachment(canvas : Canvas, fileName="color"){
     return new MessageAttachment(canvas.toBuffer(), `${fileName}.png`);
 }
 
@@ -154,7 +154,7 @@ export function canvasToMessageAttachment(canvas : Canvas, fileName:string="colo
  * @param height height of the canvas
  * @returns A Canvas with the color
  */
-export function canvasColor(color : string, width : number=700, height : number=320){
+export function canvasColor(color : string, width=700, height=320){
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
     ctx.fillStyle="#"+color;
@@ -173,11 +173,11 @@ export function isHexColor(str : string){
 }
 
 export function hexToRGB(hex : string){
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
     } : null;
 }
 
@@ -206,7 +206,7 @@ export async function getAllMessages(channel : BaseGuildTextChannel){
 
 export async function getLeaderboardMembers(guild : Guild){
     const Levels=BotUser.getDatabase(DatabaseType.Levels);
-    const levels:UserLevel[]=await getServerDatabase(Levels, guild.id)
+    const levels:UserLevel[]=await getServerDatabase(Levels, guild.id);
     levels.sort((a,b)=>{
         if(a.level===b.level){
             return b.xp-a.xp;
@@ -233,7 +233,7 @@ export function backupDatabases(){
     }
 
     const values = Object.values(DatabaseType);
-    values.forEach((value, index)=>{
+    values.forEach((value)=>{
         fs.copyFileSync(`${DATABASE_FOLDER}/${value}.sqlite`, `${DATABASE_BACKUP_FOLDER}/${value}.sqlite`);
     });
 }
@@ -266,4 +266,14 @@ export async function reportError(error, message? : Message){
 
 export function isModerator(member : GuildMember){
     return member.permissions.has("MANAGE_GUILD");
+}
+
+export async function createMessageEmbed(data : MessageEmbedOptions|MessageEmbed, guild : Guild){
+    const embed=new MessageEmbed(data);
+    embed.setColor(await getBotRoleColor(guild));
+    const footers=[Localisation.getTranslation("footer.donate", DONATE_LINK), Localisation.getTranslation("footer.suggestion", PREFIX, "suggestion")];
+    const option=Math.floor((footers.length*10)*Math.random());
+    if(option<footers.length)
+        embed.setFooter(`${data.footer||""}\n${footers[option]}`);
+    return embed;
 }

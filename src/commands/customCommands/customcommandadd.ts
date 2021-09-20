@@ -19,7 +19,7 @@ class CustomCommandAddCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
-        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guild.id);
+        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
 
         const cmdName=cmdArgs.args.shift().toLowerCase();
         if(customCommands.find(c=>c.name===cmdName)||(BotUser.getCommand(cmdName)))
@@ -35,7 +35,7 @@ class CustomCommandAddCommand extends Command{
 
         customCommands.push(customCommand);
 
-        await CustomCommands.set(cmdArgs.guild.id, customCommands);
+        await CustomCommands.set(cmdArgs.guildId, customCommands);
 
         cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.add", cmdName));
     }

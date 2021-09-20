@@ -2,7 +2,7 @@ import { EventActivity } from "./EventActivity";
 
 export abstract class OneDayEventActivity extends EventActivity{
     public constructor(date:Date){
-        super(date, nextDay(date))
+        super(date, nextDay(date));
     }
 }
 

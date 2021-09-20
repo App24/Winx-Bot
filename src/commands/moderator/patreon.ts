@@ -36,7 +36,7 @@ class AddSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const Patreon=BotUser.getDatabase(DatabaseType.Paid);
-        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guild.id);
+        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guildId);
 
         const member=await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
         if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
@@ -45,7 +45,7 @@ class AddSubCommand extends SubCommand{
 
         const patreon=new PatreonInfo(member.id, new Date().getTime());
         patreons.push(patreon);
-        await Patreon.set(cmdArgs.guild.id, patreons);
+        await Patreon.set(cmdArgs.guildId, patreons);
         return cmdArgs.message.reply(Localisation.getTranslation("patreon.add", member));
     }
 }
@@ -58,7 +58,7 @@ class RemoveSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const Patreon=BotUser.getDatabase(DatabaseType.Paid);
-        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guild.id);
+        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guildId);
 
         if(!patreons||!patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
 
@@ -69,7 +69,7 @@ class RemoveSubCommand extends SubCommand{
 
         const index=patreons.findIndex(u=>u.userId===member.id);
         if(index>=0) patreons.splice(index, 1);
-        await Patreon.set(cmdArgs.guild.id, patreons);
+        await Patreon.set(cmdArgs.guildId, patreons);
         return cmdArgs.message.reply(Localisation.getTranslation("patreon.remove", member));
     }
 }
@@ -81,7 +81,7 @@ class ListSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const Patreon=BotUser.getDatabase(DatabaseType.Paid);
-        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guild.id);
+        const patreons:PatreonInfo[]=await getServerDatabase(Patreon, cmdArgs.guildId);
 
         if(!patreons||!patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
 

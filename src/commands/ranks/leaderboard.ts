@@ -1,6 +1,6 @@
-import { GuildMember, MessageEmbed } from "discord.js";
+import { GuildMember } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getUserFromMention, getMemberById, getBotRoleColor } from "../../utils/GetterUtils";
+import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
 import { Command, CommandUsage, CommandAvailability, CommandArguments } from "../../structs/Command";
@@ -28,14 +28,14 @@ class RankCommand extends Command{
     public async onRun(cmdArgs : CommandArguments){
         const startDate=new Date();
         const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guild.id);
+        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
         if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
 
         const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
 
         let _user=cmdArgs.author;
         if(cmdArgs.args.length){
@@ -61,9 +61,7 @@ class RankCommand extends Command{
         let i=1;
         await asyncForEach(leaderboardLevels, async(leaderboardInfo:{userLevel: UserLevel, member: GuildMember})=>{
             const user=leaderboardInfo.member.user;
-            let text=`${user.username}`;
-            if(leaderboardInfo.member.nickname)
-                text+=` (${leaderboardInfo.member.nickname})`;
+            let text=user.tag;
             text=`${i}. ${text}`;
             data.push([text, user.id===_user.id]);
             data.push(["level", leaderboardInfo.userLevel, leaderboardInfo.member]);
@@ -77,9 +75,7 @@ class RankCommand extends Command{
             if(userLevel){
                 data.push(["..."]);
                 const userIndex=levels.findIndex(u=>u.userId===_user.id);
-                let text=`${_user.username}`;
-                if(member.nickname)
-                    text+=` (${member.nickname})`;
+                let text=_user.tag;
                 text=`${userIndex+1}. ${text}`;
                 data.push([text, member.id===_user.id]);
                 data.push(["level", userLevel, member]);
@@ -112,7 +108,7 @@ class RankCommand extends Command{
         ctx.font=textFont;
         i=0;
         data.forEach(value=>{
-            let text:string=value[0];
+            const text:string=value[0];
             if(text!=="...")
                 i++;
             height+=textFontSize;
@@ -120,7 +116,7 @@ class RankCommand extends Command{
                 height+=gapHeight;
         });
 
-        canvas.width=width*1.05;
+        canvas.width=width*1.2;
         canvas.height=height;
 
         ctx.fillStyle=`#${serverInfo.leaderboardColor}`;
@@ -130,7 +126,7 @@ class RankCommand extends Command{
         let brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
         const textColor = (brightness > 125) ? 'black' : 'white';
 
-        const barWidth=canvas.width*0.4;
+        const barWidth=canvas.width*0.6;
 
         ctx.font=textFont;
         ctx.fillStyle=textColor;
@@ -138,7 +134,7 @@ class RankCommand extends Command{
         let textPos=-textFontSize-(textFontSize/20);
         i=0;
         await asyncForEach(data, async(value)=>{
-            let text:string=value[0];
+            const text:string=value[0];
             if(text!=="...")
                 i++;
             if(value[1]===true)
@@ -155,7 +151,7 @@ class RankCommand extends Command{
                 if(!userSetting){
                     serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, member.id));
                     userSetting=serverUserSettings.find(u=>u.userId===member.id);
-                    await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+                    await UserSettings.set(cmdArgs.guildId, serverUserSettings);
                 }
 
                 const filled=userLevel.xp/getLevelXP(userLevel.level);

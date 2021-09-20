@@ -30,7 +30,7 @@ class BotClient extends Client{
 
         this.loadDatabases();
 
-        ;(async()=>{
+        (async()=>{
             if(this.botOptions.loadCommands){
                 await this.loadCommands();
             }
@@ -46,7 +46,7 @@ class BotClient extends Client{
         }
 
         const values = Object.values(DatabaseType);
-        values.forEach((value, index)=>{
+        values.forEach((value)=>{
             this.databases.set(<DatabaseType>value, new Keyv(`sqlite://${DATABASE_FOLDER}/${value}.sqlite`));
         });
     }
@@ -67,10 +67,10 @@ class BotClient extends Client{
                             command.description=`${name}.command.description`;
                         this.Commands.set(name, command);
                         switch(this.botOptions.logLoading){
-                            case 'complex':
-                            case 'all':
-                                console.log(Localisation.getTranslation("bot.load.command.complex", name));
-                                break;
+                        case 'complex':
+                        case 'all':
+                            console.log(Localisation.getTranslation("bot.load.command.complex", name));
+                            break;
                         }
                         loaded++;
                     }
@@ -78,10 +78,10 @@ class BotClient extends Client{
             }
         }
         switch(this.botOptions.logLoading){
-            case 'simplified':
-            case 'all':
-                console.log(Localisation.getTranslation("bot.load.command.simple", loaded));
-                break;
+        case 'simplified':
+        case 'all':
+            console.log(Localisation.getTranslation("bot.load.command.simple", loaded));
+            break;
         }
     }
 
@@ -100,20 +100,20 @@ class BotClient extends Client{
                 func();
 
                 switch(this.botOptions.logLoading){
-                    case "complex":
-                    case "all":
-                        console.log(Localisation.getTranslation("bot.load.event.complex", name));
-                        break;
+                case "complex":
+                case "all":
+                    console.log(Localisation.getTranslation("bot.load.event.complex", name));
+                    break;
                 }
                 loaded++;
             }
         }
 
         switch(this.botOptions.logLoading){
-            case "simplified":
-            case "all":
-                console.log(Localisation.getTranslation("bot.load.event.simple", loaded));
-                break;
+        case "simplified":
+        case "all":
+            console.log(Localisation.getTranslation("bot.load.event.simple", loaded));
+            break;
         }
     }
 

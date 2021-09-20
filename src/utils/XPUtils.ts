@@ -68,7 +68,7 @@ export async function removeXP(xp : number, user : User, guild : Guild, channel 
     await Levels.set(guild.id, levels);
 }
 
-export async function addXP(xp : number, user : User, guild : Guild, channel : BaseGuildTextChannel, levelUpMessage:boolean=true){
+export async function addXP(xp : number, user : User, guild : Guild, channel : BaseGuildTextChannel, levelUpMessage=true){
     const Levels=BotUser.getDatabase(DatabaseType.Levels);
     const Ranks=BotUser.getDatabase(DatabaseType.Ranks);
     const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
@@ -108,7 +108,8 @@ export async function addXP(xp : number, user : User, guild : Guild, channel : B
                 }
             }
         }
-        showLevelMessage(true, levelChannel, user, userLevel.level, rankDetails);
+        if(levelUpMessage)
+            showLevelMessage(true, levelChannel, user, userLevel.level, rankDetails);
     }
 
     await Levels.set(guild.id, levels);

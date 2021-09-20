@@ -1,7 +1,7 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
@@ -10,7 +10,6 @@ import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor }
 class CircleColorCommand extends Command{
     public constructor(){
         super();
-        this.access=CommandAccess.Patreon;
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
         this.usage=[new CommandUsage(true, "argument.get", "argument.set", "argument.reset"), new CommandUsage(false, "argument.hexcolor")];
@@ -33,10 +32,10 @@ class GetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
         if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
         cmdArgs.message.reply({content: Localisation.getTranslation("generic.hexcolor", userSettings.specialCircleColor), files: [canvasToMessageAttachment(canvasColor(userSettings.specialCircleColor))]});
@@ -51,10 +50,10 @@ class SetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
         if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
 
@@ -64,7 +63,7 @@ class SetSubCommand extends SubCommand{
         }
         if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         userSettings.specialCircleColor=color;
-        await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+        await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         cmdArgs.message.reply(Localisation.getTranslation("circlecolor.set.output", color));
     }
 }
@@ -76,14 +75,14 @@ class ResetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
         if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
         userSettings.specialCircleColor=DEFAULT_USER_SETTING.specialCircleColor;
-        await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+        await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         cmdArgs.message.reply(Localisation.getTranslation("circlecolor.resetset.output"));
     }
 }

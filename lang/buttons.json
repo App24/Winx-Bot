@@ -24,5 +24,7 @@
     "button.cleardeletedchannels": "Clear Deleted Channels",
 
     "button.background": "Background",
-    "button.highlight": "Highlight"
+    "button.highlight": "Highlight",
+
+    "button.join": "Join"
 }

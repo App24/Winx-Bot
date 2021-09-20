@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "npx rimraf dist && npx tsc && node dist/index.js",
-    "dev": "npx nodemon -e ts  --exec \"npm run compile\""
+    "dev": "npx nodemon -e ts  --exec \"npm run compile\"",
+    "lint": "eslint . --ext .ts"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,9 @@
   "devDependencies": {
     "@types/glob": "^7.1.4",
     "@types/node": "^16.4.13",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "eslint": "^7.32.0",
     "nodemon": "^2.0.12",
     "rimraf": "^3.0.2",
     "ts-node": "^10.1.0",

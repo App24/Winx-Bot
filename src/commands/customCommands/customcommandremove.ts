@@ -19,7 +19,7 @@ class CustomCommandRemoveCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
-        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guild.id);
+        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
 
         if(!customCommands.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.customcommands"));
 
@@ -31,7 +31,7 @@ class CustomCommandRemoveCommand extends Command{
         const index=customCommands.findIndex(c=>c===customCommand);
         customCommands.splice(index, 1);
 
-        await CustomCommands.set(cmdArgs.guild.id, customCommands);
+        await CustomCommands.set(cmdArgs.guildId, customCommands);
 
         cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.remove"));
     }

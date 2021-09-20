@@ -23,7 +23,7 @@
     "setlevel.command.description": "Sets level for user!",
     "suggestions.command.description": "Gets suggestions!",
     "leaderboard.command.description": "Shows the leaderboard!",
-    "magiclevels.command.description": "Show your level!",
+    "levels.command.description": "Show your level!",
     "transformations.command.description": "Shows the transformations available!",
     "excludechannel.command.description": "Excludes a channel from earning xp!",
     "levelchannel.command.description": "Sets channel where level ups go to!",
@@ -42,5 +42,8 @@
     "customisationsettings.command.description": "Get your customisation settings!",
     "customisationcode.command.description": "Set your customisation settings to a code, or get your customisation code!",
     "serversettings.command.description": "Get all the server settings!",
-    "leaderboardcolor.command.description": "Manage the leaderboard colors!"
+    "leaderboardcolor.command.description": "Manage the leaderboard colors!",
+    "ramusage.command.description": "Get RAM usage by the bot!",
+
+    "tictactoe.command.description": "Play Tic Tac Toe with another member of the server!"
 }

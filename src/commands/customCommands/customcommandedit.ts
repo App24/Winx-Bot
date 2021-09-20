@@ -19,7 +19,7 @@ class CustomCommandEditCommand extends Command{
 
     public async onRun(cmdArgs : CommandArguments){
         const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
-        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guild.id);
+        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
 
         if(!customCommands.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.customcommands"));
 
@@ -32,70 +32,70 @@ class CustomCommandEditCommand extends Command{
         const type=cmdArgs.args[1].toLowerCase();
         let op:EditSettings;
         switch(type){
-            case "desc":
-            case "description":{
-                op=EditSettings.Description;
-            }break;
-            case "access":{
-                op=EditSettings.Access;
-            }break;
-            case "message":
-            case "out":
-            case "output":{
-                op=EditSettings.Output;
-            }break;
-            default:{
-                return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.type"))
-            }break;
+        case "desc":
+        case "description":{
+            op=EditSettings.Description;
+        }break;
+        case "access":{
+            op=EditSettings.Access;
+        }break;
+        case "message":
+        case "out":
+        case "output":{
+            op=EditSettings.Output;
+        }break;
+        default:{
+            return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.type"));
+        }break;
         }
 
-        let value=cmdArgs.args[2];
+        const value=cmdArgs.args[2];
         switch(op){
-            case EditSettings.Description:{
-                customCommand.description=value;
+        case EditSettings.Description:{
+            customCommand.description=value;
+        }break;
+        case EditSettings.Access:{
+            let access:CommandAccess;
+            switch(value.toLowerCase()){
+            case "moderator":{
+                access=CommandAccess.Moderators;
             }break;
-            case EditSettings.Access:{
-                let access:CommandAccess;
-                switch(value.toLowerCase()){
-                    case "moderator":{
-                        access=CommandAccess.Moderators;
-                    }break;
-                    case "owner":{
-                        access=CommandAccess.GuildOwner;
-                    }break;
-                    case "creator":
-                    case "botowner":{
-                        access=CommandAccess.BotOwner;
-                    }break;
-                    case "patreon":{
-                        access=CommandAccess.Patreon;
-                    }break;
-                    default:{
-                        return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.access"));
-                    }break;
-                }
-                customCommand.access=access;
+            case "owner":{
+                access=CommandAccess.GuildOwner;
             }break;
-            case EditSettings.Output:{
-                if(cmdArgs.args[3]){
-                    const index=customCommand.outputs.findIndex(output=>output.toLowerCase()===value.toLowerCase());
-                    if(index>-1){
-                        customCommand.outputs[index]=cmdArgs.args[3];
-                    }else
-                        return cmdArgs.message.reply(Localisation.getTranslation("customcommand.undefined.output"));
+            case "creator":
+            case "botowner":{
+                access=CommandAccess.BotOwner;
+            }break;
+            case "patreon":{
+                access=CommandAccess.Patreon;
+            }break;
+            default:{
+                return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.access"));
+            }break;
+            }
+            customCommand.access=access;
+        }break;
+        case EditSettings.Output:{
+            if(cmdArgs.args[3]){
+                const index=customCommand.outputs.findIndex(output=>output.toLowerCase()===value.toLowerCase());
+                if(index>-1){
+                    customCommand.outputs[index]=cmdArgs.args[3];
+                }else
+                    return cmdArgs.message.reply(Localisation.getTranslation("customcommand.undefined.output"));
+            }else{
+                const index=customCommand.outputs.findIndex(output=>output.toLowerCase()===value.toLowerCase());
+                if(index>-1){
+                    customCommand.outputs.splice(index, 1);
+                    cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.output.remove"));
                 }else{
-                    const index=customCommand.outputs.findIndex(output=>output.toLowerCase()===value.toLowerCase());
-                    if(index>-1){
-                        customCommand.outputs.splice(index, 1);
-                        cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.output.remove"));
-                    }else{
-                        customCommand.outputs.push(value);
-                        cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.output.add"));
-                    }
+                    customCommand.outputs.push(value);
+                    cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.output.add"));
                 }
-            }break;
+            }
+        }break;
         }
-        await CustomCommands.set(cmdArgs.guild.id, customCommands);
+        await CustomCommands.set(cmdArgs.guildId, customCommands);
         cmdArgs.message.reply(Localisation.getTranslation("customcommand.success.edit"));
     }
 }

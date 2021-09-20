@@ -8,21 +8,22 @@ export class KeyvSqlite extends KeyvSql{
             dialect: "sqlite",
             uri: "sqlite://:memory:"
         }, opts);
-		opts.db = opts.uri.replace(/^sqlite:\/\//, '');
 
-		opts.connect = () => new Promise((resolve, reject) => {
-			const db = new sqlite3.Database(opts.db, err => {
-				if (err) {
-					reject(err);
-				} else {
-					if (opts.busyTimeout) {
-						db.configure('busyTimeout', opts.busyTimeout);
-					}
-					resolve(db);
-				}
-			});
-		})
-		.then((db:any) => pify(db.all).bind(db));
+        opts.db = opts.uri.replace(/^sqlite:\/\//, '');
+
+        opts.connect = () => new Promise((resolve, reject) => {
+            const db = new sqlite3.Database(opts.db, err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    if (opts.busyTimeout) {
+                        db.configure('busyTimeout', opts.busyTimeout);
+                    }
+                    resolve(db);
+                }
+            });
+        })
+            .then((db:any) => pify(db.all).bind(db));
 
         super(opts);
     }

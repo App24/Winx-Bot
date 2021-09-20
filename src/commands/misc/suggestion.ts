@@ -1,4 +1,4 @@
-import { TextChannel, Guild, MessageEmbed, MessageActionRow, MessageButton, BaseGuildTextChannel } from "discord.js";
+import { TextChannel, MessageEmbed, MessageActionRow, MessageButton, BaseGuildTextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { SUGGESTION_CHANNEL, OWNER_ID } from "../../Constants";
 import { getBotRoleColor, getGuildByID, GetTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
@@ -24,7 +24,7 @@ class SuggestionCommand extends Command{
         Promise.all(promises).then(async(results)=>{
             const channeld:any=results[0].reduce((acc,curr)=>{if(curr!==undefined) acc=curr;});
             let channel:BaseGuildTextChannel;
-            if(!isDM(cmdArgs.channel)&&channeld["guild"]===cmdArgs.guild.id){
+            if(!isDM(cmdArgs.channel)&&channeld["guild"]===cmdArgs.guildId){
                 channel=await GetTextBasedGuildGuildChannelById(SUGGESTION_CHANNEL, cmdArgs.guild);
             }else{
                 channel=new TextChannel(await getGuildByID(channeld["guild"]), channeld);
@@ -40,10 +40,10 @@ class SuggestionCommand extends Command{
             cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
 
             const row=new MessageActionRow()
-                      .addComponents(
-                            new MessageButton({customId: "accept", style: "SUCCESS", label: Localisation.getTranslation("button.accept")}),
-                            new MessageButton({customId: "deny", style: "DANGER", label: Localisation.getTranslation("button.deny")})
-                      )
+                .addComponents(
+                    new MessageButton({customId: "accept", style: "SUCCESS", label: Localisation.getTranslation("button.accept")}),
+                    new MessageButton({customId: "deny", style: "DANGER", label: Localisation.getTranslation("button.deny")})
+                );
 
             channel.send({embeds: [embed], components: [row]}).then(async(msg)=>{
                 const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===OWNER_ID, max: 1});

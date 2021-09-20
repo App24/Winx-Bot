@@ -1,11 +1,11 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { CREATORS_ID, VERSION } from "../../Constants";
-import { getBotMember, getBotRoleColor, getUserById } from "../../utils/GetterUtils";
+import { getBotMember, getUserById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Info } from "../../structs/Category";
 import { Command, CommandArguments } from "../../structs/Command";
-import { asyncForEach } from "../../utils/Utils";
+import { asyncForEach, createMessageEmbed } from "../../utils/Utils";
 
 class AboutCommand extends Command{
     public constructor(){
@@ -25,13 +25,12 @@ class AboutCommand extends Command{
         embed.addField(Localisation.getTranslation("about.title.about"), Localisation.getTranslation("about.description.output"));
         embed.addField(Localisation.getTranslation("about.title.creators"), data.join(", "));
         embed.addField(Localisation.getTranslation("about.title.version"), VERSION);
-        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
 
         const row=new MessageActionRow().addComponents(
             new MessageButton({style: "LINK", url: "https://github.com/App24/Winx-Bot", label: Localisation.getTranslation("about.title.github")})
         );
 
-        cmdArgs.message.reply({embeds:[embed], components: [row]});
+        cmdArgs.message.reply({embeds:[await createMessageEmbed(embed, cmdArgs.guild)], components: [row]});
     }
 }
 

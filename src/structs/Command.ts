@@ -37,7 +37,7 @@ export abstract class Command{
         this.subCommands=[];
     }
 
-    protected async onRunSubCommands(cmdArgs : CommandArguments, subCommandName : string, showError:boolean=true){
+    protected async onRunSubCommands(cmdArgs : CommandArguments, subCommandName : string, showError=true){
         let found=false;
         await asyncForEach(this.subCommands, async(subCommand : SubCommand)=>{
             if(subCommand.name.toLowerCase()===subCommandName.toLowerCase()||(subCommand.aliases&&subCommand.aliases.includes(subCommandName.toLowerCase()))){
@@ -115,14 +115,18 @@ export class CommandArguments{
     public readonly message : Message;
     public args : string[];
     public readonly guild : Guild;
+    public readonly guildId : string;
     public readonly channel : TextBasedChannels;
+    public readonly channelId : string;
     public readonly author : User;
     public readonly member : GuildMember;
 
     public constructor(message : Message, args : string[]){
         this.message=message;
         this.guild=message.guild;
+        this.guildId=message.guildId;
         this.channel=message.channel;
+        this.channelId=message.channelId;
         this.args=args;
         this.author=message.author;
         this.member=message.member;

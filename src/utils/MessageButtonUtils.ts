@@ -15,15 +15,15 @@ export async function createButtons(message : Message, author : User, text : str
 
     const msg=await message.reply({content: text, components: rows});
 
-    let filter=(i:MessageComponentInteraction)=>true;
+    let filter=(i:MessageComponentInteraction)=>i===i;
 
     if(author)
         filter=i=>i.user.id===author.id;
 
     const collector=msg.createMessageComponentCollector({filter: filter, max: settings.max, time: settings.time});
 
-    collector.on("end", _=>{
-        msg.edit({components: []})
+    collector.on("end", ()=>{
+        msg.edit({components: []});
     });
 
     return collector;

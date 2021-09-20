@@ -4,5 +4,8 @@
     "bot.load.event.simple": "Loaded {0} Events!",
     "bot.load.event.complex": "Loaded Event: {0}",
 
-    "shard.ready": "Shard {0} is ready!"
+    "shard.ready": "Shard {0} is ready!",
+
+    "footer.donate": "Consider donation {0}",
+    "footer.suggestion": "If you have a suggestion for the bot, do {0}{1}"
 }

@@ -1,7 +1,7 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
@@ -10,7 +10,6 @@ import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor }
 class BarColorCommand extends Command{
     public constructor(){
         super();
-        this.access=CommandAccess.Patreon;
         this.availability=CommandAvailability.Guild;
         this.category=Customisation;
         this.minArgs=2;
@@ -34,10 +33,10 @@ class GetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
         if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
 
@@ -70,10 +69,10 @@ class SetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
         if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
 
@@ -104,7 +103,7 @@ class SetSubCommand extends SubCommand{
         if((mod&BarMode.End)===BarMode.End){
             userSettings.barEndColor=color;
         }
-        await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+        await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         return cmdArgs.message.reply(Localisation.getTranslation("barcolor.set.output", append, color));
     }
 }
@@ -117,10 +116,10 @@ class ResetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guild.id);
+        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
         if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
             serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         }
         const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
 
@@ -146,7 +145,7 @@ class ResetSubCommand extends SubCommand{
         if((mod&BarMode.End)===BarMode.End){
             userSettings.barEndColor=DEFAULT_USER_SETTING.barEndColor;
         }
-        await UserSettings.set(cmdArgs.guild.id, serverUserSettings);
+        await UserSettings.set(cmdArgs.guildId, serverUserSettings);
         return cmdArgs.message.reply(Localisation.getTranslation("barcolor.reset.output", append));
     }
 }
