@@ -1,16 +1,17 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { getServerDatabase, canvasToMessageAttachment, canvasColor, isHexColor } from "../../utils/Utils";
+import { canvasColor } from "../../utils/CanvasUtils";
+import { canvasToMessageAttachment, isHexColor } from "../../utils/Utils";
 
 class CircleColorCommand extends Command{
     public constructor(){
         super();
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=Customisation;
         this.usage=[new CommandUsage(true, "argument.get", "argument.set", "argument.reset"), new CommandUsage(false, "argument.hexcolor")];
         this.minArgs=1;
@@ -32,12 +33,12 @@ class GetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        let userSettings=await UserSettings.get(cmdArgs.author.id);
+        if(!userSettings){
+            userSettings=DEFAULT_USER_SETTING;
+            await UserSettings.set(cmdArgs.author.id, userSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
+
         cmdArgs.message.reply({content: Localisation.getTranslation("generic.hexcolor", userSettings.specialCircleColor), files: [canvasToMessageAttachment(canvasColor(userSettings.specialCircleColor))]});
     }
 }
@@ -50,12 +51,12 @@ class SetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        let userSettings=await UserSettings.get(cmdArgs.author.id);
+        if(!userSettings){
+            userSettings=DEFAULT_USER_SETTING;
+            await UserSettings.set(cmdArgs.author.id, userSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
+
 
         let color=cmdArgs.args[0].toLowerCase();
         if(color.startsWith("#")){
@@ -63,7 +64,7 @@ class SetSubCommand extends SubCommand{
         }
         if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         userSettings.specialCircleColor=color;
-        await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        await UserSettings.set(cmdArgs.author.id, userSettings);
         cmdArgs.message.reply(Localisation.getTranslation("circlecolor.set.output", color));
     }
 }
@@ -75,14 +76,14 @@ class ResetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs : CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        let userSettings=await UserSettings.get(cmdArgs.author.id);
+        if(!userSettings){
+            userSettings=DEFAULT_USER_SETTING;
+            await UserSettings.set(cmdArgs.author.id, userSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
+
         userSettings.specialCircleColor=DEFAULT_USER_SETTING.specialCircleColor;
-        await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        await UserSettings.set(cmdArgs.author.id, userSettings);
         cmdArgs.message.reply(Localisation.getTranslation("circlecolor.resetset.output"));
     }
 }

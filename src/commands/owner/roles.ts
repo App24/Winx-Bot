@@ -1,13 +1,13 @@
 import { MessageEmbed } from "discord.js";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 
 class RolesCommand extends Command{
     public constructor(){
         super();
         this.access=CommandAccess.BotOwner;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=Owner;
         this.deprecated=true;
     }

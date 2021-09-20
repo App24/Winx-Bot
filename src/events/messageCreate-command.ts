@@ -3,7 +3,7 @@ import { Collection } from "discord.js";
 import { BotUser } from "../BotClient";
 import { OWNER_ID, PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
-import { CommandAccess, CommandArguments, CommandAvailability } from "../structs/Command";
+import { CommandAccess, CommandArguments, CommandAvailable } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
 import { formatString, secondsToTime } from "../utils/FormatUtils";
@@ -23,13 +23,11 @@ export=()=>{
         const command=BotUser.getCommand(commandName);
 
         if(!command){
-            if(isDM(message.channel))
-                return;
+            if(isDM(message.channel)) return;
             const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
             const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, message.guild.id);
             const customCommand=customCommands.find(c=>c.name===commandName);
-            if(!customCommand)
-                return;
+            if(!customCommand) return;
             switch(customCommand.access){
             case CommandAccess.Patreon:{
                 if(isDM(message.channel)||!(await isPatreon(message.author.id, message.guild.id))){
@@ -37,7 +35,7 @@ export=()=>{
                 }
             }break;
             case CommandAccess.Moderators:{
-                if(isDM(message.channel)||!message.member.permissions.has("MANAGE_GUILD")){
+                if(isDM(message.channel)||!isModerator(message.member)){
                     return message.reply(Localisation.getTranslation("command.access.moderator"));
                 }
             }break;
@@ -66,9 +64,9 @@ export=()=>{
 
         if(!isDM(message.channel)&&command.guildIds&&!command.guildIds.includes(message.guild.id)) return;
 
-        if(command.availability===CommandAvailability.Guild&&isDM(message.channel)){
+        if(command.available===CommandAvailable.Guild&&isDM(message.channel)){
             return message.reply(Localisation.getTranslation("command.available.server"));
-        }else if(command.availability===CommandAvailability.DM&&!isDM(message.channel)){
+        }else if(command.available===CommandAvailable.DM&&!isDM(message.channel)){
             return message.reply(Localisation.getTranslation("command.available.dm"));
         }
 

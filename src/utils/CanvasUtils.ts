@@ -1,4 +1,6 @@
-export function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number, clip=false){
+import { createCanvas } from "canvas";
+
+export function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number, width : number, height : number, radius : number, func:"fill"|"stroke"|"clip"="fill"){
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
@@ -10,10 +12,16 @@ export function roundRect(ctx : CanvasRenderingContext2D, x : number, y : number
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
-    if(clip){
+    switch(func){
+    case "clip":
         ctx.clip();
-    }else{
+        break;
+    case "fill":
         ctx.fill();
+        break;
+    case "stroke":
+        ctx.stroke();
+        break;
     }
 }
 
@@ -40,4 +48,20 @@ export function rgbToHsl(r : number, g : number, b : number){
     }
 
     return [ h, s, l ];
+}
+
+/**
+ * Fill a canvas with a specific color
+ * @param color hex string of color
+ * @param width width of the canvas
+ * @param height height of the canvas
+ * @returns A Canvas with the color
+ */
+export function canvasColor(color : string, width=700, height=320){
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle="#"+color;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    return canvas;
 }

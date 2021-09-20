@@ -2,7 +2,7 @@ import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailable } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
@@ -13,7 +13,7 @@ class ServerSettingsCommand extends Command{
     public constructor(){
         super();
         this.access=CommandAccess.Moderators;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=Settings;
     }
 

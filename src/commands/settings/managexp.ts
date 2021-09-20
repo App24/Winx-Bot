@@ -1,7 +1,7 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailable } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase } from "../../utils/Utils";
@@ -13,7 +13,7 @@ class SetXPCommand extends Command{
         super();
         this.category=Settings;
         this.access=CommandAccess.GuildOwner;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
     }
 
     public async onRun(cmdArgs : CommandArguments){

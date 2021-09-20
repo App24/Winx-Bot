@@ -66,7 +66,7 @@ export async function getBotRoleColor(guild : Guild){
 
 //#region Server Channels
 
-export function getGuildByID(id:string) : Promise<Guild>{
+export function getGuildById(id:string) : Promise<Guild>{
     return BotUser.guilds.fetch(id).catch(()=>undefined);
 }
 

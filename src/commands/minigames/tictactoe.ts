@@ -2,7 +2,8 @@ import { Canvas, NodeCanvasRenderingContext2D } from "canvas";
 import { Message, MessageActionRow, MessageButton } from "discord.js";
 import { Localisation } from "../../localisation";
 import { Minigames } from "../../structs/Category";
-import { Command,  CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command,  CommandArguments, CommandAvailable } from "../../structs/Command";
+import { waitForPlayers } from "../../utils/MinigameUtils";
 import { canvasToMessageAttachment } from "../../utils/Utils";
 
 class TicTacToe extends Command{
@@ -16,7 +17,7 @@ class TicTacToe extends Command{
 
     public constructor(){
         super();
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=Minigames;
         this.aliases=["n&c", "ttt"];
 
@@ -27,29 +28,9 @@ class TicTacToe extends Command{
     }
 
     public async onRun(cmdArgs : CommandArguments){
+        waitForPlayers(1, cmdArgs.channel, cmdArgs.author, (members)=>{
+            const currentGame=new TicTacToeData(cmdArgs.author.id, members[0].id, this.nSquares);
 
-        const buttons=new MessageActionRow().addComponents(new MessageButton({customId: "join", style: "PRIMARY", label: Localisation.getTranslation("button.join")}));
-
-        const message=await cmdArgs.channel.send({content: Localisation.getTranslation("generic.waitingplayers", 1), components: [buttons]});
-
-        let deleted=false;
-
-        const collector=message.createMessageComponentCollector({filter: i=>i.user.id!==cmdArgs.author.id, max: 1, time: 10*60*1000});
-
-        collector.on("end", async(collected)=>{
-            if(deleted) return;
-            await message.edit({components: []});
-            if(collected.size===0){
-                message.edit(Localisation.getTranslation("generic.noonejoin"));
-            }
-        });
-
-        collector.on("collect", (interaction)=>{
-            deleted=true;
-            const currentGame=new TicTacToeData(cmdArgs.author.id, interaction.user.id, this.nSquares);
-            
-            message.delete();
-    
             this.playGame(currentGame, currentGame.player1, cmdArgs.message);
         });
     }

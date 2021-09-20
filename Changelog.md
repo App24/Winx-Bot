@@ -1,0 +1,15 @@
+## 3.1.0:
+- Updated Discord.js
+- User Settings are now global
+- getGuildByID -> getGuildById for naming consistency
+- Slight improvements to levels.ts
+- CanvasUtils.ts/roundRect allow for other types of operations
+- Moved canvas related function to CanvasUtils.ts
+- Removed redundant options from BotOptions
+- Added American spelling for customisation to Customisation Category, as well as some customisation commands
+- XPUtils now has a parser class
+- Moved some commands to their own folder to match their categories
+- Increased consistency
+- CommandAvailability -> CommandAvailable
+- Fixed localisation issues
+- MinigameUtils.ts created

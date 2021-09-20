@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getMemberFromMention, getMemberById, getBotRoleColor } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { PatreonInfo } from "../../structs/databaseTypes/PatreonInfo";
 import { SubCommand } from "../../structs/SubCommand";
@@ -18,7 +18,7 @@ class PatreonCommand extends Command{
         this.minArgs=1;
         this.maxArgs=2;
         this.access=CommandAccess.Moderators;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.subCommands=[new AddSubCommand(), new RemoveSubCommand(), new ListSubCommand()];
     }
 

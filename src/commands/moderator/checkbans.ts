@@ -1,7 +1,7 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "../../utils/Utils";
@@ -11,7 +11,7 @@ class CheckBansCommand extends Command{
         super();
         this.category=Moderator;
         this.access=CommandAccess.Moderators;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
     }
 
     public async onRun(cmdArgs : CommandArguments){

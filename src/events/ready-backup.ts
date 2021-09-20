@@ -1,7 +1,7 @@
 import { MessageAttachment } from "discord.js";
 import { BotUser } from "../BotClient";
 import { BACKUP_CHANNEL, DATABASE_FOLDER } from "../Constants";
-import { getGuildByID, GetTextNewsGuildChannelById } from "../utils/GetterUtils";
+import { getGuildById, GetTextNewsGuildChannelById } from "../utils/GetterUtils";
 import { backupDatabases, reportError } from "../utils/Utils";
 import fs from "fs";
 import archiver from "archiver";
@@ -16,7 +16,7 @@ export=()=>{
         midnight.setMinutes(0);
         midnight.setSeconds(0);
         midnight.setMilliseconds(0);
-        backupChannel=await GetTextNewsGuildChannelById(BACKUP_CHANNEL, (await getGuildByID("700663163699462205")));
+        backupChannel=await GetTextNewsGuildChannelById(BACKUP_CHANNEL, (await getGuildById("700663163699462205")));
         setTimeout(()=>{
             backup();
             setInterval(()=>{

@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandUsage, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, getLeaderboardMembers, asyncForEach, blend, canvasToMessageAttachment, hexToRGB } from "../../utils/Utils";
@@ -11,7 +11,7 @@ import { getLevelXP } from "../../utils/XPUtils";
 import { secondsToTime } from "../../utils/FormatUtils";
 import { createCanvas } from "canvas";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { roundRect, rgbToHsl } from "../../utils/CanvasUtils";
 import { CANVAS_FONT } from "../../Constants";
 
@@ -22,7 +22,7 @@ class RankCommand extends Command{
         this.usage=[new CommandUsage(false, "argument.user")];
         this.maxArgs=1;
         this.aliases=["rank", "lb"];
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
     }
 
     public async onRun(cmdArgs : CommandArguments){
@@ -35,7 +35,6 @@ class RankCommand extends Command{
         const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
 
         let _user=cmdArgs.author;
         if(cmdArgs.args.length){
@@ -147,19 +146,18 @@ class RankCommand extends Command{
                 const member:GuildMember=value[2];
                 const levelText=Localisation.getTranslation("leaderboard.output", userLevel.level);
 
-                let userSetting=serverUserSettings.find(u=>u.userId===member.id);
-                if(!userSetting){
-                    serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, member.id));
-                    userSetting=serverUserSettings.find(u=>u.userId===member.id);
-                    await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+                let userSettings=await UserSettings.get(member.id);
+                if(!userSettings){
+                    userSettings=DEFAULT_USER_SETTING;
+                    await UserSettings.set(member.id, userSettings);
                 }
 
                 const filled=userLevel.xp/getLevelXP(userLevel.level);
         
-                const startRGB=hexToRGB(userSetting.barStartColor);
+                const startRGB=hexToRGB(userSettings.barStartColor);
                 const startHsl=rgbToHsl(startRGB.r, startRGB.g, startRGB.b);
         
-                const endRGB=hexToRGB(userSetting.barEndColor);
+                const endRGB=hexToRGB(userSettings.barEndColor);
                 const endHsl=rgbToHsl(endRGB.r, endRGB.g, endRGB.b);
                 
                 ctx.fillText(levelText, 8, textPos);
@@ -170,7 +168,7 @@ class RankCommand extends Command{
                 //Draw Level bar
                 ctx.fillStyle=`hsla(${blend(startHsl[0], endHsl[0], 1-filled)*360}, ${blend(startHsl[1], endHsl[1], 1-filled)*100}%, ${blend(startHsl[2], endHsl[2], 1 - filled)*100}%, 1)`;
                 ctx.save();
-                roundRect(ctx, barPos.x, barPos.y, barWidth, textFontSize, 20, true);
+                roundRect(ctx, barPos.x, barPos.y, barWidth, textFontSize, 20, "clip");
                 ctx.fillRect(barPos.x, barPos.y, barWidth*filled, textFontSize);
                 ctx.restore();
 

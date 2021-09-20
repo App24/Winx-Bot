@@ -2,17 +2,18 @@ import { MessageActionRow, MessageButton } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailability } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments, CommandAvailable } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
+import { canvasColor } from "../../utils/CanvasUtils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
 import { createMessageCollector } from "../../utils/MessageUtils";
-import { canvasColor, canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../utils/Utils";
+import { canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../utils/Utils";
 
 class LeaderboardColor extends Command{
     public constructor(){
         super();
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.access=CommandAccess.GuildOwner;
         this.category=Settings;
         this.aliases=["leaderboardcolour", "rankcolor", "rankcolour"];

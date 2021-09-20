@@ -9,7 +9,7 @@ import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
 import { getBotRoleColor, getMemberById, getUserById } from "./GetterUtils";
 import { PatreonInfo } from "../structs/databaseTypes/PatreonInfo";
 import { Keyv } from "../keyv/keyv-index";
-import { Canvas, createCanvas } from "canvas";
+import { Canvas } from "canvas";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
 
 /**
@@ -148,22 +148,6 @@ export function canvasToMessageAttachment(canvas : Canvas, fileName="color"){
 }
 
 /**
- * Fill a canvas with a specific color
- * @param color hex string of color
- * @param width width of the canvas
- * @param height height of the canvas
- * @returns A Canvas with the color
- */
-export function canvasColor(color : string, width=700, height=320){
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle="#"+color;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    return canvas;
-}
-
-/**
  * Check if a string is a valid hex color
  * @param str String to compare
  * @returns True if it is a hex color, false if it isn't
@@ -265,6 +249,7 @@ export async function reportError(error, message? : Message){
 }
 
 export function isModerator(member : GuildMember){
+    if(!member) return false;
     return member.permissions.has("MANAGE_GUILD");
 }
 

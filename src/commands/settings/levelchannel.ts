@@ -2,7 +2,7 @@ import { BotUser } from "../../BotClient";
 import { GetTextNewsGuildChannelFromMention } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase } from "../../utils/Utils";
@@ -14,7 +14,7 @@ class LevelChannelCommand extends Command{
         super();
         this.category=Settings;
         this.access=CommandAccess.Moderators;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
     }
 
     public async onRun(cmdArgs : CommandArguments){

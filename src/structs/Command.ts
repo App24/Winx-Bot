@@ -13,7 +13,7 @@ export abstract class Command{
     public description : string;
     public usage : CommandUsage[];
 
-    public availability : CommandAvailability;
+    public available : CommandAvailable;
     public access : CommandAccess;
 
     public aliases : string[];
@@ -31,7 +31,7 @@ export abstract class Command{
         this.description=description;
         this.enabled=true;
         this.category=Other;
-        this.availability=CommandAvailability.Both;
+        this.available=CommandAvailable.Both;
         this.minArgs=0;
         this.maxArgs=Number.MAX_SAFE_INTEGER;
         this.subCommands=[];
@@ -68,17 +68,11 @@ export abstract class Command{
         let text="";
         if(this.usage){
             this.usage.forEach((use, index)=>{
-                if(use.required){
-                    text+="<";
-                }else{
-                    text+="[";
-                }
-                text+=use.usages.map((value)=>Localisation.getTranslation(value)).join("/");
-                if(use.required){
-                    text+=">";
-                }else{
-                    text+="]";
-                }
+                const temp=use.usages.map((value)=>Localisation.getTranslation(value)).join("/");
+                if(use.required)
+                    text+=`<${temp}>`;
+                else
+                    text+=`[${temp}]`;
                 if(index<this.usage.length-1)
                     text+=" ";
             });
@@ -87,7 +81,7 @@ export abstract class Command{
     }
 }
 
-export enum CommandAvailability{
+export enum CommandAvailable{
     DM,
     Guild,
     Both
@@ -113,7 +107,7 @@ export class CommandUsage{
 
 export class CommandArguments{
     public readonly message : Message;
-    public args : string[];
+    public readonly args : string[];
     public readonly guild : Guild;
     public readonly guildId : string;
     public readonly channel : TextBasedChannels;

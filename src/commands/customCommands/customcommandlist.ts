@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { OWNER_ID } from "../../Constants";
 import { Localisation } from "../../localisation";
 import { CustomCommandsSettings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { capitalise } from "../../utils/FormatUtils";
@@ -14,7 +14,7 @@ class CustomCommandListCommand extends Command{
     public constructor(){
         super();
         this.access=CommandAccess.Moderators;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=CustomCommandsSettings;
         this.usage=[new CommandUsage(false, "argument.name")];
         this.aliases=["cclist"];

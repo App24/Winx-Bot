@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { OWNER_ID, PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
 import { Info, Category, Categories, CustomCommands } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments, CommandAvailability, CommandAccess } from "../../structs/Command";
+import { Command, CommandUsage, CommandArguments, CommandAvailable, CommandAccess } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getBotRoleColor } from "../../utils/GetterUtils";
@@ -17,14 +17,14 @@ class HelpCommand extends Command{
     }
 
     public async onRun(cmdArgs : CommandArguments) {
-        const available=isDM(cmdArgs.channel)?CommandAvailability.DM:CommandAvailability.Guild;
+        const available=isDM(cmdArgs.channel)?CommandAvailable.DM:CommandAvailable.Guild;
         if(!cmdArgs.args.length){
             const embed=new MessageEmbed();
             embed.setTitle(Localisation.getTranslation("help.title"));
             const categories=[];
             const categoryEmojis:{emoji:string, category:Category}[]=[];
             await asyncForEach(Categories, async(category:Category)=>{
-                if(category.availability===CommandAvailability.Both||(category.availability===available)){
+                if(category.availability===CommandAvailable.Both||(category.availability===available)){
                     if(category.access){
                         switch(category.access){
                         case CommandAccess.Patreon:{
@@ -98,7 +98,7 @@ class HelpCommand extends Command{
         }
         if(!category) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category"));
 
-        if(category.availability!==CommandAvailability.Both&&(category.availability!==available)) return cmdArgs.message.reply("That category is not available here!");
+        if(category.availability!==CommandAvailable.Both&&(category.availability!==available)) return cmdArgs.message.reply("That category is not available here!");
 
         const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
         if(!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
@@ -107,7 +107,7 @@ class HelpCommand extends Command{
 
 }
 
-async function getCommands(category : Category, available : CommandAvailability, channel : TextBasedChannels, guild : Guild, member : GuildMember, author : User){
+async function getCommands(category : Category, available : CommandAvailable, channel : TextBasedChannels, guild : Guild, member : GuildMember, author : User){
     const embed=new MessageEmbed();
     embed.setTitle(`${category.emoji}: ${Localisation.getTranslation(category.name)}`);
     if(category===CustomCommands){
@@ -140,7 +140,7 @@ async function getCommands(category : Category, available : CommandAvailability,
     }else{
         BotUser.Commands.forEach((command, name)=>{
             if(command.category===category){
-                if(command.availability===CommandAvailability.Both||(command.availability===available)){
+                if(command.available===CommandAvailable.Both||(command.available===available)){
                     if((command.guildIds&&command.guildIds.includes(guild.id))||(!command.guildIds||!command.guildIds.length)){
                         switch(command.access){
                         case CommandAccess.Moderators:{

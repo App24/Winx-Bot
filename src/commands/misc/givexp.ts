@@ -1,17 +1,17 @@
 import { NewsChannel, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { Command, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "../../utils/Utils";
-import { addXP, getLevelXP } from "../../utils/XPUtils";
+import { addXP, getLevelXP, XPInfo } from "../../utils/XPUtils";
 
 class GiveXPCommand extends Command{
     constructor(){
         super();
         this.cooldown=60*5;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
     }
 
     public async onRun(cmdArgs : CommandArguments){
@@ -27,7 +27,7 @@ class GiveXPCommand extends Command{
         const rand=Math.random()*100;
         if(rand<=per){
             const xp=Math.floor(getLevelXP(userLevel.level)*0.1);
-            await addXP(xp, cmdArgs.author, cmdArgs.guild, <NewsChannel|TextChannel>cmdArgs.channel);
+            await addXP(new XPInfo(xp, cmdArgs.member, cmdArgs.guild, <NewsChannel|TextChannel>cmdArgs.channel));
             return cmdArgs.message.reply(Localisation.getTranslation("givexp.success.output", xp));
         }
         cmdArgs.message.reply(Localisation.getTranslation("givexp.fail.output"));

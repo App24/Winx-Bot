@@ -3,10 +3,10 @@ import { BotUser } from "../../BotClient";
 import { getUserFromMention, getMemberById, getRoleById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandUsage, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { getServerDatabase, hexToRGB, blend, isHexColor, canvasToMessageAttachment } from "../../utils/Utils";
 import { getCurrentRank, getNextRank } from "../../utils/RankUtils";
 import { capitalise } from "../../utils/FormatUtils";
@@ -19,7 +19,7 @@ class LevelsCommand extends Command{
         super();
         this.maxArgs=1;
         this.usage=[new CommandUsage(false, "argument.user")];
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=Rank;
         this.aliases=["ml", "magiclevels"];
     }
@@ -29,7 +29,6 @@ class LevelsCommand extends Command{
         const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
 
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings:UserSetting[]=await getServerDatabase(UserSettings, cmdArgs.guildId);
 
         levels.sort((a,b)=>{
             if(a.level===b.level){
@@ -40,11 +39,11 @@ class LevelsCommand extends Command{
 
         let user=cmdArgs.author;
         if(cmdArgs.args.length){
-            const temp=await getUserFromMention(cmdArgs.args[0]);
-            if(!temp) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));
-            user=temp;
+            const tempUser=await getUserFromMention(cmdArgs.args[0]);
+            if(!tempUser) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));
+            user=tempUser;
         }
-        if(user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.bot.user", user));
+        if(user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.user.bot"));
 
         const member=await getMemberById(user.id, cmdArgs.guild);
         if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
@@ -54,34 +53,26 @@ class LevelsCommand extends Command{
             await levels.push(new UserLevel(user.id));
             userLevel = levels.find(u=>u.userId===user.id);
         }
-        let userSetting=serverUserSettings.find(u=>u.userId===user.id);
-        if(!userSetting){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, user.id));
-            userSetting=serverUserSettings.find(u=>u.userId===user.id);
-            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        let userSettings=await UserSettings.get(user.id);
+        if(!userSettings){
+            userSettings=DEFAULT_USER_SETTING;
+            await UserSettings.set(user.id, userSettings);
         }
+
         const currentRank=await getCurrentRank(userLevel.level, cmdArgs.guildId);
         const nextRank=await getNextRank(userLevel.level, cmdArgs.guildId);
 
         let currentRankText=Localisation.getTranslation("generic.none");
         if(currentRank){
             const role=await getRoleById(currentRank.roleId, cmdArgs.guild);
-            if(role){
-                currentRankText=capitalise(role.name);
-            }else{
-                currentRankText=Localisation.getTranslation("generic.unknown");
-            }
+            currentRankText=role?capitalise(role.name):Localisation.getTranslation("generic.unknown");
         }
         currentRankText=Localisation.getTranslation("magiclevels.transformation.current", currentRankText);
 
         let nextRankText=Localisation.getTranslation("generic.none");
         if(nextRank){
             const role=await getRoleById(nextRank.roleId, cmdArgs.guild);
-            if(role){
-                nextRankText=capitalise(role.name);
-            }else{
-                nextRankText=Localisation.getTranslation("generic.unknown");
-            }
+            nextRankText=role?capitalise(role.name):Localisation.getTranslation("generic.unknown");
         }
         nextRankText=Localisation.getTranslation("magiclevels.transformation.next", nextRankText);
 
@@ -102,13 +93,13 @@ class LevelsCommand extends Command{
 
         const filled=userLevel.xp/getLevelXP(userLevel.level);
 
-        const startRGB=hexToRGB(userSetting.barStartColor);
+        const startRGB=hexToRGB(userSettings.barStartColor);
         const startHsl=rgbToHsl(startRGB.r, startRGB.g, startRGB.b);
 
-        const endRGB=hexToRGB(userSetting.barEndColor);
+        const endRGB=hexToRGB(userSettings.barEndColor);
         const endHsl=rgbToHsl(endRGB.r, endRGB.g, endRGB.b);
 
-        let rgb=hexToRGB(userSetting.cardColor);
+        let rgb=hexToRGB(userSettings.cardColor);
         let brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
         const textColor = (brightness > 125) ? 'black' : 'white';
 
@@ -143,15 +134,15 @@ class LevelsCommand extends Command{
         const textPos=nameFontSize+((canvas.height-(nameFontSize+(transformationFontSize*(extraInfoAmount*1.75))))/2.0);
 
         //Draw background
-        ctx.fillStyle=`#${userSetting.cardColor}`;
+        ctx.fillStyle=`#${userSettings.cardColor}`;
         roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.width*0.01);
 
         //Draw name and level info
         ctx.font=`${nameFontSize}px ${CANVAS_FONT}`;
-        if(userSetting.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSetting.nameColor)){
+        if(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSettings.nameColor)){
             if(member.roles&&member.roles.color&&member.roles.color.color) ctx.fillStyle=member.roles.color.hexColor;
         }else{
-            ctx.fillStyle=`#${userSetting.nameColor}`;
+            ctx.fillStyle=`#${userSettings.nameColor}`;
         }
         ctx.fillText(name, pfpX+(pfpRadius*2)+pfpX, textPos);
         ctx.fillStyle=textColor;
@@ -165,7 +156,7 @@ class LevelsCommand extends Command{
         //Draw Level bar
         ctx.fillStyle=`hsla(${blend(startHsl[0], endHsl[0], 1-filled)*360}, ${blend(startHsl[1], endHsl[1], 1-filled)*100}%, ${blend(startHsl[2], endHsl[2], 1 - filled)*100}%, 1)`;
         ctx.save();
-        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth, barHeight, 20, true);
+        roundRect(ctx, pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth, barHeight, 20, "clip");
         ctx.fillRect(pfpX+(pfpRadius*2)+pfpX, textPos+10, barWidth*filled, barHeight);
         ctx.restore();
 
@@ -201,7 +192,7 @@ class LevelsCommand extends Command{
         ctx.fillText(nextRankText, pfpX+(pfpRadius*2)+pfpX, textPos+10+barHeight+transformationFontSize+5);
         ctx.fillText(lbPosition, pfpX+(pfpRadius*2)+pfpX, textPos+10+barHeight+(transformationFontSize+5)*2);
 
-        drawSpecialCircle(ctx, pfpX, pfpY, pfpRadius, `#${userSetting.specialCircleColor||DEFAULT_USER_SETTING.specialCircleColor}`);
+        drawSpecialCircle(ctx, pfpX, pfpY, pfpRadius, `#${userSettings.specialCircleColor||DEFAULT_USER_SETTING.specialCircleColor}`);
 
         //Draw Profile Picture
         ctx.save();

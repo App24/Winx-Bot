@@ -2,7 +2,7 @@ import { BotUser } from "../../BotClient";
 import { getRoleById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandUsage, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { getServerDatabase } from "../../utils/Utils";
@@ -16,7 +16,7 @@ class TestLevelCommand extends Command{
         this.minArgs=1;
         this.usage=[new CommandUsage(true, "argument.level")];
         this.access=CommandAccess.Moderators;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
     }
 
     public async onRun(cmdArgs : CommandArguments){
@@ -32,7 +32,7 @@ class TestLevelCommand extends Command{
                 rankDetails={rankLevel: rankLevel, rank: rank};
             }
         }
-        showLevelMessage(true, <BaseGuildTextChannel>cmdArgs.channel, cmdArgs.author, level, rankDetails);
+        showLevelMessage(true, <BaseGuildTextChannel>cmdArgs.channel, cmdArgs.member, level, rankDetails);
     }
 }
 

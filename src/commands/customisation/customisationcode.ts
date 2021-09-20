@@ -1,18 +1,18 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAvailability, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserSetting, copyUserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { isHexColor, getServerDatabase } from "../../utils/Utils";
+import { isHexColor } from "../../utils/Utils";
 
 class CustomisationCodeCommand extends Command{
     public constructor(){
         super();
         this.category=Customisation;
-        this.availability=CommandAvailability.Guild;
-        this.aliases=["customcode"];
+        this.available=CommandAvailable.Guild;
+        this.aliases=["customcode", "customizationcode"];
         this.minArgs=1;
         this.usage=[new CommandUsage(true, "argument.get", "argument.set"), new CommandUsage(false, "argument.code")];
         this.subCommands=[new SetSubCommand(), new GetSubCommand()];
@@ -52,12 +52,12 @@ class SetSubCommand extends SubCommand{
         if(!isHexColor(barEndColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
         
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings=await getServerDatabase<UserSetting[]>(UserSettings, cmdArgs.guildId);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        let userSettings=await UserSettings.get(cmdArgs.author.id);
+        if(!userSettings){
+            userSettings=DEFAULT_USER_SETTING;
+            await UserSettings.set(cmdArgs.author.id, userSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
+
 
         userSettings.nameColor=nameEnabled?nameColor:DEFAULT_USER_SETTING.nameColor;
         userSettings.cardColor=cardColor;
@@ -66,7 +66,7 @@ class SetSubCommand extends SubCommand{
         userSettings.barEndColor=barEndColor;
 
         cmdArgs.message.reply("Updated Customisation Settings!");
-        await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        await UserSettings.set(cmdArgs.author.id, userSettings);
     }
 }
 
@@ -77,12 +77,12 @@ class GetSubCommand extends SubCommand{
 
     public async onRun(cmdArgs:CommandArguments){
         const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        const serverUserSettings=await getServerDatabase<UserSetting[]>(UserSettings, cmdArgs.guildId);
-        if(!serverUserSettings.find(u=>u.userId===cmdArgs.author.id)){
-            serverUserSettings.push(copyUserSetting(DEFAULT_USER_SETTING, cmdArgs.author.id));
-            await UserSettings.set(cmdArgs.guildId, serverUserSettings);
+        let userSettings=await UserSettings.get(cmdArgs.author.id);
+        if(!userSettings){
+            userSettings=DEFAULT_USER_SETTING;
+            await UserSettings.set(cmdArgs.author.id, userSettings);
         }
-        const userSettings=serverUserSettings.find(u=>u.userId===cmdArgs.author.id);
+
         let code="";
         code+=(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor?"??????":userSettings.nameColor)+"|";
         code+=userSettings.cardColor+"|";

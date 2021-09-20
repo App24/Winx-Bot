@@ -11,8 +11,6 @@ import { Command } from "./structs/Command";
 interface BotOptions{
     clientOptions? : ClientOptions;
     logLoading : 'none' | 'simplified' | 'complex' | 'all';
-    loadEvents : boolean;
-    loadCommands : boolean;
 }
 
 class BotClient extends Client{
@@ -31,18 +29,14 @@ class BotClient extends Client{
         this.loadDatabases();
 
         (async()=>{
-            if(this.botOptions.loadCommands){
-                await this.loadCommands();
-            }
-            if(this.botOptions.loadEvents){
-                await this.loadEvents();
-            }
+            await this.loadCommands();
+            await this.loadEvents();
         })();
     }
     
     public loadDatabases(){
         if(!fs.existsSync(DATABASE_FOLDER)){
-            fs.mkdirSync(DATABASE_FOLDER);
+            fs.mkdirSync(DATABASE_FOLDER, {recursive: true});
         }
 
         const values = Object.values(DatabaseType);
@@ -144,7 +138,5 @@ class BotClient extends Client{
 const intents=new Intents(Intents.FLAGS.DIRECT_MESSAGES|Intents.FLAGS.DIRECT_MESSAGE_REACTIONS|Intents.FLAGS.DIRECT_MESSAGE_TYPING|Intents.FLAGS.GUILDS|Intents.FLAGS.GUILD_BANS|Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS|Intents.FLAGS.GUILD_INTEGRATIONS|Intents.FLAGS.GUILD_INVITES|Intents.FLAGS.GUILD_MEMBERS|Intents.FLAGS.GUILD_MESSAGES|Intents.FLAGS.GUILD_MESSAGE_REACTIONS|Intents.FLAGS.GUILD_MESSAGE_TYPING|Intents.FLAGS.GUILD_VOICE_STATES|Intents.FLAGS.GUILD_WEBHOOKS);
 export const BotUser=new BotClient({
     clientOptions: {intents: intents, allowedMentions: {repliedUser: false}, partials: ["CHANNEL"]},
-    logLoading: 'simplified',
-    loadCommands: true,
-    loadEvents: true
+    logLoading: 'simplified'
 });

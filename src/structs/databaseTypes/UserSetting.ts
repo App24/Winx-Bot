@@ -1,21 +1,9 @@
 export class UserSetting{
-    public userId : string;
     public barStartColor : string;
     public barEndColor : string;
     public cardColor : string;
     public nameColor : string;
     public specialCircleColor : string;
-}
-
-export function copyUserSetting(userSetting : UserSetting, userId : string){
-    const newUserSettings=new UserSetting();
-    newUserSettings.userId=userId;
-    newUserSettings.barStartColor=userSetting.barStartColor;
-    newUserSettings.barEndColor=userSetting.barEndColor;
-    newUserSettings.cardColor=userSetting.cardColor;
-    newUserSettings.nameColor=userSetting.nameColor;
-    newUserSettings.specialCircleColor=userSetting.specialCircleColor;
-    return newUserSettings;
 }
 
 const DEFAULT_USER_SETTING=new UserSetting();

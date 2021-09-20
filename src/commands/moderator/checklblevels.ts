@@ -4,19 +4,19 @@ import { PREFIX } from "../../Constants";
 import { GetTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, getLeaderboardMembers, asyncForEach, getAllMessages } from "../../utils/Utils";
-import { addXP } from "../../utils/XPUtils";
+import { addXP, XPInfo } from "../../utils/XPUtils";
 import { secondsToTime } from "../../utils/FormatUtils";
 
 class CheckLBLevelsCommand extends Command{
     public constructor(){
         super();
         this.access=CommandAccess.GuildOwner;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=Moderator;
     }
 
@@ -70,7 +70,7 @@ class CheckLBLevelsCommand extends Command{
                         totalXp+=xp;
                     }
                 });
-                await addXP(totalXp, topLevel.member.user, cmdArgs.guild, <BaseGuildTextChannel>cmdArgs.channel, false);
+                await addXP(new XPInfo(totalXp, topLevel.member, cmdArgs.guild, <BaseGuildTextChannel>cmdArgs.channel), false);
             });
             const timeDifferent=new Date().getTime()-startTime;
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index+1, NTChannels.length, secondsToTime(timeDifferent/1000)));

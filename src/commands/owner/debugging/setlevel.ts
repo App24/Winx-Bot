@@ -2,7 +2,7 @@ import { BotUser } from "../../../BotClient";
 import { getMemberFromMention } from "../../../utils/GetterUtils";
 import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess, CommandAvailability, CommandUsage, CommandArguments } from "../../../structs/Command";
+import { Command, CommandAccess, CommandAvailable, CommandUsage, CommandArguments } from "../../../structs/Command";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "../../../utils/Utils";
@@ -13,7 +13,7 @@ class SetLevelCommand extends Command{
         super();
         this.category=Owner;
         this.access=CommandAccess.BotOwner;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.usage=[new CommandUsage(true, "argument.user"), new CommandUsage(true, "argument.level"), new CommandUsage(false, "argument.xp")];
         this.minArgs=2;
         this.maxArgs=3;
@@ -22,6 +22,7 @@ class SetLevelCommand extends Command{
     public async onRun(cmdArgs : CommandArguments){
         const member=await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
         if(!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
+        if(member.user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.user.bot"));
         const level=parseInt(cmdArgs.args[1]);
         if(isNaN(level)||level<0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
         const Levels=BotUser.getDatabase(DatabaseType.Levels);

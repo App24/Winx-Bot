@@ -1,7 +1,7 @@
 import { TextChannel, MessageEmbed, MessageActionRow, MessageButton, BaseGuildTextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { SUGGESTION_CHANNEL, OWNER_ID } from "../../Constants";
-import { getBotRoleColor, getGuildByID, GetTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
+import { getBotRoleColor, getGuildById, GetTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -27,7 +27,7 @@ class SuggestionCommand extends Command{
             if(!isDM(cmdArgs.channel)&&channeld["guild"]===cmdArgs.guildId){
                 channel=await GetTextBasedGuildGuildChannelById(SUGGESTION_CHANNEL, cmdArgs.guild);
             }else{
-                channel=new TextChannel(await getGuildByID(channeld["guild"]), channeld);
+                channel=new TextChannel(await getGuildById(channeld["guild"]), channeld);
             }
             const user=cmdArgs.author;
             const request=cmdArgs.args.join(" ");

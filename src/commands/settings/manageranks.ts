@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { getRoleFromMention, getBotRoleColor } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandAvailability, CommandAccess, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailable, CommandAccess, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { getServerDatabase, asyncForEach } from "../../utils/Utils";
@@ -14,7 +14,7 @@ class SetRankCommand extends Command{
     public constructor(){
         super();
         this.category=Settings;
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.access=CommandAccess.Moderators;
     }
 

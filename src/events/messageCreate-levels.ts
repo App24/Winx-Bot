@@ -4,7 +4,7 @@ import { PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/ServerInfo";
 import { getServerDatabase, isDM } from "../utils/Utils";
-import { addXP } from "../utils/XPUtils";
+import { addXP, XPInfo } from "../utils/XPUtils";
 
 const levelCooldowns = new Collection<string, Collection<string, number>>();
 
@@ -71,7 +71,7 @@ export=()=>{
         }, 60*1000);
 
         const xp=Math.ceil((Math.min(message.content.length, serverInfo.maxMessageLength)/serverInfo.maxMessageLength)*serverInfo.maxXpPerMessage);
-        await addXP(xp, message.author, message.guild, <BaseGuildTextChannel>message.channel);
+        await addXP(new XPInfo(xp, message.member, message.guild, <BaseGuildTextChannel>message.channel));
 
     });
 }

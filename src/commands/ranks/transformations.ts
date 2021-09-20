@@ -2,7 +2,7 @@ import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandAvailability, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { asyncForEach, createMessageEmbed } from "../../utils/Utils";
@@ -10,7 +10,7 @@ import { asyncForEach, createMessageEmbed } from "../../utils/Utils";
 class RanksCommand extends Command{
     public constructor(){
         super();
-        this.availability=CommandAvailability.Guild;
+        this.available=CommandAvailable.Guild;
         this.category=Rank;
         this.aliases=["ranks"];
     }
