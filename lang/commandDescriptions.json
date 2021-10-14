@@ -45,5 +45,6 @@
     "leaderboardcolor.command.description": "Manage the leaderboard colors!",
     "ramusage.command.description": "Get RAM usage by the bot!",
 
-    "tictactoe.command.description": "Play Tic Tac Toe with another member of the server!"
+    "tictactoe.command.description": "Play Tic Tac Toe with another member in the server!",
+    "cah.command.description": "Play Cards Against Winx with members in the server!"
 }

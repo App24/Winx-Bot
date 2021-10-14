@@ -6,6 +6,7 @@ import { createGenericButtons } from "../../utils/MessageButtonUtils";
 import fs from 'fs';
 import readline from 'readline';
 import { capitalise } from "../../utils/FormatUtils";
+import { ButtonInteraction } from "discord.js";
 
 export abstract class RandomLineCommand extends Command{
     private name : string;
@@ -42,7 +43,7 @@ export abstract class RandomLineCommand extends Command{
 
         const collector=await createGenericButtons(cmdArgs.message, this.getLine(data), {time: 1000*60*5}, {customId: "reroll", style: "PRIMARY", emoji: "♻️"});
 
-        collector.on("collect", async(interaction)=>{
+        collector.on("collect", async(interaction:ButtonInteraction)=>{
             if(interaction.customId==="reroll"){
                 await interaction.update(this.getLine(data));
             }

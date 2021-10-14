@@ -154,6 +154,9 @@
     "ramusage.output": "The bot is using {0} {1}!",
 
     "tictactoe.turn": "<@{0}>, it is your turn!",
-    "tictactoe.win": "<@{0}> wins!",
-    "tictactoe.draw": "Draw!"
+    "tictactoe.error.alreadyplaced": "A player has already played in this position!",
+
+    "rps.play": "Play\n:rock: - Rock\n:scroll: - Paper\n:scissors: - Scissors",
+    "rps.played": "Please wait for the other player!",
+    "rps.alreadyplayed": "You have already played!"
 }

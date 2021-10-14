@@ -1,4 +1,4 @@
-export const VERSION="3.1.0";
+export const VERSION="3.1.1";
 
 export const CANVAS_FONT="Comic Sans MS";
 

@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { ButtonInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID } from "../../Constants";
 import { getBotRoleColor, getUserById } from "../../utils/GetterUtils";
@@ -100,7 +100,7 @@ class CompleteSubCommand extends SubCommand{
         cmdArgs.message.reply({embeds: [embed], components: [row]}).then(async(msg)=>{
             const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===OWNER_ID, max: 1});
 
-            collector.on("collect", async(interaction)=>{
+            collector.on("collect", async(interaction:ButtonInteraction)=>{
                 await interaction.update({components: []});
                 if(interaction.customId==="complete"){
                     const embed=msg.embeds[0];
@@ -143,7 +143,7 @@ class RejectSubCommand extends SubCommand{
         cmdArgs.message.reply({embeds: [embed], components: [row]}).then(async(msg)=>{
             const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===OWNER_ID, max: 1});
 
-            collector.on("collect", async(interaction)=>{
+            collector.on("collect", async(interaction:ButtonInteraction)=>{
                 await interaction.update({components: []});
                 if(interaction.customId==="reject"){
                     const embed=msg.embeds[0];

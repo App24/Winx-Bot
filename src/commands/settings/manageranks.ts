@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { ButtonInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { getRoleFromMention, getBotRoleColor } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
@@ -29,7 +29,7 @@ class SetRankCommand extends Command{
             {customId: "list", style: "PRIMARY", label: Localisation.getTranslation("button.list")}
         );
 
-        collector.on("collect", async(interaction)=>{
+        collector.on("collect", async(interaction:ButtonInteraction)=>{
             switch(interaction.customId){
             case "list":{
                 if(!ranks||!ranks.length) return <any>interaction.update(Localisation.getTranslation("error.empty.ranks"));

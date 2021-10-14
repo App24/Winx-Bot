@@ -5,4 +5,3 @@ node_modules/
 dist/
 src/commands/guildSpecific
 src/events/guildSpecific
-lines/

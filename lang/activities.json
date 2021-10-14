@@ -2,12 +2,15 @@
     "activity.basic.version": "Version {0}",
     "activity.basic.help": "{0}help for command list!",
     "activity.basic.suggestion": "{0}suggest your suggestions!",
-    "activity.users": "{0} users are earning their transformations!",
+    "activity.users": "{0} users earning their transformations!",
     "activity.basic.contact": "{0}contactcreator to contact the creator of the bot!",
     "activity.event.valentine": "💘🏹❤",
     "activity.event.pride": "Happy Pride Month 🌈",
     "activity.event.halloween": "Spooky Skeletons 🦴🦇",
     "activity.event.christmas": "Merry Holidays/Christmas 🎁🎅",
     "activity.event.newyear": "Happy New Year 🎉",
-    "activity.event.birthday": "Happy Birthday {0} 🥳🎉"
+    "activity.event.birthday": "Happy Birthday {0} 🥳🎉",
+    "activity.event.peaceday": "Happy Peace Day! 🕊🕊",
+    "activity.event.childrenday": "Happy Children's Day! 🧒",
+    "activity.event.daydead": "Happy Day Of The Dead! 💀💀"
 }

@@ -26,5 +26,6 @@
     "button.background": "Background",
     "button.highlight": "Highlight",
 
-    "button.join": "Join"
+    "button.join": "Join",
+    "button.start": "Start"
 }

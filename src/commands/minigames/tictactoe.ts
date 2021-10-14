@@ -1,5 +1,5 @@
 import { Canvas, NodeCanvasRenderingContext2D } from "canvas";
-import { Message, MessageActionRow, MessageButton } from "discord.js";
+import { ButtonInteraction, Message, MessageActionRow, MessageButton } from "discord.js";
 import { Localisation } from "../../localisation";
 import { Minigames } from "../../structs/Category";
 import { Command,  CommandArguments, CommandAvailable } from "../../structs/Command";
@@ -28,8 +28,8 @@ class TicTacToe extends Command{
     }
 
     public async onRun(cmdArgs : CommandArguments){
-        waitForPlayers(1, cmdArgs.channel, cmdArgs.author, (members)=>{
-            const currentGame=new TicTacToeData(cmdArgs.author.id, members[0].id, this.nSquares);
+        waitForPlayers(1, 1, "Tic Tac Toe", cmdArgs.guild, cmdArgs.channel, cmdArgs.member, (members)=>{
+            const currentGame=new TicTacToeData(members[0].id, members[1].id, this.nSquares);
 
             this.playGame(currentGame, currentGame.player1, cmdArgs.message);
         });
@@ -44,13 +44,14 @@ class TicTacToe extends Command{
 
         const collector=msg.createMessageComponentCollector({filter: i=>i.user.id===currentPlayer, time: 5*60*1000});
 
-        collector.on("collect", async(interaction)=>{
+        collector.on("collect", async(interaction:ButtonInteraction)=>{
             const data:any[]=interaction.customId.split("_");
             const x=Number.parseInt(data[0]);
             const y=Number.parseInt(data[1]);
             const val=data[2];
 
             if(val!=TicTacToeValue.Empty){
+                await interaction.reply({content: Localisation.getTranslation("tictactoe.error.alreadyplaced"), ephemeral: true});
                 return;
             }
 
@@ -68,7 +69,7 @@ class TicTacToe extends Command{
                 if(currentGame.positions[i*this.nSquares+x]!==playerVal)
                     break;
                 if(i===this.nSquares-1){
-                    message.reply({content: Localisation.getTranslation("tictactoe.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
+                    message.reply({content: Localisation.getTranslation("minigame.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
                     return;
                 }
             }
@@ -77,7 +78,7 @@ class TicTacToe extends Command{
                 if(currentGame.positions[y*this.nSquares+i]!==playerVal)
                     break;
                 if(i===this.nSquares-1){
-                    message.reply({content: Localisation.getTranslation("tictactoe.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
+                    message.reply({content: Localisation.getTranslation("minigame.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
                     return;
                 }
             }
@@ -87,7 +88,7 @@ class TicTacToe extends Command{
                     if(currentGame.positions[i*this.nSquares+i]!==playerVal)
                         break;
                     if(i===this.nSquares-1){
-                        message.reply({content: Localisation.getTranslation("tictactoe.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
+                        message.reply({content: Localisation.getTranslation("minigame.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
                         return;
                     }
                 }
@@ -98,7 +99,7 @@ class TicTacToe extends Command{
                     if(currentGame.positions[((this.nSquares-1)-i)*this.nSquares+i]!==playerVal)
                         break;
                     if(i===this.nSquares-1){
-                        message.reply({content: Localisation.getTranslation("tictactoe.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
+                        message.reply({content: Localisation.getTranslation("minigame.win", currentPlayer), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
                         return;
                     }
                 }
@@ -107,7 +108,7 @@ class TicTacToe extends Command{
             if(currentGame.positions.filter((val)=>val===TicTacToeValue.Empty).length>0)
                 this.playGame(currentGame, currentPlayer===currentGame.player1?currentGame.player2:currentGame.player1, message);
             else
-                message.reply({content: Localisation.getTranslation("tictactoe.draw"), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
+                message.reply({content: Localisation.getTranslation("minigame.draw"), files:[canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: {users: [currentGame.player1, currentGame.player2]}});
         });
     }
 

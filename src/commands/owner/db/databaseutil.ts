@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
+import { ButtonInteraction, MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
@@ -26,7 +26,7 @@ class DatabaseUtilCommand extends Command{
             {customId: "downloaddatabase", style: "PRIMARY", label: Localisation.getTranslation("button.downloaddatabase")}
         );
 
-        collector.on("collect", async(interaction)=>{
+        collector.on("collect", async(interaction:ButtonInteraction)=>{
             switch(interaction.customId){
             case "backup":{
                 backupDatabases();

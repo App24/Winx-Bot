@@ -13,5 +13,8 @@
     "generic.whattoremove": "What would you like to remove?",
 
     "generic.waitingplayers": "Waiting for {0} more player(s) to join!",
-    "generic.noonejoin": "No one joined :("
+    "generic.noonejoin": "No one joined :(",
+
+    "minigame.win": "<@{0}> wins!",
+    "minigame.draw": "Draw!"
 }

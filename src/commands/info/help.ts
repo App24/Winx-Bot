@@ -1,4 +1,4 @@
-import { MessageEmbed, Guild, GuildMember, User, TextBasedChannels, MessageActionRow, MessageButton } from "discord.js";
+import { MessageEmbed, Guild, GuildMember, User, TextBasedChannels, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID, PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
@@ -78,12 +78,13 @@ class HelpCommand extends Command{
                     msg.edit({components: []});
                 });
 
-                collector.on("collect", async(interaction)=>{
-                    const category=categoryEmojis.find(emoji=>emoji.category.name===interaction.customId).category;
-                    if(category){
-                        const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
-                        if(!embed.fields.length) return <any> interaction.update({content: Localisation.getTranslation("error.invalid.category.commands"), components: []});
-                        return interaction.update({embeds: [embed], components: []});
+                collector.on("collect", async function (interaction: ButtonInteraction) {
+                    const category = categoryEmojis.find(emoji => emoji.category.name === interaction.customId).category;
+                    if (category) {
+                        const embed = await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
+                        if (!embed.fields.length)
+                            return <any>interaction.update({ content: Localisation.getTranslation("error.invalid.category.commands"), components: [] });
+                        return interaction.update({ embeds: [embed], components: [] });
                     }
                 });
             });

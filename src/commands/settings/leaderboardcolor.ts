@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton } from "discord.js";
+import { ButtonInteraction, MessageActionRow, MessageButton } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
@@ -29,7 +29,7 @@ class LeaderboardColor extends Command{
             {customId: "reset", style: "PRIMARY", label:Localisation.getTranslation("button.reset")}
         );
 
-        collector.on("collect", async(interaction)=>{
+        collector.on("collect", async(interaction:ButtonInteraction)=>{
             switch(interaction.customId){
             case "get":{
                 const row=new MessageActionRow().addComponents(

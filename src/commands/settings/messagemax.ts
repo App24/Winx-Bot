@@ -7,6 +7,7 @@ import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/Ser
 import { getServerDatabase } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
 import { createMessageCollector } from "../../utils/MessageUtils";
+import { ButtonInteraction } from "discord.js";
 
 class SetMaxMessageCommand extends Command{
     public constructor(){
@@ -25,7 +26,7 @@ class SetMaxMessageCommand extends Command{
             {customId: "get", style: "PRIMARY", label: Localisation.getTranslation("button.get")}
         );
 
-        collector.on("collect", async(interaction)=>{
+        collector.on("collect", async(interaction:ButtonInteraction)=>{
             await interaction.update({components: []});
             if(interaction.customId==="set"){
                 await interaction.editReply(Localisation.getTranslation("argument.reply.amount"));

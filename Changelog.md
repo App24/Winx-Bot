@@ -1,3 +1,12 @@
+## 3.1.1:
+- MinigameUtils.ts updated to allow for a minimum amount of players
+- Updated MinigameUtils.ts to give feedback to when clicking buttons
+- Updated tictactoe.ts to give feedback to the user they can't play where a player has already played
+- Added more activities
+- Reintroduction of lines folder
+- Updated Discord.js to 13.2.0
+- Fixed crash when trying to get User
+
 ## 3.1.0:
 - Updated Discord.js
 - User Settings are now global

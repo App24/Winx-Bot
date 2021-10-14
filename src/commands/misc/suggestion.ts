@@ -1,4 +1,4 @@
-import { TextChannel, MessageEmbed, MessageActionRow, MessageButton, BaseGuildTextChannel } from "discord.js";
+import { MessageEmbed, MessageActionRow, MessageButton, BaseGuildTextChannel, ButtonInteraction } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { SUGGESTION_CHANNEL, OWNER_ID } from "../../Constants";
 import { getBotRoleColor, getGuildById, GetTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
@@ -27,7 +27,7 @@ class SuggestionCommand extends Command{
             if(!isDM(cmdArgs.channel)&&channeld["guild"]===cmdArgs.guildId){
                 channel=await GetTextBasedGuildGuildChannelById(SUGGESTION_CHANNEL, cmdArgs.guild);
             }else{
-                channel=new TextChannel(await getGuildById(channeld["guild"]), channeld);
+                channel=await GetTextBasedGuildGuildChannelById(channeld, await getGuildById(channeld["guild"]));
             }
             const user=cmdArgs.author;
             const request=cmdArgs.args.join(" ");
@@ -48,7 +48,7 @@ class SuggestionCommand extends Command{
             channel.send({embeds: [embed], components: [row]}).then(async(msg)=>{
                 const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===OWNER_ID, max: 1});
 
-                collector.on("collect", async(interaction)=>{
+                collector.on("collect", async(interaction:ButtonInteraction)=>{
                     if(interaction.customId==="accept"){
                         const embed=msg.embeds[0];
                         embed.setTitle(Localisation.getTranslation("generic.accepted"));

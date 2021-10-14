@@ -3,9 +3,12 @@ import { VERSION, PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
 import { BasicActivity } from "../structs/activities/BasicActivity";
 import { BirthdayActivity } from "../structs/activities/events/BirthdayActivity";
+import { ChildrenDayActivity } from "../structs/activities/events/ChildrenDayActivity";
 import { ChristmasActivity } from "../structs/activities/events/ChristmasActivity";
+import { DayDeadActivity } from "../structs/activities/events/DayDeadActivity";
 import { HalloweenActivity } from "../structs/activities/events/HalloweenActivity";
 import { NewYearActivity } from "../structs/activities/events/NewYearActivity";
+import { PeaceDayActivity } from "../structs/activities/events/PeaceDayActivity";
 import { PrideMonthActivity } from "../structs/activities/events/PrideMonthActivity";
 import { StValentineActivity } from "../structs/activities/events/StValentineActivity";
 import { UsersActivity } from "../structs/activities/UsersActivity";
@@ -22,6 +25,9 @@ const activities=[
     new HalloweenActivity(),
     new ChristmasActivity(),
     new NewYearActivity(),
+    new PeaceDayActivity(),
+    new DayDeadActivity(),
+    new ChildrenDayActivity(),
     //#region Birthdays
     new BirthdayActivity(new Date(2, 11, 10), "Bloom"),
     new BirthdayActivity(new Date(2, 5, 15), "Aisha"),

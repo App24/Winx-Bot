@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { ButtonInteraction, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { getBotRoleColor, GetTextNewsGuildChannelFromMention } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
@@ -29,7 +29,7 @@ class ExcludeChannelCommand extends Command{
             {customId: "list", style: "PRIMARY", label: Localisation.getTranslation("button.list")}
         );
 
-        collector.on("collect", async(interaction)=>{
+        collector.on("collect", async(interaction:ButtonInteraction)=>{
             await interaction.update({components: []});
             if(interaction.customId==="set"){
                 await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));

@@ -201,7 +201,7 @@ class LevelsCommand extends Command{
         ctx.closePath();
         ctx.clip();
         
-        const avatar=await loadImage(member.user.displayAvatarURL({format: 'png'}));
+        const avatar=await loadImage(member.displayAvatarURL({format: 'png'}));
         ctx.drawImage(avatar, pfpX+borderThickness, pfpY+borderThickness, newpfpRadius*2, newpfpRadius*2);
         ctx.restore();
 

@@ -1,34 +1,66 @@
-import { GuildMember, MessageActionRow, MessageButton, TextBasedChannels, User } from "discord.js";
+import { ButtonInteraction, Guild, GuildMember, MessageActionRow, MessageButton, TextBasedChannels } from "discord.js";
 import { Localisation } from "../localisation";
+import { createMessageEmbed } from "./Utils";
 
-export async function waitForPlayers(maxNumber : number, channel : TextBasedChannels, author : User, startGame:(members:GuildMember[])=>void){
+export async function waitForPlayers(maxPlayers : number, minPlayers : number, title:string, guild : Guild, channel : TextBasedChannels, author : GuildMember, startGame:(members:GuildMember[])=>void){
     const buttons=new MessageActionRow().addComponents(new MessageButton({customId: "join", style: "PRIMARY", label: Localisation.getTranslation("button.join")}));
 
-    let remainingPlayers=maxNumber;
+    let remainingPlayers=maxPlayers;
 
-    const message=await channel.send({content: Localisation.getTranslation("generic.waitingplayers", remainingPlayers), components: [buttons]});
+    const embed=await createMessageEmbed({description: Localisation.getTranslation("generic.waitingplayers", remainingPlayers), title}, guild);
+
+    const message=await channel.send({embeds: [embed], components: [buttons]});
 
     let deleted=false;
 
-    const collector=message.createMessageComponentCollector({filter: i=>i.user.id!==author.id, max: maxNumber, time: 10*60*1000});
+    const collector=message.createMessageComponentCollector({filter: ()=>true, time: 10*60*1000});
 
     const membersJoined=[];
 
-    collector.on("end", async(collected)=>{
+    membersJoined.push(author);
+
+    collector.on("end", async()=>{
         if(deleted) return;
         await message.edit({components: []});
-        if(collected.size===0){
-            message.edit(Localisation.getTranslation("generic.noonejoin"));
+        if(!membersJoined.length){
+            embed.setDescription(Localisation.getTranslation("generic.noonejoin"));
+            message.edit({embeds: [embed]});
         }
     });
 
-    collector.on("collect", (interaction)=>{
-        remainingPlayers--;
-        membersJoined.push(interaction.member);
-        if(remainingPlayers<=0){
+    collector.on("collect", async(interaction:ButtonInteraction)=>{
+        if(interaction.customId==="join"){
+            if(interaction.user.id===author.id){ 
+                await interaction.reply({content: Localisation.getTranslation("error.minigame.author"), ephemeral: true});
+                return;
+            }
+            if(membersJoined.find((member)=>member.id===interaction.user.id)){ 
+                await interaction.reply({content: Localisation.getTranslation("error.minigame.alreadyjoin"), ephemeral: true});
+                return;
+            }
+            remainingPlayers--;
+            membersJoined.push(interaction.member);
+            if(remainingPlayers<=0){
+                deleted=true;
+                message.delete();
+                startGame(membersJoined);
+            }else{
+                const newButtons=buttons;
+                if(remainingPlayers<=minPlayers){
+                    newButtons.addComponents(new MessageButton({customId: "start", style: "PRIMARY", label: Localisation.getTranslation("button.start")}));
+                }
+                embed.setDescription(Localisation.getTranslation("generic.waitingplayers", remainingPlayers));
+                await interaction.update({embeds: [embed], components: [newButtons]});
+            }
+        }else if(interaction.customId==="start"){
+            if(interaction.user.id!==author.id){ 
+                await interaction.reply({content: Localisation.getTranslation("error.minigame.notauthor"), ephemeral: true});
+                return;
+            }
             deleted=true;
             message.delete();
             startGame(membersJoined);
+            collector.emit("end");
         }
     });
 }
