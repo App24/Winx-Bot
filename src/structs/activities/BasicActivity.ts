@@ -1,14 +1,14 @@
 import { Activity } from "./Activity";
 
-export class BasicActivity extends Activity{
-    private activity : string;
+export class BasicActivity extends Activity {
+    private activity: string;
 
-    public constructor(activity : string){
+    public constructor(activity: string) {
         super();
-        this.activity=activity;
+        this.activity = activity;
     }
 
-    public getActivity() : string{
+    public getActivity(): string {
         return this.activity;
     }
 }

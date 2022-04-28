@@ -1,7 +1,7 @@
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 
-export=()=>{
+export = () => {
     BotUser.on("interactionCreate", async (interaction) => {
         if (!interaction.isCommand()) return;
 

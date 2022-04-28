@@ -42,7 +42,10 @@
     "argument.reply.amount": "Reply to this message with the amount",
     "argument.reply.channel": "Reply to this message with the channel",
     "argument.reply.level": "Reply to this message with the level",
+    "argument.reply.image": "Reply to this message with the image",
     "argument.reply.gif": "Reply to this message with the GIF",
     "argument.reply.role": "Reply to this message with the role",
-    "argument.reply.hexcolor": "Reply to this message with the hex color"
+    "argument.reply.hexcolor": "Reply to this message with the hex color",
+    "argument.reply.customname": "Reply to this message with the custom name",
+    "argument.reply.customnameuser": "Reply to this message with the user and label"
 }

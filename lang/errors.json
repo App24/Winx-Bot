@@ -18,7 +18,11 @@
     "error.invalid.xp": "That is not a valid amount of xp!",
     "error.invalid.errorCode": "That is an invalid error code!",
     "error.invalid.suggestionId": "That is an invalid suggestion ID!",
-    "error.invalid.number": "That is an invalid number",
+    "error.invalid.number": "That is an invalid number!",
+
+    "error.invalid.image": "That is not a valid image!",
+
+    "error.not.findfile": "Could not find file! (Possibly deleted!)",
 
     "error.empty.levels": "There are no levels in this server!",
     "error.empty.ranks": "There are no transformations in this server!",
@@ -28,6 +32,7 @@
     "error.empty.excludedchannels": "There are no excluded channels!",
     "error.empty.levelchannel": "There is no level channel!",
     "error.empty.customcommands": "There are no custom commands!",
+    "error.empty.wings": "There are no characters with wings for this rank!",
 
     "error.null.userLevel": "That user has no levels!",
 
@@ -39,6 +44,8 @@
     "error.empty.character.lines": "Character file: {0} is empty!",
 
     "error.missing.rank": "There is no transformation by that level",
+    "error.missing.gifs": "There is no gifs by that level",
+    "error.missing.image": "You did not attach an image to your message",
 
 
     "command.disabled": "This command is disabled!",
@@ -58,5 +65,7 @@
 
     "error.minigame.author": "You cannot join the lobby you created!",
     "error.minigame.alreadyjoin": "You've already joined this lobby!",
-    "error.minigame.notauthor": "Only the creator of the lobby can start it!"
+    "error.minigame.notauthor": "Only the creator of the lobby can start it!",
+
+    "error.rank.none": "You have not achieved any transformations yet!"
 }

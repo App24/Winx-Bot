@@ -1,8 +1,9 @@
 import { join } from "path";
 import fs from "fs";
+import request from "request";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, DONATE_LINK, OWNER_ID, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannels } from "discord.js";
+import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannel } from "discord.js";
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
@@ -17,11 +18,12 @@ import { UserLevel } from "../structs/databaseTypes/UserLevel";
  * @param array list of items to iterate through
  * @param callbackFn callback function to run
  */
-export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: number, array: readonly U[])=>Promise<any>|any) {
-    for(let i =0; i < array.length; i++){
-        const exit=await callbackFn(array[i], i, array);
-        if(exit===true)break;
+export async function asyncForEach<U>(array: U[], callbackFn: (value: U, index: number, array: readonly U[]) => Promise<any> | any) {
+    for (let i = 0; i < array.length; i++) {
+        const exit = await callbackFn(array[i], i, array);
+        if (exit === true) return true;
     }
+    return false;
 }
 
 /**
@@ -29,12 +31,12 @@ export async function asyncForEach<U>(array:U[], callbackFn: (value: U, index: n
  * @param map map to iterate through
  * @param callbackFn callback function to run
  */
-export async function asyncMapForEach<U,T>(map:Map<U,T>, callbackFn: (key:U, value:T, index:number, map:ReadonlyMap<U,T>)=>Promise<any>|any) {
-    const keys=Array.from(map.keys());
-    const values=Array.from(map.values());
-    for(let i =0; i < map.size; i++){
-        const exit=await callbackFn(keys[i], values[i], i, map);
-        if(exit===true)break;
+export async function asyncMapForEach<U, T>(map: Map<U, T>, callbackFn: (key: U, value: T, index: number, map: ReadonlyMap<U, T>) => Promise<any> | any) {
+    const keys = Array.from(map.keys());
+    const values = Array.from(map.values());
+    for (let i = 0; i < map.size; i++) {
+        const exit = await callbackFn(keys[i], values[i], i, map);
+        if (exit === true) break;
     }
 }
 
@@ -43,28 +45,28 @@ export async function asyncMapForEach<U,T>(map:Map<U,T>, callbackFn: (key:U, val
  * @param directory the parent directory to get all files from
  * @returns all files found in all sub-directories
  */
-export function loadFiles(directory : string){
-    const files:string[]=[];
-    const dirs:string[]=[];
+export function loadFiles(directory: string) {
+    const files: string[] = [];
+    const dirs: string[] = [];
 
-    try{
-        if(fs.existsSync(directory)){
-            const dirContent=fs.readdirSync(directory);
+    try {
+        if (fs.existsSync(directory)) {
+            const dirContent = fs.readdirSync(directory);
 
-            dirContent.forEach(file=>{
-                const fullPath=join(directory, file);
+            dirContent.forEach(file => {
+                const fullPath = join(directory, file);
 
-                if(fs.statSync(fullPath).isFile())
+                if (fs.statSync(fullPath).isFile())
                     files.push(fullPath);
-                else 
+                else
                     dirs.push(fullPath);
             });
 
-            dirs.forEach(dir=>{
-                loadFiles(dir).forEach(file=>files.push(file));
+            dirs.forEach(dir => {
+                loadFiles(dir).forEach(file => files.push(file));
             });
         }
-    }catch(ex){
+    } catch (ex) {
         console.error(ex);
         return;
     }
@@ -79,7 +81,7 @@ export function loadFiles(directory : string){
  * @param max maximum value that the value can be
  * @returns clamped valued
  */
-export function clamp(value : number, min : number, max : number){
+export function clamp(value: number, min: number, max: number) {
     return Math.max(min, Math.min(value, max));
 }
 
@@ -88,12 +90,12 @@ export function clamp(value : number, min : number, max : number){
  * @param size the length of the string
  * @returns hex string
  */
-export function genRanHex(size : number){
+export function genRanHex(size: number) {
     return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 }
 
-export function toHexString(byteArray : number[]){
-    return Array.from(byteArray, function(byte){
+export function toHexString(byteArray: number[]) {
+    return Array.from(byteArray, function (byte) {
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
     }).join('');
 }
@@ -105,11 +107,11 @@ export function toHexString(byteArray : number[]){
  * @param defaultValue The default value to set if there isn't any
  * @returns Data stored in database
  */
-export async function getServerDatabase<U>(database : Keyv, guildId : string, defaultValue : any =[]):Promise<U>{
-    let serverDatabase=await database.get(guildId);
-    if(!serverDatabase){
-        await database.set(guildId, defaultValue);
-        serverDatabase=await database.get(guildId);
+export async function getServerDatabase<U>(database: Keyv, guildId: string, defaultValue: any = []): Promise<U> {
+    let serverDatabase = await database.get(guildId);
+    if (!serverDatabase) {
+        serverDatabase = defaultValue;
+        await database.set(guildId, serverDatabase);
     }
     return serverDatabase;
 }
@@ -119,8 +121,8 @@ export async function getServerDatabase<U>(database : Keyv, guildId : string, de
  * @param channel 
  * @returns True if the chanell is DM, false if not
  */
-export function isDM(channel : TextBasedChannels){
-    return channel.type==="DM";
+export function isDM(channel: TextBasedChannel) {
+    return channel.type === "DM";
 }
 
 /**
@@ -129,12 +131,12 @@ export function isDM(channel : TextBasedChannels){
  * @param guildId The ID of the guild
  * @returns True if the user is a patreon, false if the user is not a patreon
  */
-export async function isPatreon(userId : string, guildId : string){
-    if(!userId||!guildId) return false;
-    const Patreon=BotUser.getDatabase(DatabaseType.Paid);
-    const patreon:PatreonInfo[]=await Patreon.get(guildId);
-    if(!patreon||!patreon.length) return false;
-    return patreon.find(user=>user.userId===userId)!==undefined;
+export async function isPatreon(userId: string, guildId: string) {
+    if (!userId || !guildId) return false;
+    const Patreon = BotUser.getDatabase(DatabaseType.Paid);
+    const patreon: PatreonInfo[] = await Patreon.get(guildId);
+    if (!patreon || !patreon.length) return false;
+    return patreon.find(user => user.userId === userId) !== undefined;
 }
 
 /**
@@ -143,8 +145,8 @@ export async function isPatreon(userId : string, guildId : string){
  * @param fileName Name of file to send to discord
  * @returns Message Attachment
  */
-export function canvasToMessageAttachment(canvas : Canvas, fileName="color"){
-    return new MessageAttachment(canvas.toBuffer(), `${fileName}.png`);
+export function canvasToMessageAttachment(canvas: Canvas, fileName = "color", fileExtension = "png") {
+    return new MessageAttachment(canvas.toBuffer(), `${fileName}.${fileExtension}`);
 }
 
 /**
@@ -152,11 +154,11 @@ export function canvasToMessageAttachment(canvas : Canvas, fileName="color"){
  * @param str String to compare
  * @returns True if it is a hex color, false if it isn't
  */
-export function isHexColor(str : string){
+export function isHexColor(str: string) {
     return new RegExp(/[a-f\d]{6}/g).test(str);
 }
 
-export function hexToRGB(hex : string){
+export function hexToRGB(hex: string) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
         r: parseInt(result[1], 16),
@@ -172,93 +174,99 @@ export function hexToRGB(hex : string){
  * @param w Amount to blend
  * @returns Value between `a` and `b`
  */
-export function blend(a : number, b : number, w : number){
-    return (a*w)+(b*(1-w));
+export function blend(a: number, b: number, w: number) {
+    return (a * w) + (b * (1 - w));
 }
 
-export async function getAllMessages(channel : BaseGuildTextChannel){
-    const messages:Message[]=[];
-    let msgs=await channel.messages.fetch().then(promise=>Array.from(promise.values()));
+export async function getAllMessages(channel: BaseGuildTextChannel) {
+    const messages: Message[] = [];
+    let msgs = await channel.messages.fetch().then(promise => Array.from(promise.values()));
     let lastMessage;
-    while(msgs.length){
+    while (msgs.length) {
         messages.push(...msgs);
-        lastMessage=msgs[msgs.length-1].id;
-        msgs=await channel.messages.fetch({before: lastMessage}).then(promise=>Array.from(promise.values()));
+        lastMessage = msgs[msgs.length - 1].id;
+        msgs = await channel.messages.fetch({ before: lastMessage }).then(promise => Array.from(promise.values()));
     }
     return messages;
 }
 
-export async function getLeaderboardMembers(guild : Guild){
-    const Levels=BotUser.getDatabase(DatabaseType.Levels);
-    const levels:UserLevel[]=await getServerDatabase(Levels, guild.id);
-    levels.sort((a,b)=>{
-        if(a.level===b.level){
-            return b.xp-a.xp;
+export async function getLeaderboardMembers(guild: Guild) {
+    const Levels = BotUser.getDatabase(DatabaseType.Levels);
+    const levels: UserLevel[] = await getServerDatabase(Levels, guild.id);
+    levels.sort((a, b) => {
+        if (a.level === b.level) {
+            return b.xp - a.xp;
         }
-        return b.level-a.level;
+        return b.level - a.level;
     });
-    const leaderboardLevels:{userLevel: UserLevel, member: GuildMember}[]=[];
-    let userIndex=0;
-    await asyncForEach(levels, async(level : UserLevel)=>{
-        const member=await getMemberById(level.userId, guild);
-        if(member){
-            leaderboardLevels.push({userLevel: level, member});
+    const leaderboardLevels: { userLevel: UserLevel, member: GuildMember }[] = [];
+    let userIndex = 0;
+    await asyncForEach(levels, async (level: UserLevel) => {
+        const member = await getMemberById(level.userId, guild);
+        if (member) {
+            leaderboardLevels.push({ userLevel: level, member });
             userIndex++;
-            if(userIndex>=15)
+            if (userIndex >= 15)
                 return true;
         }
     });
     return leaderboardLevels;
 }
 
-export function backupDatabases(){
-    if(!fs.existsSync(DATABASE_BACKUP_FOLDER)){
+export function backupDatabases() {
+    if (!fs.existsSync(DATABASE_BACKUP_FOLDER)) {
         fs.mkdirSync(DATABASE_BACKUP_FOLDER);
     }
 
     const values = Object.values(DatabaseType);
-    values.forEach((value)=>{
+    values.forEach((value) => {
         fs.copyFileSync(`${DATABASE_FOLDER}/${value}.sqlite`, `${DATABASE_BACKUP_FOLDER}/${value}.sqlite`);
     });
 }
 
-export async function reportError(error, message? : Message){
-    const Errors=BotUser.getDatabase(DatabaseType.Errors);
-    let hex=genRanHex(16);
-    let errors=await Errors.get(hex);
-    while(errors){
-        hex=genRanHex(16);
-        errors=await Errors.get(hex);
+export async function reportError(error, message?: Message) {
+    const Errors = BotUser.getDatabase(DatabaseType.Errors);
+    let hex = genRanHex(16);
+    let errors = await Errors.get(hex);
+    while (errors) {
+        hex = genRanHex(16);
+        errors = await Errors.get(hex);
     }
     console.error(`Code: ${hex}\n${error}`);
-    const errorObj=new ErrorStruct();
-    errorObj.time=new Date().getTime();
-    errorObj.error=error;
+    const errorObj = new ErrorStruct();
+    errorObj.time = new Date().getTime();
+    errorObj.error = error;
     await Errors.set(hex, errorObj);
     const owner = await getUserById(OWNER_ID);
-    let text=`Error: \`${hex}\``;
-    if(message){
-        const ownerMember=await getMemberById(owner.id, message.guild);
-        if(ownerMember){
-            text+=`\nServer: ${message.guild.name}`;
-            text+=`\nURL: ${message.url}`;
+    let text = `Error: \`${hex}\``;
+    if (message) {
+        const ownerMember = await getMemberById(owner.id, message.guild);
+        if (ownerMember) {
+            text += `\nServer: ${message.guild.name}`;
+            text += `\nURL: ${message.url}`;
         }
         message.reply(Localisation.getTranslation("error.execution"));
     }
     (await owner.createDM()).send(text);
 }
 
-export function isModerator(member : GuildMember){
-    if(!member) return false;
+export function isModerator(member: GuildMember) {
+    if (!member) return false;
     return member.permissions.has("MANAGE_GUILD");
 }
 
-export async function createMessageEmbed(data : MessageEmbedOptions|MessageEmbed, guild : Guild){
-    const embed=new MessageEmbed(data);
+export async function createMessageEmbed(data: MessageEmbedOptions | MessageEmbed, guild: Guild) {
+    const embed = new MessageEmbed(data);
     embed.setColor(await getBotRoleColor(guild));
-    const footers=[Localisation.getTranslation("footer.donate", DONATE_LINK), Localisation.getTranslation("footer.suggestion", PREFIX, "suggestion")];
-    const option=Math.floor((footers.length*10)*Math.random());
-    if(option<footers.length)
-        embed.setFooter(`${data.footer||""}\n${footers[option]}`);
+    const footers = [Localisation.getTranslation("footer.donate", DONATE_LINK), Localisation.getTranslation("footer.suggestion", PREFIX, "suggestion")];
+    const option = Math.floor((footers.length * 10) * Math.random());
+    if (option < footers.length)
+        embed.setFooter({ text: `${(data.footer && data.footer.text) || ""}\n${footers[option]}` });
     return embed;
+}
+
+export function downloadFile(uri: string, fileName: string, callback: () => void) {
+    request.head(uri, function () {
+        request(uri).pipe(fs.createWriteStream(fileName)).on("close", callback);
+    });
 }

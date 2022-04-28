@@ -10,7 +10,7 @@
     "cardcolor.reset.output": "Resetted the card color!",
 
     "circlecolor.set.output": "Set the color circle to #{0}!",
-    "circlecolor.resetset.output": "Resetted the circle color!",
+    "circlecolor.reset.output": "Resetted the circle color!",
 
     "namecolor.set.output": "Set the color name to #{0}!",
     "namecolor.reset.output": "Resetted the name color!",
@@ -72,8 +72,10 @@
     "transformations.title": "Transformations",
 
     "magiclevels.transformation.current": "Current Transformation: {0}",
+    "magiclevels.transformation.current.level": "- Earnt at level: {0}",
     "magiclevels.transformation.next": "Next Transformation: {0}",
-    "magiclevels.level": ": Level: {0}",
+    "magiclevels.transformation.next.level": "- Earn at level: {0}",
+    "magiclevels.level": "Level: {0}",
     "magiclevels.levels": "{0}/{1}",
     "magiclevels.lb.position": "Rank: #{0}",
 
@@ -107,6 +109,9 @@
     "setrank.rank.none": "There is no transformation with this level!",
     "setrank.gifs.remove": "Removed GIFs!",
     "setrank.role.remove": "Removed transformation!",
+    "setrank.wings.remove": "Removed Wings for character {0}!",
+    "setrank.wings.add": "Added Wings for character {0}!",
+    "setrank.wings.get": "Wings for character {0}!",
     "setrank.list.gifs": "__GIFs__",
     "setrank.list.role": "**Role**: <@&{0}>",
 
@@ -158,5 +163,10 @@
 
     "rps.play": "Play\n:rock: - Rock\n:scroll: - Paper\n:scissors: - Scissors",
     "rps.played": "Please wait for the other player!",
-    "rps.alreadyplayed": "You have already played!"
+    "rps.alreadyplayed": "You have already played!",
+
+    "winxcharacter.set": "Character set to: {0}",
+    "wingslevel.set": "Your transformation is now `{0}`!",
+
+    "checkerror.reply.code": "Please reply with error code"
 }

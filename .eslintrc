@@ -16,7 +16,6 @@
         "@typescript-eslint/no-inferrable-types": "warn",
         "prefer-const": "warn",
         "@typescript-eslint/no-explicit-any": "off",
-        "indent": "warn",
         "no-mixed-spaces-and-tabs": "off",
         "no-empty": "off",
         "no-useless-escape": "off"

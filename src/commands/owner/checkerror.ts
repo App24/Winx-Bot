@@ -2,91 +2,94 @@ import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandAccess, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
-import { SubCommand } from "../../structs/SubCommand";
 import { dateToString } from "../../utils/FormatUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";
+import { createMessageSelection } from "../../utils/MessageSelectionUtils";
+import { createMessageCollector } from "../../utils/MessageUtils";
 import { asyncForEach } from "../../utils/Utils";
 
-class CheckErrorCommand extends Command{
-    public constructor(){
+class CheckErrorCommand extends Command {
+    public constructor() {
         super();
-        this.access=CommandAccess.BotOwner;
-        this.minArgs=1;
-        this.category=Owner;
-        this.usage=[new CommandUsage(true, "argument.errorid", "argument.clear", "argument.list", "argument.prune")];
-        this.subCommands=[new ClearSubCommand(), new ListSubCommand(), new PruneSubCommand()];
+        this.access = CommandAccess.BotOwner;
+        this.category = Owner;
     }
 
-    public async onRun(cmdArgs : CommandArguments){
-        const code=cmdArgs.args.shift().toLowerCase();
-        if(!(await this.onRunSubCommands(cmdArgs, code, false))){
-            const Errors=BotUser.getDatabase(DatabaseType.Errors);
-            const error:ErrorStruct=await Errors.get(code);
-            if(!error) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.errorCode"));
-            cmdArgs.message.reply(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
-        }
-    }
-}
+    public async onRun(cmdArgs: CommandArguments) {
+        const Errors = BotUser.getDatabase(DatabaseType.Errors);
 
-class ClearSubCommand extends SubCommand{
-    public constructor(){
-        super("clear");
-    }
+        await createMessageSelection({
+            sendTarget: cmdArgs.message, author: cmdArgs.author, selectMenuOptions: [
+                {
+                    customId: "selection",
+                    placeholder: Localisation.getTranslation("generic.selectmenu.placeholder"),
+                    options: [
+                        {
+                            label: "Check",
+                            value: "check",
+                            onSelect: async ({ interaction }) => {
+                                await interaction.reply(Localisation.getTranslation("checkerror.reply.code"));
+                                const reply = await interaction.fetchReply();
+                                createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (message) => {
+                                    const error: ErrorStruct = await Errors.get(message.content);
+                                    if (!error) return <any>interaction.followUp(Localisation.getTranslation("error.invalid.errorCode"));
+                                    interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
+                                });
+                            }
+                        },
+                        {
+                            label: "List",
+                            value: "list",
+                            onSelect: async ({ interaction }) => {
 
-    public async onRun(cmdArgs : CommandArguments){
-        const Errors=BotUser.getDatabase(DatabaseType.Errors);
-        await Errors.clear();
-        return cmdArgs.message.reply(Localisation.getTranslation("checkerror.clear"));
-    }
-}
+                                const errors: { key: string, value: ErrorStruct }[] = await Errors.entries();
+                                if (!errors || !errors.length) return interaction.reply(Localisation.getTranslation("error.empty.errors"));
+                                const data = [];
+                                errors.forEach(error => {
+                                    data.push(Localisation.getTranslation("checkerror.list", error.key, dateToString(new Date(error.value.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
+                                });
+                                const embed = new MessageEmbed();
+                                embed.setColor((await getBotRoleColor(cmdArgs.guild)));
+                                embed.setDescription(data.join("\n"));
+                                return interaction.reply({ embeds: [embed] });
+                            }
+                        },
+                        {
+                            label: "Prune",
+                            value: "prune",
+                            onSelect: async ({ interaction }) => {
+                                const errors: { key: string, value: ErrorStruct }[] = await Errors.entries();
+                                if (!errors || !errors.length) return interaction.reply(Localisation.getTranslation("error.empty.errors"));
 
-class ListSubCommand extends SubCommand{
-    public constructor(){
-        super("list");
-    }
-
-    public async onRun(cmdArgs : CommandArguments){
-        const Errors=BotUser.getDatabase(DatabaseType.Errors);
-
-        const errors:{key:string, value:ErrorStruct}[]=await Errors.entries();
-        if(!errors||!errors.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.errors"));
-        const data=[];
-        errors.forEach(error=>{
-            data.push(Localisation.getTranslation("checkerror.list", error.key, dateToString(new Date(error.value.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
+                                const msPerMinute = 60 * 1000;
+                                const msPerHour = msPerMinute * 60;
+                                const msPerDay = msPerHour * 24;
+                                const msPerWeek = msPerDay * 7;
+                                const currentTime = new Date().getTime();
+                                await asyncForEach(errors, async (error: { key: string, value: ErrorStruct }) => {
+                                    if (currentTime - error.value.time > msPerWeek * 2) {
+                                        await Errors.delete(error.key);
+                                    }
+                                });
+                                return interaction.reply(Localisation.getTranslation("checkerror.prune"));
+                            }
+                        },
+                        {
+                            label: "Clear",
+                            value: "clear",
+                            onSelect: async ({ interaction }) => {
+                                await Errors.clear();
+                                return interaction.reply(Localisation.getTranslation("checkerror.clear"));
+                            }
+                        }
+                    ]
+                }
+            ]
         });
-        const embed=new MessageEmbed();
-        embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-        embed.setDescription(data.join("\n"));
-        return cmdArgs.message.reply({embeds: [embed]});
     }
 }
 
-class PruneSubCommand extends SubCommand{
-    public constructor(){
-        super("prune");
-    }
-
-    public async onRun(cmdArgs : CommandArguments){
-        const Errors=BotUser.getDatabase(DatabaseType.Errors);
-
-        const errors:{key:string, value:ErrorStruct}[]=await Errors.entries();
-        if(!errors||!errors.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.errors"));
-
-        const msPerMinute = 60 * 1000;
-        const msPerHour = msPerMinute * 60;
-        const msPerDay = msPerHour * 24;
-        const msPerWeek = msPerDay * 7;
-        const currentTime=new Date().getTime();
-        await asyncForEach(errors, async(error : {key:string, value:ErrorStruct})=>{
-            if(currentTime-error.value.time>msPerWeek*2){
-                await Errors.delete(error.key);
-            }
-        });
-        return cmdArgs.message.reply(Localisation.getTranslation("checkerror.prune"));
-    }
-}
-
-export=CheckErrorCommand;
+export = CheckErrorCommand;

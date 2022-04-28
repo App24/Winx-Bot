@@ -39,12 +39,20 @@
     "customcommandedit.command.description": "Edit custom commands!",
     "customcommandlist.command.description": "List custom commands or messages of a custom command!",
     "testlevel.command.description": "Test output of a level!",
+    "testml.command.description": "Test output of a card at a level!",
     "customisationsettings.command.description": "Get your customisation settings!",
     "customisationcode.command.description": "Set your customisation settings to a code, or get your customisation code!",
     "serversettings.command.description": "Get all the server settings!",
     "leaderboardcolor.command.description": "Manage the leaderboard colors!",
     "ramusage.command.description": "Get RAM usage by the bot!",
+    "customname.command.description": "Set custom names for people!",
+    "levelping.command.description": "Toggle Level Ping!",
+    "cardname.command.description": "Toggle Card Name!",
 
     "tictactoe.command.description": "Play Tic Tac Toe with another member in the server!",
-    "cah.command.description": "Play Cards Against Winx with members in the server!"
+    "cah.command.description": "Play Cards Against Winx with members in the server!",
+    "rps.command.description": "Play Rock Paper Scissors with a friend!",
+
+    "winxcharacter.command.description": "Set your Winx fairy!",
+    "wingslevel.command.description": "Set an already achieved transformation as your wings!"
 }

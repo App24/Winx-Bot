@@ -2,35 +2,35 @@ import EventEmitter from 'events';
 import JSONB from 'json-buffer';
 import { KeyvSqlite } from './KeyvSqlite';
 
-export class Keyv extends EventEmitter{
-    private opts:any;
+export class Keyv extends EventEmitter {
+    private opts: any;
 
-    public constructor(uri: string|any, opts?){
+    public constructor(uri: string | any, opts?) {
         super();
-        this.opts=Object.assign({
+        this.opts = Object.assign({
             namespace: "keyv",
             serialize: JSONB.stringify,
             deserialize: JSONB.parse
         },
-        (typeof uri==="string")? {uri} : uri,
-        opts);
+            (typeof uri === "string") ? { uri } : uri,
+            opts);
 
-        if(!this.opts.store){
-            this.opts.store=new KeyvSqlite(this.opts);
+        if (!this.opts.store) {
+            this.opts.store = new KeyvSqlite(this.opts);
         }
 
-        if(typeof this.opts.store.on==="function"){
-            this.opts.store.on("error", err=>this.emit("error", err));
+        if (typeof this.opts.store.on === "function") {
+            this.opts.store.on("error", err => this.emit("error", err));
         }
 
-        this.opts.store.namespace=this.opts.namespace;
+        this.opts.store.namespace = this.opts.namespace;
     }
 
-    private getKeyPrefix(key : string) : string{
+    private getKeyPrefix(key: string): string {
         return `${this.opts.namespace}:${key}`;
     }
 
-    private stripKeyPrefix(fullKey : string) :string {
+    private stripKeyPrefix(fullKey: string): string {
         const nsregexp = new RegExp('^' + this.opts.namespace + ':');
         return fullKey.replace(nsregexp, '');
     }
@@ -61,26 +61,26 @@ export class Keyv extends EventEmitter{
         }
     }
 
-    public get(key : string, opts?) : Promise<any>{
-        opts=Object.assign({removeExpired: true}, opts);
-        const oldKey=key;
-        key=this.getKeyPrefix(key);
-        const store=this.opts.store;
+    public get(key: string, opts?): Promise<any> {
+        opts = Object.assign({ removeExpired: true }, opts);
+        const oldKey = key;
+        key = this.getKeyPrefix(key);
+        const store = this.opts.store;
         return Promise.resolve()
-            .then(()=>store.get(key))
-            .then(data=>{
-                data = (typeof data==="string") ? this.opts.deserialize(data) : data;
+            .then(() => store.get(key))
+            .then(data => {
+                data = (typeof data === "string") ? this.opts.deserialize(data) : data;
                 return this.parseValue(oldKey, data, opts);
             });
     }
 
-    public query(q : string) : Promise<any>{
-        const store=this.opts.store;
+    public query(q: string): Promise<any> {
+        const store = this.opts.store;
 
         return store.query(q);
     }
 
-    public set(key : string, value : any, ttl?){
+    public set(key: string, value: any, ttl?) {
         key = this.getKeyPrefix(key);
         if (typeof ttl === 'undefined') {
             ttl = this.opts.ttl;
@@ -99,14 +99,14 @@ export class Keyv extends EventEmitter{
             .then(() => true);
     }
 
-    public delete(key : string){
+    public delete(key: string) {
         key = this.getKeyPrefix(key);
         const store = this.opts.store;
         return Promise.resolve()
             .then(() => store.delete(key));
     }
 
-    public clear(){
+    public clear() {
         const store = this.opts.store;
         return Promise.resolve()
             .then(() => store.clear());
@@ -114,9 +114,9 @@ export class Keyv extends EventEmitter{
 
     public keys() {
         return Promise.resolve()
-            .then(()=>this.query("SELECT * FROM keyv"))
-            .then(data=>{
-                const lst=[];
+            .then(() => this.query("SELECT * FROM keyv"))
+            .then(data => {
+                const lst = [];
                 data.forEach(element => {
                     lst.push(this.stripKeyPrefix(element.key));
                 });
@@ -126,9 +126,9 @@ export class Keyv extends EventEmitter{
 
     public values(opts?) {
         return Promise.resolve()
-            .then(()=>this.query("SELECT * FROM keyv"))
-            .then(data=>{
-                const lst=[];
+            .then(() => this.query("SELECT * FROM keyv"))
+            .then(data => {
+                const lst = [];
                 data.forEach(element => {
                     lst.push(this.parseValue(element.key, element.value, opts));
                 });
@@ -136,25 +136,25 @@ export class Keyv extends EventEmitter{
             });
     }
 
-    public valuesFrom(key, opts?){
+    public valuesFrom(key, opts?) {
         return Promise.resolve()
-            .then(()=>this.query(`SELECT * FROM keyv`))
-            .then(data=>{
-                const lst=[];
+            .then(() => this.query(`SELECT * FROM keyv`))
+            .then(data => {
+                const lst = [];
                 data.forEach(element => {
-                    if(element.key===this.getKeyPrefix(key))
+                    if (element.key === this.getKeyPrefix(key))
                         lst.push(this.parseValue(element.key, element.value, opts));
                 });
                 return lst;
             });
     }
 
-    public entries(opts?){
+    public entries(opts?) {
         return Promise.resolve()
-            .then(()=>this.query("SELECT * FROM keyv"))
-            .then((data)=>{
-                const newData:{"key": string, "value": any}[]=[];
-                data.forEach(e=>{
+            .then(() => this.query("SELECT * FROM keyv"))
+            .then((data) => {
+                const newData: { "key": string, "value": any }[] = [];
+                data.forEach(e => {
                     newData.push({
                         "key": this.stripKeyPrefix(e["key"]),
                         "value": this.parseValue(e["key"], e["value"], opts)

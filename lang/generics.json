@@ -2,6 +2,7 @@
     "generic.hexcolor": "#{0}",
     "generic.sent" :"Sent!",
     "generic.done" :"Done!",
+    "generic.cancel": "Cancel",
     "generic.canceled": "Canceled!",
     "generic.accepted": "Accepted",
     "generic.rejected": "Rejected",
@@ -16,5 +17,14 @@
     "generic.noonejoin": "No one joined :(",
 
     "minigame.win": "<@{0}> wins!",
-    "minigame.draw": "Draw!"
+    "minigame.draw": "Draw!",
+
+    "generic.currentcharacter": "{0}'s current character is: {1}",
+    "generic.selectcurrentcharacter": "{0} please select a character",
+
+    "generic.selectmenu.placeholder": "Please select an option",
+
+    "generic.not.author": "You are not the author of the command!",
+
+    "generic.automatic": "Automatic"
 }

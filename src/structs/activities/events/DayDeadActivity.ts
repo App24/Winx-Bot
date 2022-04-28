@@ -1,8 +1,8 @@
 import { Localisation } from "../../../localisation";
 import { OneDayEventActivity } from "../OneDayEventActivity";
 
-export class DayDeadActivity extends OneDayEventActivity{
-    public constructor(){
+export class DayDeadActivity extends OneDayEventActivity {
+    public constructor() {
         super(new Date(2, 10, 2));
     }
 

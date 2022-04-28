@@ -1,9 +1,9 @@
 import { RandomLineCommand } from "./RandomLineCommand";
 
-class DarcyCommand extends RandomLineCommand{
-    constructor(){
+class DarcyCommand extends RandomLineCommand {
+    constructor() {
         super("darcy");
     }
 }
 
-export=DarcyCommand;
+export = DarcyCommand;

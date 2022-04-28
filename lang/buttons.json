@@ -27,5 +27,10 @@
     "button.highlight": "Highlight",
 
     "button.join": "Join",
-    "button.start": "Start"
+    "button.start": "Start",
+
+    "button.wings": "Wings",
+
+    "button.end": "End",
+    "button.both": "Both"
 }

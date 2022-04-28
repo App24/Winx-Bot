@@ -1,97 +1,83 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
-import { SubCommand } from "../../structs/SubCommand";
 import { canvasColor } from "../../utils/CanvasUtils";
+import { createMessageSelection } from "../../utils/MessageSelectionUtils";
+import { createMessageCollector } from "../../utils/MessageUtils";
 import { isHexColor, canvasToMessageAttachment } from "../../utils/Utils";
 
-class NameColorCommand extends Command{
-    public constructor(){
+class NameColorCommand extends Command {
+    public constructor() {
         super();
-        this.available=CommandAvailable.Guild;
-        this.category=Customisation;
-        this.usage=[new CommandUsage(true, "argument.get", "argument.set", "argument.reset"), new CommandUsage(false, "argument.hexcolor")];
-        this.minArgs=1;
-        this.maxArgs=2;
-        this.aliases=["namecolour"];
-        this.subCommands=[new GetSubCommand(), new SetSubCommand(), new ResetSubCommand()];
+        this.available = CommandAvailable.Guild;
+        this.category = Customisation;
+        this.aliases = ["namecolour"];
     }
 
-    public async onRun(cmdArgs : CommandArguments){
-        const name=cmdArgs.args.shift();
-        await this.onRunSubCommands(cmdArgs, name);
-    }
-}
-
-class GetSubCommand extends SubCommand{
-    public constructor(){
-        super("get");
-    }
-
-    public async onRun(cmdArgs : CommandArguments){
-        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        let userSettings=await UserSettings.get(cmdArgs.author.id);
-        if(!userSettings){
-            userSettings=DEFAULT_USER_SETTING;
+    public async onRun(cmdArgs: CommandArguments) {
+        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
+        let userSettings = await UserSettings.get(cmdArgs.author.id);
+        if (!userSettings) {
+            userSettings = DEFAULT_USER_SETTING;
             await UserSettings.set(cmdArgs.author.id, userSettings);
         }
 
-        if(userSettings.nameColor===DEFAULT_USER_SETTING.nameColor||!isHexColor(userSettings.nameColor)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.namecolor"));
-        cmdArgs.message.reply({content: Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), files: [canvasToMessageAttachment(canvasColor(userSettings.nameColor))]});
+        createMessageSelection({
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: [
+                {
+                    customId: "select",
+                    placeholder: Localisation.getTranslation("generic.selectmenu.placeholder"),
+                    options: [
+                        {
+                            label: Localisation.getTranslation("button.get"),
+                            value: "get",
+                            onSelect: async ({ interaction }) => {
+                                if (userSettings.nameColor === DEFAULT_USER_SETTING.nameColor || !isHexColor(userSettings.nameColor))
+                                    return await interaction.reply(Localisation.getTranslation("error.invalid.namecolor"));
+                                await interaction.reply({ content: Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), files: [canvasToMessageAttachment(canvasColor(userSettings.nameColor))] });
+                            }
+                        },
+                        {
+                            label: Localisation.getTranslation("button.set"),
+                            value: "set",
+                            onSelect: async ({ interaction }) => {
+                                await interaction.reply({ content: Localisation.getTranslation("argument.reply.hexcolor"), components: [] });
+                                const reply = await interaction.fetchReply();
+                                createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
+                                    let color = msg.content.toLowerCase();
+                                    if (color.toLowerCase() === DEFAULT_USER_SETTING.nameColor) {
+                                        userSettings.nameColor = DEFAULT_USER_SETTING.nameColor;
+                                        cmdArgs.message.reply(Localisation.getTranslation("namecolor.reset.output"));
+                                    } else {
+                                        if (color.startsWith("#")) {
+                                            color = color.substring(1);
+                                        }
+                                        if (!isHexColor(color)) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
+                                        userSettings.nameColor = color;
+                                        cmdArgs.message.reply(Localisation.getTranslation("namecolor.set.output", color));
+                                    }
+                                    await UserSettings.set(cmdArgs.author.id, userSettings);
+                                });
+                            }
+                        },
+                        {
+                            label: Localisation.getTranslation("button.reset"),
+                            value: "reset",
+                            onSelect: async ({ interaction }) => {
+                                userSettings.nameColor = DEFAULT_USER_SETTING.nameColor;
+                                await UserSettings.set(cmdArgs.author.id, userSettings);
+                                await interaction.reply(Localisation.getTranslation("namecolor.reset.output"));
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        );
     }
 }
 
-class SetSubCommand extends SubCommand{
-    public constructor(){
-        super("set");
-        this.minArgs=1;
-    }
-
-    public async onRun(cmdArgs : CommandArguments){
-        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        let userSettings=await UserSettings.get(cmdArgs.author.id);
-        if(!userSettings){
-            userSettings=DEFAULT_USER_SETTING;
-            await UserSettings.set(cmdArgs.author.id, userSettings);
-        }
-
-
-        if(cmdArgs.args[0].toLowerCase()===DEFAULT_USER_SETTING.nameColor){
-            userSettings.nameColor=DEFAULT_USER_SETTING.nameColor;
-            cmdArgs.message.reply(Localisation.getTranslation("namecolor.reset.output"));
-        }else{
-            let color=cmdArgs.args[0].toLowerCase();
-            if(color.startsWith("#")){
-                color=color.substring(1);
-            }
-            if(!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
-            userSettings.nameColor=color;
-            cmdArgs.message.reply(Localisation.getTranslation("namecolor.set.output", color));
-        }
-        await UserSettings.set(cmdArgs.author.id, userSettings);
-    }
-}
-
-class ResetSubCommand extends SubCommand{
-    public constructor(){
-        super("reset");
-    }
-
-    public async onRun(cmdArgs : CommandArguments){
-        const UserSettings=BotUser.getDatabase(DatabaseType.UserSettings);
-        let userSettings=await UserSettings.get(cmdArgs.author.id);
-        if(!userSettings){
-            userSettings=DEFAULT_USER_SETTING;
-            await UserSettings.set(cmdArgs.author.id, userSettings);
-        }
-
-        userSettings.nameColor=DEFAULT_USER_SETTING.nameColor;
-        await UserSettings.set(cmdArgs.author.id, userSettings);
-        cmdArgs.message.reply(Localisation.getTranslation("namecolor.reset.output"));
-    }
-}
-
-export=NameColorCommand;
+export = NameColorCommand;

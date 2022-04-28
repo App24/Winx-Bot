@@ -3,47 +3,40 @@ import { BotUser } from "../BotClient";
 
 //#region User/Member
 
-export function getUserFromMention(mention : string){
-    if(!mention) return;
-    const matches=mention.match(/^<@!?(\d+)>$/);
+export function getUserFromMention(mention: string) {
+    if (!mention) return;
+    const matches = mention.match(/^<@!?(\d+)>$/);
 
-    if(!matches){
+    if (!matches) {
         return getUserById(mention);
     }
 
     return getUserById(matches[1]);
 }
 
-export function getUserById(id : string):Promise<User>{
-    if(!id) return;
+export async function getUserById(id: string): Promise<User> {
+    if (!id) return;
 
-    const member=BotUser.shard.broadcastEval((client, {id})=>client.users.fetch(id, {force: true}), {context:{id}})
-        .then((sentArray:any[])=>{
-            if(!sentArray[0]) return undefined;
-
-            return sentArray[0];
-        }).catch(()=>undefined);
-
-    return member;
+    return BotUser.users.fetch(id).catch(() => undefined);
 }
 
-export function getMemberFromMention(mention : string, guild : Guild){
-    if(!mention||!guild) return;
-    const matches=mention.match(/^<@!?(\d+)>$/);
+export function getMemberFromMention(mention: string, guild: Guild) {
+    if (!mention || !guild) return;
+    const matches = mention.match(/^<@!?(\d+)>$/);
 
-    if(!matches){
+    if (!matches) {
         return getMemberById(mention, guild);
     }
 
     return getMemberById(matches[1], guild);
 }
 
-export function getMemberById(id : string, guild : Guild):Promise<GuildMember>{
-    if(!id||!guild) return;
-    return guild.members.fetch(id).catch(()=>undefined);
+export function getMemberById(id: string, guild: Guild): Promise<GuildMember> {
+    if (!id || !guild) return;
+    return guild.members.fetch(id).catch(() => undefined);
 }
 
-export function getBotMember(guild : Guild){
+export function getBotMember(guild: Guild) {
     return getMemberById(BotUser.user.id, guild);
 }
 
@@ -52,13 +45,13 @@ export function getBotMember(guild : Guild){
  * @param guild 
  * @returns Color of the role color of bot as a number
  */
-export async function getBotRoleColor(guild : Guild){
-    const defaultcolor=5793266;
-    if(!guild) return defaultcolor;
-    const member=await getBotMember(guild);
-    if(!member) return defaultcolor;
-    if(!member.roles) return defaultcolor;
-    if(!member.roles.color) return defaultcolor;
+export async function getBotRoleColor(guild: Guild) {
+    const defaultcolor = 5793266;
+    if (!guild) return defaultcolor;
+    const member = await getBotMember(guild);
+    if (!member) return defaultcolor;
+    if (!member.roles) return defaultcolor;
+    if (!member.roles.color) return defaultcolor;
     return member.roles.color.color;
 }
 
@@ -66,76 +59,76 @@ export async function getBotRoleColor(guild : Guild){
 
 //#region Server Channels
 
-export function getGuildById(id:string) : Promise<Guild>{
-    return BotUser.guilds.fetch(id).catch(()=>undefined);
+export function getGuildById(id: string): Promise<Guild> {
+    return BotUser.guilds.fetch(id).catch(() => undefined);
 }
 
-export function GetTextNewsGuildChannelFromMention(mention : string, guild : Guild){
-    if(!mention||!guild) return;
-    const matches=mention.match(/^<#!?(\d+)>$/);
+export function GetTextNewsGuildChannelFromMention(mention: string, guild: Guild) {
+    if (!mention || !guild) return;
+    const matches = mention.match(/^<#!?(\d+)>$/);
 
-    if(!matches){
-        return GetTextNewsGuildChannelById(mention, guild);
+    if (!matches) {
+        return getTextNewsGuildChannelById(mention, guild);
     }
-    
-    return GetTextNewsGuildChannelById(matches[1], guild);
+
+    return getTextNewsGuildChannelById(matches[1], guild);
 }
 
-export function GetTextNewsGuildChannelById(id : string, guild : Guild) : TextChannel | NewsChannel{
-    if(!id||!guild) return undefined;
-    return <TextChannel | NewsChannel> guild.channels.cache.find(channel=>channel.id===id&&channel.isText());
+export function getTextNewsGuildChannelById(id: string, guild: Guild): TextChannel | NewsChannel {
+    if (!id || !guild) return undefined;
+    return <TextChannel | NewsChannel>guild.channels.cache.find(channel => channel.id === id && channel.isText());
 }
 
-export function GetTextBasedGuildChannelFromMention(mention : string, guild : Guild){
-    if(!mention||!guild) return;
-    const matches=mention.match(/^<#!?(\d+)>$/);
+export function getTextBasedGuildChannelFromMention(mention: string, guild: Guild) {
+    if (!mention || !guild) return;
+    const matches = mention.match(/^<#!?(\d+)>$/);
 
-    if(!matches){
-        return GetTextBasedGuildGuildChannelById(mention, guild);
+    if (!matches) {
+        return getTextBasedGuildGuildChannelById(mention, guild);
     }
-    
-    return GetTextBasedGuildGuildChannelById(matches[1], guild);
+
+    return getTextBasedGuildGuildChannelById(matches[1], guild);
 }
 
-export function GetTextBasedGuildGuildChannelById(id : string, guild : Guild) : BaseGuildTextChannel{
-    if(!id||!guild) return undefined;
-    return <BaseGuildTextChannel> guild.channels.cache.find(channel=>channel.id===id&&channel.isText());
+export function getTextBasedGuildGuildChannelById(id: string, guild: Guild): BaseGuildTextChannel {
+    if (!id || !guild) return undefined;
+    return <BaseGuildTextChannel>guild.channels.cache.find(channel => channel.id === id && channel.isText());
 }
 
-export function GetThreadChannelFromMention(mention : string, guild : Guild){
-    if(!mention||!guild) return;
-    const matches=mention.match(/^<#!?(\d+)>$/);
+export function getThreadChannelFromMention(mention: string, guild: Guild) {
+    if (!mention || !guild) return;
+    const matches = mention.match(/^<#!?(\d+)>$/);
 
-    if(!matches){
-        return GetThreadChannelById(mention, guild);
+    if (!matches) {
+        return getThreadChannelById(mention, guild);
     }
-    
-    return GetThreadChannelById(matches[1], guild);
+
+    return getThreadChannelById(matches[1], guild);
 }
 
-export function GetThreadChannelById(id : string, guild : Guild) : ThreadChannel{
-    if(!id||!guild) return undefined;
-    return <ThreadChannel> guild.channels.cache.find(channel=>channel.id===id&&channel.isThread());
+export function getThreadChannelById(id: string, guild: Guild): ThreadChannel {
+    if (!id || !guild) return undefined;
+    return <ThreadChannel>guild.channels.cache.find(channel => channel.id === id && channel.isThread());
 }
 
 //#endregion
 
 //#region Role
 
-export function getRoleFromMention(mention : string, guild : Guild){
-    if(!mention||!guild) return;
-    const matches=mention.match(/^<@&(\d+)>$/);
+export function getRoleFromMention(mention: string, guild: Guild) {
+    if (!mention || !guild) return;
+    const matches = mention.match(/^<@&(\d+)>$/);
 
-    if(!matches){
+    if (!matches) {
         return getRoleById(mention, guild);
     }
-    
+
     return getRoleById(matches[1], guild);
 }
 
-export function getRoleById(id : string, guild : Guild) : Promise<Role>{
-    if(!id||!guild) return undefined;
-    return guild.roles.fetch(id).catch(()=>undefined);
+export function getRoleById(id: string, guild: Guild): Promise<Role> {
+    if (!id || !guild) return undefined;
+    return guild.roles.fetch(id).catch(() => undefined);
 }
 
 //#endregion

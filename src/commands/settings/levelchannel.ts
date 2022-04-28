@@ -8,57 +8,58 @@ import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/Ser
 import { getServerDatabase } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
 import { createMessageCollector } from "../../utils/MessageUtils";
-import { ButtonInteraction } from "discord.js";
 
-class LevelChannelCommand extends Command{
-    public constructor(){
+class LevelChannelCommand extends Command {
+    public constructor() {
         super();
-        this.category=Settings;
-        this.access=CommandAccess.Moderators;
-        this.available=CommandAvailable.Guild;
+        this.category = Settings;
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
     }
 
-    public async onRun(cmdArgs : CommandArguments){
-        const ServerInfo=BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo:ServerInfo=await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
-        
-        const collector=await createWhatToDoButtons(cmdArgs.message, cmdArgs.author, {time: 1000*60*5, max: 1},
-            {customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set")},
-            {customId: "remove", style: "PRIMARY", label: Localisation.getTranslation("button.clear")},
-            {customId: "get", style: "PRIMARY", label: Localisation.getTranslation("button.get")}
-        );
+    public async onRun(cmdArgs: CommandArguments) {
+        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
+        const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
-        collector.on("collect", async(interaction:ButtonInteraction)=>{
-            await interaction.update({components: []});
-            if(interaction.customId==="set"){
-                await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
-                const reply=await interaction.fetchReply();
-                createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, {max: 1, time: 1000*60*5}).on("collect", async(msg)=>{
-                    const channel=await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
-                    if(!channel) return <any> msg.reply(Localisation.getTranslation("error.invalid.channel"));
+        await createWhatToDoButtons({
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { time: 1000 * 60 * 5, max: 1 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
+                {
+                    customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
+                        await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
+                        const reply = await interaction.fetchReply();
+                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
+                            const channel = await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
+                            if (!channel) return <any>msg.reply(Localisation.getTranslation("error.invalid.channel"));
 
-                    serverInfo.levelChannel=channel.id;
+                            serverInfo.levelChannel = channel.id;
 
-                    await ServerInfo.set(cmdArgs.guildId, serverInfo);
-                    cmdArgs.message.reply(Localisation.getTranslation("levelchannel.set", channel));
-                });
-            }
-            else if(interaction.customId==="get"){
-                if(!serverInfo.levelChannel) return <any> cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
-                const channel=await GetTextNewsGuildChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
-                if(!channel) return cmdArgs.message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
-                cmdArgs.message.reply(`${channel}`);
-            }else if(interaction.customId==="remove"){
-                if(!serverInfo.levelChannel) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
+                            await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                            cmdArgs.message.reply(Localisation.getTranslation("levelchannel.set", channel));
+                        });
+                    }
+                },
+                {
+                    customId: "get", style: "PRIMARY", label: Localisation.getTranslation("button.get"), onRun: async () => {
+                        if (!serverInfo.levelChannel) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
+                        const channel = await GetTextNewsGuildChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
+                        if (!channel) return cmdArgs.message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
+                        cmdArgs.message.reply(`${channel}`);
+                    }
+                },
+                {
+                    customId: "clear", style: "DANGER", label: Localisation.getTranslation("button.clear"), onRun: async () => {
+                        if (!serverInfo.levelChannel) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
 
-                serverInfo.levelChannel="";
+                        serverInfo.levelChannel = "";
 
-                await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
 
-                cmdArgs.message.reply(Localisation.getTranslation("levelchannel.remove"));
-            }
+                        cmdArgs.message.reply(Localisation.getTranslation("levelchannel.remove"));
+                    }
+                }
+            ]
         });
     }
 }
 
-export=LevelChannelCommand;
+export = LevelChannelCommand;

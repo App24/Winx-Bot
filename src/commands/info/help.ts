@@ -1,4 +1,4 @@
-import { MessageEmbed, Guild, GuildMember, User, TextBasedChannels, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
+import { MessageEmbed, Guild, GuildMember, User, TextBasedChannel, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID, PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
@@ -9,73 +9,73 @@ import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator, createMessageEmbed } from "../../utils/Utils";
 
-class HelpCommand extends Command{
-    public constructor(){
+class HelpCommand extends Command {
+    public constructor() {
         super();
-        this.usage=[new CommandUsage(false, "argument.category")];
-        this.category=Info;
+        this.usage = [new CommandUsage(false, "argument.category")];
+        this.category = Info;
     }
 
-    public async onRun(cmdArgs : CommandArguments) {
-        const available=isDM(cmdArgs.channel)?CommandAvailable.DM:CommandAvailable.Guild;
-        if(!cmdArgs.args.length){
-            const embed=new MessageEmbed();
+    public async onRun(cmdArgs: CommandArguments) {
+        const available = isDM(cmdArgs.channel) ? CommandAvailable.DM : CommandAvailable.Guild;
+        if (!cmdArgs.args.length) {
+            const embed = new MessageEmbed();
             embed.setTitle(Localisation.getTranslation("help.title"));
-            const categories=[];
-            const categoryEmojis:{emoji:string, category:Category}[]=[];
-            await asyncForEach(Categories, async(category:Category)=>{
-                if(category.availability===CommandAvailable.Both||(category.availability===available)){
-                    if(category.access){
-                        switch(category.access){
-                        case CommandAccess.Patreon:{
-                            if(isDM(cmdArgs.channel)||!(await isPatreon(cmdArgs.author.id, cmdArgs.guildId)))
-                                return;
-                        }break;
-                        case CommandAccess.BotOwner:{
-                            if(cmdArgs.author.id!==OWNER_ID)
-                                return;
-                        }break;
-                        case CommandAccess.Moderators:{
-                            if(isDM(cmdArgs.channel)||!isModerator(cmdArgs.member))
-                                return;
-                        }break;
-                        case CommandAccess.GuildOwner:{
-                            if(isDM(cmdArgs.channel)||cmdArgs.author.id!==cmdArgs.guild.ownerId)
-                                return;
-                        }break;
-                        case CommandAccess.None:{
-                            switch(category){
-                            case CustomCommands:{
-                                const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
-                                const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
-                                if(!customCommands.length)
+            const categories = [];
+            const categoryEmojis: { emoji: string, category: Category }[] = [];
+            await asyncForEach(Categories, async (category: Category) => {
+                if (category.availability === CommandAvailable.Both || (category.availability === available)) {
+                    if (category.access) {
+                        switch (category.access) {
+                            case CommandAccess.Patreon: {
+                                if (isDM(cmdArgs.channel) || !(await isPatreon(cmdArgs.author.id, cmdArgs.guildId)))
                                     return;
-                            }break;
-                            }
-                        }break;
+                            } break;
+                            case CommandAccess.BotOwner: {
+                                if (cmdArgs.author.id !== OWNER_ID)
+                                    return;
+                            } break;
+                            case CommandAccess.Moderators: {
+                                if (isDM(cmdArgs.channel) || !isModerator(cmdArgs.member))
+                                    return;
+                            } break;
+                            case CommandAccess.GuildOwner: {
+                                if (isDM(cmdArgs.channel) || cmdArgs.author.id !== cmdArgs.guild.ownerId)
+                                    return;
+                            } break;
+                            case CommandAccess.None: {
+                                switch (category) {
+                                    case CustomCommands: {
+                                        const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
+                                        const customCommands = await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
+                                        if (!customCommands.length)
+                                            return;
+                                    } break;
+                                }
+                            } break;
                         }
                     }
-                    categoryEmojis.push({"emoji": category.emoji, "category": category});
+                    categoryEmojis.push({ "emoji": category.emoji, "category": category });
                     categories.push(Localisation.getTranslation("help.category", category.emoji, Localisation.getTranslation(category.name)));
                 }
             });
             embed.setDescription(categories.join("\n"));
-            embed.setFooter(Localisation.getTranslation("help.footer", PREFIX));
+            embed.setFooter({ text: Localisation.getTranslation("help.footer", PREFIX) });
 
-            const rows:MessageActionRow[]=[];
-            for(let i =0; i < Math.ceil(categoryEmojis.length/5); i++){
+            const rows: MessageActionRow[] = [];
+            for (let i = 0; i < Math.ceil(categoryEmojis.length / 5); i++) {
                 rows.push(new MessageActionRow());
             }
 
-            categoryEmojis.forEach((emoji, index)=>{
-                rows[Math.floor(index/5)].addComponents(new MessageButton({customId: emoji.category.name, style: "PRIMARY", emoji: emoji.emoji}));
+            categoryEmojis.forEach((emoji, index) => {
+                rows[Math.floor(index / 5)].addComponents(new MessageButton({ customId: emoji.category.name, style: "PRIMARY", emoji: emoji.emoji }));
             });
 
-            return cmdArgs.message.reply({embeds: [await createMessageEmbed(embed, cmdArgs.guild)], components: rows}).then(msg=>{
-                const collector=msg.createMessageComponentCollector({filter: (interaction)=>interaction.user.id===cmdArgs.author.id, max: 1, time: 1000*60*5});
+            return cmdArgs.message.reply({ embeds: [await createMessageEmbed(embed, cmdArgs.guild)], components: rows }).then(msg => {
+                const collector = msg.createMessageComponentCollector({ filter: (interaction) => interaction.user.id === cmdArgs.author.id, max: 1, time: 1000 * 60 * 5 });
 
-                collector.on("end", ()=>{
-                    msg.edit({components: []});
+                collector.on("end", () => {
+                    msg.edit({ components: [] });
                 });
 
                 collector.on("collect", async function (interaction: ButtonInteraction) {
@@ -90,83 +90,83 @@ class HelpCommand extends Command{
             });
         }
 
-        let category : Category=undefined;
-        for(const _category of Categories){
-            if(_category.getNames.map(value=>value.toLowerCase()).includes(cmdArgs.args.join(" ").toLowerCase())){
-                category=_category;
+        let category: Category = undefined;
+        for (const _category of Categories) {
+            if (_category.getNames.map(value => value.toLowerCase()).includes(cmdArgs.args.join(" ").toLowerCase())) {
+                category = _category;
                 break;
             }
         }
-        if(!category) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category"));
+        if (!category) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category"));
 
-        if(category.availability!==CommandAvailable.Both&&(category.availability!==available)) return cmdArgs.message.reply("That category is not available here!");
+        if (category.availability !== CommandAvailable.Both && (category.availability !== available)) return cmdArgs.message.reply("That category is not available here!");
 
-        const embed=await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
-        if(!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
-        return cmdArgs.message.reply({embeds: [embed]});
+        const embed = await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
+        if (!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
+        return cmdArgs.message.reply({ embeds: [embed] });
     }
 
 }
 
-async function getCommands(category : Category, available : CommandAvailable, channel : TextBasedChannels, guild : Guild, member : GuildMember, author : User){
-    const embed=new MessageEmbed();
+async function getCommands(category: Category, available: CommandAvailable, channel: TextBasedChannel, guild: Guild, member: GuildMember, author: User) {
+    const embed = new MessageEmbed();
     embed.setTitle(`${category.emoji}: ${Localisation.getTranslation(category.name)}`);
-    if(category===CustomCommands){
-        const CustomCommands=BotUser.getDatabase(DatabaseType.CustomCommands);
-        const customCommands=await getServerDatabase<CustomCommand[]>(CustomCommands, guild.id);
-        await asyncForEach(customCommands, async(customCommand:CustomCommand)=>{
-            switch(customCommand.access){
-            case CommandAccess.Patreon:{
-                if(isDM(channel)||!(await isPatreon(author.id, guild.id)))
-                    return;
-            }break;
-            case CommandAccess.Moderators:{
-                if(isDM(channel)||!isModerator(member)){
-                    return;
-                }
-            }break;
-            case CommandAccess.GuildOwner:{
-                if(isDM(channel)||author.id!==guild.ownerId){
-                    return;
-                }
-            }break;
-            case CommandAccess.BotOwner:{
-                if(author.id!==OWNER_ID){
-                    return;
-                }
-            }break;
+    if (category === CustomCommands) {
+        const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
+        const customCommands = await getServerDatabase<CustomCommand[]>(CustomCommands, guild.id);
+        await asyncForEach(customCommands, async (customCommand: CustomCommand) => {
+            switch (customCommand.access) {
+                case CommandAccess.Patreon: {
+                    if (isDM(channel) || !(await isPatreon(author.id, guild.id)))
+                        return;
+                } break;
+                case CommandAccess.Moderators: {
+                    if (isDM(channel) || !isModerator(member)) {
+                        return;
+                    }
+                } break;
+                case CommandAccess.GuildOwner: {
+                    if (isDM(channel) || author.id !== guild.ownerId) {
+                        return;
+                    }
+                } break;
+                case CommandAccess.BotOwner: {
+                    if (author.id !== OWNER_ID) {
+                        return;
+                    }
+                } break;
             }
             embed.addField(customCommand.name, customCommand.description);
         });
-    }else{
-        BotUser.Commands.forEach((command, name)=>{
-            if(command.category===category){
-                if(command.available===CommandAvailable.Both||(command.available===available)){
-                    if((command.guildIds&&command.guildIds.includes(guild.id))||(!command.guildIds||!command.guildIds.length)){
-                        switch(command.access){
-                        case CommandAccess.Moderators:{
-                            if(isDM(channel)||!isModerator(member)){
-                                return;
-                            }
-                        }break;
-                        case CommandAccess.GuildOwner:{
-                            if(isDM(channel)||author.id!==guild.ownerId){
-                                return;
-                            }
-                        }break;
-                        case CommandAccess.BotOwner:{
-                            if(author.id!==OWNER_ID){
-                                return;
-                            }
-                        }break;
+    } else {
+        BotUser.Commands.forEach((command, name) => {
+            if (command.category === category) {
+                if (command.available === CommandAvailable.Both || (command.available === available)) {
+                    if ((command.guildIds && command.guildIds.includes(guild.id)) || (!command.guildIds || !command.guildIds.length)) {
+                        switch (command.access) {
+                            case CommandAccess.Moderators: {
+                                if (isDM(channel) || !isModerator(member)) {
+                                    return;
+                                }
+                            } break;
+                            case CommandAccess.GuildOwner: {
+                                if (isDM(channel) || author.id !== guild.ownerId) {
+                                    return;
+                                }
+                            } break;
+                            case CommandAccess.BotOwner: {
+                                if (author.id !== OWNER_ID) {
+                                    return;
+                                }
+                            } break;
                         }
 
-                        let title=name;
-                        if(!command.enabled) title+=` - ${Localisation.getTranslation("help.command.disabled")}`;
-                        let description=Localisation.getTranslation(command.description);
-                        if(command.aliases) description+=`\n${Localisation.getTranslation("help.command.aliases", command.aliases.join(", "))}`;
-                        if(command.usage) description+=`\n${Localisation.getTranslation("help.command.usage", command.getUsage())}`;
-                        if(command.access===CommandAccess.Patreon) description+=`\n${Localisation.getTranslation("help.command.patreon")}`;
+                        let title = name;
+                        if (!command.enabled) title += ` - ${Localisation.getTranslation("help.command.disabled")}`;
+                        let description = Localisation.getTranslation(command.description);
+                        if (command.aliases) description += `\n${Localisation.getTranslation("help.command.aliases", command.aliases.join(", "))}`;
+                        if (command.usage) description += `\n${Localisation.getTranslation("help.command.usage", command.getUsage())}`;
+                        if (command.access === CommandAccess.Patreon) description += `\n${Localisation.getTranslation("help.command.patreon")}`;
                         embed.addField(title, description);
                     }
                 }
@@ -177,4 +177,4 @@ async function getCommands(category : Category, available : CommandAvailable, ch
     return embed;
 }
 
-export=HelpCommand;
+export = HelpCommand;

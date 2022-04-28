@@ -6,6 +6,7 @@ import { BirthdayActivity } from "../structs/activities/events/BirthdayActivity"
 import { ChildrenDayActivity } from "../structs/activities/events/ChildrenDayActivity";
 import { ChristmasActivity } from "../structs/activities/events/ChristmasActivity";
 import { DayDeadActivity } from "../structs/activities/events/DayDeadActivity";
+import { EarthDayActivity } from "../structs/activities/events/EarthDayActivity";
 import { HalloweenActivity } from "../structs/activities/events/HalloweenActivity";
 import { NewYearActivity } from "../structs/activities/events/NewYearActivity";
 import { PeaceDayActivity } from "../structs/activities/events/PeaceDayActivity";
@@ -13,13 +14,14 @@ import { PrideMonthActivity } from "../structs/activities/events/PrideMonthActiv
 import { StValentineActivity } from "../structs/activities/events/StValentineActivity";
 import { UsersActivity } from "../structs/activities/UsersActivity";
 
-let i=-1;
-const activities=[
+let i = -1;
+const activities = [
     new BasicActivity(Localisation.getTranslation("activity.basic.version", VERSION)),
     new BasicActivity(Localisation.getTranslation("activity.basic.help", PREFIX)),
     new BasicActivity(Localisation.getTranslation("activity.basic.suggestion", PREFIX)),
     new UsersActivity(),
     new BasicActivity(Localisation.getTranslation("activity.basic.contact", PREFIX)),
+    new BasicActivity("🟦🟨 Slava Ukraini"),
     new StValentineActivity(),
     new PrideMonthActivity(),
     new HalloweenActivity(),
@@ -28,6 +30,7 @@ const activities=[
     new PeaceDayActivity(),
     new DayDeadActivity(),
     new ChildrenDayActivity(),
+    new EarthDayActivity(),
     //#region Birthdays
     new BirthdayActivity(new Date(2, 11, 10), "Bloom"),
     new BirthdayActivity(new Date(2, 5, 15), "Aisha"),
@@ -38,24 +41,24 @@ const activities=[
     //#endregion
 ];
 
-export=()=>{
-    BotUser.on("ready", async()=>{
+export = () => {
+    BotUser.on("ready", async () => {
         setActivity();
-        setInterval(async() => {
+        setInterval(async () => {
             setActivity();
-        }, 1000*10);
+        }, 1000 * 10);
     });
 };
 
-async function setActivity(){
+async function setActivity() {
     i++;
-    if(i>=activities.length)
-        i=0;
-    if(activities[i].isShowable()){
-        let activityText="";
-        activityText=await activities[i].getActivity();
-        BotUser.user.setActivity(activityText, {type: activities[i].type});
-    }else{
+    if (i >= activities.length)
+        i = 0;
+    if (activities[i].isShowable()) {
+        let activityText = "";
+        activityText = await activities[i].getActivity();
+        BotUser.user.setActivity(activityText, { type: activities[i].type });
+    } else {
         setActivity();
     }
 }

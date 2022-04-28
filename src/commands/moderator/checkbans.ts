@@ -6,23 +6,23 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "../../utils/Utils";
 
-class CheckBansCommand extends Command{
-    public constructor(){
+class CheckBansCommand extends Command {
+    public constructor() {
         super();
-        this.category=Moderator;
-        this.access=CommandAccess.Moderators;
-        this.available=CommandAvailable.Guild;
+        this.category = Moderator;
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
     }
 
-    public async onRun(cmdArgs : CommandArguments){
-        const Levels=BotUser.getDatabase(DatabaseType.Levels);
-        const levels:UserLevel[]=await getServerDatabase(Levels, cmdArgs.guildId);
-        if(!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
-        const bans=await cmdArgs.guild.bans.fetch();
-        let amount=0;
-        bans.forEach(ban=>{
-            const index=levels.findIndex(u=>u.userId===ban.user.id);
-            if(index>-1){
+    public async onRun(cmdArgs: CommandArguments) {
+        const Levels = BotUser.getDatabase(DatabaseType.Levels);
+        const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
+        if (!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
+        const bans = await cmdArgs.guild.bans.fetch();
+        let amount = 0;
+        bans.forEach(ban => {
+            const index = levels.findIndex(u => u.userId === ban.user.id);
+            if (index > -1) {
                 levels.splice(index, 1);
                 amount++;
             }
@@ -32,4 +32,4 @@ class CheckBansCommand extends Command{
     }
 }
 
-export=CheckBansCommand;
+export = CheckBansCommand;

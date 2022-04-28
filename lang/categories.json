@@ -10,5 +10,6 @@
     "category.customcommands": "Custom Commands",
     "category.customcommandsettings": "Custom Command Settings",
     "category.patreon": "Patreon",
-    "category.minigames": "Minigames"
+    "category.minigames": "Minigames",
+    "category.userSettings": "User Settings"
 }
