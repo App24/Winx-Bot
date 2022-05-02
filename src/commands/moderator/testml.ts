@@ -16,7 +16,6 @@ class TestMLCommand extends Command {
     public constructor() {
         super();
         this.category = Moderator;
-        this.minArgs = 1;
         this.usage = [new CommandUsage(true, "argument.level"), new CommandUsage(false, "all")];
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;

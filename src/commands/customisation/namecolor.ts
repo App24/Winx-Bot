@@ -26,55 +26,52 @@ class NameColorCommand extends Command {
         }
 
         createMessageSelection({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: [
-                {
-                    customId: "select",
-                    placeholder: Localisation.getTranslation("generic.selectmenu.placeholder"),
-                    options: [
-                        {
-                            label: Localisation.getTranslation("button.get"),
-                            value: "get",
-                            onSelect: async ({ interaction }) => {
-                                if (userSettings.nameColor === DEFAULT_USER_SETTING.nameColor || !isHexColor(userSettings.nameColor))
-                                    return await interaction.reply(Localisation.getTranslation("error.invalid.namecolor"));
-                                await interaction.reply({ content: Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), files: [canvasToMessageAttachment(canvasColor(userSettings.nameColor))] });
-                            }
-                        },
-                        {
-                            label: Localisation.getTranslation("button.set"),
-                            value: "set",
-                            onSelect: async ({ interaction }) => {
-                                await interaction.reply({ content: Localisation.getTranslation("argument.reply.hexcolor"), components: [] });
-                                const reply = await interaction.fetchReply();
-                                createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
-                                    let color = msg.content.toLowerCase();
-                                    if (color.toLowerCase() === DEFAULT_USER_SETTING.nameColor) {
-                                        userSettings.nameColor = DEFAULT_USER_SETTING.nameColor;
-                                        cmdArgs.message.reply(Localisation.getTranslation("namecolor.reset.output"));
-                                    } else {
-                                        if (color.startsWith("#")) {
-                                            color = color.substring(1);
-                                        }
-                                        if (!isHexColor(color)) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
-                                        userSettings.nameColor = color;
-                                        cmdArgs.message.reply(Localisation.getTranslation("namecolor.set.output", color));
-                                    }
-                                    await UserSettings.set(cmdArgs.author.id, userSettings);
-                                });
-                            }
-                        },
-                        {
-                            label: Localisation.getTranslation("button.reset"),
-                            value: "reset",
-                            onSelect: async ({ interaction }) => {
-                                userSettings.nameColor = DEFAULT_USER_SETTING.nameColor;
-                                await UserSettings.set(cmdArgs.author.id, userSettings);
-                                await interaction.reply(Localisation.getTranslation("namecolor.reset.output"));
-                            }
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
+            {
+                options: [
+                    {
+                        label: Localisation.getTranslation("button.get"),
+                        value: "get",
+                        onSelect: async ({ interaction }) => {
+                            if (userSettings.nameColor === DEFAULT_USER_SETTING.nameColor || !isHexColor(userSettings.nameColor))
+                                return await interaction.reply(Localisation.getTranslation("error.invalid.namecolor"));
+                            await interaction.reply({ content: Localisation.getTranslation("generic.hexcolor", userSettings.nameColor), files: [canvasToMessageAttachment(canvasColor(userSettings.nameColor))] });
                         }
-                    ]
-                }
-            ]
+                    },
+                    {
+                        label: Localisation.getTranslation("button.set"),
+                        value: "set",
+                        onSelect: async ({ interaction }) => {
+                            await interaction.reply({ content: Localisation.getTranslation("argument.reply.hexcolor"), components: [] });
+                            const reply = await interaction.fetchReply();
+                            createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
+                                let color = msg.content.toLowerCase();
+                                if (color.toLowerCase() === DEFAULT_USER_SETTING.nameColor) {
+                                    userSettings.nameColor = DEFAULT_USER_SETTING.nameColor;
+                                    cmdArgs.message.reply(Localisation.getTranslation("namecolor.reset.output"));
+                                } else {
+                                    if (color.startsWith("#")) {
+                                        color = color.substring(1);
+                                    }
+                                    if (!isHexColor(color)) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
+                                    userSettings.nameColor = color;
+                                    cmdArgs.message.reply(Localisation.getTranslation("namecolor.set.output", color));
+                                }
+                                await UserSettings.set(cmdArgs.author.id, userSettings);
+                            });
+                        }
+                    },
+                    {
+                        label: Localisation.getTranslation("button.reset"),
+                        value: "reset",
+                        onSelect: async ({ interaction }) => {
+                            userSettings.nameColor = DEFAULT_USER_SETTING.nameColor;
+                            await UserSettings.set(cmdArgs.author.id, userSettings);
+                            await interaction.reply(Localisation.getTranslation("namecolor.reset.output"));
+                        }
+                    }
+                ]
+            }
         }
         );
     }

@@ -25,6 +25,12 @@ export async function getUserLevel(userId: string, guildId: string, createNew = 
     return levels[userIndex];
 }
 
+export async function getRank(level: number, guildId: string) {
+    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
+    const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
+    return ranks.find(r => r.level === level);
+}
+
 export async function getNextRank(currentLevel: number, guildId: string) {
     const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
     const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
@@ -106,7 +112,16 @@ export async function getPreviousRanks(currentLevel: number, guildId: string) {
     return ranksToReturn;
 }
 
-export async function getUserSettings(userId: string, guildId: string) {
+export async function getUserSettings(userId: string) {
+    const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
+    const userSettings: UserSetting = await UserSettings.get(userId);
+    if (!userSettings) {
+        return DEFAULT_USER_SETTING;
+    }
+    return userSettings;
+}
+
+export async function getServerUserSettings(userId: string, guildId: string) {
     const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
     const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, guildId);
 
@@ -128,7 +143,7 @@ export async function getWingsImage(user: User, guildId: string) {
         await UserSettings.set(user.id, userSettings);
     }
 
-    const serverUserSettings = await getUserSettings(user.id, guildId);
+    const serverUserSettings = await getServerUserSettings(user.id, guildId);
     const userLevel = await getUserLevel(user.id, guildId);
 
     if (userSettings.winxCharacter <= 0)

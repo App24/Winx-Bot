@@ -15,7 +15,6 @@ class PatreonCommand extends Command {
         super();
         this.category = Moderator;
         this.usage = [new CommandUsage(true, "argument.add", "argument.remove", "argument.list"), new CommandUsage(false, "argument.user")];
-        this.minArgs = 1;
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;
         this.subCommands = [new AddSubCommand(), new RemoveSubCommand(), new ListSubCommand()];

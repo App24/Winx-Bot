@@ -3,7 +3,6 @@ import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
 class RandomChoiceClass extends Command {
     public constructor() {
         super();
-        this.minArgs = 2;
         this.usage = [new CommandUsage(true, "choice1"), new CommandUsage(true, "choice2"), new CommandUsage(false, "choice3...")];
     }
 

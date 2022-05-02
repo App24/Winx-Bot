@@ -15,7 +15,6 @@ class SuggestionsCommand extends Command {
     public constructor() {
         super();
         this.access = CommandAccess.BotOwner;
-        this.minArgs = 1;
         this.usage = [new CommandUsage(true, "argument.list", "argument.complete", "argument.reject", "argument.get"), new CommandUsage(false, "argument.requestid", "argument.rejected", "argument.completed", "argument.non")];
         this.category = Owner;
         this.subCommands = [new ListSubCommand(), new CompleteSubCommand(), new RejectSubCommand(), new GetSubCommand()];

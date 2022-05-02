@@ -6,7 +6,7 @@ import { Command, CommandAccess, CommandArguments, CommandAvailable } from "../.
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { getBotRoleColor, GetTextNewsGuildChannelFromMention } from "../../utils/GetterUtils";
+import { getBotRoleColor, getTextChannelById } from "../../utils/GetterUtils";
 import { getServerDatabase } from "../../utils/Utils";
 
 class ServerSettingsCommand extends Command {
@@ -24,7 +24,7 @@ class ServerSettingsCommand extends Command {
         const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
         const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
 
-        const channel = await GetTextNewsGuildChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
+        const channel = await getTextChannelById(serverInfo.levelChannel, cmdArgs.guild);
 
         const embed = new MessageEmbed();
         embed.addField(Localisation.getTranslation("serversettings.category.xp"), serverInfo.maxXpPerMessage.toString());

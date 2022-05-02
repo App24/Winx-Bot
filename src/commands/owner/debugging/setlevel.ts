@@ -15,7 +15,6 @@ class SetLevelCommand extends Command {
         this.access = CommandAccess.BotOwner;
         this.available = CommandAvailable.Guild;
         this.usage = [new CommandUsage(true, "argument.user"), new CommandUsage(true, "argument.level"), new CommandUsage(false, "argument.xp")];
-        this.minArgs = 2;
     }
 
     public async onRun(cmdArgs: CommandArguments) {

@@ -1,4 +1,4 @@
-import { MessageEmbed, Guild, GuildMember, User, TextBasedChannel, MessageActionRow, MessageButton, ButtonInteraction } from "discord.js";
+import { MessageEmbed, Guild, GuildMember, User, TextBasedChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { OWNER_ID, PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
@@ -7,6 +7,7 @@ import { Command, CommandUsage, CommandArguments, CommandAvailable, CommandAcces
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getBotRoleColor } from "../../utils/GetterUtils";
+import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
 import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator, createMessageEmbed } from "../../utils/Utils";
 
 class HelpCommand extends Command {
@@ -62,35 +63,31 @@ class HelpCommand extends Command {
             embed.setDescription(categories.join("\n"));
             embed.setFooter({ text: Localisation.getTranslation("help.footer", PREFIX) });
 
-            const rows: MessageActionRow[] = [];
-            for (let i = 0; i < Math.ceil(categoryEmojis.length / 5); i++) {
-                rows.push(new MessageActionRow());
-            }
+            const options: SelectOption[] = [];
 
-            categoryEmojis.forEach((emoji, index) => {
-                rows[Math.floor(index / 5)].addComponents(new MessageButton({ customId: emoji.category.name, style: "PRIMARY", emoji: emoji.emoji }));
-            });
-
-            return cmdArgs.message.reply({ embeds: [await createMessageEmbed(embed, cmdArgs.guild)], components: rows }).then(msg => {
-                const collector = msg.createMessageComponentCollector({ filter: (interaction) => interaction.user.id === cmdArgs.author.id, max: 1, time: 1000 * 60 * 5 });
-
-                collector.on("end", () => {
-                    msg.edit({ components: [] });
-                });
-
-                collector.on("collect", async function (interaction: ButtonInteraction) {
-                    const category = categoryEmojis.find(emoji => emoji.category.name === interaction.customId).category;
-                    if (category) {
-                        const embed = await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
+            categoryEmojis.forEach(emoji => {
+                options.push({
+                    label: Localisation.getTranslation(emoji.category.name),
+                    value: emoji.category.name,
+                    emoji: emoji.emoji,
+                    onSelect: async ({ interaction }) => {
+                        const embed = await getCommands(emoji.category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
                         if (!embed.fields.length)
-                            return <any>interaction.update({ content: Localisation.getTranslation("error.invalid.category.commands"), components: [] });
+                            return interaction.update({ content: Localisation.getTranslation("error.invalid.category.commands"), components: [] });
                         return interaction.update({ embeds: [embed], components: [] });
                     }
                 });
             });
+
+            return await createMessageSelection({
+                sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, options: { embeds: [await createMessageEmbed(embed, cmdArgs.guild)] }, selectMenuOptions:
+                {
+                    options
+                }
+            });
         }
 
-        let category: Category = undefined;
+        let category: Category;
         for (const _category of Categories) {
             if (_category.getNames.map(value => value.toLowerCase()).includes(cmdArgs.args.join(" ").toLowerCase())) {
                 category = _category;

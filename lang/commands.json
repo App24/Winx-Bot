@@ -111,6 +111,7 @@
     "setrank.role.remove": "Removed transformation!",
     "setrank.wings.remove": "Removed Wings for character {0}!",
     "setrank.wings.add": "Added Wings for character {0}!",
+    "setrank.wings.download": "Downloading image...",
     "setrank.wings.get": "Wings for character {0}!",
     "setrank.list.gifs": "__GIFs__",
     "setrank.list.role": "**Role**: <@&{0}>",

@@ -113,7 +113,7 @@ export = () => {
         timestamps.set(message.author.id, now);
         setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
-        if (args.length < command.minArgs) {
+        if (args.length < command.getMinArgs()) {
             let reply = Localisation.getTranslation("error.arguments.few");
 
             if (command.usage) {

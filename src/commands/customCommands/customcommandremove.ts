@@ -12,7 +12,6 @@ class CustomCommandRemoveCommand extends Command {
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;
         this.category = CustomCommandsSettings;
-        this.minArgs = 1;
         this.usage = [new CommandUsage(true, "argument.name")];
         this.aliases = ["ccremove"];
     }

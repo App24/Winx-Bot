@@ -74,13 +74,10 @@ class WingsLevelCommand extends Command {
         });
 
         createMessageSelection({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: [
-                {
-                    customId: "selection",
-                    placeholder: Localisation.getTranslation("generic.selectmenu.placeholder"),
-                    options: options
-                }
-            ]
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
+            {
+                options: options
+            }
         });
     }
 }

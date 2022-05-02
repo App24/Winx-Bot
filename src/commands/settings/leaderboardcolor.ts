@@ -10,13 +10,14 @@ import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
 import { createMessageCollector } from "../../utils/MessageUtils";
 import { canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../utils/Utils";
 
-class LeaderboardColor extends Command {
+class LeaderboardColorCommand extends Command {
     public constructor() {
         super();
         this.available = CommandAvailable.Guild;
         this.access = CommandAccess.GuildOwner;
         this.category = Settings;
         this.aliases = ["leaderboardcolour", "lbcolor", "lbcolour"];
+        this.deprecated = true;
     }
 
     public async onRun(cmdArgs: CommandArguments) {
@@ -102,4 +103,4 @@ class LeaderboardColor extends Command {
     }
 }
 
-export = LeaderboardColor;
+export = LeaderboardColorCommand;

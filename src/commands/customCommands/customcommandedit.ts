@@ -12,7 +12,6 @@ class CustomCommandEditCommand extends Command {
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;
         this.category = CustomCommandsSettings;
-        this.minArgs = 3;
         this.usage = [new CommandUsage(true, "argument.name"), new CommandUsage(true, "argument.type"), new CommandUsage(true, "argument.value", "argument.oldvalue"), new CommandUsage(false, "argument.newvalue")];
         this.aliases = ["ccedit"];
     }

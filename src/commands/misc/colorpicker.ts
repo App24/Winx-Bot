@@ -6,7 +6,6 @@ import { isHexColor, canvasToMessageAttachment } from "../../utils/Utils";
 class ColorPickerCommand extends Command {
     public constructor() {
         super();
-        this.minArgs = 1;
         this.usage = [new CommandUsage(true, "argument.hexcolor")];
         this.aliases = ["colourpicker"];
     }

@@ -1,31 +1,36 @@
-import { Message, TextBasedChannel, User, MessageEmbed, MessageSelectOptionData, MessageActionRow, MessageSelectMenu, MessageComponentInteraction } from "discord.js";
+import { Message, TextBasedChannel, User, MessageSelectOptionData, MessageActionRow, MessageSelectMenu, MessageOptions } from "discord.js";
 import { Localisation } from "../localisation";
 import { InteractionData } from "./MessageButtonUtils";
 import { asyncForEach } from "./Utils";
 
 export async function createMessageSelection(messageSelectData: MessageSelectData) {
-    const { sendTarget, author, text, selectMenuOptions } = messageSelectData;
+    const { sendTarget, author, options, selectMenuOptions } = messageSelectData;
     let { settings } = messageSelectData;
 
-    if (selectMenuOptions.length > 5) selectMenuOptions.splice(5, selectMenuOptions.length - 5);
+    if (Array.isArray(selectMenuOptions)) {
+        if (selectMenuOptions.length > 5) selectMenuOptions.splice(5, selectMenuOptions.length - 5);
+    }
 
     const rows: MessageActionRow[] = [];
-    for (let i = 0; i < selectMenuOptions.length; i++) {
+    for (let i = 0; i < (Array.isArray(selectMenuOptions) ? selectMenuOptions.length : 1); i++) {
         rows.push(new MessageActionRow());
     }
 
-    selectMenuOptions.forEach((selectMenu, index) => {
-        rows[index].addComponents(new MessageSelectMenu({ custom_id: selectMenu.customId, placeholder: selectMenu.placeholder, options: selectMenu.options }));
+    (Array.isArray(selectMenuOptions) ? selectMenuOptions : [selectMenuOptions]).forEach((selectMenu, index) => {
+        const custom_id = selectMenu.customId || `selection${index}`;
+        rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectMenu.options }));
     });
 
     let msg: Message<boolean>;
 
     const sendMessage = sendTarget instanceof Message ? sendTarget.reply.bind(sendTarget) : sendTarget.send.bind(sendTarget);
 
-    if (typeof text === "string")
-        msg = await sendMessage({ content: text, components: rows });
-    else
-        msg = await sendMessage({ embeds: text, components: rows });
+    if (typeof options === "string")
+        msg = await sendMessage({ content: options, components: rows });
+    else {
+        options.components = rows;
+        msg = await sendMessage(options);
+    }
 
     let authorId: string;
 
@@ -40,7 +45,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 
     let use = 0;
 
-    const collector = msg.createMessageComponentCollector({ filter: (i: MessageComponentInteraction) => i === i, time: settings.time });
+    const collector = msg.createMessageComponentCollector({ filter: () => true, time: settings.time });
 
     collector.on("end", () => {
         const components = msg.components;
@@ -62,10 +67,11 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                 await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
                 return;
             }
-            await asyncForEach(selectMenuOptions, async (value) => {
-                if (value.customId === interaction.customId) {
+            await asyncForEach(Array.isArray(selectMenuOptions) ? selectMenuOptions : [selectMenuOptions], async (value, index) => {
+                const custom_id = value.customId || `selection${index}`;
+                if (custom_id === interaction.customId) {
                     if (value.onSelection)
-                        value.onSelection({ interaction, message: msg, data, collector });
+                        await value.onSelection({ interaction, message: msg, data, collector });
                     await asyncForEach(value.options, async (option) => {
                         if (option.value === interaction.values[0])
                             await option.onSelect({ interaction, message: msg, data, collector });
@@ -85,13 +91,13 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 export interface MessageSelectData {
     sendTarget: Message | TextBasedChannel,
     author?: User | string,
-    text?: string | MessageEmbed[],
+    options?: string | MessageOptions,
     settings?: { max?: number, time?: number }
-    selectMenuOptions: SelectMenuOptions[]
+    selectMenuOptions: SelectMenuOptions[] | SelectMenuOptions
 }
 
 export interface SelectMenuOptions {
-    customId: string,
+    customId?: string,
     placeholder?: string,
     onSelection?(interactionData: InteractionData): void,
     options: SelectOption[]

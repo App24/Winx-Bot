@@ -8,7 +8,6 @@ class MessageUserCommand extends Command {
         super();
         this.access = CommandAccess.BotOwner;
         this.usage = [new CommandUsage(true, "argument.user"), new CommandUsage(true, "argument.message")];
-        this.minArgs = 2;
         this.category = Owner;
     }
 

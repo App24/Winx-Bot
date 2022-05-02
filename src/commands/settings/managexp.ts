@@ -14,6 +14,7 @@ class SetXPCommand extends Command {
         this.category = Settings;
         this.access = CommandAccess.GuildOwner;
         this.available = CommandAvailable.Guild;
+        this.deprecated = true;
     }
 
     public async onRun(cmdArgs: CommandArguments) {

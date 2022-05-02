@@ -18,8 +18,6 @@ export abstract class Command {
 
     public aliases: string[];
 
-    public minArgs: number;
-
     public cooldown: number;
 
     public guildIds: string[];
@@ -31,7 +29,6 @@ export abstract class Command {
         this.enabled = true;
         this.category = Other;
         this.available = CommandAvailable.Both;
-        this.minArgs = 0;
         this.subCommands = [];
     }
 
@@ -76,6 +73,21 @@ export abstract class Command {
             });
         }
         return text;
+    }
+
+    public getMinArgs() {
+        let amount = 0;
+        if (this.usage && this.usage.length > 0) {
+            for (let i = 0; i < this.usage.length; i++) {
+                const use = this.usage[i];
+                if (use.required) {
+                    amount++;
+                } else {
+                    break;
+                }
+            }
+        }
+        return amount;
     }
 }
 

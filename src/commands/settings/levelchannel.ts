@@ -1,5 +1,4 @@
 import { BotUser } from "../../BotClient";
-import { GetTextNewsGuildChannelFromMention } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
@@ -8,6 +7,7 @@ import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/Ser
 import { getServerDatabase } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
 import { createMessageCollector } from "../../utils/MessageUtils";
+import { getTextChannelFromMention } from "../../utils/GetterUtils";
 
 class LevelChannelCommand extends Command {
     public constructor() {
@@ -28,7 +28,7 @@ class LevelChannelCommand extends Command {
                         await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
                         const reply = await interaction.fetchReply();
                         createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
-                            const channel = await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
+                            const channel = await getTextChannelFromMention(msg.content, cmdArgs.guild);
                             if (!channel) return <any>msg.reply(Localisation.getTranslation("error.invalid.channel"));
 
                             serverInfo.levelChannel = channel.id;
@@ -41,7 +41,7 @@ class LevelChannelCommand extends Command {
                 {
                     customId: "get", style: "PRIMARY", label: Localisation.getTranslation("button.get"), onRun: async () => {
                         if (!serverInfo.levelChannel) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
-                        const channel = await GetTextNewsGuildChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
+                        const channel = await getTextChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
                         if (!channel) return cmdArgs.message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
                         cmdArgs.message.reply(`${channel}`);
                     }

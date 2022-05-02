@@ -1,4 +1,4 @@
-export const VERSION = "3.2.0";
+export const VERSION = "3.2.1";
 
 export const CANVAS_FONT = "Comic Sans MS";
 
@@ -14,3 +14,4 @@ export const SUGGESTION_CHANNEL = "899287973705703484";
 export const BACKUP_CHANNEL = "867321985057685514";
 
 export const DONATE_LINK = "https://paypal.me/WinxServer";
+export const GITHUB_LINK = "https://github.com/App24/Winx-Bot";

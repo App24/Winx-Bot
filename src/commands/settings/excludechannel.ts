@@ -1,6 +1,6 @@
 import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { getBotRoleColor, GetTextNewsGuildChannelFromMention } from "../../utils/GetterUtils";
+import { getBotRoleColor, getTextChannelFromMention } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
@@ -31,7 +31,7 @@ class ExcludeChannelCommand extends Command {
                         createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
                             if (!serverInfo.excludeChannels) serverInfo.excludeChannels = [];
 
-                            const channel = await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
+                            const channel = await getTextChannelFromMention(msg.content, cmdArgs.guild);
                             if (!channel) return <any>msg.reply(Localisation.getTranslation("error.invalid.channel"));
 
                             if (serverInfo.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.already"));
@@ -48,7 +48,7 @@ class ExcludeChannelCommand extends Command {
                         if (!serverInfo.excludeChannels || !serverInfo.excludeChannels.length) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
                         const data = [];
                         await asyncForEach(serverInfo.excludeChannels, async (excludedChannel: string) => {
-                            const channel = await GetTextNewsGuildChannelFromMention(excludedChannel, cmdArgs.guild);
+                            const channel = await getTextChannelFromMention(excludedChannel, cmdArgs.guild);
                             if (channel) {
                                 data.push(channel);
                             }
@@ -66,7 +66,7 @@ class ExcludeChannelCommand extends Command {
                         createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
                             if (!serverInfo.excludeChannels || !serverInfo.excludeChannels.length) return <any>msg.reply(Localisation.getTranslation("error.empty.excludedchannels"));
 
-                            const channel = await GetTextNewsGuildChannelFromMention(msg.content, cmdArgs.guild);
+                            const channel = await getTextChannelFromMention(msg.content, cmdArgs.guild);
                             if (!channel) return msg.reply(Localisation.getTranslation("error.invalid.channel"));
 
                             if (!serverInfo.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.not"));
@@ -84,7 +84,7 @@ class ExcludeChannelCommand extends Command {
                         if (!serverInfo.excludeChannels || !serverInfo.excludeChannels.length) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.empty.excludedchannels"));
                         const data = [];
                         await asyncForEach(serverInfo.excludeChannels, async (excludedChannel: string) => {
-                            const channel = await GetTextNewsGuildChannelFromMention(excludedChannel, cmdArgs.guild);
+                            const channel = await getTextChannelFromMention(excludedChannel, cmdArgs.guild);
                             if (!channel) {
                                 data.push(excludedChannel);
                             }

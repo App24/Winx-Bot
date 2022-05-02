@@ -69,13 +69,10 @@ class WinxCharacterCommand extends Command {
         });
 
         createMessageSelection({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, text: Localisation.getTranslation("generic.selectcurrentcharacter", cmdArgs.author), selectMenuOptions: [
-                {
-                    customId: "characters",
-                    placeholder: Localisation.getTranslation("generic.selectmenu.placeholder"),
-                    options
-                }
-            ]
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("generic.selectcurrentcharacter", cmdArgs.author), selectMenuOptions:
+            {
+                options
+            }
         });
     }
 }

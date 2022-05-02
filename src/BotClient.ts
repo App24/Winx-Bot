@@ -113,18 +113,13 @@ class BotClient extends Client {
 
     public loadLocalisation() {
         Localisation.clearLocalisation();
-
-        Localisation.loadLocalisation("lang/activities.json");
-        Localisation.loadLocalisation("lang/arguments.json");
-        Localisation.loadLocalisation("lang/buttons.json");
-        Localisation.loadLocalisation("lang/categories.json");
-        Localisation.loadLocalisation("lang/commandDescriptions.json");
-        Localisation.loadLocalisation("lang/commands.json");
-        Localisation.loadLocalisation("lang/errors.json");
-        Localisation.loadLocalisation("lang/generics.json");
-        Localisation.loadLocalisation("lang/levels.json");
-        Localisation.loadLocalisation("lang/miscs.json");
-        Localisation.loadLocalisation("lang/minigames.json");
+        const files = loadFiles("lang");
+        if (!files) return;
+        for (const file of files) {
+            if (file.endsWith(".json")) {
+                Localisation.loadLocalisation(file);
+            }
+        }
     }
 
     public getDatabase(databaseType: DatabaseType): Keyv {

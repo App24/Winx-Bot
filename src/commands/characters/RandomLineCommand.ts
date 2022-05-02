@@ -41,7 +41,7 @@ export abstract class RandomLineCommand extends Command {
         }
 
         await createGenericButtons({
-            sendTarget: cmdArgs.message, text: this.getLine(data), settings: { time: 1000 * 60 * 5 }, buttons: [
+            sendTarget: cmdArgs.message, options: this.getLine(data), settings: { time: 1000 * 60 * 5 }, buttons: [
                 {
                     customId: "reroll", style: "PRIMARY", emoji: "♻️",
                     onRun: async ({ interaction }) => {

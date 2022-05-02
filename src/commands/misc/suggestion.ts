@@ -1,7 +1,7 @@
 import { MessageEmbed, BaseGuildTextChannel, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { SUGGESTION_CHANNEL, OWNER_ID } from "../../Constants";
-import { getBotRoleColor, getGuildById, getTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
+import { getBotRoleColor, getGuildById, getTextChannelById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
@@ -12,7 +12,6 @@ import { createMessageButtons } from "../../utils/MessageButtonUtils";
 class SuggestionCommand extends Command {
     public constructor() {
         super();
-        this.minArgs = 1;
         this.usage = [new CommandUsage(true, "argument.suggestion")];
         this.aliases = ["suggest"];
     }
@@ -21,9 +20,9 @@ class SuggestionCommand extends Command {
         const suggestionsChannel: any = await BotUser.channels.fetch(SUGGESTION_CHANNEL);
         let channel: BaseGuildTextChannel;
         if (!isDM(cmdArgs.channel) && suggestionsChannel.guildId === cmdArgs.guildId) {
-            channel = await getTextBasedGuildGuildChannelById(SUGGESTION_CHANNEL, cmdArgs.guild);
+            channel = await getTextChannelById(SUGGESTION_CHANNEL, cmdArgs.guild);
         } else {
-            channel = await getTextBasedGuildGuildChannelById(SUGGESTION_CHANNEL, await getGuildById(suggestionsChannel.guildId));
+            channel = await getTextChannelById(SUGGESTION_CHANNEL, await getGuildById(suggestionsChannel.guildId));
         }
         const user = cmdArgs.author;
         const request = cmdArgs.args.join(" ");
@@ -36,7 +35,7 @@ class SuggestionCommand extends Command {
         cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
 
         await createMessageButtons({
-            sendTarget: <TextChannel>channel, author: OWNER_ID, text: [embed], settings: { max: 1, time: -1 }, buttons: [
+            sendTarget: <TextChannel>channel, author: OWNER_ID, options: { embeds: [embed] }, settings: { max: 1, time: -1 }, buttons: [
                 {
                     customId: "accept", style: "SUCCESS", label: Localisation.getTranslation("button.accept"), onRun: async ({ interaction, message }) => {
                         const embed = message.embeds[0];

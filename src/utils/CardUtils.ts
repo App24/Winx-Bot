@@ -1,4 +1,4 @@
-import { createCanvas, loadImage, NodeCanvasRenderingContext2D } from "canvas";
+import { createCanvas, Image, loadImage } from "canvas";
 import { Guild, GuildMember } from "discord.js";
 import { BotUser } from "../BotClient";
 import { CANVAS_FONT } from "../Constants";
@@ -13,21 +13,16 @@ import { rgbToHsl, fitTextOnCanvas, roundRect } from "./CanvasUtils";
 import { capitalise } from "./FormatUtils";
 import { getRoleById } from "./GetterUtils";
 import { getWingsImageByLevel } from "./RankUtils";
-import { getServerDatabase, asyncForEach, hexToRGB, blend, isHexColor } from "./Utils";
+import { getServerDatabase, asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor } from "./Utils";
 import { getLevelXP } from "./XPUtils";
 
-function drawSpecialCircle(ctx: NodeCanvasRenderingContext2D, x: number, y: number, radius: number, color: string) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.clip();
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, radius * 2, radius * 2);
-    ctx.restore();
+export async function drawCard(leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+    const wingsImage = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, userSettings.winxCharacter, guild.id);
+
+    return drawCardWithWings(leaderboardPosition, userLevel, userSettings, serverUserSettings, wingsImage, currentRank, nextRank, member, guild);
 }
 
-export async function drawCard(leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+export async function drawCardWithWings(leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, wingsImage: string | Buffer | Image, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
     const Levels = BotUser.getDatabase(DatabaseType.Levels);
     const levels: UserLevel[] = await getServerDatabase(Levels, guild.id);
 
@@ -83,12 +78,6 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
         });
 
         return toReturn;
-        /*const customName = customNames.users.find(u => u.id === user.id);
-        if (!customName)
-            return user.username;
-        if (customName.index >= customNames.names.length)
-            return user.username;
-        return customNames.names[customName.index];*/
     };
 
     const name = await getCustomName();
@@ -107,13 +96,7 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
     const endRGB = hexToRGB(userSettings.barEndColor);
     const endHsl = rgbToHsl(endRGB.r, endRGB.g, endRGB.b);
 
-    let rgb = hexToRGB(userSettings.cardColor);
-    let brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
-    const textColor = (brightness > 125) ? 'black' : 'white';
-
-    rgb = { r: blend(startRGB.r, endRGB.r, 1 - filled), g: blend(startRGB.g, endRGB.g, 1 - filled), b: blend(startRGB.b, endRGB.b, 1 - filled) };
-    brightness = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
-    const levelColor = (brightness > 125) ? "black" : "white";
+    const textColor = getBrightnessColor(hexToRGB(userSettings.cardColor));
 
     const namePosY = 5;
 
@@ -142,13 +125,17 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
     ctx.fillStyle = `#${userSettings.cardColor}`;
     roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.width * 0.01);
 
+    let wings: Image;
+
     //Draw Wings
-    const wingsImage = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, userSettings.winxCharacter, guild.id);
+    if (typeof (wingsImage) === "string" || Buffer.isBuffer(wingsImage)) {
+        wings = await loadImage(wingsImage);
+    } else {
+        wings = wingsImage;
+    }
 
-    const oldMode = false;
-
-    if (wingsImage) {
-        ctx.drawImage(wingsImage, (canvas.width - wingsImage.width) / 2., oldMode ? (pfpY + borderThickness - wingsImage.height / 4.) : (((newPfpRadius + pfpY + borderThickness) - wingsImage.height / 2.)), wingsImage.width, wingsImage.height);
+    if (wings) {
+        ctx.drawImage(wings, (canvas.width - wings.width) / 2., ((newPfpRadius + pfpY + borderThickness) - wings.height / 2.), wings.width, wings.height);
     }
 
     if (serverUserSettings.cardName === undefined) {
@@ -185,45 +172,11 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
     ctx.textAlign = "right";
     ctx.fillText(lbPositionText, barPosX + barWidth, namePosY);
 
-    //Draw Level bar background
-    /*ctx.fillStyle = "#272822";
-    roundRect(ctx, barPosX, barPosY, barWidth, barHeight, 20);
-
-    //Draw Level bar
-    ctx.fillStyle = `hsla(${blend(startHsl[0], endHsl[0], 1 - filled) * 360}, ${blend(startHsl[1], endHsl[1], 1 - filled) * 100}%, ${blend(startHsl[2], endHsl[2], 1 - filled) * 100}%, 1)`;
-    ctx.save();
-    roundRect(ctx, barPosX, barPosY, barWidth, barHeight, 20, "clip");
-    ctx.fillRect(barPosX, barPosY, barWidth * filled, barHeight);
-    ctx.restore();
-
-    //Draw level text
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(barPosX, barPosY, barWidth * filled, barHeight);
-    ctx.clip();
-    ctx.font = levelFont;
-    ctx.fillStyle = levelColor;
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
-    ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (barPosX) + (barWidth / 2.0), barPosY + (barHeight * 0.5));
-    ctx.restore();
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect((barWidth * filled) + barPosX, barPosY, canvas.width, barHeight);
-    ctx.clip();
-    ctx.font = levelFont;
-    ctx.fillStyle = "#ffffff";
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
-    ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (barPosX) + (barWidth / 2.0), barPosY + (barHeight * 0.5));
-    ctx.restore();*/
-
     ctx.font = levelFont;
     ctx.fillStyle = textColor;
-    ctx.textBaseline = "middle";
+    ctx.textBaseline = "bottom";
     ctx.textAlign = "center";
-    ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (canvas.width / 2.0), pfpY + (borderThickness * 2 + pfpRadius) * 2);
+    ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (canvas.width / 2.0), barPosY + barHeight + (extraTextPosY * 1.375));
 
     ctx.font = `${extraInfoFontSize}px ${CANVAS_FONT}`;
     ctx.textBaseline = 'bottom';
@@ -232,8 +185,6 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
     ctx.fillText(currentRankText, canvas.width / 2, barPosY + barHeight + extraTextPosY);
 
     ctx.fillText(nextRankText, canvas.width / 2, barPosY + barHeight + (extraTextPosY * 2));
-
-    //drawSpecialCircle(ctx, pfpX, pfpY, pfpRadius, `#${userSettings.specialCircleColor || DEFAULT_USER_SETTING.specialCircleColor}`);
 
     if (userSettings.specialCircleColor && userSettings.specialCircleColor !== DEFAULT_USER_SETTING.specialCircleColor) {
         ctx.save();

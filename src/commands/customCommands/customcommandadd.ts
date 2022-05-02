@@ -12,7 +12,6 @@ class CustomCommandAddCommand extends Command {
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;
         this.category = CustomCommandsSettings;
-        this.minArgs = 3;
         this.usage = [new CommandUsage(true, "argument.name"), new CommandUsage(true, "argument.description"), new CommandUsage(true, "argument.outputs")];
         this.aliases = ["ccadd"];
     }

@@ -7,7 +7,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
 import { getServerDatabase, canvasToMessageAttachment, getLeaderboardMembers } from "../../utils/Utils";
-import { getCurrentRank, getNextRank, getUserSettings } from "../../utils/RankUtils";
+import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
 import { drawCard } from "../../utils/CardUtils";
 
 class LevelsCommand extends Command {
@@ -63,7 +63,7 @@ class LevelsCommand extends Command {
         const currentRank = await getCurrentRank(userLevel.level, cmdArgs.guildId);
         const nextRank = await getNextRank(userLevel.level, cmdArgs.guildId);
 
-        const serverUserSettings = await getUserSettings(user.id, cmdArgs.guildId);
+        const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 
         cmdArgs.message.reply({ files: [canvasToMessageAttachment(await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild), "magiclevels")] });
     }

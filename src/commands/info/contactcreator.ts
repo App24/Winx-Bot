@@ -7,7 +7,6 @@ import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
 class ContactCreatorCommand extends Command {
     public constructor() {
         super();
-        this.minArgs = 1;
         this.category = Info;
         this.usage = [new CommandUsage(true, "argument.message")];
     }

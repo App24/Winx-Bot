@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Guild, GuildMember, NewsChannel, Role, TextChannel, ThreadChannel, User } from "discord.js";
+import { BaseGuildTextChannel, Guild, GuildMember, Role, ThreadChannel, User } from "discord.js";
 import { BotUser } from "../BotClient";
 
 //#region User/Member
@@ -63,34 +63,34 @@ export function getGuildById(id: string): Promise<Guild> {
     return BotUser.guilds.fetch(id).catch(() => undefined);
 }
 
-export function GetTextNewsGuildChannelFromMention(mention: string, guild: Guild) {
+export function GetChannelFromMention(mention: string, guild: Guild) {
     if (!mention || !guild) return;
     const matches = mention.match(/^<#!?(\d+)>$/);
 
     if (!matches) {
-        return getTextNewsGuildChannelById(mention, guild);
+        return getChannelById(mention, guild);
     }
 
-    return getTextNewsGuildChannelById(matches[1], guild);
+    return getChannelById(matches[1], guild);
 }
 
-export function getTextNewsGuildChannelById(id: string, guild: Guild): TextChannel | NewsChannel {
+export function getChannelById(id: string, guild: Guild) {
     if (!id || !guild) return undefined;
-    return <TextChannel | NewsChannel>guild.channels.cache.find(channel => channel.id === id && channel.isText());
+    return guild.channels.cache.find(channel => channel.id === id && channel.isText());
 }
 
-export function getTextBasedGuildChannelFromMention(mention: string, guild: Guild) {
+export function getTextChannelFromMention(mention: string, guild: Guild) {
     if (!mention || !guild) return;
     const matches = mention.match(/^<#!?(\d+)>$/);
 
     if (!matches) {
-        return getTextBasedGuildGuildChannelById(mention, guild);
+        return getTextChannelById(mention, guild);
     }
 
-    return getTextBasedGuildGuildChannelById(matches[1], guild);
+    return getTextChannelById(matches[1], guild);
 }
 
-export function getTextBasedGuildGuildChannelById(id: string, guild: Guild): BaseGuildTextChannel {
+export function getTextChannelById(id: string, guild: Guild) {
     if (!id || !guild) return undefined;
     return <BaseGuildTextChannel>guild.channels.cache.find(channel => channel.id === id && channel.isText());
 }
@@ -106,7 +106,7 @@ export function getThreadChannelFromMention(mention: string, guild: Guild) {
     return getThreadChannelById(matches[1], guild);
 }
 
-export function getThreadChannelById(id: string, guild: Guild): ThreadChannel {
+export function getThreadChannelById(id: string, guild: Guild) {
     if (!id || !guild) return undefined;
     return <ThreadChannel>guild.channels.cache.find(channel => channel.id === id && channel.isThread());
 }

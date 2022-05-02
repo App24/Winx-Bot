@@ -13,7 +13,6 @@ class TestLevelCommand extends Command {
     public constructor() {
         super();
         this.category = Moderator;
-        this.minArgs = 1;
         this.usage = [new CommandUsage(true, "argument.level")];
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;

@@ -1,8 +1,18 @@
+## 3.2.1:
+- Moved XP level in card
+- Fixed customisation code to allow for new circle color and winx character
+- Implemented easy way of getting user input
+- Split manageranks.ts into 3 different commands
+- Made customId for MessageSelectionMenu optional, opting for a default value
+- Leaderboard now has each user's card color and a gradient between each one
+- Improved help.ts
+- Command minArgs is now calculated depending on the usage list, instead of being set manually
+
 ## 3.2.0:
 - Major Refactoring of MessageButtonUtils.ts
 - Fixed formatting on all files
 - Reverted bot to not using shards due to difficulties fixing bugs, potentially will in the future go back to being sharded
-- Fixed embeds having [object Object] when they have a footer and get get a new footer from createMessageEmbed
+- Fixed embeds having [object Object] when they have a footer and get a new footer from createMessageEmbed
 - Added Rock Paper Scissors
 - levels.ts major revamp
 - Card revamp

@@ -19,7 +19,7 @@ export function secondsToTime(time: number) {
 /**
  * 
  * @param s String to capitalise
- * @returns Capitalised string
+ * @returns Capitalises the first letter of every word
  */
 export function capitalise(s: string) {
     const splitStr = s.toLowerCase().split(' ');

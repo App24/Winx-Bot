@@ -1,9 +1,9 @@
-import { InteractionButtonOptions, InteractionCollector, Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, TextBasedChannel, User } from "discord.js";
+import { InteractionButtonOptions, InteractionCollector, Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageOptions, TextBasedChannel, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "./Utils";
 
 export async function createMessageButtons(messageButtonData: MessageButtonData) {
-    const { sendTarget, author, text, beforeButton, buttons: _buttons } = messageButtonData;
+    const { sendTarget, author, options, beforeButton, buttons: _buttons } = messageButtonData;
     let { settings } = messageButtonData;
 
     const buttons = _buttons.filter((button) => !button.hidden);
@@ -23,10 +23,12 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
 
     const sendMessage = sendTarget instanceof Message ? sendTarget.reply.bind(sendTarget) : sendTarget.send.bind(sendTarget);
 
-    if (typeof text === "string")
-        msg = await sendMessage({ content: text, components: rows });
-    else
-        msg = await sendMessage({ embeds: text, components: rows });
+    if (typeof options === "string")
+        msg = await sendMessage({ content: options, components: rows });
+    else {
+        options.components = rows;
+        msg = await sendMessage(options);
+    }
 
     let authorId: string;
 
@@ -44,7 +46,7 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
     else if (!settings.time)
         settings.time = 1000 * 60 * 5;
 
-    const collector = msg.createMessageComponentCollector({ filter: (i: MessageComponentInteraction) => i === i, time: settings.time });
+    const collector = msg.createMessageComponentCollector({ filter: () => true, time: settings.time });
 
     collector.on("end", () => {
         const components = msg.components;
@@ -84,17 +86,17 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
 }
 
 export async function createGenericButtons(messageButtonData: MessageButtonData) {
-    return createMessageButtons({ sendTarget: messageButtonData.sendTarget, text: messageButtonData.text, settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
+    return createMessageButtons({ sendTarget: messageButtonData.sendTarget, options: messageButtonData.options, settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
 }
 
 export async function createWhatToDoButtons(messageButtonData: MessageButtonData) {
-    return createMessageButtons({ sendTarget: messageButtonData.sendTarget, author: messageButtonData.author, text: Localisation.getTranslation("generic.whattodo"), settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
+    return createMessageButtons({ sendTarget: messageButtonData.sendTarget, author: messageButtonData.author, options: Localisation.getTranslation("generic.whattodo"), settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
 }
 
 export interface MessageButtonData {
     sendTarget: Message | TextBasedChannel,
     author?: User | string,
-    text?: string | MessageEmbed[],
+    options?: string | MessageOptions,
     settings?: { max?: number, time?: number },
     beforeButton?: (interactionData: InteractionData) => void,
     buttons: InteractiveButton[]

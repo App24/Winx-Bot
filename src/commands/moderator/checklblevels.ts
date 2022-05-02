@@ -1,7 +1,7 @@
 import { GuildMember, Message, BaseGuildTextChannel, GuildBasedChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
-import { getTextBasedGuildGuildChannelById } from "../../utils/GetterUtils";
+import { getTextChannelById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailable, CommandArguments } from "../../structs/Command";
@@ -51,7 +51,7 @@ class CheckLBLevelsCommand extends Command {
                 if (excluded) {
                     if (excluded.find(c => c === channel.id)) return;
                 }
-                const NTChannel = await getTextBasedGuildGuildChannelById(channel.id, cmdArgs.guild);
+                const NTChannel = await getTextChannelById(channel.id, cmdArgs.guild);
                 NTChannels.push(NTChannel);
             }
         });

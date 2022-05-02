@@ -1,6 +1,6 @@
 import { BaseGuildTextChannel, Guild, GuildMember, MessageOptions, Role } from "discord.js";
 import { BotUser } from "../BotClient";
-import { getMemberById, getRoleById, getTextNewsGuildChannelById } from "./GetterUtils";
+import { getMemberById, getRoleById, getTextChannelById } from "./GetterUtils";
 import { Localisation } from "../localisation";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { RankLevel } from "../structs/databaseTypes/RankLevel";
@@ -25,7 +25,7 @@ export class XPInfo {
 }
 
 /**
- * 
+ * Get the amount of xp required for a certain level based on a formula
  * @param level 
  * @returns Amount of xp this level needs
  */
@@ -51,7 +51,7 @@ export async function removeXP(xpInfo: XPInfo) {
     userLevel.xp -= xpInfo.xp;
     let levelChannel = xpInfo.channel;
     if (serverInfo.levelChannel) {
-        const temp = await getTextNewsGuildChannelById(serverInfo.levelChannel, xpInfo.guild);
+        const temp = await getTextChannelById(serverInfo.levelChannel, xpInfo.guild);
         if (temp) levelChannel = temp;
     }
 
@@ -62,7 +62,7 @@ export async function removeXP(xpInfo: XPInfo) {
         }
         userLevel.level--;
         userLevel.xp += getLevelXP(userLevel.level);
-        let rankDetails;
+        let rankDetails: { rankLevel: RankLevel, rank: Role };
         if (ranks) {
             const rankLevel = ranks.find(rank => rank.level === userLevel.level + 1);
             if (rankLevel) {
@@ -70,7 +70,7 @@ export async function removeXP(xpInfo: XPInfo) {
                 if (rank) {
                     if (xpInfo.member.roles.cache.has(rank.id))
                         await xpInfo.member.roles.remove(rank, "lost transformation").catch(console.error);
-                    rankDetails = { rankLevel: rankLevel, rank: rank };
+                    rankDetails = { rankLevel, rank };
                 }
             }
         }
@@ -101,14 +101,14 @@ export async function addXP(xpInfo: XPInfo, levelUpMessage = true) {
     userLevel.xp += xpInfo.xp;
     let levelChannel = xpInfo.channel;
     if (serverInfo.levelChannel) {
-        const temp = await getTextNewsGuildChannelById(serverInfo.levelChannel, xpInfo.guild);
+        const temp = await getTextChannelById(serverInfo.levelChannel, xpInfo.guild);
         if (temp) levelChannel = temp;
     }
 
     while (userLevel.xp >= getLevelXP(userLevel.level)) {
         userLevel.xp -= getLevelXP(userLevel.level);
         userLevel.level++;
-        let rankDetails;
+        let rankDetails: { rankLevel: RankLevel, rank: Role };
         if (ranks) {
             const rankLevel = ranks.find(rank => rank.level === userLevel.level);
             if (rankLevel) {
@@ -116,7 +116,7 @@ export async function addXP(xpInfo: XPInfo, levelUpMessage = true) {
                 if (rank) {
                     if (!member.roles.cache.has(rank.id))
                         member.roles.add(rank).catch(console.error);
-                    rankDetails = { rankLevel: rankLevel, rank: rank };
+                    rankDetails = { rankLevel, rank };
                 }
             }
         }

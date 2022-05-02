@@ -30,7 +30,6 @@
     "messagemaxlength.command.description": "Set maximum length of message to give XP!",
     "messagemax.command.description": "Set maximum of messages per minute!",
     "messageminlength.command.description": "Set minimum length of message to give XP!",
-    "manageranks.command.description": "Set transformation for each level!",
     "managexp.command.description": "Set XP per message!",
     "databaseutil.command.description": "Manage the database!",
     "fakeerror.command.description": "Create a fake error!",
@@ -48,11 +47,17 @@
     "customname.command.description": "Set custom names for people!",
     "levelping.command.description": "Toggle Level Ping!",
     "cardname.command.description": "Toggle Card Name!",
+    
+    "manageranks.command.description": "Set transformation for each level!",
+    "managegifs.command.description": "Manage gifs for each transformation level!",
+    "managewings.command.description": "Manage gifs for each transformation level!",
 
     "tictactoe.command.description": "Play Tic Tac Toe with another member in the server!",
     "cah.command.description": "Play Cards Against Winx with members in the server!",
     "rps.command.description": "Play Rock Paper Scissors with a friend!",
 
     "winxcharacter.command.description": "Set your Winx fairy!",
-    "wingslevel.command.description": "Set an already achieved transformation as your wings!"
+    "wingslevel.command.description": "Set an already achieved transformation as your wings!",
+
+    "setpfp.command.description": "Set the bot profile picture!"
 }

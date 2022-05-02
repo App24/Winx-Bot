@@ -1,7 +1,7 @@
 import { Message, BaseGuildTextChannel, GuildBasedChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
-import { getMemberFromMention, getTextBasedGuildChannelFromMention } from "../../utils/GetterUtils";
+import { getMemberFromMention, getTextChannelFromMention } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
@@ -17,7 +17,6 @@ class CheckLevelsCommand extends Command {
         super();
         this.access = CommandAccess.GuildOwner;
         this.available = CommandAvailable.Guild;
-        this.minArgs = 1;
         this.usage = [new CommandUsage(true, "argument.user")];
         this.category = Moderator;
     }
@@ -49,7 +48,7 @@ class CheckLevelsCommand extends Command {
                 if (excluded) {
                     if (excluded.find(c => c === channel.id)) return;
                 }
-                const NTChannel = await getTextBasedGuildChannelFromMention(channel.id, cmdArgs.guild);
+                const NTChannel = await getTextChannelFromMention(channel.id, cmdArgs.guild);
                 NTChannels.push(NTChannel);
             }
         });

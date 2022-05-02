@@ -3,7 +3,7 @@ import fs from "fs";
 import request from "request";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, DONATE_LINK, OWNER_ID, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannel } from "discord.js";
+import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannel, User } from "discord.js";
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
@@ -12,6 +12,8 @@ import { PatreonInfo } from "../structs/databaseTypes/PatreonInfo";
 import { Keyv } from "../keyv/keyv-index";
 import { Canvas } from "canvas";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
+import { Color } from "../structs/Color";
+import { createMessageCollector } from "./MessageUtils";
 
 /**
  * 
@@ -167,6 +169,10 @@ export function hexToRGB(hex: string) {
     } : null;
 }
 
+export function rgbToHex(color: Color) {
+    return ((1 << 24) + (color.r << 16) + (color.g << 8) + color.b).toString(16).slice(1);
+}
+
 /**
  * 
  * @param a Initial Value
@@ -176,6 +182,14 @@ export function hexToRGB(hex: string) {
  */
 export function blend(a: number, b: number, w: number) {
     return (a * w) + (b * (1 - w));
+}
+
+export function blendRGB(colorA: Color, colorB: Color, w: number) {
+    return {
+        r: blend(colorA.r, colorB.r, w),
+        g: blend(colorA.g, colorB.g, w),
+        b: blend(colorA.b, colorB.b, w)
+    };
 }
 
 export async function getAllMessages(channel: BaseGuildTextChannel) {
@@ -199,12 +213,12 @@ export async function getLeaderboardMembers(guild: Guild) {
         }
         return b.level - a.level;
     });
-    const leaderboardLevels: { userLevel: UserLevel, member: GuildMember }[] = [];
+    const leaderboardLevels: { userLevel: UserLevel, member: GuildMember, position: number }[] = [];
     let userIndex = 0;
     await asyncForEach(levels, async (level: UserLevel) => {
         const member = await getMemberById(level.userId, guild);
         if (member) {
-            leaderboardLevels.push({ userLevel: level, member });
+            leaderboardLevels.push({ userLevel: level, member, position: userIndex });
             userIndex++;
             if (userIndex >= 15)
                 return true;
@@ -226,28 +240,33 @@ export function backupDatabases() {
 
 export async function reportError(error, message?: Message) {
     const Errors = BotUser.getDatabase(DatabaseType.Errors);
-    let hex = genRanHex(16);
-    let errors = await Errors.get(hex);
-    while (errors) {
+    let hex: string;
+    let errors;
+    do {
         hex = genRanHex(16);
         errors = await Errors.get(hex);
-    }
+    } while (errors);
     console.error(`Code: ${hex}\n${error}`);
     const errorObj = new ErrorStruct();
     errorObj.time = new Date().getTime();
     errorObj.error = error;
     await Errors.set(hex, errorObj);
+    
     const owner = await getUserById(OWNER_ID);
-    let text = `Error: \`${hex}\``;
+
+    const dm = await owner.createDM();
+    await dm.send("Error");
+    await dm.send(hex);
+
     if (message) {
         const ownerMember = await getMemberById(owner.id, message.guild);
         if (ownerMember) {
-            text += `\nServer: ${message.guild.name}`;
+            let text = `\nServer: ${message.guild.name}`;
             text += `\nURL: ${message.url}`;
+            await dm.send(text);
         }
         message.reply(Localisation.getTranslation("error.execution"));
     }
-    (await owner.createDM()).send(text);
 }
 
 export function isModerator(member: GuildMember) {
@@ -268,5 +287,71 @@ export async function createMessageEmbed(data: MessageEmbedOptions | MessageEmbe
 export function downloadFile(uri: string, fileName: string, callback: () => void) {
     request.head(uri, function () {
         request(uri).pipe(fs.createWriteStream(fileName)).on("close", callback);
+    });
+}
+
+export function getBrightnessColor(color: Color, brightColor = "white", darkColor = "black") {
+    const brightness = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+    return (brightness > 125) ? darkColor : brightColor;
+}
+
+export async function getReply<T>(target: Message, author: User, text: string, callbackFn: (msg: Message, resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
+    const message = await target.reply(Localisation.getTranslation(text));
+    const collector = createMessageCollector(message.channel, message.id, author, { max: 1, time: 1000 * 5 * 60 });
+    return new Promise<T>((resolve, reject) => {
+        collector.on("collect", (msg) => {
+            callbackFn(msg, resolve, reject);
+        });
+    }).then(value => {
+        return { value, message };
+    }, () => {
+        return { value: <T>undefined, message };
+    });
+}
+
+export async function getReplyNumber(target: Message, author: User, text: string) {
+    return getReply<number>(target, author, text, (msg, resolve, reject) => {
+        const level = parseInt(msg.content);
+        if (isNaN(level)) {
+            reject(Localisation.getTranslation("error.invalid.number"));
+            return <any>msg.reply(Localisation.getTranslation("error.invalid.number"));
+        }
+
+        resolve(level);
+    });
+}
+
+export async function getReplyLevel(target: Message, author: User, text: string) {
+    return getReply<number>(target, author, text, (msg, resolve, reject) => {
+        const level = parseInt(msg.content);
+        if (isNaN(level) || level < 0) {
+            reject(Localisation.getTranslation("error.invalid.level"));
+            return <any>msg.reply(Localisation.getTranslation("error.invalid.level"));
+        }
+
+        resolve(level);
+    });
+}
+
+export async function getStringReply(target: Message, author: User, text: string) {
+    return getReply<string>(target, author, text, (msg, resolve) => {
+        resolve(msg.content);
+    });
+}
+
+export async function getReplyImage(target: Message, author: User, text: string) {
+    return getReply<MessageAttachment>(target, author, text, (msg, resolve, reject) => {
+        const image = msg.attachments.first();
+        if (!image) {
+            reject(Localisation.getTranslation("error.missing.image"));
+            return msg.reply(Localisation.getTranslation("error.missing.image"));
+        }
+
+        if (!image.name.toLowerCase().endsWith(".png")) {
+            reject(Localisation.getTranslation("error.invalid.image"));
+            return msg.reply(Localisation.getTranslation("error.invalid.image"));
+        }
+
+        resolve(image);
     });
 }

@@ -3,15 +3,8 @@ import { VERSION, PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
 import { BasicActivity } from "../structs/activities/BasicActivity";
 import { BirthdayActivity } from "../structs/activities/events/BirthdayActivity";
-import { ChildrenDayActivity } from "../structs/activities/events/ChildrenDayActivity";
-import { ChristmasActivity } from "../structs/activities/events/ChristmasActivity";
-import { DayDeadActivity } from "../structs/activities/events/DayDeadActivity";
-import { EarthDayActivity } from "../structs/activities/events/EarthDayActivity";
-import { HalloweenActivity } from "../structs/activities/events/HalloweenActivity";
-import { NewYearActivity } from "../structs/activities/events/NewYearActivity";
-import { PeaceDayActivity } from "../structs/activities/events/PeaceDayActivity";
-import { PrideMonthActivity } from "../structs/activities/events/PrideMonthActivity";
-import { StValentineActivity } from "../structs/activities/events/StValentineActivity";
+import { GenericEventActivity } from "../structs/activities/GenericEventActivity";
+import { GenericOneDayEventActivity } from "../structs/activities/GenericOneDayEventActivity";
 import { UsersActivity } from "../structs/activities/UsersActivity";
 
 let i = -1;
@@ -19,18 +12,23 @@ const activities = [
     new BasicActivity(Localisation.getTranslation("activity.basic.version", VERSION)),
     new BasicActivity(Localisation.getTranslation("activity.basic.help", PREFIX)),
     new BasicActivity(Localisation.getTranslation("activity.basic.suggestion", PREFIX)),
+
     new UsersActivity(),
+
     new BasicActivity(Localisation.getTranslation("activity.basic.contact", PREFIX)),
+
     new BasicActivity("🟦🟨 Slava Ukraini"),
-    new StValentineActivity(),
-    new PrideMonthActivity(),
-    new HalloweenActivity(),
-    new ChristmasActivity(),
-    new NewYearActivity(),
-    new PeaceDayActivity(),
-    new DayDeadActivity(),
-    new ChildrenDayActivity(),
-    new EarthDayActivity(),
+
+    new GenericEventActivity(new Date(2, 5, 1), new Date(2, 6, 1), Localisation.getTranslation("activity.event.pride")),
+
+    new GenericOneDayEventActivity(new Date(2, 1, 14), Localisation.getTranslation("activity.event.valentine")),
+    new GenericOneDayEventActivity(new Date(2, 9, 31), Localisation.getTranslation("activity.event.halloween")),
+    new GenericOneDayEventActivity(new Date(2, 11, 25), Localisation.getTranslation("activity.event.christmas")),
+    new GenericOneDayEventActivity(new Date(2, 11, 31), Localisation.getTranslation("activity.event.newyear")),
+    new GenericOneDayEventActivity(new Date(2, 8, 21), Localisation.getTranslation("activity.event.peaceday")),
+    new GenericOneDayEventActivity(new Date(2, 10, 2), Localisation.getTranslation("activity.event.daydead")),
+    new GenericOneDayEventActivity(new Date(2, 10, 20), Localisation.getTranslation("activity.event.childrenday")),
+    new GenericOneDayEventActivity(new Date(22, 3, 20), Localisation.getTranslation("activity.event.earthday")),
     //#region Birthdays
     new BirthdayActivity(new Date(2, 11, 10), "Bloom"),
     new BirthdayActivity(new Date(2, 5, 15), "Aisha"),
