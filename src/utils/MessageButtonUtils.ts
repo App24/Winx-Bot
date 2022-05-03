@@ -3,8 +3,8 @@ import { Localisation } from "../localisation";
 import { asyncForEach } from "./Utils";
 
 export async function createMessageButtons(messageButtonData: MessageButtonData) {
-    const { sendTarget, author, options, beforeButton, buttons: _buttons } = messageButtonData;
-    let { settings } = messageButtonData;
+    const { sendTarget, author, beforeButton, buttons: _buttons } = messageButtonData;
+    let { settings, options } = messageButtonData;
 
     const buttons = _buttons.filter((button) => !button.hidden);
 
@@ -21,12 +21,30 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
 
     let msg: Message<boolean>;
 
-    const sendMessage = sendTarget instanceof Message ? sendTarget.reply.bind(sendTarget) : sendTarget.send.bind(sendTarget);
+    let sendMessage;
+
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction) {
+        sendMessage = sendTarget.reply.bind(sendTarget);
+        if (sendTarget instanceof MessageComponentInteraction) {
+            if (!sendTarget.deferred && !sendTarget.replied) {
+                await sendTarget.deferUpdate();
+            }
+            sendMessage = sendTarget.followUp.bind(sendTarget);
+        }
+    } else {
+        sendMessage = sendTarget.send.bind(sendTarget);
+    }
+
+    //const sendMessage = sendTarget instanceof Message ? sendTarget.reply.bind(sendTarget) : sendTarget.send.bind(sendTarget);
 
     if (typeof options === "string")
         msg = await sendMessage({ content: options, components: rows });
     else {
-        options.components = rows;
+        if (!options) {
+            options = { components: rows };
+        } else {
+            options.components = rows;
+        }
         msg = await sendMessage(options);
     }
 
@@ -94,7 +112,7 @@ export async function createWhatToDoButtons(messageButtonData: MessageButtonData
 }
 
 export interface MessageButtonData {
-    sendTarget: Message | TextBasedChannel,
+    sendTarget: Message | TextBasedChannel | MessageComponentInteraction,
     author?: User | string,
     options?: string | MessageOptions,
     settings?: { max?: number, time?: number },

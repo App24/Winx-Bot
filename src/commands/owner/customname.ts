@@ -5,7 +5,7 @@ import { Owner } from "../../structs/Category";
 import { Command, CommandAccess, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomNameUser } from "../../structs/databaseTypes/CustomName";
-import { createMessageCollector } from "../../utils/MessageUtils";
+import { getStringReply } from "../../utils/ReplyUtils";
 
 class CustomNameCommand extends Command {
     public constructor() {
@@ -61,18 +61,14 @@ class CustomNameCommand extends Command {
 
                             await interaction.update({ components: [row2] });
                         } else {
-                            await interaction.deferUpdate();
-                            const reply = await interaction.followUp({ content: Localisation.getTranslation("argument.reply.customname") });
-                            createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 }).on("collect", async (message) => {
-                                if (message.content.length > 0) {
-                                    customNames.push(message.content);
-                                    customNameUsers.push([]);
-                                    CustomNames.set(message.content, []);
-                                    message.reply("Added!");
-                                    row = this.getCustomNamesSelectMenu(customNames);
-                                    await interaction.editReply({ components: [row] });
-                                }
-                            });
+                            const { value: name, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.customname") });
+                            if (name === undefined) return;
+                            customNames.push(name);
+                            customNameUsers.push([]);
+                            CustomNames.set(name, []);
+                            message.reply("Added!");
+                            row = this.getCustomNamesSelectMenu(customNames);
+                            await interaction.editReply({ components: [row] });
                         }
                     } else if (interaction.customId === "users") {
                         await interaction.update({ components: [row] });
@@ -86,35 +82,32 @@ class CustomNameCommand extends Command {
                 } else if (interaction.isButton()) {
                     if (interaction.customId === "add") {
                         await interaction.update({ components: [row] });
-                        const reply = await interaction.followUp({ content: Localisation.getTranslation("argument.reply.customnameuser") });
-                        //const reply = await interaction.fetchReply();
-                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 }).on("collect", async (message) => {
-                            if (message.content.length > 0) {
-                                const pieces = message.content.split(" ");
-                                const mention = pieces[0];
-                                const matches = mention.match(/^<@!?(\d+)>$/);
+                        const { value: content, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.customnameuser") });
+                        if (content === undefined) return;
 
-                                let id = mention;
+                        const pieces = content.split(" ");
+                        const mention = pieces[0];
+                        const matches = mention.match(/^<@!?(\d+)>$/);
 
-                                if (matches) {
-                                    id = matches[1];
-                                }
+                        let id = mention;
 
-                                let label = id;
+                        if (matches) {
+                            id = matches[1];
+                        }
 
-                                if (pieces.length > 1) {
-                                    label = pieces[1];
-                                }
+                        let label = id;
 
-                                if (!customNameUsers[index].find(u => u.id == id)) {
-                                    customNameUsers[index].push({ id, label });
-                                    CustomNames.set(customNames[index], customNameUsers[index]);
-                                    message.reply("Added!");
-                                } else {
-                                    message.reply("User already added!");
-                                }
-                            }
-                        });
+                        if (pieces.length > 1) {
+                            label = pieces[1];
+                        }
+
+                        if (!customNameUsers[index].find(u => u.id == id)) {
+                            customNameUsers[index].push({ id, label });
+                            CustomNames.set(customNames[index], customNameUsers[index]);
+                            message.reply("Added!");
+                        } else {
+                            message.reply("User already added!");
+                        }
                     } else if (interaction.customId === "remove") {
                         const userOptions: MessageSelectOptionData[] = [];
 

@@ -6,8 +6,8 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
-import { createMessageCollector } from "../../utils/MessageUtils";
 import { getTextChannelFromMention } from "../../utils/GetterUtils";
+import { getTextChannelReply } from "../../utils/ReplyUtils";
 
 class LevelChannelCommand extends Command {
     public constructor() {
@@ -25,17 +25,13 @@ class LevelChannelCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { time: 1000 * 60 * 5, max: 1 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
                 {
                     customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
-                        await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
-                        const reply = await interaction.fetchReply();
-                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
-                            const channel = await getTextChannelFromMention(msg.content, cmdArgs.guild);
-                            if (!channel) return <any>msg.reply(Localisation.getTranslation("error.invalid.channel"));
+                        const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.channel"), guild: cmdArgs.guild });
+                        if(!channel) return;
 
-                            serverInfo.levelChannel = channel.id;
+                        serverInfo.levelChannel = channel.id;
 
-                            await ServerInfo.set(cmdArgs.guildId, serverInfo);
-                            cmdArgs.message.reply(Localisation.getTranslation("levelchannel.set", channel));
-                        });
+                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                        msg.reply(Localisation.getTranslation("levelchannel.set", channel));
                     }
                 },
                 {

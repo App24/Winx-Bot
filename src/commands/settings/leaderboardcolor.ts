@@ -7,8 +7,8 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { canvasColor } from "../../utils/CanvasUtils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
-import { createMessageCollector } from "../../utils/MessageUtils";
-import { canvasToMessageAttachment, getServerDatabase, isHexColor } from "../../utils/Utils";
+import { getHexReply } from "../../utils/ReplyUtils";
+import { canvasToMessageAttachment, getServerDatabase } from "../../utils/Utils";
 
 class LeaderboardColorCommand extends Command {
     public constructor() {
@@ -64,22 +64,18 @@ class LeaderboardColorCommand extends Command {
                     hidden: true,
                     customId: "set", style: "PRIMARY", onRun: async ({ interaction, collector, data }) => {
                         collector.emit("end", "");
-                        await interaction.reply(Localisation.getTranslation("argument.reply.hexcolor"));
-                        const reply = await interaction.fetchReply();
-                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
-                            const hex = msg.content;
-                            if (!isHexColor(hex)) return <any>msg.reply(Localisation.getTranslation("error.invalid.hexcolor"));
-                            switch (data.information.type) {
-                                case "background":
-                                    serverInfo.leaderboardColor = hex;
-                                    break;
-                                case "highlight":
-                                    serverInfo.leaderboardHighlight = hex;
-                                    break;
-                            }
-                            await ServerInfo.set(cmdArgs.guildId, serverInfo);
-                            cmdArgs.message.reply(Localisation.getTranslation(`leaderboardcolor.set.${data.information.type === "background" ? "color" : "highlight"}`));
-                        });
+                        const { value: hex } = await getHexReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.hexcolor") });
+                        if (hex === undefined) return;
+                        switch (data.information.type) {
+                            case "background":
+                                serverInfo.leaderboardColor = hex;
+                                break;
+                            case "highlight":
+                                serverInfo.leaderboardHighlight = hex;
+                                break;
+                        }
+                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                        cmdArgs.message.reply(Localisation.getTranslation(`leaderboardcolor.set.${data.information.type === "background" ? "color" : "highlight"}`));
                     }
                 },
                 {

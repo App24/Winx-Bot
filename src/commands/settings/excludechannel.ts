@@ -8,7 +8,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { getServerDatabase, asyncForEach } from "../../utils/Utils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
-import { createMessageCollector } from "../../utils/MessageUtils";
+import { getTextChannelReply } from "../../utils/ReplyUtils";
 
 class ExcludeChannelCommand extends Command {
     public constructor() {
@@ -26,21 +26,15 @@ class ExcludeChannelCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1, time: 1000 * 60 * 5 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
                 {
                     customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.add"), onRun: async ({ interaction }) => {
-                        await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
-                        const reply = await interaction.fetchReply();
-                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
-                            if (!serverInfo.excludeChannels) serverInfo.excludeChannels = [];
+                        const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.channel"), guild: cmdArgs.guild });
+                        if (!channel) return;
 
-                            const channel = await getTextChannelFromMention(msg.content, cmdArgs.guild);
-                            if (!channel) return <any>msg.reply(Localisation.getTranslation("error.invalid.channel"));
+                        if (serverInfo.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.already"));
 
-                            if (serverInfo.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.already"));
+                        serverInfo.excludeChannels.push(channel.id);
 
-                            serverInfo.excludeChannels.push(channel.id);
-
-                            await ServerInfo.set(cmdArgs.guildId, serverInfo);
-                            cmdArgs.message.reply(Localisation.getTranslation("excludechannel.add", channel));
-                        });
+                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                        msg.reply(Localisation.getTranslation("excludechannel.add", channel));
                     }
                 },
                 {
@@ -61,22 +55,16 @@ class ExcludeChannelCommand extends Command {
                 },
                 {
                     customId: "remove", style: "DANGER", label: Localisation.getTranslation("button.remove"), onRun: async ({ interaction }) => {
-                        await interaction.editReply(Localisation.getTranslation("argument.reply.channel"));
-                        const reply = await interaction.fetchReply();
-                        createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
-                            if (!serverInfo.excludeChannels || !serverInfo.excludeChannels.length) return <any>msg.reply(Localisation.getTranslation("error.empty.excludedchannels"));
+                        const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.channel"), guild: cmdArgs.guild });
+                        if (!channel) return;
 
-                            const channel = await getTextChannelFromMention(msg.content, cmdArgs.guild);
-                            if (!channel) return msg.reply(Localisation.getTranslation("error.invalid.channel"));
+                        if (!serverInfo.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.not"));
 
-                            if (!serverInfo.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.not"));
+                        const index = serverInfo.excludeChannels.findIndex(c => c === channel.id);
+                        if (index >= 0) serverInfo.excludeChannels.splice(index, 1);
 
-                            const index = serverInfo.excludeChannels.findIndex(c => c === channel.id);
-                            if (index >= 0) serverInfo.excludeChannels.splice(index, 1);
-
-                            await ServerInfo.set(cmdArgs.guildId, serverInfo);
-                            cmdArgs.message.reply(Localisation.getTranslation("excludechannel.remove", channel));
-                        });
+                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                        msg.reply(Localisation.getTranslation("excludechannel.remove", channel));
                     }
                 },
                 {

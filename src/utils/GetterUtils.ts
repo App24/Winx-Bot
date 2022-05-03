@@ -46,12 +46,10 @@ export function getBotMember(guild: Guild) {
  * @returns Color of the role color of bot as a number
  */
 export async function getBotRoleColor(guild: Guild) {
-    const defaultcolor = 5793266;
+    const defaultcolor = 0x5865f2;
     if (!guild) return defaultcolor;
     const member = await getBotMember(guild);
-    if (!member) return defaultcolor;
-    if (!member.roles) return defaultcolor;
-    if (!member.roles.color) return defaultcolor;
+    if (!member || !member.roles || !member.roles.color) return defaultcolor;
     return member.roles.color.color;
 }
 

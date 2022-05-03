@@ -1,34 +1,54 @@
-import { Message, TextBasedChannel, User, MessageSelectOptionData, MessageActionRow, MessageSelectMenu, MessageOptions } from "discord.js";
+import { Message, TextBasedChannel, User, MessageSelectOptionData, MessageActionRow, MessageSelectMenu, MessageOptions, MessageComponentInteraction } from "discord.js";
 import { Localisation } from "../localisation";
 import { InteractionData } from "./MessageButtonUtils";
 import { asyncForEach } from "./Utils";
 
 export async function createMessageSelection(messageSelectData: MessageSelectData) {
-    const { sendTarget, author, options, selectMenuOptions } = messageSelectData;
-    let { settings } = messageSelectData;
+    const { sendTarget, author, selectMenuOptions } = messageSelectData;
+    let { settings, options } = messageSelectData;
 
     if (Array.isArray(selectMenuOptions)) {
         if (selectMenuOptions.length > 5) selectMenuOptions.splice(5, selectMenuOptions.length - 5);
     }
 
+    const optionsList = (Array.isArray(selectMenuOptions) ? selectMenuOptions : [selectMenuOptions]);
+
     const rows: MessageActionRow[] = [];
-    for (let i = 0; i < (Array.isArray(selectMenuOptions) ? selectMenuOptions.length : 1); i++) {
+    for (let i = 0; i < optionsList.length; i++) {
         rows.push(new MessageActionRow());
     }
 
-    (Array.isArray(selectMenuOptions) ? selectMenuOptions : [selectMenuOptions]).forEach((selectMenu, index) => {
+    optionsList.forEach((selectMenu, index) => {
         const custom_id = selectMenu.customId || `selection${index}`;
-        rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectMenu.options }));
+        rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectMenu.options, minValues: selectMenu.minValues, maxValues: selectMenu.maxValues }));
     });
 
     let msg: Message<boolean>;
 
-    const sendMessage = sendTarget instanceof Message ? sendTarget.reply.bind(sendTarget) : sendTarget.send.bind(sendTarget);
+    let sendMessage;
+
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction) {
+        sendMessage = sendTarget.reply.bind(sendTarget);
+        if (sendTarget instanceof MessageComponentInteraction) {
+            if (!sendTarget.deferred && !sendTarget.replied) {
+                await sendTarget.deferUpdate();
+            }
+            sendMessage = sendTarget.followUp.bind(sendTarget);
+        }
+    } else {
+        sendMessage = sendTarget.send.bind(sendTarget);
+    }
+
+    //const sendMessage = sendTarget instanceof Message ? sendTarget.reply.bind(sendTarget) : (sendTarget instanceof MessageComponentInteraction ?  : sendTarget.send.bind(sendTarget));
 
     if (typeof options === "string")
         msg = await sendMessage({ content: options, components: rows });
     else {
-        options.components = rows;
+        if (!options) {
+            options = { components: rows };
+        } else {
+            options.components = rows;
+        }
         msg = await sendMessage(options);
     }
 
@@ -67,14 +87,16 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                 await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
                 return;
             }
-            await asyncForEach(Array.isArray(selectMenuOptions) ? selectMenuOptions : [selectMenuOptions], async (value, index) => {
+            await asyncForEach(optionsList, async (value, index) => {
                 const custom_id = value.customId || `selection${index}`;
                 if (custom_id === interaction.customId) {
                     if (value.onSelection)
                         await value.onSelection({ interaction, message: msg, data, collector });
                     await asyncForEach(value.options, async (option) => {
-                        if (option.value === interaction.values[0])
-                            await option.onSelect({ interaction, message: msg, data, collector });
+                        await asyncForEach(interaction.values, async (value) => {
+                            if (option.value === value)
+                                await option.onSelect({ interaction, message: msg, data, collector });
+                        });
                     });
                 }
             });
@@ -89,16 +111,18 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 }
 
 export interface MessageSelectData {
-    sendTarget: Message | TextBasedChannel,
+    sendTarget: Message | TextBasedChannel | MessageComponentInteraction,
     author?: User | string,
     options?: string | MessageOptions,
-    settings?: { max?: number, time?: number }
+    settings?: { max?: number, time?: number },
     selectMenuOptions: SelectMenuOptions[] | SelectMenuOptions
 }
 
 export interface SelectMenuOptions {
     customId?: string,
     placeholder?: string,
+    minValues?: number,
+    maxValues?: number,
     onSelection?(interactionData: InteractionData): void,
     options: SelectOption[]
 }

@@ -50,7 +50,11 @@ export function rgbToHsl(r: number, g: number, b: number) {
         h /= 6;
     }
 
-    return [h, s, l];
+    return {
+        h,
+        s,
+        l
+    };
 }
 
 /**

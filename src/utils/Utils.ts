@@ -3,7 +3,7 @@ import fs from "fs";
 import request from "request";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, DONATE_LINK, OWNER_ID, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannel, User } from "discord.js";
+import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannel } from "discord.js";
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
@@ -13,7 +13,6 @@ import { Keyv } from "../keyv/keyv-index";
 import { Canvas } from "canvas";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
 import { Color } from "../structs/Color";
-import { createMessageCollector } from "./MessageUtils";
 
 /**
  * 
@@ -251,7 +250,7 @@ export async function reportError(error, message?: Message) {
     errorObj.time = new Date().getTime();
     errorObj.error = error;
     await Errors.set(hex, errorObj);
-    
+
     const owner = await getUserById(OWNER_ID);
 
     const dm = await owner.createDM();
@@ -293,65 +292,4 @@ export function downloadFile(uri: string, fileName: string, callback: () => void
 export function getBrightnessColor(color: Color, brightColor = "white", darkColor = "black") {
     const brightness = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
     return (brightness > 125) ? darkColor : brightColor;
-}
-
-export async function getReply<T>(target: Message, author: User, text: string, callbackFn: (msg: Message, resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
-    const message = await target.reply(Localisation.getTranslation(text));
-    const collector = createMessageCollector(message.channel, message.id, author, { max: 1, time: 1000 * 5 * 60 });
-    return new Promise<T>((resolve, reject) => {
-        collector.on("collect", (msg) => {
-            callbackFn(msg, resolve, reject);
-        });
-    }).then(value => {
-        return { value, message };
-    }, () => {
-        return { value: <T>undefined, message };
-    });
-}
-
-export async function getReplyNumber(target: Message, author: User, text: string) {
-    return getReply<number>(target, author, text, (msg, resolve, reject) => {
-        const level = parseInt(msg.content);
-        if (isNaN(level)) {
-            reject(Localisation.getTranslation("error.invalid.number"));
-            return <any>msg.reply(Localisation.getTranslation("error.invalid.number"));
-        }
-
-        resolve(level);
-    });
-}
-
-export async function getReplyLevel(target: Message, author: User, text: string) {
-    return getReply<number>(target, author, text, (msg, resolve, reject) => {
-        const level = parseInt(msg.content);
-        if (isNaN(level) || level < 0) {
-            reject(Localisation.getTranslation("error.invalid.level"));
-            return <any>msg.reply(Localisation.getTranslation("error.invalid.level"));
-        }
-
-        resolve(level);
-    });
-}
-
-export async function getStringReply(target: Message, author: User, text: string) {
-    return getReply<string>(target, author, text, (msg, resolve) => {
-        resolve(msg.content);
-    });
-}
-
-export async function getReplyImage(target: Message, author: User, text: string) {
-    return getReply<MessageAttachment>(target, author, text, (msg, resolve, reject) => {
-        const image = msg.attachments.first();
-        if (!image) {
-            reject(Localisation.getTranslation("error.missing.image"));
-            return msg.reply(Localisation.getTranslation("error.missing.image"));
-        }
-
-        if (!image.name.toLowerCase().endsWith(".png")) {
-            reject(Localisation.getTranslation("error.invalid.image"));
-            return msg.reply(Localisation.getTranslation("error.invalid.image"));
-        }
-
-        resolve(image);
-    });
 }

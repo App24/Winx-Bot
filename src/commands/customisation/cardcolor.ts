@@ -6,8 +6,8 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
 import { canvasColor } from "../../utils/CanvasUtils";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
-import { createMessageCollector } from "../../utils/MessageUtils";
-import { canvasToMessageAttachment, isHexColor } from "../../utils/Utils";
+import { getHexReply } from "../../utils/ReplyUtils";
+import { canvasToMessageAttachment } from "../../utils/Utils";
 
 class CardColorCommand extends Command {
     public constructor() {
@@ -40,18 +40,11 @@ class CardColorCommand extends Command {
                         label: Localisation.getTranslation("button.set"),
                         value: "set",
                         onSelect: async ({ interaction }) => {
-                            await interaction.reply({ content: Localisation.getTranslation("argument.reply.hexcolor"), components: [] });
-                            const reply = await interaction.fetchReply();
-                            createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (msg) => {
-                                let color = msg.content.toLowerCase();
-                                if (color.startsWith("#")) {
-                                    color = color.substring(1);
-                                }
-                                if (!isHexColor(color)) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
-                                userSettings.cardColor = color;
-                                cmdArgs.message.reply(Localisation.getTranslation("cardcolor.set.output", color));
-                                await UserSettings.set(cmdArgs.author.id, userSettings);
-                            });
+                            const { value: color, message } = await getHexReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.hexcolor") });
+                            if (color === undefined) return;
+                            userSettings.cardColor = color;
+                            message.reply(Localisation.getTranslation("cardcolor.set.output", color));
+                            await UserSettings.set(cmdArgs.author.id, userSettings);
                         }
                     },
                     {

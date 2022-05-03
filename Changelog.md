@@ -1,3 +1,8 @@
+## 3.2.2:
+- Improved barcolor.ts
+- Improved user input
+- Removed old code from leaderboard.ts
+
 ## 3.2.1:
 - Moved XP level in card
 - Fixed customisation code to allow for new circle color and winx character

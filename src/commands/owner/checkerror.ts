@@ -8,7 +8,7 @@ import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
 import { dateToString } from "../../utils/FormatUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
-import { createMessageCollector } from "../../utils/MessageUtils";
+import { getStringReply } from "../../utils/ReplyUtils";
 import { asyncForEach } from "../../utils/Utils";
 
 class CheckErrorCommand extends Command {
@@ -29,13 +29,12 @@ class CheckErrorCommand extends Command {
                         label: "Check",
                         value: "check",
                         onSelect: async ({ interaction }) => {
-                            await interaction.reply(Localisation.getTranslation("checkerror.reply.code"));
-                            const reply = await interaction.fetchReply();
-                            createMessageCollector(cmdArgs.channel, reply.id, cmdArgs.author, { max: 1, time: 1000 * 60 * 5 }).on("collect", async (message) => {
-                                const error: ErrorStruct = await Errors.get(message.content);
-                                if (!error) return <any>interaction.followUp(Localisation.getTranslation("error.invalid.errorCode"));
-                                interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
-                            });
+                            const { value: errorCode } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("checkerror.reply.code") });
+                            if (errorCode === undefined)
+                                return;
+                            const error: ErrorStruct = await Errors.get(errorCode);
+                            if (!error) return <any>interaction.followUp(Localisation.getTranslation("error.invalid.errorCode"));
+                            interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
                         }
                     },
                     {

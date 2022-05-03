@@ -198,7 +198,7 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
 
     ctx.save();
     ctx.beginPath();
-    ctx.strokeStyle = `hsla(${blend(startHsl[0], endHsl[0], 1 - filled) * 360}, ${blend(startHsl[1], endHsl[1], 1 - filled) * 100}%, ${blend(startHsl[2], endHsl[2], 1 - filled) * 100}%, 1)`;
+    ctx.strokeStyle = `hsla(${blend(startHsl.h, endHsl.h, 1 - filled) * 360}, ${blend(startHsl.s, endHsl.s, 1 - filled) * 100}%, ${blend(startHsl.l, endHsl.l, 1 - filled) * 100}%, 1)`;
     ctx.lineWidth = borderThickness * 2;
     ctx.arc(newPfpRadius + pfpX + borderThickness, newPfpRadius + pfpY + borderThickness, pfpRadius, (Math.PI / 180) * 270, (Math.PI / 180) * (270 + (360 * filled)));
     ctx.stroke();

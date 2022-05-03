@@ -75,7 +75,7 @@ export abstract class Command {
         return text;
     }
 
-    public getMinArgs() {
+    get minArgs() {
         let amount = 0;
         if (this.usage && this.usage.length > 0) {
             for (let i = 0; i < this.usage.length; i++) {
