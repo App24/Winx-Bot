@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton } from "discord.js";
+/*import { MessageActionRow, MessageButton } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
@@ -99,4 +99,4 @@ class LeaderboardColorCommand extends Command {
     }
 }
 
-export = LeaderboardColorCommand;
+export = LeaderboardColorCommand;*/

@@ -1,7 +1,10 @@
-import { createCanvas, Image, loadImage } from "canvas";
+import { Canvas, createCanvas, createImageData, Image, loadImage } from "canvas";
+import decodeGif from "decode-gif";
 import { Guild, GuildMember } from "discord.js";
+import { get } from "https";
 import { BotUser } from "../BotClient";
 import { CANVAS_FONT } from "../Constants";
+import GIFEncoder, { applyPalette, quantize } from "../gifenc/gifenc";
 import { Localisation } from "../localisation";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomNameUser } from "../structs/databaseTypes/CustomName";
@@ -13,7 +16,7 @@ import { rgbToHsl, fitTextOnCanvas, roundRect } from "./CanvasUtils";
 import { capitalise } from "./FormatUtils";
 import { getRoleById } from "./GetterUtils";
 import { getWingsImageByLevel } from "./RankUtils";
-import { getServerDatabase, asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor } from "./Utils";
+import { getServerDatabase, asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, stream2buffer, toBuffer } from "./Utils";
 import { getLevelXP } from "./XPUtils";
 
 export async function drawCard(leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
@@ -23,6 +26,53 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
 }
 
 export async function drawCardWithWings(leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, wingsImage: string | Buffer | Image, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+    const userPfpUrl = member.displayAvatarURL({ dynamic: true });
+
+    if (serverUserSettings.animatedCard == undefined) {
+        serverUserSettings.animatedCard = true;
+    }
+
+    if (userPfpUrl.toLocaleLowerCase().endsWith(".gif") && serverUserSettings.animatedCard) {
+
+        return new Promise<Buffer>((resolve) => {
+
+            get(member.displayAvatarURL({ format: "gif" }), async (response) => {
+                const buffer = await stream2buffer(response);
+
+                const { width, height, frames } = decodeGif(buffer);
+
+                const gif = GIFEncoder();
+
+                await asyncForEach(frames, async (frame) => {
+                    const pfpCanvas = createCanvas(width, height);
+                    const pfpCtx = pfpCanvas.getContext("2d");
+
+                    const data = createImageData(frame.data, width, height);
+                    pfpCtx.putImageData(data, 0, 0);
+
+                    const canvas = await drawCardFrame(pfpCanvas, leaderboardPosition, userLevel, userSettings, serverUserSettings, wingsImage, currentRank, nextRank, member, guild);
+                    const ctx = canvas.getContext("2d");
+
+                    const array = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    const palette = quantize(array.data, 256);
+                    const index = applyPalette(array.data, palette);
+
+                    gif.writeFrame(index, array.width, array.height, { palette, transparent: true });
+                });
+
+                gif.finish();
+
+                resolve(toBuffer(gif.buffer));
+            });
+        }).then(buffer => { return { image: buffer, extension: "gif" }; });
+    } else {
+        const avatar = await loadImage(member.displayAvatarURL({ format: 'png' }));
+        return { image: (await drawCardFrame(avatar, leaderboardPosition, userLevel, userSettings, serverUserSettings, wingsImage, currentRank, nextRank, member, guild)).toBuffer(), extension: "png" };
+    }
+}
+
+async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, wingsImage: string | Buffer | Image, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
     const Levels = BotUser.getDatabase(DatabaseType.Levels);
     const levels: UserLevel[] = await getServerDatabase(Levels, guild.id);
 
@@ -62,25 +112,6 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
 
     const canvas = createCanvas(1200, 600);
     const ctx = canvas.getContext("2d");
-
-    const getCustomName = async () => {
-        const customNames: string[] = await CustomNames.keys();
-        const customNameUsers: CustomNameUser[][] = await CustomNames.values();
-        let toReturn = user.username;
-
-        await asyncForEach(customNameUsers, async (users, i) => {
-            return await asyncForEach(users, u => {
-                if (u.id === user.id) {
-                    toReturn = customNames[i];
-                    return true;
-                }
-            });
-        });
-
-        return toReturn;
-    };
-
-    const name = await getCustomName();
 
     const pfpRadius = 140;
     const nameFontSize = 60;
@@ -139,10 +170,30 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
     }
 
     if (serverUserSettings.cardName === undefined) {
-        serverUserSettings.cardName = true;
+        serverUserSettings.cardName = "NICKNAME";
     }
 
-    if (serverUserSettings.cardName) {
+    if (serverUserSettings.cardName !== "DISABLED") {
+
+        const getCustomName = async () => {
+            const customNames: string[] = await CustomNames.keys();
+            const customNameUsers: CustomNameUser[][] = await CustomNames.values();
+            let toReturn = serverUserSettings.cardName === "NICKNAME" ? (member.nickname || user.username) : user.username;
+
+            await asyncForEach(customNameUsers, async (users, i) => {
+                return await asyncForEach(users, u => {
+                    if (u.id === user.id) {
+                        toReturn = customNames[i];
+                        return true;
+                    }
+                });
+            });
+
+            return toReturn;
+        };
+
+        const userName = await getCustomName();
+
         //Draw name
         ctx.font = `${nameFontSize}px ${CANVAS_FONT}`;
         if (userSettings.nameColor === DEFAULT_USER_SETTING.nameColor || !isHexColor(userSettings.nameColor)) {
@@ -154,8 +205,8 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
         ctx.textAlign = "center";
         ctx.strokeStyle = "black";
         ctx.lineWidth = 3;
-        ctx.strokeText(name, canvas.width / 2, namePosY);
-        ctx.fillText(name, canvas.width / 2, namePosY);
+        ctx.strokeText(userName, canvas.width / 2, namePosY);
+        ctx.fillText(userName, canvas.width / 2, namePosY);
     }
 
     //Draw Levels
@@ -164,6 +215,14 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
     ctx.font = `${lbFontSize}px ${CANVAS_FONT}`;
     ctx.textAlign = "left";
     ctx.fillText(levelsText, barPosX, namePosY);
+    const metrics = ctx.measureText(levelsText);
+    const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+    ctx.font = levelFont;
+    ctx.fillStyle = textColor;
+    ctx.textBaseline = "top";
+    ctx.textAlign = "center";
+    ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), barPosX + (metrics.width / 2.), namePosY + (actualHeight * 1.4));
 
     //Draw Leaderboard Position
     ctx.textBaseline = "top";
@@ -171,12 +230,6 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
     ctx.font = `${lbFontSize}px ${CANVAS_FONT}`;
     ctx.textAlign = "right";
     ctx.fillText(lbPositionText, barPosX + barWidth, namePosY);
-
-    ctx.font = levelFont;
-    ctx.fillStyle = textColor;
-    ctx.textBaseline = "bottom";
-    ctx.textAlign = "center";
-    ctx.fillText(Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), (canvas.width / 2.0), barPosY + barHeight + (extraTextPosY * 1.375));
 
     ctx.font = `${extraInfoFontSize}px ${CANVAS_FONT}`;
     ctx.textBaseline = 'bottom';
@@ -211,8 +264,7 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
     ctx.closePath();
     ctx.clip();
 
-    const avatar = await loadImage(member.displayAvatarURL({ format: 'png' }));
-    ctx.drawImage(avatar, pfpX + borderThickness, pfpY + borderThickness, newPfpRadius * 2, newPfpRadius * 2);
+    ctx.drawImage(userAvatar, pfpX + borderThickness, pfpY + borderThickness, newPfpRadius * 2, newPfpRadius * 2);
     ctx.restore();
 
     return canvas;

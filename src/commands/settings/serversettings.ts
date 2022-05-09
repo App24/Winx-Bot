@@ -34,8 +34,8 @@ class ServerSettingsCommand extends Command {
         embed.addField(Localisation.getTranslation("serversettings.category.levelchannel"), `${channel || Localisation.getTranslation("generic.none")}`);
         embed.addField(Localisation.getTranslation("serversettings.category.ranks"), ranks.length.toString());
         embed.addField(Localisation.getTranslation("serversettings.category.excludechannels"), serverInfo.excludeChannels.length.toString());
-        embed.addField(Localisation.getTranslation("serversettings.category.leaderboardcolor"), `#${serverInfo.leaderboardColor}`);
-        embed.addField(Localisation.getTranslation("serversettings.category.leaderboardhighlight"), `#${serverInfo.leaderboardHighlight}`);
+        //embed.addField(Localisation.getTranslation("serversettings.category.leaderboardcolor"), `#${serverInfo.leaderboardColor}`);
+        //embed.addField(Localisation.getTranslation("serversettings.category.leaderboardhighlight"), `#${serverInfo.leaderboardHighlight}`);
         embed.setColor(await getBotRoleColor(cmdArgs.guild));
 
         cmdArgs.message.reply({ embeds: [embed] });

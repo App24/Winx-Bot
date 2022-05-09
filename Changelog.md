@@ -1,3 +1,7 @@
+## 3.2.3
+- Fixed bug in levelping.ts where anyone could activate the buttons
+- Animated level cards if the user has an animated pfp, gifs can sometimes not be properly processed, leading to transparent pixels
+
 ## 3.2.2:
 - Improved barcolor.ts
 - Improved user input

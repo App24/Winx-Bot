@@ -1,11 +1,11 @@
-import { NewsChannel, TextChannel } from "discord.js";
+import { BaseGuildTextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Command, CommandAvailable, CommandArguments } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "../../utils/Utils";
-import { addXP, getLevelXP, XPInfo } from "../../utils/XPUtils";
+import { addXP, getLevelXP } from "../../utils/XPUtils";
 
 class GiveXPCommand extends Command {
     constructor() {
@@ -27,7 +27,7 @@ class GiveXPCommand extends Command {
         const rand = Math.random() * 100;
         if (rand <= per) {
             const xp = Math.floor(getLevelXP(userLevel.level) * 0.1);
-            await addXP(new XPInfo(xp, cmdArgs.member, cmdArgs.guild, <NewsChannel | TextChannel>cmdArgs.channel));
+            await addXP({ xp, member: cmdArgs.member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel });
             return cmdArgs.message.reply(Localisation.getTranslation("givexp.success.output", xp));
         }
         cmdArgs.message.reply(Localisation.getTranslation("givexp.fail.output"));

@@ -1,7 +1,7 @@
 import { parse } from "discord-command-parser";
 import { Collection } from "discord.js";
 import { BotUser } from "../BotClient";
-import { OWNER_ID, PREFIX } from "../Constants";
+import { PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
 import { CommandAccess, CommandArguments, CommandAvailable } from "../structs/Command";
 import { DatabaseType } from "../structs/DatabaseTypes";
@@ -45,7 +45,7 @@ export = () => {
                     }
                 } break;
                 case CommandAccess.BotOwner: {
-                    if (message.author.id !== OWNER_ID) {
+                    if (message.author.id !== process.env.OWNER_ID) {
                         return message.reply(Localisation.getTranslation("command.access.botOwner"));
                     }
                 } break;
@@ -87,7 +87,7 @@ export = () => {
                 }
             } break;
             case CommandAccess.BotOwner: {
-                if (message.author.id !== OWNER_ID) {
+                if (message.author.id !== process.env.OWNER_ID) {
                     return message.reply(Localisation.getTranslation("command.access.botOwner"));
                 }
             } break;

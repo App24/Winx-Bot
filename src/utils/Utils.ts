@@ -1,7 +1,7 @@
 import { join } from "path";
 import fs from "fs";
 import request from "request";
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, DONATE_LINK, OWNER_ID, PREFIX } from "../Constants";
+import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannel } from "discord.js";
 import { BotUser } from "../BotClient";
@@ -13,6 +13,7 @@ import { Keyv } from "../keyv/keyv-index";
 import { Canvas } from "canvas";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
 import { Color } from "../structs/Color";
+import { Stream } from "stream";
 
 /**
  * 
@@ -142,12 +143,12 @@ export async function isPatreon(userId: string, guildId: string) {
 
 /**
  * 
- * @param canvas Canvas to convert
+ * @param data Canvas to convert
  * @param fileName Name of file to send to discord
  * @returns Message Attachment
  */
-export function canvasToMessageAttachment(canvas: Canvas, fileName = "color", fileExtension = "png") {
-    return new MessageAttachment(canvas.toBuffer(), `${fileName}.${fileExtension}`);
+export function canvasToMessageAttachment(data: Canvas | Buffer, fileName = "color", fileExtension = "png") {
+    return new MessageAttachment(data instanceof Canvas ? data.toBuffer() : data, `${fileName}.${fileExtension}`);
 }
 
 /**
@@ -251,7 +252,7 @@ export async function reportError(error, message?: Message) {
     errorObj.error = error;
     await Errors.set(hex, errorObj);
 
-    const owner = await getUserById(OWNER_ID);
+    const owner = await getUserById(process.env.OWNER_ID);
 
     const dm = await owner.createDM();
     await dm.send("Error");
@@ -276,14 +277,14 @@ export function isModerator(member: GuildMember) {
 export async function createMessageEmbed(data: MessageEmbedOptions | MessageEmbed, guild: Guild) {
     const embed = new MessageEmbed(data);
     embed.setColor(await getBotRoleColor(guild));
-    const footers = [Localisation.getTranslation("footer.donate", DONATE_LINK), Localisation.getTranslation("footer.suggestion", PREFIX, "suggestion")];
+    const footers = [Localisation.getTranslation("footer.donate", process.env.npm_package_config_donate), Localisation.getTranslation("footer.suggestion", PREFIX, "suggestion")];
     const option = Math.floor((footers.length * 10) * Math.random());
     if (option < footers.length)
         embed.setFooter({ text: `${(data.footer && data.footer.text) || ""}\n${footers[option]}` });
     return embed;
 }
 
-export function downloadFile(uri: string, fileName: string, callback: () => void) {
+export function downloadFile(uri: string, fileName: string, callback?: () => void) {
     request.head(uri, function () {
         request(uri).pipe(fs.createWriteStream(fileName)).on("close", callback);
     });
@@ -292,4 +293,35 @@ export function downloadFile(uri: string, fileName: string, callback: () => void
 export function getBrightnessColor(color: Color, brightColor = "white", darkColor = "black") {
     const brightness = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
     return (brightness > 125) ? darkColor : brightColor;
+}
+
+export async function stream2buffer(stream: Stream): Promise<Buffer> {
+
+    return new Promise<Buffer>((resolve, reject) => {
+
+        const _buf = Array<any>();
+
+        stream.on("data", chunk => _buf.push(chunk));
+        stream.on("end", () => resolve(Buffer.concat(_buf)));
+        stream.on("error", err => reject(`error converting stream - ${err}`));
+
+    });
+}
+
+export function toBuffer(ab: ArrayBuffer) {
+    const buf = Buffer.alloc(ab.byteLength);
+    const view = new Uint8Array(ab);
+    for (let i = 0; i < buf.length; ++i) {
+        buf[i] = view[i];
+    }
+    return buf;
+}
+
+export function toArrayBuffer(buf: Buffer) {
+    const ab = new ArrayBuffer(buf.length);
+    const view = new Uint8Array(ab);
+    for (let i = 0; i < buf.length; ++i) {
+        view[i] = buf[i];
+    }
+    return ab;
 }

@@ -22,9 +22,9 @@ export = () => {
 
             if (!serverInfo.levelChannel) serverInfo.levelChannel = DEFAULT_SERVER_INFO.levelChannel;
 
-            if (!serverInfo.leaderboardColor) serverInfo.leaderboardColor = DEFAULT_SERVER_INFO.leaderboardColor;
+            //if (!serverInfo.leaderboardColor) serverInfo.leaderboardColor = DEFAULT_SERVER_INFO.leaderboardColor;
 
-            if (!serverInfo.leaderboardHighlight) serverInfo.leaderboardHighlight = DEFAULT_SERVER_INFO.leaderboardHighlight;
+            //if (!serverInfo.leaderboardHighlight) serverInfo.leaderboardHighlight = DEFAULT_SERVER_INFO.leaderboardHighlight;
 
             await ServerInfo.set(server.id, serverInfo);
         });

@@ -47,6 +47,7 @@
     "customname.command.description": "Set custom names for people!",
     "levelping.command.description": "Toggle Level Ping!",
     "cardname.command.description": "Toggle Card Name!",
+    "cardpfp.command.description": "Toggle Animated card!",
     
     "manageranks.command.description": "Set transformation for each level!",
     "managegifs.command.description": "Manage gifs for each transformation level!",

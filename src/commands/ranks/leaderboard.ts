@@ -8,9 +8,8 @@ import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, getLeaderboardMembers, asyncForEach, blend, canvasToMessageAttachment, hexToRGB, getBrightnessColor } from "../../utils/Utils";
 import { getLevelXP } from "../../utils/XPUtils";
 import { createCanvas, loadImage } from "canvas";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
-import { roundRect, rgbToHsl } from "../../utils/CanvasUtils";
+import { roundRect, rgbToHsl, underlineText } from "../../utils/CanvasUtils";
 import { CANVAS_FONT } from "../../Constants";
 
 class RankCommand extends Command {
@@ -23,14 +22,13 @@ class RankCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
+        const msg = await cmdArgs.message.reply("Generating leaderboard...");
+
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
         if (!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
 
         const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
         let user = cmdArgs.author;
         if (cmdArgs.args.length) {
@@ -70,7 +68,7 @@ class RankCommand extends Command {
         const textFontSize = 50;
         const textFont = `${textFontSize}px ${CANVAS_FONT}`;
 
-        const separatorHeight = 5;
+        const separatorHeight = 10;
 
         const canvas = createCanvas(10, 10);
         const ctx = canvas.getContext("2d");
@@ -128,6 +126,8 @@ class RankCommand extends Command {
 
         ctx.restore();
 
+        let previousUserSettings: UserSetting;
+
         await asyncForEach(leaderboardLevels, async (value, i) => {
             let userSettings: UserSetting = await UserSettings.get(value.member.id);
             if (!userSettings) {
@@ -153,7 +153,7 @@ class RankCommand extends Command {
             const textColor = getBrightnessColor(hexToRGB(userSettings.cardColor));
 
             if (value.position >= 15) {
-                ctx.fillStyle = textColor;
+                ctx.fillStyle = getBrightnessColor(hexToRGB(previousUserSettings.cardColor));
                 ctx.fillRect(0, pfpY - pfpRadius - pfpPadding - (separatorHeight / 2.), canvas.width, separatorHeight);
             }
 
@@ -187,17 +187,23 @@ class RankCommand extends Command {
             ctx.restore();
 
             ctx.font = textFont;
-            if (user.id === value.member.id) {
-                ctx.fillStyle = `#${serverInfo.leaderboardHighlight}`;
-            } else {
-                ctx.fillStyle = textColor;
-            }
-            ctx.textBaseline = "ideographic";
+            ctx.fillStyle = textColor;
+            ctx.textBaseline = "middle";
             ctx.textAlign = "left";
-            ctx.fillText(`${value.position + 1}. ${value.member.user.tag} ${levelText}`, pfpX + pfpRadius + borderThickness + pfpPadding * 2, pfpY - textFontSize / 2.);
+
+            const textPosx = pfpX + pfpRadius + borderThickness + pfpPadding * 2;
+            const textPosY = pfpY;
+
+            ctx.fillText(`${value.position + 1}. ${value.member.user.tag} ${levelText}`, textPosx, textPosY);
+            if (user.id === value.member.id) {
+                underlineText(ctx, `${value.position + 1}. ${value.member.user.tag} ${levelText}`, textPosx, textPosY);
+            }
+
+            previousUserSettings = userSettings;
         });
 
         cmdArgs.message.reply({ files: [canvasToMessageAttachment(canvas, "leaderboard")] });
+        msg.delete();
     }
 }
 

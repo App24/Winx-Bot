@@ -420,6 +420,11 @@
   dependencies:
     "sprintf-js" "~1.0.2"
 
+"array-range@^1.0.1":
+  "integrity" "sha1-9W5GWRhDYRxqVvd+8C7afFAIm/w="
+  "resolved" "https://registry.npmjs.org/array-range/-/array-range-1.0.1.tgz"
+  "version" "1.0.1"
+
 "array-union@^2.1.0":
   "integrity" "sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw=="
   "resolved" "https://registry.npmjs.org/array-union/-/array-union-2.1.0.tgz"
@@ -807,6 +812,14 @@
   "version" "4.3.2"
   dependencies:
     "ms" "2.1.2"
+
+"decode-gif@^1.0.1":
+  "integrity" "sha512-L0MT527mwlkil9TiN1xwnJXzUxCup55bUT91CPmQlc9zYejXJ8xp17d5EVnwM80JOIGImBUk1ptJQ+hDihyzwg=="
+  "resolved" "https://registry.npmjs.org/decode-gif/-/decode-gif-1.0.1.tgz"
+  "version" "1.0.1"
+  dependencies:
+    "array-range" "^1.0.1"
+    "omggif" "^1.0.10"
 
 "decompress-response@^3.3.0":
   "integrity" "sha1-gKTdMjdIOEv6JICDYirt7Jgq3/M="
@@ -2036,6 +2049,11 @@
   "integrity" "sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM="
   "resolved" "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz"
   "version" "4.1.1"
+
+"omggif@^1.0.10":
+  "integrity" "sha512-LMJTtvgc/nugXj0Vcrrs68Mn2D1r0zf630VNtqtpI1FEO7e+O9FP4gqs9AcnBaSEeoHIPm28u6qgPR0oyEpGSw=="
+  "resolved" "https://registry.npmjs.org/omggif/-/omggif-1.0.10.tgz"
+  "version" "1.0.10"
 
 "once@^1.3.0", "once@^1.3.1", "once@^1.4.0":
   "integrity" "sha1-WDsap3WWHUsROsF9nFC6753Xa9E="

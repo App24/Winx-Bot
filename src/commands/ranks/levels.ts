@@ -20,6 +20,8 @@ class LevelsCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
+        const msg = await cmdArgs.message.reply("Generating card...");
+
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
 
@@ -65,7 +67,11 @@ class LevelsCommand extends Command {
 
         const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 
-        cmdArgs.message.reply({ files: [canvasToMessageAttachment(await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild), "magiclevels")] });
+        const { image, extension } = await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+
+        cmdArgs.message.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
+
+        msg.delete();
     }
 }
 

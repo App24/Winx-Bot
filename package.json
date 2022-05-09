@@ -1,6 +1,6 @@
 {
   "name": "winx-bot",
-  "version": "1.0.0",
+  "version": "3.2.3",
   "description": "Winx Bot used in many Winx related servers.",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,10 @@
     "compile": "npx rimraf dist && npx tsc && node dist/index.js",
     "dev": "npx nodemon -e ts  --exec \"npm run compile\"",
     "lint": "eslint . --ext .ts"
+  },
+  "config": {
+    "github": "https://github.com/App24/Winx-Bot",
+    "donate": "https://paypal.me/WinxServer"
   },
   "repository": {
     "type": "git",
@@ -23,6 +27,7 @@
     "@keyv/sql": "^1.1.2",
     "archiver": "^5.3.0",
     "canvas": "^2.8.0",
+    "decode-gif": "^1.0.1",
     "discord-command-parser": "^1.5.3",
     "discord.js": "^13.6.0",
     "dotenv": "^10.0.0",

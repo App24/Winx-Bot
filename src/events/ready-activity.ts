@@ -1,5 +1,5 @@
 import { BotUser } from "../BotClient";
-import { VERSION, PREFIX } from "../Constants";
+import { PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
 import { BasicActivity } from "../structs/activities/BasicActivity";
 import { BirthdayActivity } from "../structs/activities/events/BirthdayActivity";
@@ -9,7 +9,7 @@ import { UsersActivity } from "../structs/activities/UsersActivity";
 
 let i = -1;
 const activities = [
-    new BasicActivity(Localisation.getTranslation("activity.basic.version", VERSION)),
+    new BasicActivity(Localisation.getTranslation("activity.basic.version", process.env.npm_package_version)),
     new BasicActivity(Localisation.getTranslation("activity.basic.help", PREFIX)),
     new BasicActivity(Localisation.getTranslation("activity.basic.suggestion", PREFIX)),
 

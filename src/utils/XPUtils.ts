@@ -8,20 +8,13 @@ import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/Server
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "./Utils";
 import { capitalise } from "./FormatUtils";
-import { ServerUserSettings } from "../structs/databaseTypes/ServerUserSettings";
+import { getServerUserSettings } from "./RankUtils";
 
-export class XPInfo {
-    public readonly xp: number;
-    public readonly member: GuildMember;
-    public readonly guild: Guild;
-    public readonly channel: BaseGuildTextChannel;
-
-    public constructor(xp: number, member: GuildMember, guild: Guild, channel: BaseGuildTextChannel) {
-        this.xp = xp;
-        this.member = member;
-        this.guild = guild;
-        this.channel = channel;
-    }
+export interface XPInfo {
+    readonly xp: number;
+    readonly member: GuildMember;
+    readonly guild: Guild;
+    readonly channel: BaseGuildTextChannel;
 }
 
 /**
@@ -74,7 +67,7 @@ export async function removeXP(xpInfo: XPInfo) {
                 }
             }
         }
-        showLevelMessage(false, levelChannel, xpInfo.member, userLevel.level, rankDetails);
+        await showLevelMessage(false, levelChannel, xpInfo.member, userLevel.level, rankDetails);
     }
 
     await Levels.set(xpInfo.guild.id, levels);
@@ -121,22 +114,14 @@ export async function addXP(xpInfo: XPInfo, levelUpMessage = true) {
             }
         }
         if (levelUpMessage)
-            showLevelMessage(true, levelChannel, xpInfo.member, userLevel.level, rankDetails);
+            await showLevelMessage(true, levelChannel, xpInfo.member, userLevel.level, rankDetails);
     }
 
     await Levels.set(xpInfo.guild.id, levels);
 }
 
 export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuildTextChannel, member: GuildMember, level: number, rankDetails: { rankLevel: RankLevel, rank: Role }) {
-    const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
-    const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, levelChannel.guildId);
-
-    let userIndex = serverUserSettings.findIndex(u => u.userId === member.id);
-    if (userIndex < 0) {
-        serverUserSettings.push(new ServerUserSettings(member.id));
-        userIndex = serverUserSettings.length - 1;
-    }
-    const userSettings = serverUserSettings[userIndex];
+    const userSettings = await getServerUserSettings(member.id, levelChannel.guildId);
 
     if (userSettings.levelPing === undefined) {
         userSettings.levelPing = false;

@@ -55,17 +55,20 @@ class TestMLCommand extends Command {
         const nextRank = await getNextRank(userLevel.level, cmdArgs.guildId);
 
         const serverUserSettings = new ServerUserSettings(cmdArgs.author.id);
+        serverUserSettings.animatedCard = false;
 
         if (winxNumber > 0) {
             await asyncForEach(Object.keys(WinxCharacter), async (val) => {
                 if (val === "None") return;
                 if (isNaN(parseInt(val))) {
                     userSettings.winxCharacter = WinxCharacter[val];
-                    await cmdArgs.message.reply({ content: val, files: [canvasToMessageAttachment(await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild), "magiclevels")] });
+                    const { image, extension } = await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+                    await cmdArgs.message.reply({ content: val, files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
                 }
             });
         } else {
-            cmdArgs.message.reply({ files: [canvasToMessageAttachment(await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild), "magiclevels")] });
+            const { image, extension } = await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+            cmdArgs.message.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
         }
 
     }

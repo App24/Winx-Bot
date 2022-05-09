@@ -112,3 +112,21 @@ export function fitTextOnCanvas(ctx: NodeCanvasRenderingContext2D, text: string,
     return fontsize;
 
 }
+
+export function underlineText(ctx: NodeCanvasRenderingContext2D, text: string, x: number, y: number) {
+    const metrics = ctx.measureText(text);
+    const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    const fontSize = Math.floor(actualHeight * 1.4);
+    const height = Math.ceil(fontSize * 0.08);
+    switch (ctx.textAlign) {
+        case "center": x -= (metrics.width / 2); break;
+        case "right": x -= metrics.width; break;
+    }
+    switch (ctx.textBaseline) {
+        case "top": y += (fontSize); break;
+        case "middle": y += (fontSize / 2); break;
+    }
+    ctx.save();
+    roundRect(ctx, x, y, metrics.width, height, height * 0.2, "fill");
+    ctx.restore();
+}

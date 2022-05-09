@@ -1,6 +1,5 @@
 import { MessageEmbed, BaseGuildTextChannel, TextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { SUGGESTION_CHANNEL, OWNER_ID } from "../../Constants";
 import { getBotRoleColor, getGuildById, getTextChannelById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
@@ -17,12 +16,12 @@ class SuggestionCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        const suggestionsChannel: any = await BotUser.channels.fetch(SUGGESTION_CHANNEL);
+        const suggestionsChannel: any = await BotUser.channels.fetch(process.env.SUGGESTION_CHANNEL);
         let channel: BaseGuildTextChannel;
         if (!isDM(cmdArgs.channel) && suggestionsChannel.guildId === cmdArgs.guildId) {
-            channel = await getTextChannelById(SUGGESTION_CHANNEL, cmdArgs.guild);
+            channel = await getTextChannelById(process.env.SUGGESTION_CHANNEL, cmdArgs.guild);
         } else {
-            channel = await getTextChannelById(SUGGESTION_CHANNEL, await getGuildById(suggestionsChannel.guildId));
+            channel = await getTextChannelById(process.env.SUGGESTION_CHANNEL, await getGuildById(suggestionsChannel.guildId));
         }
         const user = cmdArgs.author;
         const request = cmdArgs.args.join(" ");
@@ -35,7 +34,7 @@ class SuggestionCommand extends Command {
         cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
 
         await createMessageButtons({
-            sendTarget: <TextChannel>channel, author: OWNER_ID, options: { embeds: [embed] }, settings: { max: 1, time: -1 }, buttons: [
+            sendTarget: <TextChannel>channel, author: process.env.OWNER_ID, options: { embeds: [embed] }, settings: { max: 1, time: -1 }, buttons: [
                 {
                     customId: "accept", style: "SUCCESS", label: Localisation.getTranslation("button.accept"), onRun: async ({ interaction, message }) => {
                         const embed = message.embeds[0];

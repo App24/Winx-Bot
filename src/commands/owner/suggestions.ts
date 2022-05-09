@@ -1,6 +1,5 @@
 import { ButtonInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { OWNER_ID } from "../../Constants";
 import { getBotRoleColor, getUserById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
@@ -96,7 +95,7 @@ class CompleteSubCommand extends SubCommand {
             );
 
         cmdArgs.message.reply({ embeds: [embed], components: [row] }).then(async (msg) => {
-            const collector = msg.createMessageComponentCollector({ filter: (interaction) => interaction.user.id === OWNER_ID, max: 1 });
+            const collector = msg.createMessageComponentCollector({ filter: (interaction) => interaction.user.id === cmdArgs.author.id, max: 1 });
 
             collector.on("collect", async (interaction: ButtonInteraction) => {
                 await interaction.update({ components: [] });
@@ -139,7 +138,7 @@ class RejectSubCommand extends SubCommand {
             );
 
         cmdArgs.message.reply({ embeds: [embed], components: [row] }).then(async (msg) => {
-            const collector = msg.createMessageComponentCollector({ filter: (interaction) => interaction.user.id === OWNER_ID, max: 1 });
+            const collector = msg.createMessageComponentCollector({ filter: (interaction) => interaction.user.id === cmdArgs.author.id, max: 1 });
 
             collector.on("collect", async (interaction: ButtonInteraction) => {
                 await interaction.update({ components: [] });

@@ -9,7 +9,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, asyncForEach, getAllMessages } from "../../utils/Utils";
-import { addXP, XPInfo } from "../../utils/XPUtils";
+import { addXP } from "../../utils/XPUtils";
 import { secondsToTime } from "../../utils/FormatUtils";
 
 class CheckLevelsCommand extends Command {
@@ -66,7 +66,7 @@ class CheckLevelsCommand extends Command {
                     totalXp += xp;
                 }
             });
-            await addXP(new XPInfo(totalXp, member, cmdArgs.guild, <BaseGuildTextChannel>cmdArgs.channel), false);
+            await addXP({ xp: totalXp, member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel }, false);
             const timeDifferent = new Date().getTime() - startTime;
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index + 1, NTChannels.length, secondsToTime(timeDifferent / 1000)));
         });

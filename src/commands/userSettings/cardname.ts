@@ -1,9 +1,11 @@
 import { BotUser } from "../../BotClient";
+import { Localisation } from "../../localisation";
 import { UserSettings } from "../../structs/Category";
 import { Command, CommandArguments, CommandAvailable } from "../../structs/Command";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
-import { createGenericButtons } from "../../utils/MessageButtonUtils";
+import { capitalise } from "../../utils/FormatUtils";
+import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { getServerDatabase } from "../../utils/Utils";
 
 class CardNameCommand extends Command {
@@ -25,10 +27,59 @@ class CardNameCommand extends Command {
         const userSettings = serverUserSettings[userIndex];
 
         if (userSettings.cardName === undefined) {
-            userSettings.cardName = true;
+            userSettings.cardName = "NICKNAME";
         }
 
-        createGenericButtons({
+        createMessageSelection({
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
+            {
+                options:
+                    [
+                        {
+                            label: "Disable",
+                            value: "disable",
+                            default: userSettings.cardName === "DISABLED",
+                            onSelect: async ({ interaction }) => {
+                                userSettings.cardName = "DISABLED";
+                                interaction.reply({ content: Localisation.getTranslation("cardname.reply", capitalise(userSettings.cardName)) });
+                                serverUserSettings[userIndex] = userSettings;
+                                await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
+                            }
+                        },
+                        {
+                            label: "Username",
+                            value: "username",
+                            default: userSettings.cardName === "USERNAME",
+                            onSelect: async ({ interaction }) => {
+                                userSettings.cardName = "USERNAME";
+                                interaction.reply({ content: Localisation.getTranslation("cardname.reply", capitalise(userSettings.cardName)) });
+                                serverUserSettings[userIndex] = userSettings;
+                                await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
+                            }
+                        },
+                        {
+                            label: "Nickname",
+                            value: "nickname",
+                            default: userSettings.cardName === "NICKNAME",
+                            onSelect: async ({ interaction }) => {
+                                userSettings.cardName = "NICKNAME";
+                                interaction.reply({ content: Localisation.getTranslation("cardname.reply", capitalise(userSettings.cardName)) });
+                                serverUserSettings[userIndex] = userSettings;
+                                await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
+                            }
+                        },
+                        {
+                            label: Localisation.getTranslation("button.cancel"),
+                            value: "cancel",
+                            onSelect: async ({ interaction }) => {
+                                await interaction.deferUpdate();
+                            }
+                        }
+                    ]
+            }
+        });
+
+        /*createGenericButtons({
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, buttons: [
                 {
                     customId: "toggle",
@@ -50,7 +101,7 @@ class CardNameCommand extends Command {
                     }
                 }
             ]
-        });
+        });*/
     }
 }
 

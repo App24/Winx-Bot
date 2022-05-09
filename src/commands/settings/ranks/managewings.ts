@@ -91,8 +91,10 @@ class ManageWingsCommand extends Command {
                             const userSettings = await getUserSettings(cmdArgs.author.id);
                             const serverUserSettings = new ServerUserSettings(cmdArgs.author.id);
 
+                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, userSettings, serverUserSettings, image.url, undefined, undefined, cmdArgs.member, cmdArgs.guild);
+
                             await createMessageButtons({
-                                sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(await drawCardWithWings(0, userLevel, userSettings, serverUserSettings, image.url, undefined, undefined, cmdArgs.member, cmdArgs.guild))] }, buttons:
+                                sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:
                                     [
                                         {
                                             customId: "accept",

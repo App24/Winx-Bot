@@ -1,5 +1,5 @@
 import { Canvas, NodeCanvasRenderingContext2D } from "canvas";
-import { ButtonInteraction, Message, MessageActionRow, MessageButton } from "discord.js";
+import { Message, MessageActionRow, MessageButton } from "discord.js";
 import { Localisation } from "../../localisation";
 import { Minigames } from "../../structs/Category";
 import { Command, CommandArguments, CommandAvailable } from "../../structs/Command";
@@ -42,9 +42,14 @@ class TicTacToe extends Command {
 
         const msg = await message.reply({ content: Localisation.getTranslation("tictactoe.turn", currentPlayer), files: [canvasToMessageAttachment(canvas, "tictactoe")], components: buttons, allowedMentions: { users: [currentPlayer] } });
 
-        const collector = msg.createMessageComponentCollector({ filter: i => i.user.id === currentPlayer, time: 5 * 60 * 1000 });
+        const collector = msg.createMessageComponentCollector({ filter: () => true, time: 5 * 60 * 1000 });
 
-        collector.on("collect", async (interaction: ButtonInteraction) => {
+        collector.on("collect", async (interaction) => {
+            if (!interaction.isButton()) return;
+            if (interaction.user.id !== currentPlayer) {
+                await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
+                return;
+            }
             const data: any[] = interaction.customId.split("_");
             const x = Number.parseInt(data[0]);
             const y = Number.parseInt(data[1]);

@@ -1,6 +1,6 @@
 import { MessageEmbed, Guild, GuildMember, User, TextBasedChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { OWNER_ID, PREFIX } from "../../Constants";
+import { PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
 import { Info, Category, Categories, CustomCommands } from "../../structs/Category";
 import { Command, CommandUsage, CommandArguments, CommandAvailable, CommandAccess } from "../../structs/Command";
@@ -33,7 +33,7 @@ class HelpCommand extends Command {
                                     return;
                             } break;
                             case CommandAccess.BotOwner: {
-                                if (cmdArgs.author.id !== OWNER_ID)
+                                if (cmdArgs.author.id !== process.env.OWNER_ID)
                                     return;
                             } break;
                             case CommandAccess.Moderators: {
@@ -128,7 +128,7 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                     }
                 } break;
                 case CommandAccess.BotOwner: {
-                    if (author.id !== OWNER_ID) {
+                    if (author.id !== process.env.OWNER_ID) {
                         return;
                     }
                 } break;
@@ -152,7 +152,7 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                                 }
                             } break;
                             case CommandAccess.BotOwner: {
-                                if (author.id !== OWNER_ID) {
+                                if (author.id !== process.env.OWNER_ID) {
                                     return;
                                 }
                             } break;

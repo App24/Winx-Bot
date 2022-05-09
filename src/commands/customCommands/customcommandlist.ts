@@ -1,6 +1,5 @@
 import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { OWNER_ID } from "../../Constants";
 import { Localisation } from "../../localisation";
 import { CustomCommandsSettings } from "../../structs/Category";
 import { Command, CommandAccess, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
@@ -43,7 +42,7 @@ class CustomCommandListCommand extends Command {
                         }
                     } break;
                     case CommandAccess.BotOwner: {
-                        if (cmdArgs.author.id !== OWNER_ID) {
+                        if (cmdArgs.author.id !== process.env.OWNER_ID) {
                             return;
                         }
                     } break;

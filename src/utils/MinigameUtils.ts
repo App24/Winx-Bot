@@ -22,7 +22,7 @@ export async function waitForPlayers(maxPlayers: number, minPlayers: number, tit
     collector.on("end", async () => {
         if (deleted) return;
         await message.edit({ components: [] });
-        if (!membersJoined.length) {
+        if (membersJoined.length < 1) {
             embed.setDescription(Localisation.getTranslation("generic.noonejoin"));
             message.edit({ embeds: [embed] });
         }

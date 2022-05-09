@@ -6,6 +6,9 @@
     "generic.canceled": "Canceled!",
     "generic.accepted": "Accepted",
     "generic.rejected": "Rejected",
+    "generic.enabled": "Enabled",
+    "generic.disabled": "Disabled",
+
     "generic.none": "None",
     "generic.unknown": "Unknown",
     "generic.confirmation": "You sure you want to do this?",

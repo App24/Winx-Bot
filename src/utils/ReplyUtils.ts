@@ -77,15 +77,7 @@ export async function getNumberReply(replyData: ReplyData, bounds: { min?: numbe
 }
 
 export async function getLevelReply(replyData: ReplyData) {
-    return getReply<number>(replyData, (msg, resolve, reject) => {
-        const level = parseInt(msg.content);
-        if (isNaN(level) || level < 0) {
-            reject(Localisation.getTranslation("error.invalid.level"));
-            return <any>msg.reply(Localisation.getTranslation("error.invalid.level"));
-        }
-
-        resolve(level);
-    });
+    return getNumberReply(replyData, { min: 0 });
 }
 
 export async function getStringReply(replyData: ReplyData) {
@@ -102,7 +94,7 @@ export async function getImageReply(replyData: ReplyData) {
             return msg.reply(Localisation.getTranslation("error.missing.image"));
         }
 
-        if (!image.name.toLowerCase().endsWith(".png")) {
+        if (![".png", ".jpg", ".jpeg"].some(extension => image.name.toLowerCase().endsWith(extension))) {
             reject(Localisation.getTranslation("error.invalid.image"));
             return msg.reply(Localisation.getTranslation("error.invalid.image"));
         }

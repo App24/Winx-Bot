@@ -169,5 +169,11 @@
     "winxcharacter.set": "Character set to: {0}",
     "wingslevel.set": "Your transformation is now `{0}`!",
 
-    "checkerror.reply.code": "Please reply with error code"
+    "checkerror.reply.code": "Please reply with error code",
+
+    "cardpfp.warning": "Animated cards will only work if you have an animated pfp!",
+    "cardpfp.reply": "Animated card is now {0}!",
+
+    "levelping.reply": "Level pings are now {0}!",
+    "cardname.reply": "Card name is now {0}!"
 }

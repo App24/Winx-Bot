@@ -3,7 +3,7 @@ databases/
 backupDatabases/
 node_modules/
 dist/
-src/commands/guildSpecific
-src/events/guildSpecific
+guildSpecific/
 wings/
+emojis/
 .vscode

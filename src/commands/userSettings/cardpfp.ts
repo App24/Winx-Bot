@@ -7,12 +7,11 @@ import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettin
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { getServerDatabase } from "../../utils/Utils";
 
-class LevelPingCommand extends Command {
+class CardPfpCommand extends Command {
     public constructor() {
         super();
         this.category = UserSettings;
         this.available = CommandAvailable.Guild;
-        this.aliases = ["pinglevel"];
     }
 
     public async onRun(cmdArgs: CommandArguments) {
@@ -26,19 +25,19 @@ class LevelPingCommand extends Command {
         }
         const userSettings = serverUserSettings[userIndex];
 
-        if (userSettings.levelPing === undefined) {
-            userSettings.levelPing = false;
+        if (userSettings.animatedCard === undefined) {
+            userSettings.animatedCard = true;
         }
 
         createMessageButtons({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, buttons: [
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("cardpfp.warning"), buttons: [
                 {
                     customId: "toggle",
-                    label: userSettings.levelPing ? Localisation.getTranslation("button.disable") : Localisation.getTranslation("button.enable"),
+                    label: userSettings.animatedCard ? Localisation.getTranslation("button.disable") : Localisation.getTranslation("button.enable"),
                     style: "PRIMARY",
                     onRun: async ({ interaction }) => {
-                        userSettings.levelPing = !userSettings.levelPing;
-                        interaction.reply({ content: Localisation.getTranslation("levelping.reply", userSettings.animatedCard ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
+                        userSettings.animatedCard = !userSettings.animatedCard;
+                        interaction.reply({ content: Localisation.getTranslation("cardpfp.reply", userSettings.animatedCard ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
                         serverUserSettings[userIndex] = userSettings;
                         await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
                     }
@@ -56,4 +55,4 @@ class LevelPingCommand extends Command {
     }
 }
 
-export = LevelPingCommand;
+export = CardPfpCommand;

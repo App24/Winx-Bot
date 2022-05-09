@@ -26,7 +26,7 @@ class LevelChannelCommand extends Command {
                 {
                     customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
                         const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.channel"), guild: cmdArgs.guild });
-                        if(!channel) return;
+                        if (!channel) return;
 
                         serverInfo.levelChannel = channel.id;
 

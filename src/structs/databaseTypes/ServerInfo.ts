@@ -5,8 +5,8 @@ export class ServerInfo {
     public maxMessageLength: number;
     public levelChannel: string;
     public excludeChannels: string[];
-    public leaderboardColor: string;
-    public leaderboardHighlight: string;
+    //public leaderboardColor: string;
+    //public leaderboardHighlight: string;
 
     public constructor(maxMessagePerMinute: number, maxXpPerMessage: number, minMessageLength: number, maxMessageLength: number) {
         this.maxMessagePerMinute = maxMessagePerMinute;
@@ -15,8 +15,8 @@ export class ServerInfo {
         this.maxMessageLength = maxMessageLength;
         this.levelChannel = "";
         this.excludeChannels = [];
-        this.leaderboardColor = "363636";
-        this.leaderboardHighlight = "87ceeb";
+        //this.leaderboardColor = "363636";
+        //this.leaderboardHighlight = "87ceeb";
     }
 }
 

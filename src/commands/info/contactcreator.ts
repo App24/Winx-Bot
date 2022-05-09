@@ -1,4 +1,3 @@
-import { OWNER_ID } from "../../Constants";
 import { getUserById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Info } from "../../structs/Category";
@@ -13,7 +12,7 @@ class ContactCreatorCommand extends Command {
 
     public async onRun(cmdArgs: CommandArguments) {
         const messageContent = cmdArgs.args.join(" ");
-        const owner = await getUserById(OWNER_ID);
+        const owner = await getUserById(process.env.OWNER_ID);
         (await owner.createDM()).send(`${cmdArgs.author}: ${messageContent}`);
         cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
     }
