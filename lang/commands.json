@@ -167,7 +167,10 @@
     "rps.alreadyplayed": "You have already played!",
 
     "winxcharacter.set": "Character set to: {0}",
+
     "wingslevel.set": "Your transformation is now `{0}`!",
+
+    "wingstemplate.set": "Your wings template is now {0}",
 
     "checkerror.reply.code": "Please reply with error code",
 

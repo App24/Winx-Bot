@@ -1,7 +1,8 @@
 import { Message, MessageActionRow, MessageButton } from "discord.js";
 import { Localisation } from "../../localisation";
 import { Minigames } from "../../structs/Category";
-import { Command, CommandArguments, CommandAvailable } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { waitForPlayers } from "../../utils/MinigameUtils";
 import { createMessageEmbed } from "../../utils/Utils";
 

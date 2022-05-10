@@ -1,7 +1,8 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { UserSettings } from "../../structs/Category";
-import { Command, CommandArguments, CommandAvailable } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { createMessageButtons } from "../../utils/MessageButtonUtils";

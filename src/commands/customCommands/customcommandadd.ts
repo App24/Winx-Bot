@@ -1,7 +1,9 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { CustomCommandsSettings } from "../../structs/Category";
-import { Command, CommandAccess, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
+import { CommandAccess } from "../../structs/CommandAccess";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getServerDatabase } from "../../utils/Utils";

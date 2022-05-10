@@ -1,7 +1,8 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAccess } from "../../structs/CommandAccess";
 
 class ReloadLocalisationCommand extends Command {
     public constructor() {

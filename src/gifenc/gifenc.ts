@@ -1,21 +1,877 @@
+function rgb2y(r: number, g: number, b: number) {
+    return r * 0.29889531 + g * 0.58662247 + b * 0.11448223;
+}
+function rgb2i(r: number, g: number, b: number) {
+    return r * 0.59597799 - g * 0.2741761 - b * 0.32180189;
+}
+function rgb2q(r: number, g: number, b: number) {
+    return r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
+}
+
+function colorDifferenceYIQSquared(yiqA, yiqB) {
+    const y = yiqA[0] - yiqB[0];
+    const i = yiqA[1] - yiqB[1];
+    const q = yiqA[2] - yiqB[2];
+    const a = alpha(yiqA) - alpha(yiqB);
+    return y * y * 0.5053 + i * i * 0.299 + q * q * 0.1957 + a * a;
+}
+
+function alpha(array) {
+    return array[3] != null ? array[3] : 0xff;
+}
+
+function colorDifferenceYIQ(yiqA, yiqB) {
+    return Math.sqrt(colorDifferenceYIQSquared(yiqA, yiqB));
+}
+
+function colorDifferenceRGBToYIQSquared(rgb1, rgb2) {
+    const [r1, g1, b1] = rgb1;
+    const [r2, g2, b2] = rgb2;
+    const y = rgb2y(r1, g1, b1) - rgb2y(r2, g2, b2),
+        i = rgb2i(r1, g1, b1) - rgb2i(r2, g2, b2),
+        q = rgb2q(r1, g1, b1) - rgb2q(r2, g2, b2);
+    const a = alpha(rgb1) - alpha(rgb2);
+    return y * y * 0.5053 + i * i * 0.299 + q * q * 0.1957 + a * a;
+}
+
+function colorDifferenceRGBToYIQ(rgb1, rgb2) {
+    return Math.sqrt(colorDifferenceRGBToYIQSquared(rgb1, rgb2));
+}
+
+function euclideanDistanceSquared(a, b) {
+    let sum = 0;
+    for (let n = 0; n < a.length; n++) {
+        const dx = a[n] - b[n];
+        sum += dx * dx;
+    }
+    return sum;
+}
+
+function euclideanDistance(a, b) {
+    return Math.sqrt(euclideanDistanceSquared(a, b));
+}
+
+const constants = {
+    signature: "GIF",
+    version: "89a",
+    trailer: 0x3B,
+    extensionIntroducer: 0x21,
+    applicationExtensionLabel: 0xFF,
+    graphicControlExtensionLabel: 0xF9,
+    imageSeparator: 0x2C,
+    // Header
+    signatureSize: 3,
+    versionSize: 3,
+    globalColorTableFlagMask: 0b10000000,
+    colorResolutionMask: 0b01110000,
+    sortFlagMask: 0b00001000,
+    globalColorTableSizeMask: 0b00000111,
+    // Application extension
+    applicationIdentifierSize: 8,
+    applicationAuthCodeSize: 3,
+    // Graphic control extension
+    disposalMethodMask: 0b00011100,
+    userInputFlagMask: 0b00000010,
+    transparentColorFlagMask: 0b00000001,
+    // Image descriptor
+    localColorTableFlagMask: 0b10000000,
+    interlaceFlagMask: 0b01000000,
+    idSortFlagMask: 0b00100000,
+    localColorTableSizeMask: 0b00000111
+};
+
+/*
+  LZWEncoder.js
+  Authors
+  Kevin Weiner (original Java version - kweiner@fmsware.com)
+  Thibault Imbert (AS3 version - bytearray.org)
+  Johan Nordberg (JS version - code@johan-nordberg.com)
+  Acknowledgements
+  GIFCOMPR.C - GIF Image compression routines
+  Lempel-Ziv compression based on 'compress'. GIF modifications by
+  David Rowley (mgardi@watdcsu.waterloo.edu)
+  GIF Image compression - modified 'compress'
+  Based on: compress.c - File compression ala IEEE Computer, June 1984.
+  By Authors: Spencer W. Thomas (decvax!harpo!utah-cs!utah-gr!thomas)
+  Jim McKie (decvax!mcvax!jim)
+  Steve Davies (decvax!vax135!petsd!peora!srd)
+  Ken Turkowski (decvax!decwrl!turtlevax!ken)
+  James A. Woods (decvax!ihnp4!ames!jaw)
+  Joe Orost (decvax!vax135!petsd!joe)
+  Matt DesLauriers (@mattdesl - V8/JS optimizations)
+  Mathieu Henri (@p01 - JS optimization)
+*/
+
+const EOF = -1;
+const BITS = 12;
+const DEFAULT_HSIZE = 5003; // 80% occupancy
+const MASKS = [
+    0x0000,
+    0x0001,
+    0x0003,
+    0x0007,
+    0x000f,
+    0x001f,
+    0x003f,
+    0x007f,
+    0x00ff,
+    0x01ff,
+    0x03ff,
+    0x07ff,
+    0x0fff,
+    0x1fff,
+    0x3fff,
+    0x7fff,
+    0xffff,
+];
+
+function lzwEncode(
+    width,
+    height,
+    pixels,
+    colorDepth,
+    outStream = createStream(512),
+    accum = new Uint8Array(256),
+    htab = new Int32Array(DEFAULT_HSIZE),
+    codetab = new Int32Array(DEFAULT_HSIZE)
+) {
+    const hsize = htab.length;
+    const initCodeSize = Math.max(2, colorDepth);
+
+    accum.fill(0);
+    codetab.fill(0);
+    htab.fill(-1);
+
+    let cur_accum = 0;
+    let cur_bits = 0;
+
+    // Algorithm: use open addressing double hashing (no chaining) on the
+    // prefix code / next character combination. We do a variant of Knuth's
+    // algorithm D (vol. 3, sec. 6.4) along with G. Knott's relatively-prime
+    // secondary probe. Here, the modular division first probe is gives way
+    // to a faster exclusive-or manipulation. Also do block compression with
+    // an adaptive reset, whereby the code table is cleared when the compression
+    // ratio decreases, but after the table fills. The variable-length output
+    // codes are re-sized at this point, and a special CLEAR code is generated
+    // for the decompressor. Late addition: construct the table according to
+    // file size for noticeable speed improvement on small files. Please direct
+    // questions about this implementation to ames!jaw.
+
+    // compress and write the pixel data
+    const init_bits = initCodeSize + 1;
+
+    // Set up the globals: g_init_bits - initial number of bits
+    const g_init_bits = init_bits;
+
+    // Set up the necessary values
+
+    // block compression parameters -- after all codes are used up,
+    // and compression rate changes, start over.
+    let clear_flg = false;
+    let n_bits = g_init_bits;
+    let maxcode = (1 << n_bits) - 1;
+
+    const ClearCode = 1 << (init_bits - 1);
+    const EOFCode = ClearCode + 1;
+    let free_ent = ClearCode + 2;
+    let a_count = 0; // clear packet
+
+    let ent = pixels[0];
+
+    let hshift = 0;
+    for (let fcode = hsize; fcode < 65536; fcode *= 2) {
+        ++hshift;
+    }
+    hshift = 8 - hshift; // set hash code range bound
+
+    outStream.writeByte(initCodeSize); // write "initial code size" byte
+
+    output(ClearCode);
+
+    const length = pixels.length;
+    for (let idx = 1; idx < length; idx++) {
+        next_block: {
+            const c = pixels[idx];
+            const fcode = (c << BITS) + ent;
+            let i = (c << hshift) ^ ent; // xor hashing
+            if (htab[i] === fcode) {
+                ent = codetab[i];
+                break next_block;
+            }
+
+            const disp = i === 0 ? 1 : hsize - i; // secondary hash (after G. Knott)
+            while (htab[i] >= 0) {
+                // non-empty slot
+                i -= disp;
+                if (i < 0) i += hsize;
+                if (htab[i] === fcode) {
+                    ent = codetab[i];
+                    break next_block;
+                }
+            }
+            output(ent);
+            ent = c;
+            if (free_ent < 1 << BITS) {
+                codetab[i] = free_ent++; // code -> hashtable
+                htab[i] = fcode;
+            } else {
+                // Clear out the hash table
+                // table clear for block compress
+                htab.fill(-1);
+                free_ent = ClearCode + 2;
+                clear_flg = true;
+                output(ClearCode);
+            }
+        }
+    }
+
+    // Put out the final code.
+    output(ent);
+    output(EOFCode);
+
+    outStream.writeByte(0); // write block terminator
+    return outStream.bytesView();
+
+    function output(code: number) {
+        cur_accum &= MASKS[cur_bits];
+
+        if (cur_bits > 0) cur_accum |= code << cur_bits;
+        else cur_accum = code;
+
+        cur_bits += n_bits;
+
+        while (cur_bits >= 8) {
+            // Add a character to the end of the current packet, and if it is 254
+            // characters, flush the packet to disk.
+            accum[a_count++] = cur_accum & 0xff;
+            if (a_count >= 254) {
+                outStream.writeByte(a_count);
+                outStream.writeBytesView(accum, 0, a_count);
+                a_count = 0;
+            }
+            cur_accum >>= 8;
+            cur_bits -= 8;
+        }
+
+        // If the next entry is going to be too big for the code size,
+        // then increase it, if possible.
+        if (free_ent > maxcode || clear_flg) {
+            if (clear_flg) {
+                n_bits = g_init_bits;
+                maxcode = (1 << n_bits) - 1;
+                clear_flg = false;
+            } else {
+                ++n_bits;
+                maxcode = n_bits === BITS ? (1 << n_bits) : (1 << n_bits) - 1;
+            }
+        }
+
+        if (code == EOFCode) {
+            // At EOF, write the rest of the buffer.
+            while (cur_bits > 0) {
+                // Add a character to the end of the current packet, and if it is 254
+                // characters, flush the packet to disk.
+                accum[a_count++] = cur_accum & 0xff;
+                if (a_count >= 254) {
+                    outStream.writeByte(a_count);
+                    outStream.writeBytesView(accum, 0, a_count);
+                    a_count = 0;
+                }
+                cur_accum >>= 8;
+                cur_bits -= 8;
+            }
+            // Flush the packet to disk, and reset the accumulator
+            if (a_count > 0) {
+                outStream.writeByte(a_count);
+                outStream.writeBytesView(accum, 0, a_count);
+                a_count = 0;
+            }
+        }
+    }
+}
+
+function roundStep(byte, step) {
+    return step > 1 ? Math.round(byte / step) * step : byte;
+}
+
+function prequantize(
+    rgba,
+    { roundRGB = 5, roundAlpha = 10, oneBitAlpha = null } = {}
+) {
+    const data = new Uint32Array(rgba.buffer);
+    for (let i = 0; i < data.length; i++) {
+        const color = data[i];
+        let a = (color >> 24) & 0xff;
+        let b = (color >> 16) & 0xff;
+        let g = (color >> 8) & 0xff;
+        let r = color & 0xff;
+
+        a = roundStep(a, roundAlpha);
+        if (oneBitAlpha) {
+            const threshold = typeof oneBitAlpha === "number" ? oneBitAlpha : 127;
+            a = a <= threshold ? 0x00 : 0xff;
+        }
+        r = roundStep(r, roundRGB);
+        g = roundStep(g, roundRGB);
+        b = roundStep(b, roundRGB);
+
+        data[i] = (a << 24) | (b << 16) | (g << 8) | (r << 0);
+    }
+}
+
+function applyPalette(rgba, palette, format = "rgb565") {
+    if (!rgba || !rgba.buffer) {
+        throw new Error('quantize() expected RGBA Uint8Array data');
+    }
+    if (!(rgba instanceof Uint8Array) && !(rgba instanceof Uint8ClampedArray)) {
+        throw new Error('quantize() expected RGBA Uint8Array data');
+    }
+    if (palette.length > 256) {
+        throw new Error('applyPalette() only works with 256 colors or less');
+    }
+
+    const data = new Uint32Array(rgba.buffer);
+    const length = data.length;
+    const bincount = format === "rgb444" ? 4096 : 65536;
+    const index = new Uint8ClampedArray(length);
+    const cache = new Array(bincount);
+    const hasAlpha = format === "rgba4444";
+
+    // Some duplicate code below due to very hot code path
+    // Introducing branching/conditions shows some significant impact
+    if (format === "rgba4444") {
+        for (let i = 0; i < length; i++) {
+            const color = data[i];
+            const a = (color >> 24) & 0xff;
+            const b = (color >> 16) & 0xff;
+            const g = (color >> 8) & 0xff;
+            const r = color & 0xff;
+            const key = rgba8888_to_rgba4444(r, g, b, a);
+            const idx = key in cache ? cache[key] : (cache[key] = nearestColorIndexRGBA(r, g, b, a, palette));
+            index[i] = idx;
+        }
+    } else {
+        const rgb888_to_key = format === "rgb444" ? rgb888_to_rgb444 : rgb888_to_rgb565;
+        for (let i = 0; i < length; i++) {
+            const color = data[i];
+            const b = (color >> 16) & 0xff;
+            const g = (color >> 8) & 0xff;
+            const r = color & 0xff;
+            const key = rgb888_to_key(r, g, b);
+            const idx = key in cache ? cache[key] : (cache[key] = nearestColorIndexRGB(r, g, b, palette));
+            index[i] = idx;
+        }
+    }
+
+    return index;
+}
+
+function nearestColorIndexRGBA(r, g, b, a, palette) {
+    let k = 0;
+    let mindist = 1e100;
+    for (let i = 0; i < palette.length; i++) {
+        const px2 = palette[i];
+        const a2 = px2[3];
+        let curdist = sqr(a2 - a);
+        if (curdist > mindist) continue;
+        const r2 = px2[0];
+        curdist += sqr(r2 - r);
+        if (curdist > mindist) continue;
+        const g2 = px2[1];
+        curdist += sqr(g2 - g);
+        if (curdist > mindist) continue;
+        const b2 = px2[2];
+        curdist += sqr(b2 - b);
+        if (curdist > mindist) continue;
+        mindist = curdist;
+        k = i;
+    }
+    return k;
+}
+
+function nearestColorIndexRGB(r, g, b, palette) {
+    let k = 0;
+    let mindist = 1e100;
+    for (let i = 0; i < palette.length; i++) {
+        const px2 = palette[i];
+        const r2 = px2[0];
+        let curdist = sqr(r2 - r);
+        if (curdist > mindist) continue;
+        const g2 = px2[1];
+        curdist += sqr(g2 - g);
+        if (curdist > mindist) continue;
+        const b2 = px2[2];
+        curdist += sqr(b2 - b);
+        if (curdist > mindist) continue;
+        mindist = curdist;
+        k = i;
+    }
+    return k;
+}
+
+function snapColorsToPalette(palette, knownColors, threshold = 5) {
+    if (!palette.length || !knownColors.length) return;
+
+    const paletteRGB = palette.map((p) => p.slice(0, 3));
+    const thresholdSq = threshold * threshold;
+    const dim = palette[0].length;
+    for (let i = 0; i < knownColors.length; i++) {
+        let color = knownColors[i];
+        if (color.length < dim) {
+            // palette is RGBA, known is RGB
+            color = [color[0], color[1], color[2], 0xff];
+        } else if (color.length > dim) {
+            // palette is RGB, known is RGBA
+            color = color.slice(0, 3);
+        } else {
+            // make sure we always copy known colors
+            color = color.slice();
+        }
+        const r = nearestColorIndexWithDistance(
+            paletteRGB,
+            color.slice(0, 3),
+            euclideanDistanceSquared
+        );
+        const idx = r[0];
+        const distanceSq = r[1];
+        if (distanceSq > 0 && distanceSq <= thresholdSq) {
+            palette[idx] = color;
+        }
+    }
+}
+
+function sqr(a) {
+    return a * a;
+}
+
+function nearestColorIndex(
+    colors,
+    pixel,
+    distanceFn = euclideanDistanceSquared
+) {
+    let minDist = Infinity;
+    let minDistIndex = -1;
+    for (let j = 0; j < colors.length; j++) {
+        const paletteColor = colors[j];
+        const dist = distanceFn(pixel, paletteColor);
+        if (dist < minDist) {
+            minDist = dist;
+            minDistIndex = j;
+        }
+    }
+    return minDistIndex;
+}
+
+function nearestColorIndexWithDistance(
+    colors,
+    pixel,
+    distanceFn = euclideanDistanceSquared
+) {
+    let minDist = Infinity;
+    let minDistIndex = -1;
+    for (let j = 0; j < colors.length; j++) {
+        const paletteColor = colors[j];
+        const dist = distanceFn(pixel, paletteColor);
+        if (dist < minDist) {
+            minDist = dist;
+            minDistIndex = j;
+        }
+    }
+    return [minDistIndex, minDist];
+}
+
+function nearestColor(
+    colors,
+    pixel,
+    distanceFn = euclideanDistanceSquared
+) {
+    return colors[nearestColorIndex(colors, pixel, distanceFn)];
+}
+
+// Modified from:
+// https://github.com/mcychan/PnnQuant.js/blob/master/src/pnnquant.js
+
+/* Fast pairwise nearest neighbor based algorithm for multilevel thresholding
+Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
+Copyright (c) 2018-2021 Miller Cy Chan
+* error measure; time used is proportional to number of bins squared - WJ */
+
+function clamp(value, min, max) {
+    return value < min ? min : value > max ? max : value;
+}
+
+function find_nn(bins, idx, hasAlpha) {
+    let nn = 0;
+    let err = 1e100;
+
+    const bin1 = bins[idx];
+    const n1 = bin1.cnt;
+    const wa = bin1.ac;
+    const wr = bin1.rc;
+    const wg = bin1.gc;
+    const wb = bin1.bc;
+    for (let i = bin1.fw; i != 0; i = bins[i].fw) {
+        const bin = bins[i];
+        const n2 = bin.cnt;
+        const nerr2 = (n1 * n2) / (n1 + n2);
+        if (nerr2 >= err) continue;
+
+        let nerr = 0;
+        if (hasAlpha) {
+            nerr += nerr2 * sqr(bin.ac - wa);
+            if (nerr >= err) continue;
+        }
+
+        nerr += nerr2 * sqr(bin.rc - wr);
+        if (nerr >= err) continue;
+
+        nerr += nerr2 * sqr(bin.gc - wg);
+        if (nerr >= err) continue;
+
+        nerr += nerr2 * sqr(bin.bc - wb);
+        if (nerr >= err) continue;
+        err = nerr;
+        nn = i;
+    }
+    bin1.err = err;
+    bin1.nn = nn;
+}
+
+function create_bin() {
+    return {
+        ac: 0,
+        rc: 0,
+        gc: 0,
+        bc: 0,
+        cnt: 0,
+        nn: 0,
+        fw: 0,
+        bk: 0,
+        tm: 0,
+        mtm: 0,
+        err: 0,
+    };
+}
+
+function bin_add_rgb(bin, r, g, b) {
+    bin.rc += r;
+    bin.gc += g;
+    bin.bc += b;
+    bin.cnt++;
+}
+
+function create_bin_list(data, format) {
+    const bincount = format === "rgb444" ? 4096 : 65536;
+    const bins = new Array(bincount);
+    const size = data.length;
+
+    /* Build histogram */
+    // Note: Instead of introducing branching/conditions
+    // within a very hot per-pixel iteration, we just duplicate the code
+    // for each new condition
+    if (format === "rgba4444") {
+        for (let i = 0; i < size; ++i) {
+            const color = data[i];
+            const a = (color >> 24) & 0xff;
+            const b = (color >> 16) & 0xff;
+            const g = (color >> 8) & 0xff;
+            const r = color & 0xff;
+
+            // reduce to rgb4444 16-bit uint
+            const index = rgba8888_to_rgba4444(r, g, b, a);
+            const bin = index in bins ? bins[index] : (bins[index] = create_bin());
+            bin.rc += r;
+            bin.gc += g;
+            bin.bc += b;
+            bin.ac += a;
+            bin.cnt++;
+        }
+    }
+
+    else if (format === "rgb444") {
+        for (let i = 0; i < size; ++i) {
+            const color = data[i];
+            const b = (color >> 16) & 0xff;
+            const g = (color >> 8) & 0xff;
+            const r = color & 0xff;
+
+            // reduce to rgb444 12-bit uint
+            const index = rgb888_to_rgb444(r, g, b);
+            const bin = index in bins ? bins[index] : (bins[index] = create_bin());
+            bin.rc += r;
+            bin.gc += g;
+            bin.bc += b;
+            bin.cnt++;
+        }
+    } else {
+        for (let i = 0; i < size; ++i) {
+            const color = data[i];
+            const b = (color >> 16) & 0xff;
+            const g = (color >> 8) & 0xff;
+            const r = color & 0xff;
+
+            // reduce to rgb565 16-bit uint
+            const index = rgb888_to_rgb565(r, g, b);
+            const bin = index in bins ? bins[index] : (bins[index] = create_bin());
+            bin.rc += r;
+            bin.gc += g;
+            bin.bc += b;
+            bin.cnt++;
+        }
+    }
+    return bins;
+}
+
+function quantize(rgba, maxColors, opts: {
+    format?: "rgb565" | "rgb444" | "rgba4444",
+    clearAlpha?: boolean,
+    clearAlphaColor?: number,
+    clearAlphaThreshold?: number,
+    oneBitAlpha?: boolean,
+    useSqrt?: boolean
+} = { format: "rgb565", clearAlpha: true, clearAlphaColor: 0x00, clearAlphaThreshold: 0, oneBitAlpha: false }) {
+    const {
+        format = "rgb565",
+        clearAlpha = true,
+        clearAlphaColor = 0x00,
+        clearAlphaThreshold = 0,
+        oneBitAlpha = false,
+    } = opts;
+
+    if (!rgba || !rgba.buffer) {
+        throw new Error('quantize() expected RGBA Uint8Array data');
+    }
+    if (!(rgba instanceof Uint8Array) && !(rgba instanceof Uint8ClampedArray)) {
+        throw new Error('quantize() expected RGBA Uint8Array data');
+    }
+
+    const data = new Uint32Array(rgba.buffer);
+
+    let useSqrt = opts.useSqrt !== false;
+
+    // format can be:
+    // rgb565 (default)
+    // rgb444
+    // rgba4444
+
+    const hasAlpha = format === "rgba4444";
+    const bins = create_bin_list(data, format);
+    const bincount = bins.length;
+    const bincountMinusOne = bincount - 1;
+    const heap = new Uint32Array(bincount + 1);
+
+    /* Cluster nonempty bins at one end of array */
+    let maxbins = 0;
+    for (let i = 0; i < bincount; ++i) {
+        const bin = bins[i];
+        if (bin != null) {
+            const d = 1.0 / bin.cnt;
+            if (hasAlpha) bin.ac *= d;
+            bin.rc *= d;
+            bin.gc *= d;
+            bin.bc *= d;
+            bins[maxbins++] = bin;
+        }
+    }
+
+    if (sqr(maxColors) / maxbins < 0.022) {
+        useSqrt = false;
+    }
+
+    let i = 0;
+    for (; i < maxbins - 1; ++i) {
+        bins[i].fw = i + 1;
+        bins[i + 1].bk = i;
+        if (useSqrt) bins[i].cnt = Math.sqrt(bins[i].cnt);
+    }
+    if (useSqrt) bins[i].cnt = Math.sqrt(bins[i].cnt);
+
+    let h, l, l2;
+    /* Initialize nearest neighbors and build heap of them */
+    for (i = 0; i < maxbins; ++i) {
+        find_nn(bins, i, false);
+        /* Push slot on heap */
+        const err = bins[i].err;
+        for (l = ++heap[0]; l > 1; l = l2) {
+            l2 = l >> 1;
+            if (bins[(h = heap[l2])].err <= err) break;
+            heap[l] = h;
+        }
+        heap[l] = i;
+    }
+
+    /* Merge bins which increase error the least */
+    const extbins = maxbins - maxColors;
+    for (i = 0; i < extbins;) {
+        let tb;
+        /* Use heap to find which bins to merge */
+        for (; ;) {
+            let b1 = heap[1];
+            tb = bins[b1]; /* One with least error */
+            /* Is stored error up to date? */
+            if (tb.tm >= tb.mtm && bins[tb.nn].mtm <= tb.tm) break;
+            if (tb.mtm == bincountMinusOne)
+          /* Deleted node */ b1 = heap[1] = heap[heap[0]--];
+        /* Too old error value */ else {
+                find_nn(bins, b1, false);
+                tb.tm = i;
+            }
+            /* Push slot down */
+            const err = bins[b1].err;
+            for (l = 1; (l2 = l + l) <= heap[0]; l = l2) {
+                if (l2 < heap[0] && bins[heap[l2]].err > bins[heap[l2 + 1]].err) l2++;
+                if (err <= bins[(h = heap[l2])].err) break;
+                heap[l] = h;
+            }
+            heap[l] = b1;
+        }
+
+        /* Do a merge */
+        const nb = bins[tb.nn];
+        const n1 = tb.cnt;
+        const n2 = nb.cnt;
+        const d = 1.0 / (n1 + n2);
+        if (hasAlpha) tb.ac = d * (n1 * tb.ac + n2 * nb.ac);
+        tb.rc = d * (n1 * tb.rc + n2 * nb.rc);
+        tb.gc = d * (n1 * tb.gc + n2 * nb.gc);
+        tb.bc = d * (n1 * tb.bc + n2 * nb.bc);
+        tb.cnt += nb.cnt;
+        tb.mtm = ++i;
+
+        /* Unchain deleted bin */
+        bins[nb.bk].fw = nb.fw;
+        bins[nb.fw].bk = nb.bk;
+        nb.mtm = bincountMinusOne;
+    }
+
+    // let palette = new Uint32Array(maxColors);
+    const palette = [];
+
+    /* Fill palette */
+    let k = 0;
+    for (i = 0; ; ++k) {
+        let r = clamp(Math.round(bins[i].rc), 0, 0xff);
+        let g = clamp(Math.round(bins[i].gc), 0, 0xff);
+        let b = clamp(Math.round(bins[i].bc), 0, 0xff);
+
+        let a = 0xff;
+        if (hasAlpha) {
+            a = clamp(Math.round(bins[i].ac), 0, 0xff);
+            if (oneBitAlpha) {
+                const threshold = typeof oneBitAlpha === "number" ? oneBitAlpha : 127;
+                a = a <= threshold ? 0x00 : 0xff;
+            }
+            if (clearAlpha && a <= clearAlphaThreshold) {
+                r = g = b = clearAlphaColor;
+                a = 0x00;
+            }
+        }
+
+        const color = hasAlpha ? [r, g, b, a] : [r, g, b];
+        const exists = existsInPalette(palette, color);
+        if (!exists) palette.push(color);
+        if ((i = bins[i].fw) == 0) break;
+    }
+
+    return palette;
+}
+
+function existsInPalette(palette, color) {
+    for (let i = 0; i < palette.length; i++) {
+        const p = palette[i];
+        const matchesRGB =
+            p[0] === color[0] && p[1] === color[1] && p[2] === color[2];
+        const matchesAlpha =
+            p.length >= 4 && color.length >= 4 ? p[3] === color[3] : true;
+        if (matchesRGB && matchesAlpha) return true;
+    }
+    return false;
+}
+
+// TODO: Further 'clean' palette by merging nearly-identical colors?
+
+function uint32_to_rgba(color: number) {
+    const a = (color >> 24) & 0xff;
+    const b = (color >> 16) & 0xff;
+    const g = (color >> 8) & 0xff;
+    const r = color & 0xff;
+    return [r, g, b, a];
+}
+
+function rgba_to_uint32(r: number, g: number, b: number, a: number) {
+    return (a << 24) | (b << 16) | (g << 8) | r;
+}
+
+function rgb888_to_rgb565(r: number, g: number, b: number) {
+    return ((r << 8) & 0xf800) | ((g << 2) & 0x03e0) | (b >> 3);
+}
+
+function rgba8888_to_rgba4444(r: number, g: number, b: number, a: number) {
+    return (r >> 4) | (g & 0xf0) | ((b & 0xf0) << 4) | ((a & 0xf0) << 8);
+}
+
+function rgb888_to_rgb444(r: number, g: number, b: number) {
+    return ((r >> 4) << 8) | (g & 0xf0) | (b >> 4);
+}
+
+function createStream(initialCapacity = 256) {
+    let cursor = 0;
+    let contents = new Uint8Array(initialCapacity);
+
+    return {
+        get buffer() {
+            return contents.buffer;
+        },
+        reset() {
+            cursor = 0;
+        },
+        bytesView() {
+            return contents.subarray(0, cursor);
+        },
+        bytes() {
+            return contents.slice(0, cursor);
+        },
+        writeByte(byte) {
+            expand(cursor + 1);
+            contents[cursor] = byte;
+            cursor++;
+        },
+        writeBytes(data: Uint8Array, offset = 0, byteLength = data.length) {
+            expand(cursor + byteLength);
+            for (let i = 0; i < byteLength; i++) {
+                contents[cursor++] = data[i + offset];
+            }
+        },
+        writeBytesView(data: Uint8Array, offset = 0, byteLength = data.byteLength) {
+            expand(cursor + byteLength);
+            contents.set(data.subarray(offset, offset + byteLength), cursor);
+            cursor += byteLength;
+        },
+    };
+
+    function expand(newCapacity: number) {
+        const prevCapacity = contents.length;
+        if (prevCapacity >= newCapacity) return; // No need to expand, the storage was already large enough.
+        // Don't expand strictly to the given requested limit if it's only a very small increase, but instead geometrically grow capacity.
+        // For small filesizes (<1MB), perform size*2 geometric increase, but for large sizes, do a much more conservative size*1.125 increase to
+        // avoid overshooting the allocation cap by a very large margin.
+        const CAPACITY_DOUBLING_MAX = 1024 * 1024;
+        newCapacity = Math.max(
+            newCapacity,
+            (prevCapacity * (prevCapacity < CAPACITY_DOUBLING_MAX ? 2.0 : 1.125)) >>>
+            0
+        );
+        if (prevCapacity != 0) newCapacity = Math.max(newCapacity, 256); // At minimum allocate 256b for each file when expanding.
+        const oldContents = contents;
+        contents = new Uint8Array(newCapacity); // Allocate new storage.
+        if (cursor > 0) contents.set(oldContents.subarray(0, cursor), 0);
+    }
+}
+
 /**
  * Gif Enc by mattdesl
  * https://github.com/mattdesl/gifenc
  */
-
-import constants from "./constants";
-import lzwEncode from "./lzwEncode";
-import createStream from "./stream";
-import quantize from "./pnnquant2";
-
-import {
-    prequantize,
-    applyPalette,
-    nearestColorIndex,
-    nearestColor,
-    nearestColorIndexWithDistance,
-    snapColorsToPalette,
-} from "./palettize";
 
 function GIFEncoder(opt: { initialCapacity?: number, auto?: boolean } = { initialCapacity: 4096, auto: true }) {
     const { initialCapacity = 4096, auto = true } = opt;

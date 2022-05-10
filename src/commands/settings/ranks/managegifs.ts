@@ -1,7 +1,9 @@
 import { BotUser } from "../../../BotClient";
 import { Localisation } from "../../../localisation";
 import { Settings } from "../../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailable } from "../../../structs/Command";
+import { Command, CommandArguments } from "../../../structs/Command";
+import { CommandAvailable } from "../../../structs/CommandAvailable";
+import { CommandAccess } from "../../../structs/CommandAccess";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { RankLevel } from "../../../structs/databaseTypes/RankLevel";
 import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";

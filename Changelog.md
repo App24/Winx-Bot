@@ -1,3 +1,8 @@
+## 3.3.0
+- Slash commands
+- Different ways of having separate wings in the same card
+- User settings back to being server-wide instead of global
+
 ## 3.2.3
 - Fixed bug in levelping.ts where anyone could activate the buttons
 - Animated level cards if the user has an animated pfp, gifs can sometimes not be properly processed, leading to transparent pixels

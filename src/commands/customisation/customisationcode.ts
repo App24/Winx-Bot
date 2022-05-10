@@ -1,12 +1,14 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAvailable, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
 import { SubCommand } from "../../structs/SubCommand";
-import { isHexColor } from "../../utils/Utils";
+import { getServerDatabase, isHexColor } from "../../utils/Utils";
 import { WinxCharacter } from "../../structs/WinxCharacters";
+import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
+import { getServerUserSettings } from "../../utils/RankUtils";
 
 class CustomisationCodeCommand extends Command {
     public constructor() {
@@ -56,12 +58,15 @@ class SetSubCommand extends SubCommand {
         if (!isHexColor(barStartColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
         if (!isHexColor(barEndColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
 
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-        let userSettings: UserSetting = await UserSettings.get(cmdArgs.author.id);
-        if (!userSettings) {
-            userSettings = DEFAULT_USER_SETTING;
-            await UserSettings.set(cmdArgs.author.id, userSettings);
+        const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
+        const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
+
+        let userIndex = serverUserSettings.findIndex(u => u.userId === cmdArgs.author.id);
+        if (userIndex < 0) {
+            serverUserSettings.push(new ServerUserSettings(cmdArgs.author.id));
+            userIndex = serverUserSettings.length - 1;
         }
+        const userSettings = serverUserSettings[userIndex];
 
         let winxCharacter;
         try {
@@ -70,15 +75,17 @@ class SetSubCommand extends SubCommand {
             return cmdArgs.message.reply("Invalid winx character");
         }
 
-        userSettings.nameColor = nameEnabled ? nameColor : DEFAULT_USER_SETTING.nameColor;
+        userSettings.nameColor = nameEnabled ? nameColor : new ServerUserSettings(cmdArgs.author.id).nameColor;
         userSettings.cardColor = cardColor;
-        userSettings.specialCircleColor = circleEnabled ? circleColor : DEFAULT_USER_SETTING.specialCircleColor;
+        userSettings.specialCircleColor = circleEnabled ? circleColor : new ServerUserSettings(cmdArgs.author.id).specialCircleColor;
         userSettings.barStartColor = barStartColor;
         userSettings.barEndColor = barEndColor;
         userSettings.winxCharacter = winxCharacter;
 
+        serverUserSettings[userIndex] = userSettings;
+
         cmdArgs.message.reply("Updated Customisation Settings!");
-        await UserSettings.set(cmdArgs.author.id, userSettings);
+        await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
     }
 }
 
@@ -88,17 +95,12 @@ class GetSubCommand extends SubCommand {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-        let userSettings: UserSetting = await UserSettings.get(cmdArgs.author.id);
-        if (!userSettings) {
-            userSettings = DEFAULT_USER_SETTING;
-            await UserSettings.set(cmdArgs.author.id, userSettings);
-        }
+        const userSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
 
         let code = "";
-        code += (userSettings.nameColor === DEFAULT_USER_SETTING.nameColor ? "??????" : userSettings.nameColor) + "|";
+        code += (userSettings.nameColor === new ServerUserSettings(cmdArgs.author.id).nameColor ? "??????" : userSettings.nameColor) + "|";
         code += userSettings.cardColor + "|";
-        code += (userSettings.specialCircleColor === DEFAULT_USER_SETTING.specialCircleColor ? "??????" : userSettings.specialCircleColor) + "|";
+        code += (userSettings.specialCircleColor === new ServerUserSettings(cmdArgs.author.id).specialCircleColor ? "??????" : userSettings.specialCircleColor) + "|";
         code += userSettings.barStartColor + "|";
         code += userSettings.barEndColor + "|";
         code += userSettings.winxCharacter;

@@ -7,6 +7,7 @@ import { DatabaseType } from "./structs/DatabaseTypes";
 import { loadFiles } from "./utils/Utils";
 import fs from "fs";
 import { Command } from "./structs/Command";
+import { SlashCommand } from "./structs/SlashCommand";
 
 interface BotOptions {
     clientOptions?: ClientOptions;
@@ -16,6 +17,7 @@ interface BotOptions {
 class BotClient extends Client {
     private databases = new Collection<DatabaseType, Keyv>();
     public Commands = new Collection<string, Command>();
+    public SlashCommands = new Collection<string, SlashCommand>();
 
     private botOptions: BotOptions;
 
@@ -29,6 +31,7 @@ class BotClient extends Client {
         this.loadDatabases();
 
         (async () => {
+            await this.loadSlashCommands();
             await this.loadCommands();
             await this.loadEvents();
         })();
@@ -54,7 +57,7 @@ class BotClient extends Client {
                 try {
                     const commandImport = await import(`./${file.substr(5, file.length)}`);
                     const { default: cClass } = commandImport;
-                    const command = new cClass();
+                    const command: Command = new cClass();
                     if (!command.deprecated) {
                         const name = path.basename(file).slice(0, -3);
                         if (!command.description)
@@ -107,6 +110,42 @@ class BotClient extends Client {
             case "simplified":
             case "all":
                 console.log(Localisation.getTranslation("bot.load.event.simple", loaded));
+                break;
+        }
+    }
+
+    private async loadSlashCommands() {
+        const files = loadFiles("dist/slashCommands");
+        if (!files) return;
+        let loaded = 0;
+        for (const file of files) {
+            if (file.endsWith(".js")) {
+                try {
+                    const commandImport = await import(`./${file.substr(5, file.length)}`);
+                    const { default: cClass } = commandImport;
+                    const command: SlashCommand = new cClass();
+                    const name = path.basename(file).slice(0, -3);
+                    if (command.commandData.type === "CHAT_INPUT") {
+                        if (!command.commandData.description) {
+                            console.log(`Slash Command: \`${name}\` has no description, yet it is a \`${command.commandData.type}\` slash command!`);
+                            continue;
+                        }
+                    }
+                    this.SlashCommands.set(name, command);
+                    switch (this.botOptions.logLoading) {
+                        case 'complex':
+                        case 'all':
+                            console.log(Localisation.getTranslation("bot.load.slashcommand.complex", name));
+                            break;
+                    }
+                    loaded++;
+                } catch { }
+            }
+        }
+        switch (this.botOptions.logLoading) {
+            case 'simplified':
+            case 'all':
+                console.log(Localisation.getTranslation("bot.load.slashcommand.simple", loaded));
                 break;
         }
     }

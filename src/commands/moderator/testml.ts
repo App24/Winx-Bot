@@ -1,11 +1,10 @@
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailable, CommandUsage } from "../../structs/Command";
-import { DatabaseType } from "../../structs/DatabaseTypes";
+import { Command, CommandArguments, CommandUsage } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
+import { CommandAccess } from "../../structs/CommandAccess";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { UserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
 import { WinxCharacter } from "../../structs/WinxCharacters";
 import { drawCard } from "../../utils/CardUtils";
 import { getMemberById } from "../../utils/GetterUtils";
@@ -31,9 +30,6 @@ class TestMLCommand extends Command {
             if (isNaN(winxNumber) || winxNumber < 0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
         }
 
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-
-
         const user = cmdArgs.author;
 
         const leaderboardPosition = 0;
@@ -42,11 +38,6 @@ class TestMLCommand extends Command {
         if (!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
         const userLevel = new UserLevel(user.id);
-        let userSettings: UserSetting = await UserSettings.get(user.id);
-        if (!userSettings) {
-            userSettings = DEFAULT_USER_SETTING;
-            await UserSettings.set(user.id, userSettings);
-        }
 
         userLevel.xp = 0;
         userLevel.level = level;
@@ -61,13 +52,13 @@ class TestMLCommand extends Command {
             await asyncForEach(Object.keys(WinxCharacter), async (val) => {
                 if (val === "None") return;
                 if (isNaN(parseInt(val))) {
-                    userSettings.winxCharacter = WinxCharacter[val];
-                    const { image, extension } = await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+                    serverUserSettings.winxCharacter = WinxCharacter[val];
+                    const { image, extension } = await drawCard(leaderboardPosition, userLevel, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
                     await cmdArgs.message.reply({ content: val, files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
                 }
             });
         } else {
-            const { image, extension } = await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+            const { image, extension } = await drawCard(leaderboardPosition, userLevel, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
             cmdArgs.message.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
         }
 

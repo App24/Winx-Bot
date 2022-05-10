@@ -1,13 +1,14 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandArguments, CommandAvailable, CommandUsage } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserSetting, DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
+import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { WinxCharacter } from "../../structs/WinxCharacters";
 import { capitalise } from "../../utils/FormatUtils";
-import { getMemberFromMention } from "../../utils/GetterUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
+import { getServerDatabase } from "../../utils/Utils";
 
 class WinxCharacterCommand extends Command {
     public constructor() {
@@ -15,32 +16,18 @@ class WinxCharacterCommand extends Command {
         this.available = CommandAvailable.Guild;
         this.category = Customisation;
         this.aliases = ["setcharacter", "setwinx"];
-        this.usage = [new CommandUsage(false, Localisation.getTranslation("argument.user"))];
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-        if (cmdArgs.args[0]) {
-            const user = await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
-            if (user) {
-                let userSettings: UserSetting = await UserSettings.get(user.id);
-                if (!userSettings) {
-                    userSettings = DEFAULT_USER_SETTING;
-                    await UserSettings.set(cmdArgs.author.id, userSettings);
-                }
+        const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
+        const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
 
-                if (!userSettings.winxCharacter) userSettings.winxCharacter = WinxCharacter.None;
-
-                cmdArgs.message.reply(Localisation.getTranslation("generic.currentcharacter", user, WinxCharacter[userSettings.winxCharacter]));
-                return;
-            }
+        let userIndex = serverUserSettings.findIndex(u => u.userId === cmdArgs.author.id);
+        if (userIndex < 0) {
+            serverUserSettings.push(new ServerUserSettings(cmdArgs.author.id));
+            userIndex = serverUserSettings.length - 1;
         }
-
-        let userSettings: UserSetting = await UserSettings.get(cmdArgs.author.id);
-        if (!userSettings) {
-            userSettings = DEFAULT_USER_SETTING;
-            await UserSettings.set(cmdArgs.author.id, userSettings);
-        }
+        const userSettings = serverUserSettings[userIndex];
 
         if (!userSettings.winxCharacter) userSettings.winxCharacter = WinxCharacter.None;
 
@@ -53,8 +40,9 @@ class WinxCharacterCommand extends Command {
                     default: character === WinxCharacter[userSettings.winxCharacter],
                     onSelect: async ({ interaction }) => {
                         userSettings.winxCharacter = WinxCharacter[character];
+                        serverUserSettings[userIndex] = userSettings;
                         await interaction.reply(Localisation.getTranslation("winxcharacter.set", WinxCharacter[userSettings.winxCharacter]));
-                        await UserSettings.set(cmdArgs.author.id, userSettings);
+                        await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
                     }
                 });
             }

@@ -2,6 +2,8 @@ import { Guild, GuildMember, Message, TextBasedChannel, User } from "discord.js"
 import { Localisation } from "../localisation";
 import { asyncForEach } from "../utils/Utils";
 import { Category, Other } from "./Category";
+import { CommandAccess } from "./CommandAccess";
+import { CommandAvailable } from "./CommandAvailable";
 import { SubCommand } from "./SubCommand";
 
 export abstract class Command {
@@ -89,20 +91,6 @@ export abstract class Command {
         }
         return amount;
     }
-}
-
-export enum CommandAvailable {
-    DM,
-    Guild,
-    Both
-}
-
-export enum CommandAccess {
-    None = 1,
-    Patreon,
-    Moderators,
-    GuildOwner,
-    BotOwner
 }
 
 export class CommandUsage {

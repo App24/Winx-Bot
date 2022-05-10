@@ -3,7 +3,9 @@ import { BotUser } from "../../../BotClient";
 import { WINGS_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
 import { Settings } from "../../../structs/Category";
-import { Command, CommandAccess, CommandArguments, CommandAvailable } from "../../../structs/Command";
+import { Command, CommandArguments } from "../../../structs/Command";
+import { CommandAvailable } from "../../../structs/CommandAvailable";
+import { CommandAccess } from "../../../structs/CommandAccess";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { DEFAULT_WINGS_DATA, RankLevel } from "../../../structs/databaseTypes/RankLevel";
 import { ServerUserSettings } from "../../../structs/databaseTypes/ServerUserSettings";
@@ -12,7 +14,7 @@ import { drawCardWithWings } from "../../../utils/CardUtils";
 import { capitalise } from "../../../utils/FormatUtils";
 import { createMessageButtons } from "../../../utils/MessageButtonUtils";
 import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";
-import { getRank, getUserSettings } from "../../../utils/RankUtils";
+import { getRank } from "../../../utils/RankUtils";
 import { getImageReply, getLevelReply } from "../../../utils/ReplyUtils";
 import { canvasToMessageAttachment, downloadFile, getServerDatabase } from "../../../utils/Utils";
 
@@ -88,10 +90,9 @@ class ManageWingsCommand extends Command {
 
                             const userLevel = new UserLevel(cmdArgs.author.id);
 
-                            const userSettings = await getUserSettings(cmdArgs.author.id);
                             const serverUserSettings = new ServerUserSettings(cmdArgs.author.id);
 
-                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, userSettings, serverUserSettings, image.url, undefined, undefined, cmdArgs.member, cmdArgs.guild);
+                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, image.url, image.url, undefined, undefined, cmdArgs.member, cmdArgs.guild);
 
                             await createMessageButtons({
                                 sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:

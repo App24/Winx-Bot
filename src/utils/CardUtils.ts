@@ -1,31 +1,35 @@
 import { Canvas, createCanvas, createImageData, Image, loadImage } from "canvas";
 import decodeGif from "decode-gif";
-import { Guild, GuildMember } from "discord.js";
+import { Guild, GuildMember, User } from "discord.js";
+import { existsSync } from "fs";
 import { get } from "https";
 import { BotUser } from "../BotClient";
-import { CANVAS_FONT } from "../Constants";
+import { CANVAS_FONT, CARD_TEMPLATES_FOLDER, LB_USERS } from "../Constants";
 import GIFEncoder, { applyPalette, quantize } from "../gifenc/gifenc";
 import { Localisation } from "../localisation";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomNameUser } from "../structs/databaseTypes/CustomName";
 import { RankLevel } from "../structs/databaseTypes/RankLevel";
-import { ServerUserSettings } from "../structs/databaseTypes/ServerUserSettings";
+import { CardTemplate, ServerUserSettings } from "../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
-import { DEFAULT_USER_SETTING, UserSetting } from "../structs/databaseTypes/UserSetting";
-import { rgbToHsl, fitTextOnCanvas, roundRect } from "./CanvasUtils";
+import { rgbToHsl, fitTextOnCanvas, roundRect, underlineText } from "./CanvasUtils";
 import { capitalise } from "./FormatUtils";
 import { getRoleById } from "./GetterUtils";
 import { getWingsImageByLevel } from "./RankUtils";
 import { getServerDatabase, asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, stream2buffer, toBuffer } from "./Utils";
 import { getLevelXP } from "./XPUtils";
 
-export async function drawCard(leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
-    const wingsImage = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, userSettings.winxCharacter, guild.id);
+export async function drawCard(leaderboardPosition: number, userLevel: UserLevel, serverUserSettings: ServerUserSettings, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+    if (serverUserSettings.wingsLevelB === undefined)
+        serverUserSettings.wingsLevelB = -1;
 
-    return drawCardWithWings(leaderboardPosition, userLevel, userSettings, serverUserSettings, wingsImage, currentRank, nextRank, member, guild);
+    const wingsImageA = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, serverUserSettings.winxCharacter, guild.id);
+    const wingsImageB = await getWingsImageByLevel(serverUserSettings.wingsLevelB < 0 ? userLevel.level : serverUserSettings.wingsLevelB, serverUserSettings.winxCharacter, guild.id);
+
+    return drawCardWithWings(leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild);
 }
 
-export async function drawCardWithWings(leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, wingsImage: string | Buffer | Image, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+export async function drawCardWithWings(leaderboardPosition: number, userLevel: UserLevel, serverUserSettings: ServerUserSettings, wingsImageA: string | Buffer | Image, wingsImageB: string | Buffer | Image, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
     const userPfpUrl = member.displayAvatarURL({ dynamic: true });
 
     if (serverUserSettings.animatedCard == undefined) {
@@ -50,7 +54,7 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
                     const data = createImageData(frame.data, width, height);
                     pfpCtx.putImageData(data, 0, 0);
 
-                    const canvas = await drawCardFrame(pfpCanvas, leaderboardPosition, userLevel, userSettings, serverUserSettings, wingsImage, currentRank, nextRank, member, guild);
+                    const canvas = await drawCardFrame(pfpCanvas, leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild);
                     const ctx = canvas.getContext("2d");
 
                     const array = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -68,11 +72,11 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
         }).then(buffer => { return { image: buffer, extension: "gif" }; });
     } else {
         const avatar = await loadImage(member.displayAvatarURL({ format: 'png' }));
-        return { image: (await drawCardFrame(avatar, leaderboardPosition, userLevel, userSettings, serverUserSettings, wingsImage, currentRank, nextRank, member, guild)).toBuffer(), extension: "png" };
+        return { image: (await drawCardFrame(avatar, leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild)).toBuffer(), extension: "png" };
     }
 }
 
-async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: number, userLevel: UserLevel, userSettings: UserSetting, serverUserSettings: ServerUserSettings, wingsImage: string | Buffer | Image, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: number, userLevel: UserLevel, serverUserSettings: ServerUserSettings, wingsImageA: string | Buffer | Image, wingsImageB: string | Buffer | Image, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
     const Levels = BotUser.getDatabase(DatabaseType.Levels);
     const levels: UserLevel[] = await getServerDatabase(Levels, guild.id);
 
@@ -84,6 +88,9 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
         }
         return b.level - a.level;
     });
+
+    if (serverUserSettings.wingsTemplate === undefined)
+        serverUserSettings.wingsTemplate = CardTemplate.Normal;
 
     const user = member.user;
 
@@ -121,13 +128,13 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
 
     const filled = userLevel.xp / getLevelXP(userLevel.level);
 
-    const startRGB = hexToRGB(userSettings.barStartColor);
+    const startRGB = hexToRGB(serverUserSettings.barStartColor);
     const startHsl = rgbToHsl(startRGB.r, startRGB.g, startRGB.b);
 
-    const endRGB = hexToRGB(userSettings.barEndColor);
+    const endRGB = hexToRGB(serverUserSettings.barEndColor);
     const endHsl = rgbToHsl(endRGB.r, endRGB.g, endRGB.b);
 
-    const textColor = getBrightnessColor(hexToRGB(userSettings.cardColor));
+    const textColor = getBrightnessColor(hexToRGB(serverUserSettings.cardColor));
 
     const namePosY = 5;
 
@@ -153,20 +160,64 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
     const extraTextPosY = ((canvas.height - topTextHeight) / extraInfoAmount);
 
     //Draw background
-    ctx.fillStyle = `#${userSettings.cardColor}`;
+    ctx.fillStyle = `#${serverUserSettings.cardColor}`;
     roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.width * 0.01);
 
-    let wings: Image;
+    const wingsImages: Image[] = [];
+    let templateImage: Image;
 
-    //Draw Wings
-    if (typeof (wingsImage) === "string" || Buffer.isBuffer(wingsImage)) {
-        wings = await loadImage(wingsImage);
-    } else {
-        wings = wingsImage;
+    const templatePath = `${CARD_TEMPLATES_FOLDER}/${serverUserSettings.wingsTemplate}.png`;
+
+
+    if (existsSync(templatePath)) {
+        templateImage = await loadImage(templatePath);
     }
 
-    if (wings) {
-        ctx.drawImage(wings, (canvas.width - wings.width) / 2., ((newPfpRadius + pfpY + borderThickness) - wings.height / 2.), wings.width, wings.height);
+    //Draw Wings
+    if (typeof (wingsImageA) === "string" || Buffer.isBuffer(wingsImageA)) {
+        wingsImages.push(await loadImage(wingsImageA));
+    } else {
+        wingsImages.push(wingsImageA);
+    }
+
+    if (typeof (wingsImageB) === "string" || Buffer.isBuffer(wingsImageB)) {
+        wingsImages.push(await loadImage(wingsImageB));
+    } else {
+        wingsImages.push(wingsImageB);
+    }
+
+    if (wingsImages.length >= 2) {
+        if (wingsImages[0]) {
+            const wings = wingsImages[0];
+            const wingsX = (canvas.width - wings.width) / 2.;
+            const wingsY = ((newPfpRadius + pfpY + borderThickness) - wings.height / 2.);
+
+            if (!templateImage) {
+                ctx.drawImage(wings, wingsX, wingsY);
+            }
+            else {
+                ctx.drawImage(drawMaskedImage(templateImage, wings, "source-in"), wingsX, wingsY);
+            }
+        }
+
+        if (wingsImages[1]) {
+            const wings = wingsImages[1];
+            const wingsX = (canvas.width - wings.width) / 2.;
+            const wingsY = ((newPfpRadius + pfpY + borderThickness) - wings.height / 2.);
+
+            if (!templateImage) {
+                ctx.drawImage(wings, wingsX, wingsY);
+            }
+            else {
+                ctx.drawImage(drawMaskedImage(templateImage, wings, "source-out"), wingsX, wingsY);
+            }
+        }
+    } else if (wingsImages.length) {
+        const wings = wingsImages[0];
+        const wingsX = (canvas.width - wings.width) / 2.;
+        const wingsY = ((newPfpRadius + pfpY + borderThickness) - wings.height / 2.);
+
+        ctx.drawImage(wings, wingsX, wingsY);
     }
 
     if (serverUserSettings.cardName === undefined) {
@@ -196,10 +247,10 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
 
         //Draw name
         ctx.font = `${nameFontSize}px ${CANVAS_FONT}`;
-        if (userSettings.nameColor === DEFAULT_USER_SETTING.nameColor || !isHexColor(userSettings.nameColor)) {
+        if (serverUserSettings.nameColor === new ServerUserSettings(user.id).nameColor || !isHexColor(serverUserSettings.nameColor)) {
             if (member.roles && member.roles.color && member.roles.color.color) ctx.fillStyle = member.roles.color.hexColor;
         } else {
-            ctx.fillStyle = `#${userSettings.nameColor}`;
+            ctx.fillStyle = `#${serverUserSettings.nameColor}`;
         }
         ctx.textBaseline = "top";
         ctx.textAlign = "center";
@@ -239,11 +290,11 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
 
     ctx.fillText(nextRankText, canvas.width / 2, barPosY + barHeight + (extraTextPosY * 2));
 
-    if (userSettings.specialCircleColor && userSettings.specialCircleColor !== DEFAULT_USER_SETTING.specialCircleColor) {
+    if (serverUserSettings.specialCircleColor && serverUserSettings.specialCircleColor !== new ServerUserSettings(user.id).specialCircleColor) {
         ctx.save();
         ctx.beginPath();
         ctx.arc(newPfpRadius + pfpX + borderThickness, newPfpRadius + pfpY + borderThickness, pfpRadius, (Math.PI / 180) * 270, (Math.PI / 180) * (270 + 360));
-        ctx.strokeStyle = `#${userSettings.specialCircleColor}`;
+        ctx.strokeStyle = `#${serverUserSettings.specialCircleColor}`;
         ctx.lineWidth = borderThickness * 2;
         ctx.stroke();
         ctx.restore();
@@ -266,6 +317,167 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
 
     ctx.drawImage(userAvatar, pfpX + borderThickness, pfpY + borderThickness, newPfpRadius * 2, newPfpRadius * 2);
     ctx.restore();
+
+    return canvas;
+}
+
+function drawMaskedImage(mask: Image, image: Image, globalCompositeOperation: "source-in" | "source-out") {
+    const canvas = createCanvas(image.width, image.height);
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
+
+    ctx.globalCompositeOperation = globalCompositeOperation;
+
+    ctx.drawImage(image, 0, 0);
+
+    return canvas;
+}
+
+export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel, member: GuildMember, position: number }[], user: User, guildId: string) {
+    const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
+    const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, guildId);
+
+    const pfpPadding = 10;
+    const pfpRadius = 60;
+    const borderThickness = 3;
+    const newPfpRadius = pfpRadius - borderThickness;
+
+
+    const textFontSize = 50;
+    const textFont = `${textFontSize}px ${CANVAS_FONT}`;
+
+    const separatorHeight = 10;
+
+    const canvas = createCanvas(10, 10);
+    const ctx = canvas.getContext("2d");
+
+    const textSizes: number[] = [];
+
+    ctx.font = textFont;
+    leaderboardLevels.forEach((value) => {
+        const levelText = Localisation.getTranslation("leaderboard.output", value.userLevel.level);
+        textSizes.push(ctx.measureText(`${value.position + 1}. ${value.member.user.tag} ${levelText}`).width + ((pfpRadius + pfpPadding) + (pfpRadius + borderThickness + pfpPadding * 2)));
+    });
+
+    let width = textSizes[0];
+    textSizes.forEach(size => {
+        if (size > width) width = size;
+    });
+    width = Math.max(width, 1200);
+
+    canvas.width = width;
+    canvas.height = ((pfpPadding) * (leaderboardLevels.length + 1)) + (pfpRadius + pfpPadding) * (leaderboardLevels.length * 2);
+
+    const colors: string[] = [];
+
+    await asyncForEach(leaderboardLevels, async (value) => {
+        let userSettings = serverUserSettings.find(s => s.userId === value.member.id);
+        if (!userSettings) {
+            userSettings = new ServerUserSettings(value.member.id);
+        }
+        colors.push(userSettings.cardColor);
+    });
+
+    ctx.save();
+    roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.height * 0.01, "clip");
+
+    colors.forEach((color, i) => {
+        let height = pfpRadius * 2 + pfpPadding;
+        const yPos = ((pfpPadding) * (i + 1)) + (pfpRadius + pfpPadding) * (i * 2);
+        if (i <= 0 || i >= colors.length - 1) {
+            height += pfpPadding;
+        }
+        if (i >= colors.length - 1) {
+            height += pfpPadding;
+        }
+        ctx.fillStyle = `#${color}`;
+        ctx.fillRect(0, i <= 0 ? 0 : yPos, canvas.width, height);
+        if (i >= 0 && i < colors.length - 1) {
+            const grd = ctx.createLinearGradient(0, i <= 0 ? height : yPos + height, 0, (i <= 0 ? height : yPos + height) + 20);
+            grd.addColorStop(0, `#${color}`);
+            grd.addColorStop(1, `#${colors[i + 1]}`);
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, i <= 0 ? height : yPos + height, canvas.width, 20);
+        }
+    });
+
+    ctx.restore();
+
+    let previousUserSettings: ServerUserSettings;
+
+    await asyncForEach(leaderboardLevels, async (value, i) => {
+        let userSettings = serverUserSettings.find(s => s.userId === value.member.id);
+        if (!userSettings) {
+            userSettings = new ServerUserSettings(value.member.id);
+        }
+
+        const pfpX = pfpRadius + pfpPadding;
+        const pfpY = ((pfpPadding) * (i + 1)) + pfpRadius + (pfpRadius + pfpPadding) * (i * 2);
+
+        const userLevel = value.userLevel;
+
+        const levelText = Localisation.getTranslation("leaderboard.output", value.userLevel.level);
+
+        const filled = userLevel.xp / getLevelXP(userLevel.level);
+
+        const startRGB = hexToRGB(userSettings.barStartColor);
+        const startHsl = rgbToHsl(startRGB.r, startRGB.g, startRGB.b);
+
+        const endRGB = hexToRGB(userSettings.barEndColor);
+        const endHsl = rgbToHsl(endRGB.r, endRGB.g, endRGB.b);
+
+        const textColor = getBrightnessColor(hexToRGB(userSettings.cardColor));
+
+        if (value.position >= LB_USERS) {
+            ctx.fillStyle = getBrightnessColor(hexToRGB(previousUserSettings.cardColor));
+            ctx.fillRect(0, pfpY - pfpRadius - pfpPadding - (separatorHeight / 2.), canvas.width, separatorHeight);
+        }
+
+        if (userSettings.specialCircleColor && userSettings.specialCircleColor !== new ServerUserSettings(value.member.id).specialCircleColor) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(pfpX + borderThickness, pfpY + borderThickness, pfpRadius, (Math.PI / 180) * 270, (Math.PI / 180) * (270 + 360));
+            ctx.strokeStyle = `#${userSettings.specialCircleColor}`;
+            ctx.lineWidth = borderThickness * 2;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.strokeStyle = `hsla(${blend(startHsl.h, endHsl.h, 1 - filled) * 360}, ${blend(startHsl.s, endHsl.s, 1 - filled) * 100}%, ${blend(startHsl.l, endHsl.l, 1 - filled) * 100}%, 1)`;
+        ctx.lineWidth = borderThickness * 2;
+        ctx.arc(pfpX + borderThickness, pfpY + borderThickness, pfpRadius, (Math.PI / 180) * 270, (Math.PI / 180) * (270 + (360 * filled)));
+        ctx.stroke();
+        ctx.restore();
+
+        //Draw Profile Picture
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pfpX + borderThickness, pfpY + borderThickness, newPfpRadius, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
+
+        const avatar = await loadImage(value.member.displayAvatarURL({ format: 'png' }));
+        ctx.drawImage(avatar, pfpX - newPfpRadius + borderThickness, pfpY - newPfpRadius + borderThickness, newPfpRadius * 2, newPfpRadius * 2);
+        ctx.restore();
+
+        ctx.font = textFont;
+        ctx.fillStyle = textColor;
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+
+        const textPosx = pfpX + pfpRadius + borderThickness + pfpPadding * 2;
+        const textPosY = pfpY;
+
+        ctx.fillText(`${value.position + 1}. ${value.member.user.tag} ${levelText}`, textPosx, textPosY);
+        if (user.id === value.member.id) {
+            underlineText(ctx, `${value.position + 1}. ${value.member.user.tag} ${levelText}`, textPosx, textPosY);
+        }
+
+        previousUserSettings = userSettings;
+    });
 
     return canvas;
 }

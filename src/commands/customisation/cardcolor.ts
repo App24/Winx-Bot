@@ -1,13 +1,14 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAvailable, CommandArguments } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
+import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { canvasColor } from "../../utils/CanvasUtils";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { getHexReply } from "../../utils/ReplyUtils";
-import { canvasToMessageAttachment } from "../../utils/Utils";
+import { canvasToMessageAttachment, getServerDatabase } from "../../utils/Utils";
 
 class CardColorCommand extends Command {
     public constructor() {
@@ -18,12 +19,15 @@ class CardColorCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-        let userSettings: UserSetting = await UserSettings.get(cmdArgs.author.id);
-        if (!userSettings) {
-            userSettings = DEFAULT_USER_SETTING;
-            await UserSettings.set(cmdArgs.author.id, userSettings);
+        const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
+        const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
+
+        let userIndex = serverUserSettings.findIndex(u => u.userId === cmdArgs.author.id);
+        if (userIndex < 0) {
+            serverUserSettings.push(new ServerUserSettings(cmdArgs.author.id));
+            userIndex = serverUserSettings.length - 1;
         }
+        const userSettings = serverUserSettings[userIndex];
 
         await createMessageSelection({
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
@@ -43,16 +47,18 @@ class CardColorCommand extends Command {
                             const { value: color, message } = await getHexReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.hexcolor") });
                             if (color === undefined) return;
                             userSettings.cardColor = color;
+                            serverUserSettings[userIndex] = userSettings;
                             message.reply(Localisation.getTranslation("cardcolor.set.output", color));
-                            await UserSettings.set(cmdArgs.author.id, userSettings);
+                            await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
                         }
                     },
                     {
                         label: Localisation.getTranslation("button.reset"),
                         value: "reset",
                         onSelect: async ({ interaction }) => {
-                            userSettings.cardColor = DEFAULT_USER_SETTING.cardColor;
-                            await UserSettings.set(cmdArgs.author.id, userSettings);
+                            userSettings.cardColor = new ServerUserSettings(cmdArgs.guildId).cardColor;
+                            serverUserSettings[userIndex] = userSettings;
+                            await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
                             await interaction.reply(Localisation.getTranslation("cardcolor.reset.output"));
                         }
                     }

@@ -2,7 +2,8 @@ import { ButtonInteraction, Message, MessageActionRow, MessageAttachment, Messag
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
+import { Command, CommandArguments } from "../../../structs/Command";
+import { CommandAccess } from "../../../structs/CommandAccess";
 import { backupDatabases } from "../../../utils/Utils";
 import fs from "fs";
 import archiver from "archiver";

@@ -1,4 +1,4 @@
-import { CommandAccess } from "../Command";
+import { CommandAccess } from "../CommandAccess";
 
 export class CustomCommand {
     public name: string;

@@ -48,6 +48,7 @@
     "levelping.command.description": "Toggle Level Ping!",
     "cardname.command.description": "Toggle Card Name!",
     "cardpfp.command.description": "Toggle Animated card!",
+    "wingstemplate.command.description": "Select wings template!",
     
     "manageranks.command.description": "Set transformation for each level!",
     "managegifs.command.description": "Manage gifs for each transformation level!",
@@ -60,5 +61,6 @@
     "winxcharacter.command.description": "Set your Winx fairy!",
     "wingslevel.command.description": "Set an already achieved transformation as your wings!",
 
-    "setpfp.command.description": "Set the bot profile picture!"
+    "setpfp.command.description": "Set the bot profile picture!",
+    "slashcommands.command.description": "Register/Reset bot slash commands!"
 }

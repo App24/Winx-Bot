@@ -1,7 +1,8 @@
 import { getUserFromMention } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { CommandAccess } from "../../structs/CommandAccess";
 
 class MessageUserCommand extends Command {
     public constructor() {

@@ -2,7 +2,8 @@ import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandAvailable, CommandArguments } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { asyncForEach, createMessageEmbed } from "../../utils/Utils";
@@ -18,10 +19,10 @@ class RanksCommand extends Command {
     public async onRun(cmdArgs: CommandArguments) {
         const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
         const ranks: RankLevel[] = await Ranks.get(cmdArgs.guildId);
-        if (!ranks) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
+        if (!ranks || !ranks.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
         const data = [];
         ranks.sort((a, b) => a.level - b.level);
-        await asyncForEach(ranks, async (rank: RankLevel) => {
+        await asyncForEach(ranks, async (rank) => {
             data.push(Localisation.getTranslation("transformations.list", rank.level, `<@&${rank.roleId}>`));
         });
         const embed = new MessageEmbed();

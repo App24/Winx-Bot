@@ -1,5 +1,6 @@
 import { Owner } from "../../../structs/Category";
-import { Command, CommandAccess, CommandArguments } from "../../../structs/Command";
+import { Command, CommandArguments } from "../../../structs/Command";
+import { CommandAccess } from "../../../structs/CommandAccess";
 import { reportError } from "../../../utils/Utils";
 
 class FakeErrorCommand extends Command {

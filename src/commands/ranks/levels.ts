@@ -2,10 +2,10 @@ import { BotUser } from "../../BotClient";
 import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandUsage, CommandAvailable, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { DEFAULT_USER_SETTING, UserSetting } from "../../structs/databaseTypes/UserSetting";
 import { getServerDatabase, canvasToMessageAttachment, getLeaderboardMembers } from "../../utils/Utils";
 import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
 import { drawCard } from "../../utils/CardUtils";
@@ -20,12 +20,8 @@ class LevelsCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        const msg = await cmdArgs.message.reply("Generating card...");
-
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
-
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
 
         levels.sort((a, b) => {
             if (a.level === b.level) {
@@ -42,24 +38,22 @@ class LevelsCommand extends Command {
         }
         if (user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.user.bot"));
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild);
-        let leaderboardPosition = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id) + 1;
-        if (leaderboardPosition <= 0) {
-            leaderboardPosition = levels.findIndex(u => u.userId === user.id) + 1;
-        }
-
         const member = await getMemberById(user.id, cmdArgs.guild);
         if (!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
+
+        const msg = await cmdArgs.message.reply("Generating card...");
+
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild);
+        let leaderboardPosition = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id);
+        if (leaderboardPosition < 0) {
+            leaderboardPosition = levels.findIndex(u => u.userId === user.id);
+        }
+        leaderboardPosition += 1;
 
         let userLevel = levels.find(u => u.userId === user.id);
         if (!userLevel) {
             await levels.push(new UserLevel(user.id));
             userLevel = levels.find(u => u.userId === user.id);
-        }
-        let userSettings: UserSetting = await UserSettings.get(user.id);
-        if (!userSettings) {
-            userSettings = DEFAULT_USER_SETTING;
-            await UserSettings.set(user.id, userSettings);
         }
 
         const currentRank = await getCurrentRank(userLevel.level, cmdArgs.guildId);
@@ -67,7 +61,7 @@ class LevelsCommand extends Command {
 
         const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 
-        const { image, extension } = await drawCard(leaderboardPosition, userLevel, userSettings, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+        const { image, extension } = await drawCard(leaderboardPosition, userLevel, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
 
         cmdArgs.message.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
 

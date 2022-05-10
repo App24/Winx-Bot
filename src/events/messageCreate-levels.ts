@@ -27,9 +27,7 @@ export = () => {
         const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
         if (message.content.length < serverInfo.minMessageLength) return;
         const excluded = serverInfo.excludeChannels;
-        if (excluded) {
-            if (excluded.find(c => c === message.channel.id)) return;
-        }
+        if (excluded && excluded.find(c => c === message.channel.id)) return;
 
         if (!levelCooldowns.has(message.guild.id)) {
             levelCooldowns.set(message.guild.id, new Collection());
@@ -66,8 +64,7 @@ export = () => {
         const newDate = Date.now();
         xpData.push(newDate);
         setTimeout(() => {
-            const index = xpData.indexOf(newDate);
-            xpData.splice(index, 1);
+            xpData.splice(0, 1);
         }, 60 * 1000);
 
         const xp = Math.ceil((Math.min(message.content.length, serverInfo.maxMessageLength) / serverInfo.maxMessageLength) * serverInfo.maxXpPerMessage);

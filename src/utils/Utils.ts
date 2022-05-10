@@ -1,9 +1,9 @@
 import { join } from "path";
 import fs from "fs";
 import request from "request";
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, PREFIX } from "../Constants";
+import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, LB_USERS, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { BaseGuildTextChannel, Guild, GuildMember, Message, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextBasedChannel } from "discord.js";
+import { BaseGuildTextChannel, CommandInteraction, ContextMenuInteraction, Guild, GuildMember, Message, MessageAttachment, MessageComponentInteraction, MessageEmbed, MessageEmbedOptions, TextBasedChannel } from "discord.js";
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
@@ -220,7 +220,7 @@ export async function getLeaderboardMembers(guild: Guild) {
         if (member) {
             leaderboardLevels.push({ userLevel: level, member, position: userIndex });
             userIndex++;
-            if (userIndex >= 15)
+            if (userIndex >= LB_USERS)
                 return true;
         }
     });
@@ -238,7 +238,7 @@ export function backupDatabases() {
     });
 }
 
-export async function reportError(error, message?: Message) {
+export async function reportError(error, message?: Message | MessageComponentInteraction | CommandInteraction | ContextMenuInteraction) {
     const Errors = BotUser.getDatabase(DatabaseType.Errors);
     let hex: string;
     let errors;
@@ -262,10 +262,17 @@ export async function reportError(error, message?: Message) {
         const ownerMember = await getMemberById(owner.id, message.guild);
         if (ownerMember) {
             let text = `\nServer: ${message.guild.name}`;
-            text += `\nURL: ${message.url}`;
+            if (message instanceof Message)
+                text += `\nURL: ${message.url}`;
             await dm.send(text);
         }
-        message.reply(Localisation.getTranslation("error.execution"));
+        if (message instanceof Message) {
+            message.reply(Localisation.getTranslation("error.execution"));
+        } else {
+            if (!message.deferred && !message.replied)
+                await message.deferReply();
+            message.followUp(Localisation.getTranslation("error.execution"));
+        }
     }
 }
 

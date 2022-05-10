@@ -2,10 +2,11 @@ import { MessageEmbed } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandAvailable, CommandArguments } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_USER_SETTING } from "../../structs/databaseTypes/UserSetting";
-import { createMessageEmbed } from "../../utils/Utils";
+import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
+import { createMessageEmbed, getServerDatabase } from "../../utils/Utils";
 
 class CustomisationSettingsCommand extends Command {
     public constructor() {
@@ -16,12 +17,15 @@ class CustomisationSettingsCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-        let userSettings = await UserSettings.get(cmdArgs.author.id);
-        if (!userSettings) {
-            userSettings = DEFAULT_USER_SETTING;
-            await UserSettings.set(cmdArgs.author.id, userSettings);
+        const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
+        const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
+
+        let userIndex = serverUserSettings.findIndex(u => u.userId === cmdArgs.author.id);
+        if (userIndex < 0) {
+            serverUserSettings.push(new ServerUserSettings(cmdArgs.author.id));
+            userIndex = serverUserSettings.length - 1;
         }
+        const userSettings = serverUserSettings[userIndex];
 
         const embed = new MessageEmbed();
         embed.addField(Localisation.getTranslation("customisationsettings.cardColor"), `#${userSettings.cardColor}`);

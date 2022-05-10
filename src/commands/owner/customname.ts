@@ -2,7 +2,8 @@ import { MessageActionRow, MessageButton, MessageComponentInteraction, MessageSe
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandAccess, CommandArguments } from "../../structs/Command";
+import { Command, CommandArguments } from "../../structs/Command";
+import { CommandAccess } from "../../structs/CommandAccess";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomNameUser } from "../../structs/databaseTypes/CustomName";
 import { getStringReply } from "../../utils/ReplyUtils";

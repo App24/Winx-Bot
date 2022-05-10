@@ -6,7 +6,7 @@ import { DatabaseType } from "../structs/DatabaseTypes";
 import { RankLevel } from "../structs/databaseTypes/RankLevel";
 import { ServerUserSettings } from "../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
-import { UserSetting, DEFAULT_USER_SETTING } from "../structs/databaseTypes/UserSetting";
+import { UserSetting } from "../structs/databaseTypes/UserSetting";
 import { WinxCharacter } from "../structs/WinxCharacters";
 import { getServerDatabase } from "./Utils";
 
@@ -116,7 +116,7 @@ export async function getUserSettings(userId: string) {
     const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
     const userSettings: UserSetting = await UserSettings.get(userId);
     if (!userSettings) {
-        return DEFAULT_USER_SETTING;
+        return new UserSetting();
     }
     return userSettings;
 }
@@ -135,18 +135,10 @@ export async function getServerUserSettings(userId: string, guildId: string) {
 }
 
 export async function getWingsImage(user: User, guildId: string) {
-    const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-
-    let userSettings: UserSetting = await UserSettings.get(user.id);
-    if (!userSettings) {
-        userSettings = DEFAULT_USER_SETTING;
-        await UserSettings.set(user.id, userSettings);
-    }
-
     const serverUserSettings = await getServerUserSettings(user.id, guildId);
     const userLevel = await getUserLevel(user.id, guildId);
 
-    if (userSettings.winxCharacter <= 0)
+    if (serverUserSettings.winxCharacter <= 0)
         return undefined;
 
     let level = userLevel.level;
@@ -154,7 +146,7 @@ export async function getWingsImage(user: User, guildId: string) {
         level = serverUserSettings.wingsLevel;
     }
 
-    return getWingsImageByLevel(level, userSettings.winxCharacter, guildId);
+    return getWingsImageByLevel(level, serverUserSettings.winxCharacter, guildId);
 }
 
 export async function getWingsImageByLevel(level: number, winxCharacter: WinxCharacter, guildId: string) {
