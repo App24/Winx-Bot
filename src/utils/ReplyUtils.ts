@@ -1,10 +1,11 @@
-import { Message, User, MessageAttachment, MessageComponentInteraction, MessageOptions, TextBasedChannel, Role, Guild, BaseGuildTextChannel } from "discord.js";
+import { Message, MessageAttachment, MessageComponentInteraction, MessageOptions, Role, Guild, BaseGuildTextChannel } from "discord.js";
 import { Localisation } from "../localisation";
 import { getRoleFromMention, getTextChannelFromMention } from "./GetterUtils";
+import { MessageAuthor, SendTarget } from "./MessageButtonUtils";
 import { createMessageCollector } from "./MessageUtils";
 import { isHexColor } from "./Utils";
 
-export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Message, resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
+export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Message, resolve: (value: { value: T, message: Message } | PromiseLike<{ value: T, message: Message }>) => void, reject: (reason?: any) => void) => void) {
     const { sendTarget, author, options } = replyData;
     let { settings } = replyData;
 
@@ -36,7 +37,7 @@ export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Messag
         authorId = (typeof author === "string" ? author : author.id);
 
     if (!settings) {
-        settings = { max: 1, time: 1000 * 60 * 5 };
+        settings = { max: Number.MAX_SAFE_INTEGER, time: 1000 * 60 * 5 };
     }
 
     if (settings.time && settings.time <= 0)
@@ -44,14 +45,23 @@ export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Messag
     else if (!settings.time)
         settings.time = 1000 * 60 * 5;
 
-    const collector = createMessageCollector(message.channel, message.id, authorId, { max: settings.max, time: settings.time });
-    return new Promise<T>((resolve, reject) => {
+    let use = 0;
+
+    const collector = createMessageCollector(message.channel, message.id, { max: settings.max, time: settings.time });
+    return new Promise<{ value: T, message: Message }>((resolve, reject) => {
         collector.on("collect", (msg) => {
-            callbackFn(msg, resolve, reject);
+            if (msg.author.bot) return;
+            if (msg.author.id === authorId) {
+                use++;
+                if (settings.max && settings.max > 0 && use >= settings.max) {
+                    collector.emit("end", "");
+                }
+                callbackFn(msg, resolve, reject);
+            } else {
+                msg.reply({ content: Localisation.getTranslation("generic.not.author"), allowedMentions: { users: [msg.author.id] } });
+            }
         });
-    }).then(value => {
-        return { value, message };
-    }, () => {
+    }).then(value => value, () => {
         return { value: <T>undefined, message };
     });
 }
@@ -72,7 +82,7 @@ export async function getNumberReply(replyData: ReplyData, bounds: { min?: numbe
             return <any>msg.reply(Localisation.getTranslation("error.invalid.number"));
         }
 
-        resolve(level);
+        resolve({ value: level, message: msg });
     });
 }
 
@@ -82,7 +92,7 @@ export async function getLevelReply(replyData: ReplyData) {
 
 export async function getStringReply(replyData: ReplyData) {
     return getReply<string>(replyData, (msg, resolve) => {
-        resolve(msg.content);
+        resolve({ value: msg.content, message: msg });
     });
 }
 
@@ -99,7 +109,7 @@ export async function getImageReply(replyData: ReplyData) {
             return msg.reply(Localisation.getTranslation("error.invalid.image"));
         }
 
-        resolve(image);
+        resolve({ value: image, message: msg });
     });
 }
 
@@ -115,7 +125,9 @@ export async function getHexReply(replyData: ReplyData) {
             return msg.reply(Localisation.getTranslation("error.invalid.hexcolor"));
         }
 
-        resolve(hex);
+        hex = hex.substring(0, 6);
+
+        resolve({ value: hex, message: msg });
     });
 }
 
@@ -127,7 +139,7 @@ export async function getRoleReply(replyData: GuildReplyData) {
             return msg.reply(Localisation.getTranslation("error.invalid.role"));
         }
 
-        resolve(role);
+        resolve({ value: role, message: msg });
     });
 }
 
@@ -139,13 +151,13 @@ export async function getTextChannelReply(replyData: GuildReplyData) {
             return msg.reply(Localisation.getTranslation("error.invalid.channel"));
         }
 
-        resolve(channel);
+        resolve({ value: channel, message: msg });
     });
 }
 
 export interface ReplyData {
-    sendTarget: Message | TextBasedChannel | MessageComponentInteraction,
-    author: User | string,
+    sendTarget: SendTarget,
+    author: MessageAuthor,
     options: string | MessageOptions,
     settings?: { max?: number, time?: number }
 }

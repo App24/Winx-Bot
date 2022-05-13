@@ -50,7 +50,7 @@ class WingsLevelCommand extends Command {
                 options:
                     [
                         {
-                            label: "Wings A",
+                            label: "Primary Wings",
                             value: "wings_a",
                             onSelect: async ({ interaction }) => {
                                 createMessageSelection({
@@ -62,7 +62,7 @@ class WingsLevelCommand extends Command {
                             }
                         },
                         {
-                            label: "Wings B",
+                            label: "Secondary Wings",
                             value: "wings_b",
                             onSelect: async ({ interaction }) => {
                                 createMessageSelection({

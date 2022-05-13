@@ -87,6 +87,10 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                 await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
                 return;
             }
+            use++;
+            if (settings.max && settings.max > 0 && use >= settings.max) {
+                collector.emit("end", "");
+            }
             await asyncForEach(optionsList, async (value, index) => {
                 const custom_id = value.customId || `selection${index}`;
                 if (custom_id === interaction.customId) {
@@ -100,10 +104,6 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                     });
                 }
             });
-            use++;
-            if (settings.max && settings.max > 0 && use >= settings.max) {
-                collector.emit("end", "");
-            }
         }
     });
 

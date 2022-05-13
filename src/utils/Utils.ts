@@ -157,7 +157,7 @@ export function canvasToMessageAttachment(data: Canvas | Buffer, fileName = "col
  * @returns True if it is a hex color, false if it isn't
  */
 export function isHexColor(str: string) {
-    return new RegExp(/[a-f\d]{6}/g).test(str);
+    return new RegExp(/[a-fA-F\d]{6}/g).test(str);
 }
 
 export function hexToRGB(hex: string) {

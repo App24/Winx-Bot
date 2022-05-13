@@ -1,4 +1,6 @@
+import { Guild } from "discord.js";
 import { BotUser } from "../../BotClient";
+import { Keyv } from "../../keyv/keyv-index";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
 import { Command, CommandArguments } from "../../structs/Command";
@@ -30,8 +32,56 @@ class WinxCharacterCommand extends Command {
         const userSettings = serverUserSettings[userIndex];
 
         if (!userSettings.winxCharacter) userSettings.winxCharacter = WinxCharacter.None;
+        if (!userSettings.winxCharacterB) userSettings.winxCharacterB = WinxCharacter.None;
 
-        const options: SelectOption[] = [];
+        
+
+        createMessageSelection({
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
+            {
+                options:
+                    [
+                        {
+                            label: "Winx Character for Primary Wings",
+                            value: "wings_a",
+                            onSelect: async ({ interaction }) => {
+                                createMessageSelection({
+                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
+                                    {
+                                        options: await this.updateWings("WINGS_A", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            label: "Winx Character for Secondary Wings",
+                            value: "wings_b",
+                            onSelect: async ({ interaction }) => {
+                                createMessageSelection({
+                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
+                                    {
+                                        options: await this.updateWings("WINGS_B", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            label: "Both Wings",
+                            value: "both",
+                            onSelect: async ({ interaction }) => {
+                                createMessageSelection({
+                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
+                                    {
+                                        options: await this.updateWings("BOTH", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
+                                    }
+                                });
+                            }
+                        }
+                    ]
+            }
+        });
+
+        /*const options: SelectOption[] = [];
         Object.keys(WinxCharacter).forEach((character) => {
             if (isNaN(parseInt(character))) {
                 options.push({
@@ -61,7 +111,60 @@ class WinxCharacterCommand extends Command {
             {
                 options
             }
+        });*/
+    }
+
+    async updateWings(setType: "WINGS_A" | "WINGS_B" | "BOTH", ServerUserSettingsDatabase: Keyv, serverUserSettings: ServerUserSettings[], userSettings: ServerUserSettings, userIndex: number, guild: Guild) {
+        const options: SelectOption[] = [];
+
+        const setWinxCharacter = async (character: WinxCharacter) => {
+            if (setType === "WINGS_A" || setType === "BOTH") {
+                userSettings.winxCharacter = character;
+            }
+            if (setType === "WINGS_B" || setType === "BOTH") {
+                userSettings.winxCharacterB = character;
+            }
+            serverUserSettings[userIndex] = userSettings;
+            await ServerUserSettingsDatabase.set(guild.id, serverUserSettings);
+        };
+
+        const isDefault = (character: string) => {
+            if (setType === "WINGS_A") {
+                return WinxCharacter[userSettings.winxCharacter] === character;
+            } else if (setType === "WINGS_B") {
+                return WinxCharacter[userSettings.winxCharacterB] === character;
+            }
+
+            const wingsA = userSettings.winxCharacter;
+            const wingsB = userSettings.winxCharacterB;
+
+            if (WinxCharacter[wingsA] === character)
+                return wingsA === wingsB;
+            return false;
+        };
+
+        Object.keys(WinxCharacter).forEach((character)=>{
+            if(!isNaN(parseInt(character))) return;
+            options.push({
+                value: character,
+                label: capitalise(character),
+                default: isDefault(character),
+                onSelect: async({interaction})=>{
+                    setWinxCharacter(WinxCharacter[character]);
+                    await interaction.reply(Localisation.getTranslation("winxcharacter.set", character));
+                }
+            });
         });
+
+        options.push({
+            value: "cancel",
+            label: Localisation.getTranslation("generic.cancel"),
+            onSelect: async ({ interaction }) => {
+                interaction.deferUpdate();
+            }
+        });
+
+        return options;
     }
 }
 

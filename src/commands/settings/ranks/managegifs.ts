@@ -31,7 +31,7 @@ class ManageGifsCommand extends Command {
                         label: Localisation.getTranslation("button.get"),
                         value: "get",
                         onSelect: async ({ interaction }) => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
                             const gifs = await this.getLevelGifs(level, cmdArgs.guildId);
                             if (!gifs || gifs.length <= 0) {
@@ -70,7 +70,7 @@ class ManageGifsCommand extends Command {
                         label: Localisation.getTranslation("button.add"),
                         value: "set",
                         onSelect: async ({ interaction }) => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
                             const gifs = await this.getLevelGifs(level, cmdArgs.guildId);
                             if (gifs.length > 15) {
@@ -96,7 +96,7 @@ class ManageGifsCommand extends Command {
                         label: Localisation.getTranslation("button.remove"),
                         value: "delete",
                         onSelect: async ({ interaction }) => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
                             const gifs = await this.getLevelGifs(level, cmdArgs.guildId);
                             if (!gifs || gifs.length <= 0) {

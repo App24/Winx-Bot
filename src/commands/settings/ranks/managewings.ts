@@ -38,7 +38,7 @@ class ManageWingsCommand extends Command {
                         label: Localisation.getTranslation("button.get"),
                         value: "get",
                         onSelect: async ({ interaction }) => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
                             const wings = await this.getLevelWings(level, cmdArgs.guildId);
                             if (wings === DEFAULT_WINGS_DATA) {
@@ -81,11 +81,11 @@ class ManageWingsCommand extends Command {
                         label: Localisation.getTranslation("button.add"),
                         value: "set",
                         onSelect: async () => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
                             const rankLevel = await getRank(level, cmdArgs.guildId);
 
-                            const { value: image, message: msg } = await getImageReply({ sendTarget: message, author: cmdArgs.author, options: "argument.reply.image" });
+                            const { value: image, message: msg } = await getImageReply({ sendTarget: message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.image") });
                             if (!image) return;
 
                             const userLevel = new UserLevel(cmdArgs.author.id);
@@ -168,7 +168,7 @@ class ManageWingsCommand extends Command {
                         label: Localisation.getTranslation("button.remove"),
                         value: "delete",
                         onSelect: async ({ interaction }) => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
                             const wings = await this.getLevelWings(level, cmdArgs.guildId);
                             if (wings === DEFAULT_WINGS_DATA) {

@@ -24,7 +24,7 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
         serverUserSettings.wingsLevelB = -1;
 
     const wingsImageA = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, serverUserSettings.winxCharacter, guild.id);
-    const wingsImageB = await getWingsImageByLevel(serverUserSettings.wingsLevelB < 0 ? userLevel.level : serverUserSettings.wingsLevelB, serverUserSettings.winxCharacter, guild.id);
+    const wingsImageB = await getWingsImageByLevel(serverUserSettings.wingsLevelB < 0 ? userLevel.level : serverUserSettings.wingsLevelB, serverUserSettings.winxCharacterB ?? serverUserSettings.winxCharacter, guild.id);
 
     return drawCardWithWings(leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild);
 }
@@ -89,10 +89,13 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
         return b.level - a.level;
     });
 
+    const user = member.user;
+
     if (serverUserSettings.wingsTemplate === undefined)
         serverUserSettings.wingsTemplate = CardTemplate.Normal;
 
-    const user = member.user;
+    if (serverUserSettings.cardTemplate === undefined)
+        serverUserSettings.cardTemplate = CardTemplate.Normal;
 
     let currentRankText = Localisation.getTranslation("generic.none");
     if (currentRank) {
@@ -159,18 +162,47 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
 
     const extraTextPosY = ((canvas.height - topTextHeight) / extraInfoAmount);
 
+    let cardTemplateImage: Image;
+
+    const cardTemplatePath = `${CARD_TEMPLATES_FOLDER}/${serverUserSettings.cardTemplate}.png`;
+
+    if (existsSync(cardTemplatePath)) {
+        cardTemplateImage = await loadImage(cardTemplatePath);
+    }
+
     //Draw background
-    ctx.fillStyle = `#${serverUserSettings.cardColor}`;
-    roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.width * 0.01);
+
+    if (cardTemplateImage) {
+        const tempCanvas = createCanvas(canvas.width, canvas.height);
+        const tempCtx = tempCanvas.getContext("2d");
+
+        tempCtx.fillStyle = `#${serverUserSettings.cardColor}`;
+        roundRect(tempCtx, 0, 0, canvas.width, canvas.height, canvas.width * 0.01);
+
+        ctx.drawImage(drawMaskedImage(cardTemplateImage, tempCanvas, "source-in"), 0, 0);
+
+        tempCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (serverUserSettings.cardColorB === undefined) {
+            serverUserSettings.cardColorB = new ServerUserSettings(user.id).cardColorB;
+        }
+
+        tempCtx.fillStyle = `#${serverUserSettings.cardColorB}`;
+        roundRect(tempCtx, 0, 0, canvas.width, canvas.height, canvas.width * 0.01);
+
+        ctx.drawImage(drawMaskedImage(cardTemplateImage, tempCanvas, "source-out"), 0, 0);
+    } else {
+        ctx.fillStyle = `#${serverUserSettings.cardColor}`;
+        roundRect(ctx, 0, 0, canvas.width, canvas.height, canvas.width * 0.01);
+    }
 
     const wingsImages: Image[] = [];
-    let templateImage: Image;
+    let wingsTemplateImage: Image;
 
-    const templatePath = `${CARD_TEMPLATES_FOLDER}/${serverUserSettings.wingsTemplate}.png`;
+    const wingsTemplatePath = `${CARD_TEMPLATES_FOLDER}/${serverUserSettings.wingsTemplate}.png`;
 
-
-    if (existsSync(templatePath)) {
-        templateImage = await loadImage(templatePath);
+    if (existsSync(wingsTemplatePath)) {
+        wingsTemplateImage = await loadImage(wingsTemplatePath);
     }
 
     //Draw Wings
@@ -192,11 +224,11 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
             const wingsX = (canvas.width - wings.width) / 2.;
             const wingsY = ((newPfpRadius + pfpY + borderThickness) - wings.height / 2.);
 
-            if (!templateImage) {
+            if (!wingsTemplateImage) {
                 ctx.drawImage(wings, wingsX, wingsY);
             }
             else {
-                ctx.drawImage(drawMaskedImage(templateImage, wings, "source-in"), wingsX, wingsY);
+                ctx.drawImage(drawMaskedImage(wingsTemplateImage, wings, "source-in"), wingsX, wingsY);
             }
         }
 
@@ -205,11 +237,11 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
             const wingsX = (canvas.width - wings.width) / 2.;
             const wingsY = ((newPfpRadius + pfpY + borderThickness) - wings.height / 2.);
 
-            if (!templateImage) {
+            if (!wingsTemplateImage) {
                 ctx.drawImage(wings, wingsX, wingsY);
             }
             else {
-                ctx.drawImage(drawMaskedImage(templateImage, wings, "source-out"), wingsX, wingsY);
+                ctx.drawImage(drawMaskedImage(wingsTemplateImage, wings, "source-out"), wingsX, wingsY);
             }
         }
     } else if (wingsImages.length) {
@@ -254,7 +286,7 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
         }
         ctx.textBaseline = "top";
         ctx.textAlign = "center";
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = textColor;
         ctx.lineWidth = 3;
         ctx.strokeText(userName, canvas.width / 2, namePosY);
         ctx.fillText(userName, canvas.width / 2, namePosY);
@@ -321,7 +353,7 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
     return canvas;
 }
 
-function drawMaskedImage(mask: Image, image: Image, globalCompositeOperation: "source-in" | "source-out") {
+function drawMaskedImage(mask: Image, image: Image | Canvas, globalCompositeOperation: "source-in" | "source-out") {
     const canvas = createCanvas(image.width, image.height);
     const ctx = canvas.getContext("2d");
 

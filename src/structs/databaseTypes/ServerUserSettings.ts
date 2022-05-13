@@ -8,12 +8,17 @@ export class ServerUserSettings {
     public cardName: "DISABLED" | "USERNAME" | "NICKNAME";
     public animatedCard: boolean;
     public wingsTemplate: CardTemplate;
+    public cardTemplate: CardTemplate;
+
     public barStartColor: string;
     public barEndColor: string;
     public cardColor: string;
+    public cardColorB: string;
     public nameColor: string;
     public specialCircleColor: string;
+
     public winxCharacter: WinxCharacter;
+    public winxCharacterB: WinxCharacter;
 
     public constructor(id: string) {
         this.userId = id;
@@ -23,16 +28,21 @@ export class ServerUserSettings {
         this.cardName = "NICKNAME";
         this.animatedCard = true;
         this.wingsTemplate = CardTemplate.Normal;
+        this.cardColor = CardTemplate.Normal;
         this.cardColor = "363636";
+        this.cardColorB = "363636";
         this.barStartColor = "cc0000";
         this.barEndColor = "44cc00";
         this.nameColor = "none";
-        this.specialCircleColor = undefined;
+        this.specialCircleColor = "none";
         this.winxCharacter = WinxCharacter.None;
+        this.winxCharacterB = WinxCharacter.None;
     }
 }
 
 export enum CardTemplate {
     Normal = "normal",
-    Split = "split"
+    Split = "split",
+    Gradient = "gradient",
+    Radial_Gradient = "radialGradient"
 }

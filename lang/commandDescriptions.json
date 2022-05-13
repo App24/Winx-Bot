@@ -49,6 +49,7 @@
     "cardname.command.description": "Toggle Card Name!",
     "cardpfp.command.description": "Toggle Animated card!",
     "wingstemplate.command.description": "Select wings template!",
+    "cardtemplate.command.description": "Select card template!",
     
     "manageranks.command.description": "Set transformation for each level!",
     "managegifs.command.description": "Manage gifs for each transformation level!",

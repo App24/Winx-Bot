@@ -1,7 +1,6 @@
 import { BaseGuildTextChannel, MessageAttachment } from "discord.js";
 import { BotUser } from "../BotClient";
 import { DATABASE_FOLDER } from "../Constants";
-import { getGuildById, getTextChannelById } from "../utils/GetterUtils";
 import { backupDatabases, reportError } from "../utils/Utils";
 import fs from "fs";
 import archiver from "archiver";
@@ -16,8 +15,7 @@ export = () => {
         midnight.setMinutes(0);
         midnight.setSeconds(0);
         midnight.setMilliseconds(0);
-        const backupChannelAny: any = await BotUser.channels.fetch(process.env.BACKUP_CHANNEL);
-        backupChannel = await getTextChannelById(process.env.BACKUP_CHANNEL, await getGuildById(backupChannelAny.guildId));
+        backupChannel = <BaseGuildTextChannel>(await BotUser.channels.fetch(process.env.BACKUP_CHANNEL));
         setTimeout(() => {
             backup();
             setInterval(() => {

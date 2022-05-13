@@ -1,4 +1,4 @@
-import { InteractionButtonOptions, InteractionCollector, Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageOptions, TextBasedChannel, User } from "discord.js";
+import { GuildMember, InteractionButtonOptions, InteractionCollector, Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageOptions, TextBasedChannel, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "./Utils";
 
@@ -86,6 +86,10 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
                 await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
                 return;
             }
+            use++;
+            if (settings.max && settings.max > 0 && use >= settings.max) {
+                collector.emit("end", "");
+            }
             if (beforeButton)
                 await beforeButton({ interaction, message: msg, data, collector });
             await asyncForEach(_buttons, async (value) => {
@@ -93,10 +97,6 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
                     await value.onRun({ interaction, message: msg, data, collector });
                 }
             });
-            use++;
-            if (settings.max && settings.max > 0 && use >= settings.max) {
-                collector.emit("end", "");
-            }
         }
     });
 
@@ -111,9 +111,12 @@ export async function createWhatToDoButtons(messageButtonData: MessageButtonData
     return createMessageButtons({ sendTarget: messageButtonData.sendTarget, author: messageButtonData.author, options: Localisation.getTranslation("generic.whattodo"), settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
 }
 
+export type SendTarget = Message | TextBasedChannel | MessageComponentInteraction;
+export type MessageAuthor = GuildMember | User | string;
+
 export interface MessageButtonData {
-    sendTarget: Message | TextBasedChannel | MessageComponentInteraction,
-    author?: User | string,
+    sendTarget: SendTarget,
+    author?: MessageAuthor,
     options?: string | MessageOptions,
     settings?: { max?: number, time?: number },
     beforeButton?: (interactionData: InteractionData) => void,

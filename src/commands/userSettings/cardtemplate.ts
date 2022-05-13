@@ -8,7 +8,7 @@ import { CardTemplate, ServerUserSettings } from "../../structs/databaseTypes/Se
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
 import { getServerDatabase } from "../../utils/Utils";
 
-class WingsTemplateCommand extends Command {
+class CardTemplateCommand extends Command {
     public constructor() {
         super();
         this.available = CommandAvailable.Guild;
@@ -34,13 +34,13 @@ class WingsTemplateCommand extends Command {
             options.push({
                 label: key.replace("_", " "),
                 value: key.toLowerCase(),
-                default: userSettings.wingsTemplate === CardTemplate[key],
+                default: userSettings.cardTemplate === CardTemplate[key],
                 onSelect: async ({ interaction }) => {
-                    userSettings.wingsTemplate = CardTemplate[key];
+                    userSettings.cardTemplate = CardTemplate[key];
 
                     serverUserSettings[userIndex] = userSettings;
                     await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
-                    interaction.reply(Localisation.getTranslation("wingstemplate.set", key.replace("_", " ")));
+                    interaction.reply(Localisation.getTranslation("cardtemplate.set", key.replace("_", " ")));
                 }
             });
         });
@@ -54,4 +54,4 @@ class WingsTemplateCommand extends Command {
     }
 }
 
-export = WingsTemplateCommand;
+export = CardTemplateCommand;

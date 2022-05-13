@@ -36,7 +36,7 @@ class ManageRanksCommand extends Command {
                         label: Localisation.getTranslation("button.add"),
                         value: "add",
                         onSelect: async ({ interaction }) => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
 
                             let rankLevel = ranks.find(rank => rank.level === level);
@@ -60,7 +60,7 @@ class ManageRanksCommand extends Command {
                         label: Localisation.getTranslation("button.remove"),
                         value: "remove",
                         onSelect: async () => {
-                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: "argument.reply.level" });
+                            const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
                             if (level === undefined || level < 0) return;
 
                             const rankLevelIndex = ranks.findIndex(rank => rank.level === level);

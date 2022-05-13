@@ -60,7 +60,7 @@ class CircleColorCommand extends Command {
                         onSelect: async ({ interaction }) => {
                             userSettings.specialCircleColor = new ServerUserSettings(cmdArgs.author.id).specialCircleColor;
                             serverUserSettings[userIndex] = userSettings;
-                            await ServerUserSettingsDatabase.set(cmdArgs.author.id, userSettings);
+                            await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
                             await interaction.reply(Localisation.getTranslation("circlecolor.reset.output"));
                         }
                     }

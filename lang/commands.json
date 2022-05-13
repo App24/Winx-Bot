@@ -171,6 +171,7 @@
     "wingslevel.set": "Your transformation is now `{0}`!",
 
     "wingstemplate.set": "Your wings template is now {0}",
+    "cardtemplate.set": "Your card template is now {0}",
 
     "checkerror.reply.code": "Please reply with error code",
 

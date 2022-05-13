@@ -8,6 +8,7 @@ import { loadFiles } from "./utils/Utils";
 import fs from "fs";
 import { Command } from "./structs/Command";
 import { SlashCommand } from "./structs/SlashCommand";
+import { Category } from "./structs/Category";
 
 interface BotOptions {
     clientOptions?: ClientOptions;
@@ -16,7 +17,7 @@ interface BotOptions {
 
 class BotClient extends Client {
     private databases = new Collection<DatabaseType, Keyv>();
-    public Commands = new Collection<string, Command>();
+    private commands = new Collection<string, Command>();
     public SlashCommands = new Collection<string, SlashCommand>();
 
     private botOptions: BotOptions;
@@ -62,7 +63,7 @@ class BotClient extends Client {
                         const name = path.basename(file).slice(0, -3);
                         if (!command.description)
                             command.description = `${name}.command.description`;
-                        this.Commands.set(name, command);
+                        this.commands.set(name, command);
                         switch (this.botOptions.logLoading) {
                             case 'complex':
                             case 'all':
@@ -166,7 +167,11 @@ class BotClient extends Client {
     }
 
     public getCommand(commandName: string) {
-        return this.Commands.get(commandName) || this.Commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        return this.commands.get(commandName) || this.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+    }
+
+    public getCommands(category: Category) {
+        return this.commands.filter(command => command.category === category);
     }
 }
 

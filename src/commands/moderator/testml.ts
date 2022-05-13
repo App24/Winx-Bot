@@ -3,12 +3,12 @@ import { Moderator } from "../../structs/Category";
 import { Command, CommandArguments, CommandUsage } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
+import { CardTemplate } from "../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { WinxCharacter } from "../../structs/WinxCharacters";
 import { drawCard } from "../../utils/CardUtils";
 import { getMemberById } from "../../utils/GetterUtils";
-import { getCurrentRank, getNextRank } from "../../utils/RankUtils";
+import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
 import { asyncForEach, canvasToMessageAttachment } from "../../utils/Utils";
 
 class TestMLCommand extends Command {
@@ -45,8 +45,11 @@ class TestMLCommand extends Command {
         const currentRank = await getCurrentRank(userLevel.level, cmdArgs.guildId);
         const nextRank = await getNextRank(userLevel.level, cmdArgs.guildId);
 
-        const serverUserSettings = new ServerUserSettings(cmdArgs.author.id);
+        const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
         serverUserSettings.animatedCard = false;
+        serverUserSettings.wingsLevel = -1;
+        serverUserSettings.cardTemplate = CardTemplate.Normal;
+        serverUserSettings.wingsTemplate = CardTemplate.Normal;
 
         if (winxNumber > 0) {
             await asyncForEach(Object.keys(WinxCharacter), async (val) => {

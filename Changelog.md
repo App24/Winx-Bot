@@ -1,3 +1,7 @@
+## 3.3.1
+- Can now have different colors in the card color
+- Fixed some localisation issues
+
 ## 3.3.0
 - Slash commands
 - Different ways of having separate wings in the same card
