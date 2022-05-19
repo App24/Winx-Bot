@@ -93,24 +93,6 @@ class RPSCommand extends Command {
                 checkWinner(RPSMoves.Paper, RPSMoves.Rock);
                 checkWinner(RPSMoves.Rock, RPSMoves.Scissors);
                 checkWinner(RPSMoves.Scissors, RPSMoves.Paper);
-
-                /*else if (player1Move === RPSMoves.Scissors && player2Move === RPSMoves.Paper) {
-                    await message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player1.id] } });
-                } else if (player2Move === RPSMoves.Scissors && player1Move === RPSMoves.Paper) {
-                    await message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player2.id] } });
-                }
-
-                else if (player1Move === RPSMoves.Paper && player2Move === RPSMoves.Rock) {
-                    await message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player1.id] } });
-                } else if (player2Move === RPSMoves.Paper && player1Move === RPSMoves.Rock) {
-                    await message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player2.id), allowedMentions: { users: [gameData.player2.id] } });
-                }
-
-                else if (player1Move === RPSMoves.Rock && player2Move === RPSMoves.Scissors) {
-                    await message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player1.id] } });
-                } else if (player2Move === RPSMoves.Rock && player1Move === RPSMoves.Scissors) {
-                    await message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player2.id), allowedMentions: { users: [gameData.player2.id] } });
-                }*/
             }
         });
     }

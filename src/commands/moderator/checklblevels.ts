@@ -32,7 +32,7 @@ class CheckLBLevelsCommand extends Command {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
 
-        if (!levels || !levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
+        if (!levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
 
         const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild);
 

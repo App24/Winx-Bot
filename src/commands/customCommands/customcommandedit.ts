@@ -71,6 +71,9 @@ class CustomCommandEditCommand extends Command {
                     case "patreon": {
                         access = CommandAccess.Patreon;
                     } break;
+                    case "booster": {
+                        access = CommandAccess.Booster;
+                    } break;
                     default: {
                         return cmdArgs.message.reply(Localisation.getTranslation("customcommand.invalid.access"));
                     } break;

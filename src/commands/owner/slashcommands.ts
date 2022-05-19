@@ -5,6 +5,7 @@ import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Owner } from "../../structs/Category";
+import { Localisation } from "../../localisation";
 
 class RegisterSlashCommandsCommand extends Command {
     public constructor() {
@@ -19,7 +20,7 @@ class RegisterSlashCommandsCommand extends Command {
                 options:
                     [
                         {
-                            label: "Register",
+                            label: Localisation.getTranslation("button.register"),
                             value: "register",
                             onSelect: async ({ interaction }) => {
                                 const commands = BotUser.SlashCommands.map((c, n) => {
@@ -31,19 +32,19 @@ class RegisterSlashCommandsCommand extends Command {
                                     sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
                                         options: [
                                             {
-                                                label: "Global",
+                                                label: Localisation.getTranslation("button.global"),
                                                 value: "global",
                                                 onSelect: async ({ interaction }) => {
                                                     BotUser.application.commands.set(commands);
-                                                    interaction.reply("Done");
+                                                    interaction.reply(Localisation.getTranslation("generic.done"));
                                                 }
                                             },
                                             {
-                                                label: "Guild",
+                                                label: Localisation.getTranslation("button.guild"),
                                                 value: "guild",
                                                 onSelect: async ({ interaction }) => {
                                                     cmdArgs.guild.commands.set(commands);
-                                                    interaction.reply("Done");
+                                                    interaction.reply(Localisation.getTranslation("generic.done"));
                                                 }
                                             }
                                         ]
@@ -52,14 +53,14 @@ class RegisterSlashCommandsCommand extends Command {
                             }
                         },
                         {
-                            label: "Reset",
+                            label: Localisation.getTranslation("button.reset"),
                             value: "reset",
                             onSelect: async ({ interaction }) => {
                                 await createMessageSelection({
                                     sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
                                         options: [
                                             {
-                                                label: "Global",
+                                                label: Localisation.getTranslation("button.global"),
                                                 value: "global",
                                                 onSelect: async ({ interaction }) => {
                                                     interaction.deferReply();
@@ -71,12 +72,12 @@ class RegisterSlashCommandsCommand extends Command {
                                                                 const deleteUrl = `${Routes.applicationCommands(BotUser.user.id)}/${command.id}`;
                                                                 promises.push(rest.delete(<any>deleteUrl));
                                                             }
-                                                            return Promise.all(promises).then(() => interaction.followUp("Done"));
+                                                            return Promise.all(promises).then(() => interaction.followUp(Localisation.getTranslation("generic.done")));
                                                         });
                                                 }
                                             },
                                             {
-                                                label: "Guild",
+                                                label: Localisation.getTranslation("button.guild"),
                                                 value: "guild",
                                                 onSelect: async ({ interaction }) => {
                                                     interaction.deferReply();
@@ -88,7 +89,7 @@ class RegisterSlashCommandsCommand extends Command {
                                                                 const deleteUrl = `${Routes.applicationGuildCommands(BotUser.user.id, cmdArgs.guildId)}/${command.id}`;
                                                                 promises.push(rest.delete(<any>deleteUrl));
                                                             }
-                                                            return Promise.all(promises).then(() => interaction.followUp("Done"));
+                                                            return Promise.all(promises).then(() => interaction.followUp(Localisation.getTranslation("generic.done")));
                                                         });
                                                 }
                                             }

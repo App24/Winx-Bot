@@ -80,38 +80,6 @@ class WinxCharacterCommand extends Command {
                     ]
             }
         });
-
-        /*const options: SelectOption[] = [];
-        Object.keys(WinxCharacter).forEach((character) => {
-            if (isNaN(parseInt(character))) {
-                options.push({
-                    value: character,
-                    label: capitalise(character),
-                    default: character === WinxCharacter[userSettings.winxCharacter],
-                    onSelect: async ({ interaction }) => {
-                        userSettings.winxCharacter = WinxCharacter[character];
-                        serverUserSettings[userIndex] = userSettings;
-                        await interaction.reply(Localisation.getTranslation("winxcharacter.set", WinxCharacter[userSettings.winxCharacter]));
-                        await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
-                    }
-                });
-            }
-        });
-
-        options.push({
-            value: "cancel",
-            label: Localisation.getTranslation("generic.cancel"),
-            onSelect: async ({ interaction }) => {
-                interaction.deferUpdate();
-            }
-        });
-
-        createMessageSelection({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("generic.selectcurrentcharacter", cmdArgs.author), selectMenuOptions:
-            {
-                options
-            }
-        });*/
     }
 
     async updateWings(setType: "WINGS_A" | "WINGS_B" | "BOTH", ServerUserSettingsDatabase: Keyv, serverUserSettings: ServerUserSettings[], userSettings: ServerUserSettings, userIndex: number, guild: Guild) {

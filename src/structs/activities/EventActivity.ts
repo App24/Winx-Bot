@@ -8,12 +8,13 @@ export abstract class EventActivity extends Activity {
         super();
         this.startTime = startTime;
         this.endTime = endTime;
-        this.startTime.setFullYear(new Date().getFullYear());
-        this.endTime.setFullYear(new Date().getFullYear());
+        this.startTime.setFullYear(1);
+        this.endTime.setFullYear(1);
     }
 
     public isShowable(): boolean {
         const currentDate = new Date();
+        currentDate.setFullYear(1);
         currentDate.setHours(24, 0, 0, 0);
         return currentDate >= this.startTime && currentDate <= this.endTime;
     }

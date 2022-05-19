@@ -12,7 +12,7 @@ export = () => {
         const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
         const levels: UserLevel[] = await getServerDatabase(Levels, member.guild.id);
         const ranks: RankLevel[] = await getServerDatabase(Ranks, member.guild.id);
-        if (!levels || !ranks) return;
+        if (!levels.length || !ranks.length) return;
         const user = levels.find(u => u.userId === member.id);
         if (user) {
             await asyncForEach(ranks, async (rank: RankLevel) => {

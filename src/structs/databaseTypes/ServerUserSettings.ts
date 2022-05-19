@@ -9,6 +9,7 @@ export class ServerUserSettings {
     public animatedCard: boolean;
     public wingsTemplate: CardTemplate;
     public cardTemplate: CardTemplate;
+    public cardWings: "ENABLED" | "CUSTOM";
 
     public barStartColor: string;
     public barEndColor: string;
@@ -26,6 +27,7 @@ export class ServerUserSettings {
         this.wingsLevelB = -1;
         this.levelPing = false;
         this.cardName = "NICKNAME";
+        this.cardWings = "ENABLED";
         this.animatedCard = true;
         this.wingsTemplate = CardTemplate.Normal;
         this.cardColor = CardTemplate.Normal;
@@ -44,5 +46,6 @@ export enum CardTemplate {
     Normal = "normal",
     Split = "split",
     Gradient = "gradient",
+    Central_Gradient = "centralGradient",
     Radial_Gradient = "radialGradient"
 }

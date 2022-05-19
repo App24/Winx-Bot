@@ -1,5 +1,5 @@
 import { loadImage } from "canvas";
-import { User } from "discord.js";
+import { Guild, Role, User } from "discord.js";
 import { existsSync } from "fs";
 import { BotUser } from "../BotClient";
 import { DatabaseType } from "../structs/DatabaseTypes";
@@ -8,7 +8,8 @@ import { ServerUserSettings } from "../structs/databaseTypes/ServerUserSettings"
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
 import { UserSetting } from "../structs/databaseTypes/UserSetting";
 import { WinxCharacter } from "../structs/WinxCharacters";
-import { getServerDatabase } from "./Utils";
+import { getRoleById } from "./GetterUtils";
+import { asyncForEach, getServerDatabase } from "./Utils";
 
 export async function getUserLevel(userId: string, guildId: string, createNew = true) {
     const Levels = BotUser.getDatabase(DatabaseType.Levels);
@@ -20,8 +21,9 @@ export async function getUserLevel(userId: string, guildId: string, createNew = 
         userIndex = levels.length - 1;
         await Levels.set(guildId, levels);
     } else if (userIndex < 0) {
-        return undefined;
+        return;
     }
+    
     return levels[userIndex];
 }
 
@@ -34,26 +36,33 @@ export async function getRank(level: number, guildId: string) {
 export async function getNextRank(currentLevel: number, guildId: string) {
     const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
     const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
-    if (!ranks || !ranks.length) return;
+
+    if (!ranks.length) return;
+
     ranks.sort((a, b) => {
         return a.level - b.level;
     });
+
     let rankToReturn: RankLevel;
     for (const rank of ranks) {
         if (rank.level <= currentLevel) continue;
         rankToReturn = rank;
         break;
     }
+
     return rankToReturn;
 }
 
 export async function getCurrentRank(currentLevel: number, guildId: string) {
     const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
     const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
-    if (!ranks || !ranks.length) return;
+
+    if (!ranks.length) return;
+
     ranks.sort((a, b) => {
         return a.level - b.level;
     });
+
     let rankToReturn: RankLevel;
     for (const rank of ranks) {
         if (rank.level > currentLevel) break;
@@ -61,16 +70,20 @@ export async function getCurrentRank(currentLevel: number, guildId: string) {
             rankToReturn = rank;
         }
     }
+
     return rankToReturn;
 }
 
 export async function getPreviousRank(currentLevel: number, guildId: string) {
     const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
     const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
-    if (!ranks || !ranks.length) return;
+
+    if (!ranks.length) return;
+
     ranks.sort((a, b) => {
         return a.level - b.level;
     });
+
     let currentRank: RankLevel;
     for (const rank of ranks) {
         if (rank.level > currentLevel) break;
@@ -78,6 +91,7 @@ export async function getPreviousRank(currentLevel: number, guildId: string) {
             currentRank = rank;
         }
     }
+
     let rankToReturn: RankLevel;
     for (const rank of ranks) {
         if (rank.level >= currentLevel || rank.level === currentRank.level) break;
@@ -85,16 +99,20 @@ export async function getPreviousRank(currentLevel: number, guildId: string) {
             rankToReturn = rank;
         }
     }
+
     return rankToReturn;
 }
 
 export async function getPreviousRanks(currentLevel: number, guildId: string) {
     const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
     const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
-    if (!ranks || !ranks.length) return;
+
+    if (!ranks.length) return;
+
     ranks.sort((a, b) => {
         return a.level - b.level;
     });
+
     let currentRank: RankLevel;
     for (const rank of ranks) {
         if (rank.level > currentLevel) break;
@@ -102,6 +120,7 @@ export async function getPreviousRanks(currentLevel: number, guildId: string) {
             currentRank = rank;
         }
     }
+
     const ranksToReturn: RankLevel[] = [];
     for (const rank of ranks) {
         if (rank.level >= currentLevel || rank.level === currentRank.level) break;
@@ -109,6 +128,7 @@ export async function getPreviousRanks(currentLevel: number, guildId: string) {
             ranksToReturn.push(rank);
         }
     }
+
     return ranksToReturn;
 }
 
@@ -138,9 +158,6 @@ export async function getWingsImage(user: User, guildId: string) {
     const serverUserSettings = await getServerUserSettings(user.id, guildId);
     const userLevel = await getUserLevel(user.id, guildId);
 
-    if (serverUserSettings.winxCharacter <= 0)
-        return undefined;
-
     let level = userLevel.level;
     if (serverUserSettings.wingsLevel >= 0) {
         level = serverUserSettings.wingsLevel;
@@ -150,9 +167,6 @@ export async function getWingsImage(user: User, guildId: string) {
 }
 
 export async function getWingsImageByLevel(level: number, winxCharacter: WinxCharacter, guildId: string) {
-    if (winxCharacter <= 0)
-        return undefined;
-
     const rank = await getCurrentRank(level, guildId);
 
     return getWingsImageByRank(rank, winxCharacter);
@@ -160,10 +174,10 @@ export async function getWingsImageByLevel(level: number, winxCharacter: WinxCha
 
 export async function getWingsImageByRank(rank: RankLevel, winxCharacter: WinxCharacter) {
     if (winxCharacter <= 0)
-        return undefined;
+        return;
 
     if (!rank || !rank.wings)
-        return undefined;
+        return;
 
     const characterWingFile = Object.values(rank.wings)[winxCharacter - 1];
 
@@ -171,5 +185,26 @@ export async function getWingsImageByRank(rank: RankLevel, winxCharacter: WinxCh
         return loadImage(characterWingFile);
     }
 
-    return undefined;
+    return;
+}
+
+export async function getRankRoles(guild: Guild, maxLevel = Number.MAX_SAFE_INTEGER) {
+    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
+    const ranks: RankLevel[] = await getServerDatabase(Ranks, guild.id);
+
+    ranks.sort((a, b) => {
+        return a.level - b.level;
+    });
+
+    const toReturn: { rank: RankLevel, role: Role }[] = [];
+
+    await asyncForEach(ranks, async (rank) => {
+        if (rank.level <= maxLevel) {
+            const role = await getRoleById(rank.roleId, guild);
+            if(!role) return;
+            toReturn.push({ rank, role });
+        }
+    });
+
+    return toReturn;
 }

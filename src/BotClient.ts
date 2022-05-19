@@ -50,30 +50,28 @@ class BotClient extends Client {
     }
 
     private async loadCommands() {
-        const files = loadFiles("dist/commands");
+        const files = loadFiles("dist/commands", ".js");
         if (!files) return;
         let loaded = 0;
         for (const file of files) {
-            if (file.endsWith(".js")) {
-                try {
-                    const commandImport = await import(`./${file.substr(5, file.length)}`);
-                    const { default: cClass } = commandImport;
-                    const command: Command = new cClass();
-                    if (!command.deprecated) {
-                        const name = path.basename(file).slice(0, -3);
-                        if (!command.description)
-                            command.description = `${name}.command.description`;
-                        this.commands.set(name, command);
-                        switch (this.botOptions.logLoading) {
-                            case 'complex':
-                            case 'all':
-                                console.log(Localisation.getTranslation("bot.load.command.complex", name));
-                                break;
-                        }
-                        loaded++;
+            try {
+                const commandImport = await import(`./${file.substr(5, file.length)}`);
+                const { default: cClass } = commandImport;
+                const command: Command = new cClass();
+                if (!command.deprecated) {
+                    const name = path.basename(file).slice(0, -3);
+                    if (!command.description)
+                        command.description = `${name}.command.description`;
+                    this.commands.set(name, command);
+                    switch (this.botOptions.logLoading) {
+                        case 'complex':
+                        case 'all':
+                            console.log(Localisation.getTranslation("bot.load.command.complex", name));
+                            break;
                     }
-                } catch { }
-            }
+                    loaded++;
+                }
+            } catch { }
         }
         switch (this.botOptions.logLoading) {
             case 'simplified':
@@ -84,27 +82,25 @@ class BotClient extends Client {
     }
 
     private async loadEvents() {
-        const files = loadFiles("dist/events");
+        const files = loadFiles("dist/events", ".js");
         if (!files) return;
         let loaded = 0;
         for (const file of files) {
-            if (file.endsWith(".js")) {
-                const event = await import(`./${file.substr(5, file.length)}`);
-                const { default: func } = event;
-                const name = path.basename(file).slice(0, -3);
+            const event = await import(`./${file.substr(5, file.length)}`);
+            const { default: func } = event;
+            const name = path.basename(file).slice(0, -3);
 
-                if (typeof func !== "function") continue;
+            if (typeof func !== "function") continue;
 
-                func();
+            func();
 
-                switch (this.botOptions.logLoading) {
-                    case "complex":
-                    case "all":
-                        console.log(Localisation.getTranslation("bot.load.event.complex", name));
-                        break;
-                }
-                loaded++;
+            switch (this.botOptions.logLoading) {
+                case "complex":
+                case "all":
+                    console.log(Localisation.getTranslation("bot.load.event.complex", name));
+                    break;
             }
+            loaded++;
         }
 
         switch (this.botOptions.logLoading) {
@@ -116,32 +112,30 @@ class BotClient extends Client {
     }
 
     private async loadSlashCommands() {
-        const files = loadFiles("dist/slashCommands");
+        const files = loadFiles("dist/slashCommands", ".js");
         if (!files) return;
         let loaded = 0;
         for (const file of files) {
-            if (file.endsWith(".js")) {
-                try {
-                    const commandImport = await import(`./${file.substr(5, file.length)}`);
-                    const { default: cClass } = commandImport;
-                    const command: SlashCommand = new cClass();
-                    const name = path.basename(file).slice(0, -3);
-                    if (command.commandData.type === "CHAT_INPUT") {
-                        if (!command.commandData.description) {
-                            console.log(`Slash Command: \`${name}\` has no description, yet it is a \`${command.commandData.type}\` slash command!`);
-                            continue;
-                        }
+            try {
+                const commandImport = await import(`./${file.substr(5, file.length)}`);
+                const { default: cClass } = commandImport;
+                const command: SlashCommand = new cClass();
+                const name = path.basename(file).slice(0, -3);
+                if (command.commandData.type === "CHAT_INPUT") {
+                    if (!command.commandData.description) {
+                        console.log(`Slash Command: \`${name}\` has no description, yet it is a \`${command.commandData.type}\` slash command!`);
+                        continue;
                     }
-                    this.SlashCommands.set(name, command);
-                    switch (this.botOptions.logLoading) {
-                        case 'complex':
-                        case 'all':
-                            console.log(Localisation.getTranslation("bot.load.slashcommand.complex", name));
-                            break;
-                    }
-                    loaded++;
-                } catch { }
-            }
+                }
+                this.SlashCommands.set(name, command);
+                switch (this.botOptions.logLoading) {
+                    case 'complex':
+                    case 'all':
+                        console.log(Localisation.getTranslation("bot.load.slashcommand.complex", name));
+                        break;
+                }
+                loaded++;
+            } catch { }
         }
         switch (this.botOptions.logLoading) {
             case 'simplified':
@@ -153,12 +147,10 @@ class BotClient extends Client {
 
     public loadLocalisation() {
         Localisation.clearLocalisation();
-        const files = loadFiles("lang");
+        const files = loadFiles("lang", ".json");
         if (!files) return;
         for (const file of files) {
-            if (file.endsWith(".json")) {
-                Localisation.loadLocalisation(file);
-            }
+            Localisation.loadLocalisation(file);
         }
     }
 

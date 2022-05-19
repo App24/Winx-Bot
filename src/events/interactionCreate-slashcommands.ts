@@ -4,7 +4,7 @@ import { Localisation } from "../localisation";
 import { CommandAvailable } from "../structs/CommandAvailable";
 import { CommandAccess } from "../structs/CommandAccess";
 import { SlashCommandArguments } from "../structs/SlashCommand";
-import { isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
+import { isBooster, isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
 
 export = () => {
     BotUser.on("interactionCreate", async (interaction) => {
@@ -27,6 +27,11 @@ export = () => {
             case CommandAccess.Patreon: {
                 if (isDM(interaction.channel) || !(await isPatreon(interaction.user.id, interaction.guild.id))) {
                     return interaction.followUp(Localisation.getTranslation("command.access.patreon"));
+                }
+            } break;
+            case CommandAccess.Booster: {
+                if (isDM(interaction.channel) || !isBooster(<GuildMember>interaction.member)) {
+                    return interaction.followUp(Localisation.getTranslation("command.access.booster"));
                 }
             } break;
             case CommandAccess.Moderators: {

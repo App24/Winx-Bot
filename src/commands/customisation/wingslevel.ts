@@ -88,13 +88,6 @@ class WingsLevelCommand extends Command {
                     ]
             }
         });
-
-        /*createMessageSelection({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-            {
-                options: options
-            }
-        });*/
     }
 
     async updateWings(setType: "WINGS_A" | "WINGS_B" | "BOTH", ServerUserSettingsDatabase: Keyv, serverUserSettings: ServerUserSettings[], userSettings: ServerUserSettings, userIndex: number, guild: Guild, previousRanks: RankLevel[]) {

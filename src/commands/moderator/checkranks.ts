@@ -25,8 +25,8 @@ class CheckRanksCommand extends Command {
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
         const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
 
-        if (!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
-        if (!ranks) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
+        if (!levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
+        if (!ranks.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
 
         const members = await cmdArgs.guild.members.fetch().then(promise => Array.from(promise.values()));
         await cmdArgs.message.reply(Localisation.getTranslation("checkranks.start"));

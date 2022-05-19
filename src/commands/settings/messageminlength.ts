@@ -26,7 +26,7 @@ class SetMinLengthCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1, time: 1000 * 60 * 6 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
                 {
                     customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
-                        const { value: len, message: msg } = await getNumberReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.amount") }, { min: 1 });
+                        const { value: len, message: msg } = await getNumberReply({ sendTarget: interaction, author: cmdArgs.author }, { min: 1 });
                         if (!len) return;
                         if (len > serverInfo.maxMessageLength) return msg.reply(Localisation.getTranslation("setminlength.error"));
                         serverInfo.minMessageLength = len;

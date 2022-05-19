@@ -6,7 +6,7 @@ import { Command, CommandArguments } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
-import { asyncForEach, createMessageEmbed } from "../../utils/Utils";
+import { asyncForEach, createMessageEmbed, getServerDatabase } from "../../utils/Utils";
 
 class RanksCommand extends Command {
     public constructor() {
@@ -18,8 +18,8 @@ class RanksCommand extends Command {
 
     public async onRun(cmdArgs: CommandArguments) {
         const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-        const ranks: RankLevel[] = await Ranks.get(cmdArgs.guildId);
-        if (!ranks || !ranks.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
+        const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
+        if (!ranks.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
         const data = [];
         ranks.sort((a, b) => a.level - b.level);
         await asyncForEach(ranks, async (rank) => {

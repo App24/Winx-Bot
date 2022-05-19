@@ -9,7 +9,7 @@ import { CommandAccess } from "../structs/CommandAccess";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
 import { formatString, secondsToTime } from "../utils/FormatUtils";
-import { getServerDatabase, isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
+import { getServerDatabase, isBooster, isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -34,6 +34,11 @@ export = () => {
                 case CommandAccess.Patreon: {
                     if (isDM(message.channel) || !(await isPatreon(message.author.id, message.guild.id))) {
                         return message.reply(Localisation.getTranslation("command.access.patreon"));
+                    }
+                } break;
+                case CommandAccess.Booster: {
+                    if (isDM(message.channel) || !isBooster(message.member)) {
+                        return message.reply(Localisation.getTranslation("command.access.booster"));
                     }
                 } break;
                 case CommandAccess.Moderators: {
@@ -76,6 +81,11 @@ export = () => {
             case CommandAccess.Patreon: {
                 if (isDM(message.channel) || !(await isPatreon(message.author.id, message.guild.id))) {
                     return message.reply(Localisation.getTranslation("command.access.patreon"));
+                }
+            } break;
+            case CommandAccess.Booster: {
+                if (isDM(message.channel) || !isBooster(message.member)) {
+                    return message.reply(Localisation.getTranslation("command.access.booster"));
                 }
             } break;
             case CommandAccess.Moderators: {

@@ -41,7 +41,7 @@ class LevelsCommand extends Command {
         const member = await getMemberById(user.id, cmdArgs.guild);
         if (!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
-        const msg = await cmdArgs.message.reply("Generating card...");
+        const msg = await cmdArgs.message.reply(Localisation.getTranslation("magiclevels.generate"));
 
         const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild);
         let leaderboardPosition = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id);

@@ -1,6 +1,6 @@
 import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
 
-class RandomChoiceClass extends Command {
+class RandomChoiceCommand extends Command {
     public constructor() {
         super();
         this.usage = [new CommandUsage(true, "choice1"), new CommandUsage(true, "choice2"), new CommandUsage(false, "choice3...")];
@@ -11,4 +11,4 @@ class RandomChoiceClass extends Command {
     }
 }
 
-export = RandomChoiceClass;
+export = RandomChoiceCommand;

@@ -77,43 +77,6 @@ class CardColorCommand extends Command {
                     ]
             }
         });
-
-        /*await createMessageSelection({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-            {
-                options: [
-                    {
-                        label: Localisation.getTranslation("button.get"),
-                        value: "get",
-                        onSelect: async ({ interaction }) => {
-                            await interaction.reply({ content: Localisation.getTranslation("generic.hexcolor", userSettings.cardColor), files: [canvasToMessageAttachment(canvasColor(userSettings.cardColor))] });
-                        }
-                    },
-                    {
-                        label: Localisation.getTranslation("button.set"),
-                        value: "set",
-                        onSelect: async ({ interaction }) => {
-                            const { value: color, message } = await getHexReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.hexcolor") });
-                            if (color === undefined) return;
-                            userSettings.cardColor = color;
-                            serverUserSettings[userIndex] = userSettings;
-                            message.reply(Localisation.getTranslation("cardcolor.set.output", color));
-                            await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
-                        }
-                    },
-                    {
-                        label: Localisation.getTranslation("button.reset"),
-                        value: "reset",
-                        onSelect: async ({ interaction }) => {
-                            userSettings.cardColor = new ServerUserSettings(cmdArgs.guildId).cardColor;
-                            serverUserSettings[userIndex] = userSettings;
-                            await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
-                            await interaction.reply(Localisation.getTranslation("cardcolor.reset.output"));
-                        }
-                    }
-                ]
-            }
-        });*/
     }
 
     async updateWings(setType: "COLOR_A" | "COLOR_B" | "BOTH", ServerUserSettingsDatabase: Keyv, serverUserSettings: ServerUserSettings[], userSettings: ServerUserSettings, userIndex: number, guild: Guild, author: User) {
@@ -158,7 +121,7 @@ class CardColorCommand extends Command {
             label: Localisation.getTranslation("button.set"),
             value: "set",
             onSelect: async ({ interaction }) => {
-                const { value: color, message } = await getHexReply({ sendTarget: interaction, author: author, options: Localisation.getTranslation("argument.reply.hexcolor") });
+                const { value: color, message } = await getHexReply({ sendTarget: interaction, author: author });
                 if (color === undefined) return;
                 if (setType === "COLOR_A" || setType === "BOTH") {
                     userSettings.cardColor = color;

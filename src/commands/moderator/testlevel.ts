@@ -31,7 +31,7 @@ class TestLevelCommand extends Command {
         if (rankLevel) {
             const rank = await getRoleById(rankLevel.roleId, cmdArgs.guild);
             if (rank) {
-                rankDetails = { rankLevel: rankLevel, rank: rank };
+                rankDetails = { rankLevel, rank };
             }
         }
         showLevelMessage(true, <BaseGuildTextChannel>cmdArgs.channel, cmdArgs.member, level, rankDetails);

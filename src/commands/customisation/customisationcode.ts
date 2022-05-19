@@ -7,8 +7,10 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { SubCommand } from "../../structs/SubCommand";
 import { getServerDatabase, isHexColor } from "../../utils/Utils";
 import { WinxCharacter } from "../../structs/WinxCharacters";
-import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
+import { CardTemplate, ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { getServerUserSettings } from "../../utils/RankUtils";
+
+const NONE = "??????";
 
 class CustomisationCodeCommand extends Command {
     public constructor() {
@@ -37,26 +39,9 @@ class SetSubCommand extends SubCommand {
 
         const values = code.split("|");
 
-        if (values.length < 5) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        const templates = Object.values(CardTemplate);
 
-        const nameColor = values[0];
-        const cardColor = values[1];
-        const circleColor = values[2];
-        const barStartColor = values[3];
-        const barEndColor = values[4];
-        const winxCharacterInt = parseInt(values[5]);
-        if (isNaN(winxCharacterInt)) {
-            return cmdArgs.message.reply("Invalid winx character");
-        }
-
-        const nameEnabled = nameColor !== "??????";
-        const circleEnabled = circleColor !== "??????";
-
-        if (nameEnabled && !isHexColor(nameColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
-        if (circleEnabled && !isHexColor(cardColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
-        if (!isHexColor(circleColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
-        if (!isHexColor(barStartColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
-        if (!isHexColor(barEndColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if (values.length < 12) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
 
         const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
         const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
@@ -68,23 +53,139 @@ class SetSubCommand extends SubCommand {
         }
         const userSettings = serverUserSettings[userIndex];
 
-        let winxCharacter;
+        /*const changeSetting = (value, canBeDisabled: boolean, validation: (value) => boolean, invalidLocation: string, convert: (value) => [boolean, any]) => {
+            const enabled = canBeDisabled ? (value !== NONE) : true;
+
+            if (enabled && !validation(value)) {
+                cmdArgs.message.reply(Localisation.getTranslation(invalidLocation));
+                return;
+            }
+
+            const convertResult = convert ? convert(value) : [true, value];
+            if (!convertResult[0]) {
+                cmdArgs.message.reply(Localisation.getTranslation(invalidLocation));
+                return;
+            }
+
+            return convertResult[1];
+        };
+
+        {
+            const value = changeSetting(values.shift(), true, isHexColor, "customisationcode.value.error", undefined);
+            if (!value) return;
+            userSettings.nameColor = value;
+        }
+        {
+            const value = changeSetting(values.shift(), false, isHexColor, "customisationcode.value.error", undefined);
+            if (!value) return;
+            userSettings.cardColor = value;
+        }
+        {
+            const value = changeSetting(values.shift(), false, isHexColor, "customisationcode.value.error", undefined);
+            if (!value) return;
+            userSettings.cardColorB = value;
+        }
+        {
+            const value = changeSetting(values.shift(), true, isHexColor, "customisationcode.value.error", undefined);
+            if (!value) return;
+            userSettings.specialCircleColor = value;
+        }
+        {
+            const value = changeSetting(values.shift(), false, isHexColor, "customisationcode.value.error", undefined);
+            if (!value) return;
+            userSettings.barStartColor = value;
+        }
+        {
+            const value = changeSetting(values.shift(), false, isHexColor, "customisationcode.value.error", undefined);
+            if (!value) return;
+            userSettings.barEndColor = value;
+        }
+        {
+            const value = changeSetting(values.shift(), false, (value) => !isNaN(value), "customisationcode.value.character", (value) => {
+                try {
+                    const winxCharacter = <WinxCharacter>value;
+                    return [true, winxCharacter];
+                } catch {
+                    return [false, undefined];
+                }
+            });
+            if (!value) return;
+            userSettings.winxCharacter = value;
+        }
+        {
+            const value = changeSetting(values.shift(), false, (value) => !isNaN(value), "customisationcode.value.character", (value) => {
+                try {
+                    const winxCharacter = <WinxCharacter>value;
+                    return [true, winxCharacter];
+                } catch {
+                    return [false, undefined];
+                }
+            });
+            if (!value) return;
+            userSettings.winxCharacterB = value;
+        }*/
+
+        const nameColor = values.shift();
+        const cardColor = values.shift();
+        const cardColorB = values.shift();
+        const circleColor = values.shift();
+        const barStartColor = values.shift();
+        const barEndColor = values.shift();
+        const winxCharacterInt = parseInt(values.shift());
+        const winxCharacterBInt = parseInt(values.shift());
+        const wingsLevelInt = parseInt(values.shift());
+        const wingsLevelBInt = parseInt(values.shift());
+        const cardTemplateInt = parseInt(values.shift());
+        const wingsTemplateInt = parseInt(values.shift());
+
+        if ([winxCharacterInt, winxCharacterBInt].some(v => isNaN(v))) {
+            return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.character"));
+        }
+
+        if ([wingsLevelInt, wingsLevelBInt].some(v => isNaN(v) || v < -1)) {
+            return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.wings"));
+        }
+
+        if ([cardTemplateInt, wingsTemplateInt].some(v => isNaN(v) || v < 0 || v >= templates.length)) {
+            return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.template"));
+        }
+
+        const nameEnabled = nameColor !== NONE;
+        const circleEnabled = circleColor !== NONE;
+
+        if (nameEnabled && !isHexColor(nameColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if (circleEnabled && !isHexColor(circleColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if (!isHexColor(cardColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if (!isHexColor(cardColorB)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if (!isHexColor(barStartColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+        if (!isHexColor(barEndColor)) return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.error"));
+
+
+
+        let winxCharacter, winxCharacterB;
         try {
             winxCharacter = <WinxCharacter>winxCharacterInt;
+            winxCharacterB = <WinxCharacter>winxCharacterBInt;
         } catch {
-            return cmdArgs.message.reply("Invalid winx character");
+            return cmdArgs.message.reply(Localisation.getTranslation("customisationcode.value.character"));
         }
 
         userSettings.nameColor = nameEnabled ? nameColor : new ServerUserSettings(cmdArgs.author.id).nameColor;
         userSettings.cardColor = cardColor;
+        userSettings.cardColorB = cardColorB;
         userSettings.specialCircleColor = circleEnabled ? circleColor : new ServerUserSettings(cmdArgs.author.id).specialCircleColor;
         userSettings.barStartColor = barStartColor;
         userSettings.barEndColor = barEndColor;
         userSettings.winxCharacter = winxCharacter;
+        userSettings.winxCharacterB = winxCharacterB;
+        userSettings.wingsLevel = wingsLevelInt;
+        userSettings.wingsLevelB = wingsLevelBInt;
+        userSettings.cardTemplate = templates[cardTemplateInt];
+        userSettings.wingsTemplate = templates[wingsTemplateInt];
 
         serverUserSettings[userIndex] = userSettings;
 
-        cmdArgs.message.reply("Updated Customisation Settings!");
+        cmdArgs.message.reply(Localisation.getTranslation("customisationcode.update"));
         await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
     }
 }
@@ -97,15 +198,23 @@ class GetSubCommand extends SubCommand {
     public async onRun(cmdArgs: CommandArguments) {
         const userSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
 
-        let code = "";
-        code += (userSettings.nameColor === new ServerUserSettings(cmdArgs.author.id).nameColor ? "??????" : userSettings.nameColor) + "|";
-        code += userSettings.cardColor + "|";
-        code += (userSettings.specialCircleColor === new ServerUserSettings(cmdArgs.author.id).specialCircleColor ? "??????" : userSettings.specialCircleColor) + "|";
-        code += userSettings.barStartColor + "|";
-        code += userSettings.barEndColor + "|";
-        code += userSettings.winxCharacter;
+        const templates = Object.values(CardTemplate);
 
-        cmdArgs.message.reply(Localisation.getTranslation("customisationcode.get", code));
+        const code: string[] = [];
+        code.push((userSettings.nameColor === new ServerUserSettings(cmdArgs.author.id).nameColor ? NONE : userSettings.nameColor));
+        code.push(userSettings.cardColor);
+        code.push(userSettings.cardColorB);
+        code.push((userSettings.specialCircleColor === new ServerUserSettings(cmdArgs.author.id).specialCircleColor ? NONE : userSettings.specialCircleColor));
+        code.push(userSettings.barStartColor);
+        code.push(userSettings.barEndColor);
+        code.push(`${userSettings.winxCharacter}`);
+        code.push(`${userSettings.winxCharacterB}`);
+        code.push(`${userSettings.wingsLevel}`);
+        code.push(`${userSettings.wingsLevelB}`);
+        code.push(`${templates.findIndex(t => t === userSettings.cardTemplate)}`);
+        code.push(`${templates.findIndex(t => t === userSettings.wingsTemplate)}`);
+
+        cmdArgs.message.reply(Localisation.getTranslation("customisationcode.get", code.join("|")));
     }
 }
 

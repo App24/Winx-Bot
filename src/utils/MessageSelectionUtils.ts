@@ -1,4 +1,5 @@
-import { Message, TextBasedChannel, User, MessageSelectOptionData, MessageActionRow, MessageSelectMenu, MessageOptions, MessageComponentInteraction } from "discord.js";
+import { Message, TextBasedChannel, User, MessageSelectOptionData, MessageActionRow, MessageSelectMenu, MessageOptions, MessageComponentInteraction, GuildMember } from "discord.js";
+import { MAX_ITEMS_PER_SELECT_MENU } from "../Constants";
 import { Localisation } from "../localisation";
 import { InteractionData } from "./MessageButtonUtils";
 import { asyncForEach } from "./Utils";
@@ -18,9 +19,47 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
         rows.push(new MessageActionRow());
     }
 
+    const selectOptions: { selectMenu: SelectMenuOptions, selectIndex: number, options: SelectOption[][] }[] = [];
+
     optionsList.forEach((selectMenu, index) => {
         const custom_id = selectMenu.customId || `selection${index}`;
-        rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectMenu.options, minValues: selectMenu.minValues, maxValues: selectMenu.maxValues }));
+        const tempOptions: SelectOption[][] = [];
+        const options = [...selectMenu.options];
+
+        let selectIndex = 0;
+
+        do {
+            const toAddOptions = options.splice(0, Math.min(MAX_ITEMS_PER_SELECT_MENU, options.length));
+            if (options.length > 0 && selectIndex < Math.floor(selectMenu.options.length / MAX_ITEMS_PER_SELECT_MENU)) {
+                toAddOptions.push({
+                    label: "Next",
+                    value: "next",
+                    onSelect: async ({ interaction }) => {
+                        const row = rows[index];
+                        (<MessageSelectMenu>row.components[0]).setOptions(selectOptions[index].options[++selectOptions[index].selectIndex]);
+                        rows[index] = row;
+                        await interaction.update({ components: rows });
+                    }
+                });
+            }
+            if (selectIndex > 0) {
+                toAddOptions.push({
+                    label: "Previous",
+                    value: "previous",
+                    onSelect: async ({ interaction }) => {
+                        const row = rows[index];
+                        (<MessageSelectMenu>row.components[0]).setOptions(selectOptions[index].options[--selectOptions[index].selectIndex]);
+                        rows[index] = row;
+                        await interaction.update({ components: rows });
+                    }
+                });
+            }
+            selectIndex++;
+            tempOptions.push(toAddOptions);
+        } while (options.length > 0);
+
+        selectOptions.push({ selectMenu, selectIndex: 0, options: tempOptions });
+        rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], minValues: selectMenu.minValues, maxValues: selectMenu.maxValues }));
     });
 
     let msg: Message<boolean>;
@@ -87,23 +126,29 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                 await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
                 return;
             }
-            use++;
-            if (settings.max && settings.max > 0 && use >= settings.max) {
-                collector.emit("end", "");
-            }
-            await asyncForEach(optionsList, async (value, index) => {
-                const custom_id = value.customId || `selection${index}`;
+            let navigation = false;
+            await asyncForEach(selectOptions, async (value, index) => {
+                const selectMenu = value.selectMenu;
+                const custom_id = selectMenu.customId || `selection${index}`;
                 if (custom_id === interaction.customId) {
-                    if (value.onSelection)
-                        await value.onSelection({ interaction, message: msg, data, collector });
-                    await asyncForEach(value.options, async (option) => {
+                    if (selectMenu.onSelection)
+                        await selectMenu.onSelection({ interaction, message: msg, data, collector });
+                    await asyncForEach(value.options[value.selectIndex], async (option) => {
                         await asyncForEach(interaction.values, async (value) => {
-                            if (option.value === value)
+                            if (option.value === value) {
+                                navigation = ["next", "previous"].includes(value);
                                 await option.onSelect({ interaction, message: msg, data, collector });
+                            }
                         });
                     });
                 }
             });
+            if (!navigation) {
+                use++;
+                if (settings.max && settings.max > 0 && use >= settings.max) {
+                    collector.emit("end", "");
+                }
+            }
         }
     });
 
@@ -112,7 +157,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 
 export interface MessageSelectData {
     sendTarget: Message | TextBasedChannel | MessageComponentInteraction,
-    author?: User | string,
+    author?: User | string | GuildMember,
     options?: string | MessageOptions,
     settings?: { max?: number, time?: number },
     selectMenuOptions: SelectMenuOptions[] | SelectMenuOptions

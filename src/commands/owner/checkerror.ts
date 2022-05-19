@@ -27,10 +27,10 @@ class CheckErrorCommand extends Command {
             {
                 options: [
                     {
-                        label: "Check",
+                        label: Localisation.getTranslation("button.check"),
                         value: "check",
                         onSelect: async ({ interaction }) => {
-                            const { value: errorCode } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("checkerror.reply.code") });
+                            const { value: errorCode } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "checkerror.reply.code" });
                             if (errorCode === undefined)
                                 return;
                             const error: ErrorStruct = await Errors.get(errorCode);
@@ -39,7 +39,7 @@ class CheckErrorCommand extends Command {
                         }
                     },
                     {
-                        label: "List",
+                        label: Localisation.getTranslation("button.list"),
                         value: "list",
                         onSelect: async ({ interaction }) => {
 
@@ -56,7 +56,7 @@ class CheckErrorCommand extends Command {
                         }
                     },
                     {
-                        label: "Prune",
+                        label: Localisation.getTranslation("button.prune"),
                         value: "prune",
                         onSelect: async ({ interaction }) => {
                             const errors: { key: string, value: ErrorStruct }[] = await Errors.entries();
@@ -76,7 +76,7 @@ class CheckErrorCommand extends Command {
                         }
                     },
                     {
-                        label: "Clear",
+                        label: Localisation.getTranslation("button.clear"),
                         value: "clear",
                         onSelect: async ({ interaction }) => {
                             await Errors.clear();

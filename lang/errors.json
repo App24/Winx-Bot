@@ -54,6 +54,7 @@
     "command.available.dm": "This is a DM only command!",
 
     "command.access.patreon": "You cannot run this command! It is a patreon only feature! Contact a mod to find out how to gain access to it!",
+    "command.access.booster": "You cannot run this command! It is a booster only feature!",
     "command.access.moderator": "You cannot run this command!",
     "command.access.guildOwner": "You cannot run this command!",
     "command.access.botOwner": "You cannot run this command!",
@@ -67,5 +68,8 @@
     "error.minigame.alreadyjoin": "You've already joined this lobby!",
     "error.minigame.notauthor": "Only the creator of the lobby can start it!",
 
-    "error.rank.none": "You have not achieved any transformations yet!"
+    "error.rank.none": "You have not achieved any transformations yet!",
+
+    "error.customwings.user.none": "That user does not have custom wings!",
+    "error.customwings.guild.none": "There are no custom wings in this server!"
 }

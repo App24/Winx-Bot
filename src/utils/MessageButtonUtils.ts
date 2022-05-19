@@ -86,10 +86,6 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
                 await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
                 return;
             }
-            use++;
-            if (settings.max && settings.max > 0 && use >= settings.max) {
-                collector.emit("end", "");
-            }
             if (beforeButton)
                 await beforeButton({ interaction, message: msg, data, collector });
             await asyncForEach(_buttons, async (value) => {
@@ -97,6 +93,10 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
                     await value.onRun({ interaction, message: msg, data, collector });
                 }
             });
+            use++;
+            if (settings.max && settings.max > 0 && use >= settings.max) {
+                collector.emit("end", "");
+            }
         }
     });
 

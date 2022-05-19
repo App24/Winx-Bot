@@ -1,23 +1,23 @@
-import fs from "fs";
+import { existsSync, readFileSync } from "fs";
 import { formatString } from "./utils/FormatUtils";
 
-export class Localisation {
-    private static localisation;
+class Language {
+    private localisation;
 
-    public static clearLocalisation() {
+    public clearLocalisation() {
         this.localisation = {};
     }
 
-    public static loadLocalisation(file: string) {
-        if (!fs.existsSync(file)) return;
-        const jsonData: any = fs.readFileSync(file);
+    public loadLocalisation(file: string) {
+        if (!existsSync(file)) return;
+        const jsonData: any = readFileSync(file);
         const langData = JSON.parse(jsonData);
         for (const key in langData) {
             this.localisation[key] = langData[key];
         }
     }
 
-    public static getTranslation(key: string, ...args) {
+    public getTranslation(key: string, ...args) {
         const toReturn = this.localisation[key];
         if (!toReturn) {
             console.log(`Couldn't find translation for key: '${key}'`);
@@ -26,3 +26,5 @@ export class Localisation {
         return formatString(toReturn, ...args);
     }
 }
+
+export const Localisation = new Language();

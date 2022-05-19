@@ -19,7 +19,7 @@ class CheckBansCommand extends Command {
     public async onRun(cmdArgs: CommandArguments) {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
-        if (!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
+        if (!levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
         const bans = await cmdArgs.guild.bans.fetch();
         let amount = 0;
         bans.forEach(ban => {

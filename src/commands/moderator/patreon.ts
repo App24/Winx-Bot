@@ -60,7 +60,7 @@ class RemoveSubCommand extends SubCommand {
         const Patreon = BotUser.getDatabase(DatabaseType.Paid);
         const patreons: PatreonInfo[] = await getServerDatabase(Patreon, cmdArgs.guildId);
 
-        if (!patreons || !patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
+        if (!patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
 
         const member = await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
         if (!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
@@ -83,7 +83,7 @@ class ListSubCommand extends SubCommand {
         const Patreon = BotUser.getDatabase(DatabaseType.Paid);
         const patreons: PatreonInfo[] = await getServerDatabase(Patreon, cmdArgs.guildId);
 
-        if (!patreons || !patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
+        if (!patreons.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.patreon"));
 
         const data = [];
         await asyncForEach(patreons, async (patreon: PatreonInfo) => {

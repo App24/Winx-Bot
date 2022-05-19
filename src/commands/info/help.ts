@@ -10,7 +10,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator, createMessageEmbed, asyncMapForEach } from "../../utils/Utils";
+import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator, createMessageEmbed, asyncMapForEach, isBooster } from "../../utils/Utils";
 
 class HelpCommand extends Command {
     public constructor() {
@@ -33,6 +33,11 @@ class HelpCommand extends Command {
                         case CommandAccess.Patreon: {
                             if (isDM(cmdArgs.channel) || !(await isPatreon(cmdArgs.author.id, cmdArgs.guildId)))
                                 return;
+                        } break;
+                        case CommandAccess.Booster: {
+                            if (isDM(cmdArgs.channel) || !isBooster(cmdArgs.member)) {
+                                return;
+                            }
                         } break;
                         case CommandAccess.BotOwner: {
                             if (cmdArgs.author.id !== process.env.OWNER_ID)
@@ -172,6 +177,7 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                     if (command.aliases) description += `\n${Localisation.getTranslation("help.command.aliases", command.aliases.join(", "))}`;
                     if (command.usage) description += `\n${Localisation.getTranslation("help.command.usage", command.getUsage())}`;
                     if (command.access === CommandAccess.Patreon) description += `\n${Localisation.getTranslation("help.command.patreon")}`;
+                    if (command.access === CommandAccess.Booster) description += `\n${Localisation.getTranslation("help.command.booster")}`;
                     addCommand(title, description);
                 }
             }

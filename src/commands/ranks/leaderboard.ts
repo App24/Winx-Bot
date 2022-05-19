@@ -21,7 +21,7 @@ class RankCommand extends Command {
     public async onRun(cmdArgs: CommandArguments) {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
-        if (!levels) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
+        if (!levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
 
         let user = cmdArgs.author;
         if (cmdArgs.args.length) {
@@ -33,7 +33,7 @@ class RankCommand extends Command {
         const member = await getMemberById(user.id, cmdArgs.guild);
         if (!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
 
-        const msg = await cmdArgs.message.reply("Generating leaderboard...");
+        const msg = await cmdArgs.message.reply(Localisation.getTranslation("leaderboard.generate"));
 
         levels.sort((a, b) => {
             if (a.level === b.level) {

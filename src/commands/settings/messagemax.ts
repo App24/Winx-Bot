@@ -26,7 +26,7 @@ class SetMaxMessageCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1, time: 1000 * 60 * 6 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
                 {
                     customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
-                        const { value: amount, message: msg } = await getNumberReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.amount") }, { min: 1 });
+                        const { value: amount, message: msg } = await getNumberReply({ sendTarget: interaction, author: cmdArgs.author }, { min: 1 });
                         if (!amount) return;
                         serverInfo.maxMessagePerMinute = amount;
                         await ServerInfo.set(cmdArgs.guildId, serverInfo);

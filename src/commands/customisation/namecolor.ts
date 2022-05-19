@@ -46,7 +46,7 @@ class NameColorCommand extends Command {
                         label: Localisation.getTranslation("button.set"),
                         value: "set",
                         onSelect: async ({ interaction }) => {
-                            const { value: color, message } = await getHexReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.hexcolor") });
+                            const { value: color, message } = await getHexReply({ sendTarget: interaction, author: cmdArgs.author });
                             if (color === undefined) return;
                             userSettings.nameColor = color;
                             serverUserSettings[userIndex] = userSettings;

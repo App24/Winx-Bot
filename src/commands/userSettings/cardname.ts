@@ -37,7 +37,7 @@ class CardNameCommand extends Command {
                 options:
                     [
                         {
-                            label: "Disable",
+                            label: Localisation.getTranslation("button.disable"),
                             value: "disable",
                             default: userSettings.cardName === "DISABLED",
                             onSelect: async ({ interaction }) => {
@@ -48,7 +48,7 @@ class CardNameCommand extends Command {
                             }
                         },
                         {
-                            label: "Username",
+                            label: Localisation.getTranslation("button.username"),
                             value: "username",
                             default: userSettings.cardName === "USERNAME",
                             onSelect: async ({ interaction }) => {
@@ -59,7 +59,7 @@ class CardNameCommand extends Command {
                             }
                         },
                         {
-                            label: "Nickname",
+                            label: Localisation.getTranslation("button.nickname"),
                             value: "nickname",
                             default: userSettings.cardName === "NICKNAME",
                             onSelect: async ({ interaction }) => {

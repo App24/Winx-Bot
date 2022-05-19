@@ -1,14 +1,13 @@
 import { BotUser } from "../BotClient";
 import { DatabaseType } from "../structs/DatabaseTypes";
 import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/ServerInfo";
-import { asyncMapForEach } from "../utils/Utils";
+import { asyncMapForEach, getServerDatabase } from "../utils/Utils";
 
 export = () => {
     BotUser.on("ready", async () => {
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        await asyncMapForEach(BotUser.guilds.cache, async (_, server) => {
-            let serverInfo: ServerInfo = await ServerInfo.get(server.id);
-            if (!serverInfo) serverInfo = DEFAULT_SERVER_INFO;
+        await asyncMapForEach(BotUser.guilds.cache, async (_, guild) => {
+            const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, guild.id, DEFAULT_SERVER_INFO);
 
             if (!serverInfo.maxXpPerMessage) serverInfo.maxXpPerMessage = DEFAULT_SERVER_INFO.maxXpPerMessage;
 
@@ -26,7 +25,7 @@ export = () => {
 
             //if (!serverInfo.leaderboardHighlight) serverInfo.leaderboardHighlight = DEFAULT_SERVER_INFO.leaderboardHighlight;
 
-            await ServerInfo.set(server.id, serverInfo);
+            await ServerInfo.set(guild.id, serverInfo);
         });
     });
 };

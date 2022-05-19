@@ -8,5 +8,6 @@ export enum DatabaseType {
     Paid = "paid",
     CustomCommands = "customCommands",
     CustomNames = "customNames",
-    ServerUserSettings = "serverUserSettings"
+    ServerUserSettings = "serverUserSettings",
+    CustomWings = "customWings"
 }

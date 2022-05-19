@@ -3,8 +3,8 @@ import { Characters } from "../../structs/Category";
 import { Command, CommandArguments } from "../../structs/Command";
 import { reportError } from "../../utils/Utils";
 import { createGenericButtons } from "../../utils/MessageButtonUtils";
-import fs from 'fs';
-import readline from 'readline';
+import { createReadStream, existsSync } from 'fs';
+import { createInterface } from 'readline';
 import { capitalise } from "../../utils/FormatUtils";
 
 export abstract class RandomLineCommand extends Command {
@@ -17,14 +17,14 @@ export abstract class RandomLineCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        if (!fs.existsSync(`lines/${this.name}.txt`)) {
+        if (!existsSync(`lines/${this.name}.txt`)) {
             reportError(Localisation.getTranslation("error.missing.character.lines", this.name), cmdArgs.message);
             return;
         }
 
-        const fileStream = fs.createReadStream(`lines/${this.name}.txt`);
+        const fileStream = createReadStream(`lines/${this.name}.txt`);
 
-        const rl = readline.createInterface({
+        const rl = createInterface({
             input: fileStream,
             crlfDelay: Infinity
         });

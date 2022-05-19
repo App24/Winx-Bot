@@ -27,7 +27,7 @@ class LevelChannelCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { time: 1000 * 60 * 5, max: 1 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
                 {
                     customId: "set", style: "PRIMARY", label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
-                        const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.channel"), guild: cmdArgs.guild });
+                        const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                         if (!channel) return;
 
                         serverInfo.levelChannel = channel.id;
@@ -38,7 +38,7 @@ class LevelChannelCommand extends Command {
                 },
                 {
                     customId: "get", style: "PRIMARY", label: Localisation.getTranslation("button.get"), onRun: async () => {
-                        if (!serverInfo.levelChannel) return <any>cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
+                        if (!serverInfo.levelChannel) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levelchannel"));
                         const channel = await getTextChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
                         if (!channel) return cmdArgs.message.reply(Localisation.getTranslation("levelchannel.missing.channel"));
                         cmdArgs.message.reply(`${channel}`);

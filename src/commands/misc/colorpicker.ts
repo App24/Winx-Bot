@@ -16,7 +16,6 @@ class ColorPickerCommand extends Command {
             color = color.substring(1);
         }
         if (!isHexColor(color)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.hexcolor"));
-        color = color.substring(0, 6);
         cmdArgs.message.reply({ content: Localisation.getTranslation("generic.hexcolor", color), files: [canvasToMessageAttachment(canvasColor(color))] });
     }
 }

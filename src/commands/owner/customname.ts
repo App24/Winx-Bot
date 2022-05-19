@@ -18,7 +18,7 @@ class CustomNameCommand extends Command {
     public async onRun(cmdArgs: CommandArguments) {
         const CustomNames = BotUser.getDatabase(DatabaseType.CustomNames);
 
-        const customNames: string[] = await CustomNames.keys();
+        const customNames = await CustomNames.keys();
 
         const customNameUsers: CustomNameUser[][] = await CustomNames.values();
 
@@ -62,7 +62,7 @@ class CustomNameCommand extends Command {
 
                             await interaction.update({ components: [row2] });
                         } else {
-                            const { value: name, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.customname") });
+                            const { value: name, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "argument.reply.customname" });
                             if (name === undefined) return;
                             customNames.push(name);
                             customNameUsers.push([]);
@@ -83,7 +83,7 @@ class CustomNameCommand extends Command {
                 } else if (interaction.isButton()) {
                     if (interaction.customId === "add") {
                         await interaction.update({ components: [row] });
-                        const { value: content, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.customnameuser") });
+                        const { value: content, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "argument.reply.customnameuser" });
                         if (content === undefined) return;
 
                         const pieces = content.split(" ");

@@ -7,7 +7,7 @@ import { CommandAvailable } from "../../structs/CommandAvailable";
 import { waitForPlayers } from "../../utils/MinigameUtils";
 import { canvasToMessageAttachment } from "../../utils/Utils";
 
-class TicTacToe extends Command {
+class TicTacToeCommand extends Command {
 
     private nSquares = 3;
 
@@ -215,4 +215,4 @@ enum TicTacToeValue {
     Empty
 }
 
-export = TicTacToe;
+export = TicTacToeCommand;

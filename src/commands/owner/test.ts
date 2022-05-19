@@ -1,11 +1,6 @@
-/*import { BotUser } from "../../BotClient";
 import { Command, CommandArguments } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
-import { UserSetting } from "../../structs/databaseTypes/UserSetting";
-import { getMemberById } from "../../utils/GetterUtils";
-import { asyncForEach, asyncMapForEach, getServerDatabase } from "../../utils/Utils";
+import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
 
 class TestCommand extends Command {
     public constructor() {
@@ -14,42 +9,24 @@ class TestCommand extends Command {
     }
 
     public async onRun(cmdArgs: CommandArguments) {
-        const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-        const ServerUserSetting = BotUser.getDatabase(DatabaseType.ServerUserSettings);
+        const options: SelectOption[] = [];
 
-        const users: { key: string, value: UserSetting }[] = await UserSettings.entries();
-
-        cmdArgs.message.reply("Starting...");
-        const guilds = await BotUser.guilds.fetch();
-        await asyncMapForEach(guilds, async (id, oauthguild) => {
-            const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSetting, id);
-            const guild = await oauthguild.fetch();
-            await asyncForEach(users, async (user) => {
-                const member = await getMemberById(user.key, guild);
-                if (member) {
-                    let userIndex = serverUserSettings.findIndex(u => u.userId === user.key);
-                    if (userIndex < 0) {
-                        serverUserSettings.push(new ServerUserSettings(user.key));
-                        userIndex = serverUserSettings.length - 1;
-                    }
-                    const userSettings = serverUserSettings[userIndex];
-
-                    const globalUserSettings = user.value;
-
-                    userSettings.barStartColor = globalUserSettings.barStartColor;
-                    userSettings.barEndColor = globalUserSettings.barEndColor;
-                    userSettings.cardColor = globalUserSettings.cardColor;
-                    userSettings.nameColor = globalUserSettings.nameColor;
-                    userSettings.specialCircleColor = globalUserSettings.specialCircleColor;
-                    userSettings.winxCharacter = globalUserSettings.winxCharacter;
-
-                    serverUserSettings[userIndex] = userSettings;
+        for (let index = 0; index < 5; index++) {
+            options.push({
+                label: index.toString(),
+                value: index.toString(),
+                onSelect: async ({ interaction }) => {
+                    interaction.reply({ content: "clicked", ephemeral: true });
                 }
             });
-            await ServerUserSetting.set(id, serverUserSettings);
+        }
+
+        createMessageSelection({
+            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
+                options
+            }
         });
-        cmdArgs.message.reply("Done");
     }
 }
 
-export = TestCommand;*/
+export = TestCommand;

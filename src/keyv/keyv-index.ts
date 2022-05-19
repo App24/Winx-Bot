@@ -112,7 +112,7 @@ export class Keyv extends EventEmitter {
             .then(() => store.clear());
     }
 
-    public keys() {
+    public keys(): Promise<string[]> {
         return Promise.resolve()
             .then(() => this.query("SELECT * FROM keyv"))
             .then(data => {

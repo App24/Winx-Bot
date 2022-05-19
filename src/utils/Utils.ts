@@ -1,5 +1,5 @@
 import { join } from "path";
-import fs from "fs";
+import { copyFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, statSync } from "fs";
 import request from "request";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, LB_USERS, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
@@ -20,7 +20,7 @@ import { Stream } from "stream";
  * @param array list of items to iterate through
  * @param callbackFn callback function to run
  */
-export async function asyncForEach<U>(array: U[], callbackFn: (value: U, index: number, array: readonly U[]) => Promise<any> | any) {
+export async function asyncForEach<T>(array: T[], callbackFn: (value: T, index: number, array: readonly T[]) => Promise<any> | any) {
     for (let i = 0; i < array.length; i++) {
         const exit = await callbackFn(array[i], i, array);
         if (exit === true) return true;
@@ -33,7 +33,7 @@ export async function asyncForEach<U>(array: U[], callbackFn: (value: U, index: 
  * @param map map to iterate through
  * @param callbackFn callback function to run
  */
-export async function asyncMapForEach<U, T>(map: Map<U, T>, callbackFn: (key: U, value: T, index: number, map: ReadonlyMap<U, T>) => Promise<any> | any) {
+export async function asyncMapForEach<T, D>(map: Map<T, D>, callbackFn: (key: T, value: D, index: number, map: ReadonlyMap<T, D>) => Promise<any> | any) {
     const keys = Array.from(map.keys());
     const values = Array.from(map.values());
     for (let i = 0; i < map.size; i++) {
@@ -47,21 +47,24 @@ export async function asyncMapForEach<U, T>(map: Map<U, T>, callbackFn: (key: U,
  * @param directory the parent directory to get all files from
  * @returns all files found in all sub-directories
  */
-export function loadFiles(directory: string) {
+export function loadFiles(directory: string, fileExtension = ".*") {
     const files: string[] = [];
     const dirs: string[] = [];
 
     try {
-        if (fs.existsSync(directory)) {
-            const dirContent = fs.readdirSync(directory);
+        if (existsSync(directory)) {
+            const dirContent = readdirSync(directory);
 
             dirContent.forEach(file => {
                 const fullPath = join(directory, file);
 
-                if (fs.statSync(fullPath).isFile())
-                    files.push(fullPath);
-                else
+                if (statSync(fullPath).isFile()) {
+                    if (fullPath.endsWith(fileExtension) || fileExtension === ".*")
+                        files.push(fullPath);
+                }
+                else {
                     dirs.push(fullPath);
+                }
             });
 
             dirs.forEach(dir => {
@@ -109,7 +112,7 @@ export function toHexString(byteArray: number[]) {
  * @param defaultValue The default value to set if there isn't any
  * @returns Data stored in database
  */
-export async function getServerDatabase<U>(database: Keyv, guildId: string, defaultValue: any = []): Promise<U> {
+export async function getServerDatabase<T>(database: Keyv, guildId: string, defaultValue: any = []): Promise<T> {
     let serverDatabase = await database.get(guildId);
     if (!serverDatabase) {
         serverDatabase = defaultValue;
@@ -136,9 +139,12 @@ export function isDM(channel: TextBasedChannel) {
 export async function isPatreon(userId: string, guildId: string) {
     if (!userId || !guildId) return false;
     const Patreon = BotUser.getDatabase(DatabaseType.Paid);
-    const patreon: PatreonInfo[] = await Patreon.get(guildId);
-    if (!patreon || !patreon.length) return false;
+    const patreon: PatreonInfo[] = await getServerDatabase(Patreon, guildId);
     return patreon.find(user => user.userId === userId) !== undefined;
+}
+
+export function isBooster(member: GuildMember) {
+    return member.premiumSinceTimestamp !== null;
 }
 
 /**
@@ -157,11 +163,11 @@ export function canvasToMessageAttachment(data: Canvas | Buffer, fileName = "col
  * @returns True if it is a hex color, false if it isn't
  */
 export function isHexColor(str: string) {
-    return new RegExp(/[a-fA-F\d]{6}/g).test(str);
+    return /^#?([a-fA-F\d]{2})([a-fA-F\d]{2})([a-fA-F\d]{2})$/i.test(str);
 }
 
 export function hexToRGB(hex: string) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const result = /^#?([a-fA-F\d]{2})([a-fA-F\d]{2})([a-fA-F\d]{2})$/i.exec(hex);
     return result ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
@@ -228,13 +234,13 @@ export async function getLeaderboardMembers(guild: Guild) {
 }
 
 export function backupDatabases() {
-    if (!fs.existsSync(DATABASE_BACKUP_FOLDER)) {
-        fs.mkdirSync(DATABASE_BACKUP_FOLDER);
+    if (!existsSync(DATABASE_BACKUP_FOLDER)) {
+        mkdirSync(DATABASE_BACKUP_FOLDER);
     }
 
     const values = Object.values(DatabaseType);
     values.forEach((value) => {
-        fs.copyFileSync(`${DATABASE_FOLDER}/${value}.sqlite`, `${DATABASE_BACKUP_FOLDER}/${value}.sqlite`);
+        copyFileSync(`${DATABASE_FOLDER}/${value}.sqlite`, `${DATABASE_BACKUP_FOLDER}/${value}.sqlite`);
     });
 }
 
@@ -293,7 +299,7 @@ export async function createMessageEmbed(data: MessageEmbedOptions | MessageEmbe
 
 export function downloadFile(uri: string, fileName: string, callback?: () => void) {
     request.head(uri, function () {
-        request(uri).pipe(fs.createWriteStream(fileName)).on("close", callback);
+        request(uri).pipe(createWriteStream(fileName)).on("close", callback);
     });
 }
 

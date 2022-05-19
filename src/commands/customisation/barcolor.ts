@@ -122,7 +122,7 @@ class BarColorCommand extends Command {
                             label: Localisation.getTranslation("button.set"),
                             value: "set",
                             onSelect: async ({ interaction }) => {
-                                const { value: color, message } = await getHexReply({ sendTarget: interaction, author: author, options: Localisation.getTranslation("argument.reply.hexcolor") });
+                                const { value: color, message } = await getHexReply({ sendTarget: interaction, author: author });
                                 if (color === undefined) return;
 
                                 const append = [];

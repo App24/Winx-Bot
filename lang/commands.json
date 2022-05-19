@@ -29,6 +29,7 @@
     "help.category": "{0}: {1}",
     "help.command.disabled": "__Disabled__",
     "help.command.patreon": "__Patreon Only__",
+    "help.command.booster": "__Booster Only__",
     "help.command.aliases": "Aliases: {0}",
     "help.command.usage": "Usage: {0}",
 
@@ -67,6 +68,7 @@
     "suggestions.rejected": "{0}\n__**Rejected**__",
 
     "leaderboard.output": "Level: {0}",
+    "leaderboard.generate": "Generating leaderboard...",
 
     "transformations.list": "Level {0}: {1}",
     "transformations.title": "Transformations",
@@ -78,6 +80,7 @@
     "magiclevels.level": "Level: {0}",
     "magiclevels.levels": "{0}/{1}",
     "magiclevels.lb.position": "Rank: #{0}",
+    "magiclevels.generate": "Generating card...",
 
     "setxp.get": "XP per message is `{0}`!",
     "setxp.set": "XP per message is now `{0}`!",
@@ -116,6 +119,9 @@
     "setrank.list.gifs": "__GIFs__",
     "setrank.list.role": "**Role**: <@&{0}>",
 
+    "customwings.wings.add": "Added Wings for user {0}!",
+    "customwings.wings.remove": "Removed Wings for user {0}!",
+
     "restoredb.empty.backups": "There are no backups",
 
     "downloaddb.wait": "Zipping databases...",
@@ -133,14 +139,25 @@
     "customcommand.success.output.remove": "Successfully removed output from command!",
     "customcommand.success.output.add": "Successfully added output to command!",
 
-    "customisationsettings.cardColor": "Card Color",
+    "customisationsettings.cardColor": "Primary Card Color",
+    "customisationsettings.cardColorB": "Secondary Card Color",
     "customisationsettings.nameColor": "Name Color",
     "customisationsettings.barStartColor": "Beginning Bar Color",
     "customisationsettings.barEndColor": "End Bar Color",
     "customisationsettings.specialCircleColor": "Circle Color",
+    "customisationsettings.winxCharacterA": "Primary Winx Character",
+    "customisationsettings.winxCharacterB": "Seconday Winx Character",
+    "customisationsettings.cardTemplate": "Card Template",
+    "customisationsettings.wingsTemplate": "Wings Template",
+    "customisationsettings.wingsLevelA": "Primary Wings",
+    "customisationsettings.wingsLevelB": "Secondary Wings",
 
     "customisationcode.get": "Here is your code: `{0}`",
+    "customisationcode.update": "Updated Customisation Settings!",
     "customisationcode.value.error": "That code is invalid!",
+    "customisationcode.value.character": "Invalid winx character",
+    "customisationcode.value.wings": "Invalid wings level",
+    "customisationcode.value.template": "Invalid winx character",
 
     "serversettings.category.xp": "XP Amount",
     "serversettings.category.messagemax": "Max messages per minute",
@@ -179,5 +196,6 @@
     "cardpfp.reply": "Animated card is now {0}!",
 
     "levelping.reply": "Level pings are now {0}!",
-    "cardname.reply": "Card name is now {0}!"
+    "cardname.reply": "Card name is now {0}!",
+    "cardwings.reply": "Card wings are now {0}!"
 }

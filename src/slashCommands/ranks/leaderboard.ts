@@ -27,7 +27,7 @@ class LeaderboardCommand extends SlashCommand {
     public async onRun(cmdArgs: SlashCommandArguments) {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
-        if (!levels) return cmdArgs.interaction.followUp(Localisation.getTranslation("error.empty.levels"));
+        if (!levels.length) return cmdArgs.interaction.followUp(Localisation.getTranslation("error.empty.levels"));
 
         let user = cmdArgs.author;
         if (cmdArgs.args.length) {

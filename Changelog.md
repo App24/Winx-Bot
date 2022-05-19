@@ -1,3 +1,9 @@
+## 3.4.0
+- Added ability of boosters/patreons of having custom wings in the level card
+- Improved user experience when managing wings/ranks/gifs
+- Added ability of having commands only be accessible to boosters
+- Updated customisationsettings and customisationcode to support the new customisations
+
 ## 3.3.1
 - Can now have different colors in the card color
 - Fixed some localisation issues
