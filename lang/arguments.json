@@ -48,5 +48,6 @@
     "argument.reply.user": "Reply to this message with the user",
     "argument.reply.hexcolor": "Reply to this message with the hex color",
     "argument.reply.customname": "Reply to this message with the custom name",
-    "argument.reply.customnameuser": "Reply to this message with the user and label"
+    "argument.reply.customnameuser": "Reply to this message with the user and label",
+    "argument.reply.cardcode": "Reply to this message with the card code"
 }

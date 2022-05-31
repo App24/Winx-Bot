@@ -6,6 +6,7 @@ class TestCommand extends Command {
     public constructor() {
         super();
         this.access = CommandAccess.BotOwner;
+        this.deprecated = true;
     }
 
     public async onRun(cmdArgs: CommandArguments) {

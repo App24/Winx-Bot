@@ -24,7 +24,7 @@ class SetLevelCommand extends Command {
         if (!member) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.member"));
         if (member.user.bot) return cmdArgs.message.reply(Localisation.getTranslation("error.user.bot"));
         const level = parseInt(cmdArgs.args[1]);
-        if (isNaN(level) || level < 0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
+        if (isNaN(level)) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
         let userLevel = levels.find(user => user.userId === member.id);

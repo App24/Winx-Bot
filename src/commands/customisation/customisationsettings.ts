@@ -31,19 +31,27 @@ class CustomisationSettingsCommand extends Command {
         const templates = Object.values(CardTemplate);
         const templatesNames = Object.keys(CardTemplate);
 
+        if (!userSettings.cardTemplate) {
+            userSettings.cardTemplate = CardTemplate.Normal;
+        }
+
+        if (!userSettings.wingsTemplate) {
+            userSettings.wingsTemplate = CardTemplate.Normal;
+        }
+
         const embed = new MessageEmbed();
-        embed.addField(Localisation.getTranslation("customisationsettings.cardColor"), `#${userSettings.cardColor}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.cardColorB"), `#${userSettings.cardColorB}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.nameColor"), `#${userSettings.nameColor}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.barStartColor"), `#${userSettings.barStartColor}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.barEndColor"), `#${userSettings.barEndColor}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.specialCircleColor"), `#${userSettings.specialCircleColor}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.wingsLevelA"), `${userSettings.wingsLevel}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.wingsLevelB"), `${userSettings.wingsLevelB}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.winxCharacterA"), `${WinxCharacter[userSettings.winxCharacter]}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.winxCharacterB"), `${WinxCharacter[userSettings.winxCharacterB]}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.cardTemplate"), `${templatesNames[templates.findIndex(t => t === userSettings.cardTemplate)].replace("_", " ")}`);
-        embed.addField(Localisation.getTranslation("customisationsettings.wingsTemplate"), `${templatesNames[templates.findIndex(t => t === userSettings.wingsTemplate)].replace("_", " ")}`);
+        embed.addField(Localisation.getTranslation("customisationsettings.cardColor"), `#${userSettings.cardColor}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.cardColorB"), `#${userSettings.cardColorB}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.nameColor"), `#${userSettings.nameColor}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.barStartColor"), `#${userSettings.barStartColor}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.barEndColor"), `#${userSettings.barEndColor}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.specialCircleColor"), `#${userSettings.specialCircleColor}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.wingsLevelA"), `${userSettings.wingsLevel}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.wingsLevelB"), `${userSettings.wingsLevelB}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.winxCharacterA"), `${WinxCharacter[userSettings.winxCharacter]}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.winxCharacterB"), `${WinxCharacter[userSettings.winxCharacterB]}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.cardTemplate"), `${templatesNames[templates.findIndex(t => t === userSettings.cardTemplate)].replace("_", " ")}`, true);
+        embed.addField(Localisation.getTranslation("customisationsettings.wingsTemplate"), `${templatesNames[templates.findIndex(t => t === userSettings.wingsTemplate)].replace("_", " ")}`, true);
         cmdArgs.message.reply({ embeds: [await createMessageEmbed(embed, cmdArgs.guild)] });
     }
 }

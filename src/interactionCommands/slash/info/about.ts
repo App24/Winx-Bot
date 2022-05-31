@@ -1,10 +1,10 @@
 import { MessageEmbed, MessageActionRow, MessageButton } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { CREATORS_ID } from "../../Constants";
-import { Localisation } from "../../localisation";
-import { SlashCommand, SlashCommandArguments } from "../../structs/SlashCommand";
-import { getBotMember } from "../../utils/GetterUtils";
-import { createMessageEmbed } from "../../utils/Utils";
+import { BotUser } from "../../../BotClient";
+import { CREATORS_ID } from "../../../Constants";
+import { Localisation } from "../../../localisation";
+import { SlashCommand, SlashCommandArguments } from "../../../structs/SlashCommand";
+import { getBotMember } from "../../../utils/GetterUtils";
+import { createMessageEmbed } from "../../../utils/Utils";
 
 class AboutCommand extends SlashCommand {
     public constructor() {

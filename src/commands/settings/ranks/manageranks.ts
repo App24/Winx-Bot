@@ -116,36 +116,6 @@ class ManageRanksCommand extends Command {
                                     options
                                 }
                             });
-
-                            /*const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
-                            if (level === undefined || level < 0) return;
-
-                            const rankLevelIndex = ranks.findIndex(rank => rank.level === level);
-                            if (rankLevelIndex < 0) return message.reply(Localisation.getTranslation("error.missing.rank"));
-
-                            await createMessageButtons({
-                                sendTarget: message, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("generic.confirmation"), buttons: [
-                                    {
-                                        customId: "accept",
-                                        style: "PRIMARY",
-                                        label: Localisation.getTranslation("button.accept"),
-                                        onRun: async ({ interaction }) => {
-                                            rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${level}`, { recursive: true, force: true });
-                                            ranks.splice(rankLevelIndex, 1);
-                                            await Ranks.set(cmdArgs.guildId, ranks);
-                                            interaction.reply(Localisation.getTranslation("setrank.role.remove"));
-                                        }
-                                    },
-                                    {
-                                        customId: "cancel",
-                                        style: "DANGER",
-                                        label: Localisation.getTranslation("button.cancel"),
-                                        onRun: async ({ interaction }) => {
-                                            await interaction.deferUpdate();
-                                        }
-                                    }
-                                ]
-                            });*/
                         }
                     },
                     {

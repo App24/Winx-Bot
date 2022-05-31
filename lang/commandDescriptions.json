@@ -47,10 +47,11 @@
     "customname.command.description": "Set custom names for people!",
     "levelping.command.description": "Toggle Level Ping!",
     "cardname.command.description": "Toggle Card Name!",
-    "cardpfp.command.description": "Toggle Animated card!",
+    "animatedcard.command.description": "Toggle Animated card!",
     "wingstemplate.command.description": "Select wings template!",
     "cardtemplate.command.description": "Select card template!",
     "cardwings.command.description": "Change wings on your card!",
+    "cardcode.command.description": "Edit your card",
     
     "manageranks.command.description": "Set transformation for each level!",
     "managegifs.command.description": "Manage gifs for each transformation level!",
@@ -68,5 +69,5 @@
     "setpfp.command.description": "Set the bot profile picture!",
     "slashcommands.command.description": "Register/Reset bot slash commands!",
 
-    "wingstemplate.command.description": "Get the wings template image!"
+    "getwingstemplate.command.description": "Get the wings template image!"
 }

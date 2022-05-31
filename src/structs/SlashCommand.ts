@@ -1,4 +1,4 @@
-import { ApplicationCommandData, CommandInteraction, Guild, TextBasedChannel, User, GuildMember } from "discord.js";
+import { ApplicationCommandData, Guild, TextBasedChannel, User, GuildMember, BaseCommandInteraction } from "discord.js";
 import { CommandAvailable } from "./CommandAvailable";
 import { CommandAccess } from "./CommandAccess";
 
@@ -22,7 +22,7 @@ export abstract class SlashCommand {
 }
 
 export class SlashCommandArguments {
-    public readonly interaction: CommandInteraction;
+    public readonly interaction: BaseCommandInteraction;
     public readonly args: string[];
     public readonly guild: Guild;
     public readonly guildId: string;
@@ -31,7 +31,7 @@ export class SlashCommandArguments {
     public readonly author: User;
     public readonly member: GuildMember;
 
-    public constructor(interaction: CommandInteraction, args: string[]) {
+    public constructor(interaction: BaseCommandInteraction, args: string[]) {
         this.args = args;
         this.interaction = interaction;
         this.guild = interaction.guild;

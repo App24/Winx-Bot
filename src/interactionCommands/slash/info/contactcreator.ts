@@ -1,6 +1,6 @@
-import { Localisation } from "../../localisation";
-import { SlashCommand, SlashCommandArguments } from "../../structs/SlashCommand";
-import { getUserById } from "../../utils/GetterUtils";
+import { Localisation } from "../../../localisation";
+import { SlashCommand, SlashCommandArguments } from "../../../structs/SlashCommand";
+import { getUserById } from "../../../utils/GetterUtils";
 
 class ContactCreator extends SlashCommand {
     public constructor() {

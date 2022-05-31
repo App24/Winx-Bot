@@ -9,7 +9,6 @@ import { CommandAccess } from "../../structs/CommandAccess";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomWings } from "../../structs/databaseTypes/CustomWings";
-import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { drawCardWithWings } from "../../utils/CardUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";

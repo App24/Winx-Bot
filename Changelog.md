@@ -1,3 +1,9 @@
+## 3.4.1
+- Fixed issue with levelping outputting the wrong result
+- Added user context commands
+- Improved backup system, and, potentially, prevent zip files from not being sent/deleted
+- Massive revamp to level cards, can be fully customisable
+
 ## 3.4.0
 - Added ability of boosters/patreons of having custom wings in the level card
 - Improved user experience when managing wings/ranks/gifs

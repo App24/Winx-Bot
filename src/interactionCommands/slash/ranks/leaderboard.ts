@@ -1,12 +1,13 @@
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
-import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { SlashCommand, SlashCommandArguments } from "../../structs/SlashCommand";
-import { drawLeaderboard } from "../../utils/CardUtils";
-import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
-import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../utils/Utils";
+import { BotUser } from "../../../BotClient";
+import { Localisation } from "../../../localisation";
+import { CommandAvailable } from "../../../structs/CommandAvailable";
+import { DatabaseType } from "../../../structs/DatabaseTypes";
+import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
+import { SlashCommand, SlashCommandArguments } from "../../../structs/SlashCommand";
+import { drawLeaderboard } from "../../../utils/CardUtils";
+import { getUserFromMention, getMemberById } from "../../../utils/GetterUtils";
+import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../../utils/Utils";
+
 
 class LeaderboardCommand extends SlashCommand {
     public constructor() {

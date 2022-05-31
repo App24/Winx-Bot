@@ -1,4 +1,4 @@
-import { BotUser } from "../BotClient";
+/*import { BotUser } from "../BotClient";
 import { PREFIX } from "../Constants";
 import { Localisation } from "../localisation";
 import { BasicActivity } from "../structs/activities/BasicActivity";
@@ -59,4 +59,4 @@ async function setActivity() {
     } else {
         setActivity();
     }
-}
+}*/

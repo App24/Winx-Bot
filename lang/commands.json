@@ -197,5 +197,9 @@
 
     "levelping.reply": "Level pings are now {0}!",
     "cardname.reply": "Card name is now {0}!",
-    "cardwings.reply": "Card wings are now {0}!"
+    "cardwings.reply": "Card wings are now {0}!",
+
+    "cardcode.get.output": "Here is your code: `{0}`",
+    "cardcode.set.output": "Card code set!",
+    "cardcode.reset.output": "Card code reset!"
 }

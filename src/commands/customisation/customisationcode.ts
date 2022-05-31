@@ -20,6 +20,7 @@ class CustomisationCodeCommand extends Command {
         this.aliases = ["customcode", "customizationcode"];
         this.usage = [new CommandUsage(true, "argument.get", "argument.set"), new CommandUsage(false, "argument.code")];
         this.subCommands = [new SetSubCommand(), new GetSubCommand()];
+        this.deprecated = true;
     }
 
     public async onRun(cmdArgs: CommandArguments) {

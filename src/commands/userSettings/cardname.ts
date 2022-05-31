@@ -79,30 +79,6 @@ class CardNameCommand extends Command {
                     ]
             }
         });
-
-        /*createGenericButtons({
-            sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, buttons: [
-                {
-                    customId: "toggle",
-                    label: userSettings.cardName ? "Disable" : "Enable",
-                    style: "PRIMARY",
-                    onRun: async ({ interaction }) => {
-                        userSettings.cardName = !userSettings.cardName;
-                        interaction.reply({ content: `Card name is now ${(userSettings.cardName ? "enabled" : "disabled")}!` });
-                        serverUserSettings[userIndex] = userSettings;
-                        await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
-                    }
-                },
-                {
-                    customId: "cancel",
-                    label: "Cancel",
-                    style: "PRIMARY",
-                    onRun: async ({ interaction }) => {
-                        await interaction.deferUpdate();
-                    }
-                }
-            ]
-        });*/
     }
 }
 

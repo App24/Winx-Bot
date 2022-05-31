@@ -13,6 +13,7 @@ class CardPfpCommand extends Command {
         super();
         this.category = UserSettings;
         this.available = CommandAvailable.Guild;
+        this.aliases = ["cardpfp"];
     }
 
     public async onRun(cmdArgs: CommandArguments) {
@@ -34,7 +35,7 @@ class CardPfpCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("cardpfp.warning"), buttons: [
                 {
                     customId: "toggle",
-                    label: userSettings.animatedCard ? Localisation.getTranslation("button.disable") : Localisation.getTranslation("button.enable"),
+                    emoji: userSettings.levelPing ? "❌" : "✅",
                     style: "PRIMARY",
                     onRun: async ({ interaction }) => {
                         userSettings.animatedCard = !userSettings.animatedCard;
@@ -46,7 +47,7 @@ class CardPfpCommand extends Command {
                 {
                     customId: "cancel",
                     label: Localisation.getTranslation("button.cancel"),
-                    style: "PRIMARY",
+                    style: "DANGER",
                     onRun: async ({ interaction }) => {
                         await interaction.deferUpdate();
                     }

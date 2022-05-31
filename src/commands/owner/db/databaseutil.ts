@@ -6,10 +6,10 @@ import { Command, CommandArguments } from "../../../structs/Command";
 import { CommandAccess } from "../../../structs/CommandAccess";
 import { backupDatabases } from "../../../utils/Utils";
 import fs from "fs";
-import archiver from "archiver";
 import { BotUser } from "../../../BotClient";
 import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { createWhatToDoButtons } from "../../../utils/MessageButtonUtils";
+import { zip } from "zip-a-folder";
 
 class DatabaseUtilCommand extends Command {
     public constructor() {
@@ -32,19 +32,8 @@ class DatabaseUtilCommand extends Command {
                 {
                     customId: "downloadbackup", style: "PRIMARY", label: Localisation.getTranslation("button.downloadbackup"), onRun: async ({ interaction }) => {
                         const file = "backup.zip";
-                        const output = fs.createWriteStream(file);
-                        const archive = archiver("zip");
-                        archive.on("error", (err) => {
-                            throw err;
-                        });
-
                         await interaction.update(Localisation.getTranslation("downloaddb.wait"));
-
-                        archive.directory(DATABASE_BACKUP_FOLDER, false);
-
-                        archive.pipe(output);
-
-                        await archive.finalize();
+                        await zip(DATABASE_FOLDER, file);
 
                         await interaction.editReply({ content: "Backup", files: [new MessageAttachment(file)], components: [] });
                         fs.unlinkSync(file);
@@ -67,19 +56,8 @@ class DatabaseUtilCommand extends Command {
                 {
                     customId: "downloaddatabase", style: "PRIMARY", label: Localisation.getTranslation("button.downloaddatabase"), onRun: async ({ interaction }) => {
                         const file = "databases.zip";
-                        const output = fs.createWriteStream(file);
-                        const archive = archiver("zip");
-                        archive.on("error", (err) => {
-                            throw err;
-                        });
-
                         await interaction.update(Localisation.getTranslation("downloaddb.wait"));
-
-                        archive.directory(DATABASE_FOLDER, false);
-
-                        archive.pipe(output);
-
-                        await archive.finalize();
+                        await zip(DATABASE_FOLDER, file);
 
                         await interaction.editReply({ content: "Database", files: [new MessageAttachment(file)], components: [] });
                         fs.unlinkSync(file);
@@ -114,19 +92,8 @@ class DatabaseUtilCommand extends Command {
 
     async downloadBackup(interaction: ButtonInteraction) {
         const file = "backup.zip";
-        const output = fs.createWriteStream(file);
-        const archive = archiver("zip");
-        archive.on("error", (err) => {
-            throw err;
-        });
-
         await interaction.update(Localisation.getTranslation("downloaddb.wait"));
-
-        archive.directory(DATABASE_BACKUP_FOLDER, false);
-
-        archive.pipe(output);
-
-        await archive.finalize();
+        await zip(DATABASE_FOLDER, file);
 
         await interaction.editReply({ content: "Backup", files: [new MessageAttachment(file)], components: [] });
         fs.unlinkSync(file);
@@ -134,7 +101,7 @@ class DatabaseUtilCommand extends Command {
 
     async restoreDatabase(interaction: ButtonInteraction, message: Message) {
         if (!fs.existsSync(DATABASE_BACKUP_FOLDER)) {
-            return <any>message.reply(Localisation.getTranslation("restoredb.empty.backups"));
+            return message.reply(Localisation.getTranslation("restoredb.empty.backups"));
         }
 
         const row = new MessageActionRow().addComponents(

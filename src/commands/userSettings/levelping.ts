@@ -35,11 +35,11 @@ class LevelPingCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, buttons: [
                 {
                     customId: "toggle",
-                    label: userSettings.levelPing ? Localisation.getTranslation("button.disable") : Localisation.getTranslation("button.enable"),
+                    emoji: userSettings.levelPing ? "❌": "✅",
                     style: "PRIMARY",
                     onRun: async ({ interaction }) => {
                         userSettings.levelPing = !userSettings.levelPing;
-                        interaction.reply({ content: Localisation.getTranslation("levelping.reply", userSettings.animatedCard ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
+                        interaction.reply({ content: Localisation.getTranslation("levelping.reply", userSettings.levelPing ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
                         serverUserSettings[userIndex] = userSettings;
                         await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
                     }
@@ -47,7 +47,7 @@ class LevelPingCommand extends Command {
                 {
                     customId: "cancel",
                     label: Localisation.getTranslation("button.cancel"),
-                    style: "PRIMARY",
+                    style: "DANGER",
                     onRun: async ({ interaction }) => {
                         await interaction.deferUpdate();
                     }

@@ -8,48 +8,55 @@ import { isBooster, isDM, isModerator, isPatreon, reportError } from "../utils/U
 
 export = () => {
     BotUser.on("interactionCreate", async (interaction) => {
-        if (!interaction.isCommand()) return;
+        if (!interaction.isCommand() && !interaction.isContextMenu()) return;
 
 
         const command = BotUser.SlashCommands.get(interaction.commandName);
         if (!command)
             return <any>interaction.reply("No command");
 
-        await interaction.deferReply({ ephemeral: command.deferEphemeral }).catch(() => undefined);
+        const reportIssue = async (text: string) => {
+            await interaction.deferReply({ ephemeral: true }).catch(() => undefined);
+            await interaction.followUp(Localisation.getTranslation(text));
+        };
+
 
         if (command.available === CommandAvailable.Guild && isDM(interaction.channel)) {
-            return interaction.followUp(Localisation.getTranslation("command.available.server"));
+            return reportIssue("command.available.server");
         } else if (command.available === CommandAvailable.DM && !isDM(interaction.channel)) {
-            return interaction.followUp(Localisation.getTranslation("command.available.dm"));
+            return reportIssue("command.available.dm");
         }
-
+        
+        
         switch (command.access) {
             case CommandAccess.Patreon: {
                 if (isDM(interaction.channel) || !(await isPatreon(interaction.user.id, interaction.guild.id))) {
-                    return interaction.followUp(Localisation.getTranslation("command.access.patreon"));
+                    return reportIssue("command.access.patreon");
                 }
             } break;
             case CommandAccess.Booster: {
                 if (isDM(interaction.channel) || !isBooster(<GuildMember>interaction.member)) {
-                    return interaction.followUp(Localisation.getTranslation("command.access.booster"));
+                    return reportIssue("command.access.booster");
                 }
             } break;
             case CommandAccess.Moderators: {
                 if (isDM(interaction.channel) || !isModerator(<GuildMember>interaction.member)) {
-                    return interaction.followUp(Localisation.getTranslation("command.access.moderator"));
+                    return reportIssue("command.access.moderator");
                 }
             } break;
             case CommandAccess.GuildOwner: {
                 if (isDM(interaction.channel) || interaction.user.id !== interaction.guild.ownerId) {
-                    return interaction.followUp(Localisation.getTranslation("command.access.guildOwner"));
+                    return reportIssue("command.access.guildOwner");
                 }
             } break;
             case CommandAccess.BotOwner: {
                 if (interaction.user.id !== process.env.OWNER_ID) {
-                    return interaction.followUp(Localisation.getTranslation("command.access.botOwner"));
+                    return reportIssue("command.access.botOwner");
                 }
             } break;
         }
+
+        await interaction.deferReply({ ephemeral: command.deferEphemeral }).catch(() => undefined);
 
         const args: string[] = [];
 
@@ -61,7 +68,8 @@ export = () => {
                 });
             } else if (option.value) args.push(option.value.toString());
         }
-        interaction.member = interaction.guild.members.cache.get(interaction.user.id);
+        if (interaction.guild)
+            interaction.member = interaction.guild.members.cache.get(interaction.user.id);
 
         try {
             const cmdArgs = new SlashCommandArguments(interaction, args);

@@ -112,7 +112,7 @@ class BotClient extends Client {
     }
 
     private async loadSlashCommands() {
-        const files = loadFiles("dist/slashCommands", ".js");
+        const files = loadFiles("dist/interactionCommands", ".js");
         if (!files) return;
         let loaded = 0;
         for (const file of files) {

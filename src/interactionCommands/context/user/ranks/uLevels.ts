@@ -1,26 +1,17 @@
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
-import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { SlashCommand, SlashCommandArguments } from "../../structs/SlashCommand";
-import { drawCard } from "../../utils/CardUtils";
-import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
-import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
-import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../utils/Utils";
+import { BotUser } from "../../../../BotClient";
+import { Localisation } from "../../../../localisation";
+import { CommandAvailable } from "../../../../structs/CommandAvailable";
+import { DatabaseType } from "../../../../structs/DatabaseTypes";
+import { UserLevel } from "../../../../structs/databaseTypes/UserLevel";
+import { SlashCommand, SlashCommandArguments } from "../../../../structs/SlashCommand";
+import { drawCard } from "../../../../utils/CardUtils";
+import { getUserFromMention, getMemberById } from "../../../../utils/GetterUtils";
+import { getCurrentRank, getNextRank, getServerUserSettings } from "../../../../utils/RankUtils";
+import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../../../utils/Utils";
 
 class LevelsCommand extends SlashCommand {
     public constructor() {
-        super({
-            name: "", description: "Show your level!", type: "CHAT_INPUT", options:
-                [
-                    {
-                        name: "user",
-                        description: "Mention user to see their levels",
-                        type: "USER",
-                    }
-                ]
-        });
+        super({ type: "USER", name: "" });
 
         this.available = CommandAvailable.Guild;
     }

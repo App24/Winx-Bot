@@ -88,40 +88,6 @@ class ManageGifsCommand extends Command {
                                     options
                                 }
                             });
-
-                            /*const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
-                            if (level === undefined || level < 0) return;
-                            const gifs = await this.getLevelGifs(level, cmdArgs.guildId);
-                            if (!gifs || gifs.length <= 0) {
-                                return interaction.followUp(Localisation.getTranslation("error.missing.gifs"));
-                            }
-
-                            const options: SelectOption[] = [];
-
-                            options.push({
-                                label: Localisation.getTranslation("button.cancel"),
-                                value: "-1",
-                                onSelect: async ({ interaction }) => {
-                                    interaction.deferUpdate();
-                                }
-                            });
-
-                            gifs.forEach((gif, i) => {
-                                options.push({
-                                    label: gif,
-                                    value: i.toString(),
-                                    onSelect: async ({ interaction }) => {
-                                        interaction.reply(gif);
-                                    }
-                                });
-                            });
-
-                            createMessageSelection({
-                                sendTarget: message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                {
-                                    options
-                                }
-                            });*/
                         }
                     },
                     {
@@ -144,11 +110,6 @@ class ManageGifsCommand extends Command {
                                     label: capitalise(rankRole.role.name),
                                     value: rankRole.role.name,
                                     onSelect: async ({ interaction }) => {
-                                        const gifs = await this.getLevelGifs(rankRole.rank.level, cmdArgs.guildId);
-                                        if (!gifs || gifs.length <= 0) {
-                                            return interaction.reply(Localisation.getTranslation("error.missing.gifs"));
-                                        }
-
                                         const rankLevel = rankRole.rank;
 
                                         const { value: gif } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "argument.reply.gif" });
@@ -172,23 +133,6 @@ class ManageGifsCommand extends Command {
                                     options
                                 }
                             });
-
-                            /*const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
-                            if (level === undefined || level < 0) return;
-                            const rankLevel = await getRank(level, cmdArgs.guildId);
-
-                            const { value: gif } = await getStringReply({ sendTarget: message, author: cmdArgs.author, options: "argument.reply.gif" });
-                            if (gif === undefined) return;
-
-                            const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-                            const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
-                            const index = ranks.findIndex(r => r.level === rankLevel.level);
-                            if (index >= 0) {
-                                rankLevel.gifs.push(gif);
-                                ranks[index] = rankLevel;
-                            }
-                            interaction.followUp(Localisation.getTranslation("setrank.gifs.add"));
-                            await Ranks.set(cmdArgs.guildId, ranks);*/
                         }
                     },
                     {
@@ -261,48 +205,6 @@ class ManageGifsCommand extends Command {
                                     options
                                 }
                             });
-                            /*const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
-                            if (level === undefined || level < 0) return;
-                            const gifs = await this.getLevelGifs(level, cmdArgs.guildId);
-                            if (!gifs || gifs.length <= 0) {
-                                return interaction.followUp(Localisation.getTranslation("error.missing.gifs"));
-                            }
-                            const rankLevel = await getRank(level, cmdArgs.guildId);
-
-                            const options: SelectOption[] = [];
-
-                            options.push({
-                                label: Localisation.getTranslation("button.cancel"),
-                                value: "-1",
-                                onSelect: async ({ interaction }) => {
-                                    interaction.deferUpdate();
-                                }
-                            });
-
-                            gifs.forEach((gif, i) => {
-                                options.push({
-                                    label: gif,
-                                    value: i.toString(),
-                                    onSelect: async ({ interaction }) => {
-                                        const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-                                        const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
-                                        const index = ranks.findIndex(r => r.level === rankLevel.level);
-                                        if (index >= 0) {
-                                            rankLevel.gifs.splice(i, 1);
-                                            ranks[index] = rankLevel;
-                                        }
-                                        await Ranks.set(cmdArgs.guildId, ranks);
-                                        interaction.reply(Localisation.getTranslation("setrank.gifs.remove"));
-                                    }
-                                });
-                            });
-
-                            createMessageSelection({
-                                sendTarget: message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                {
-                                    options
-                                }
-                            });*/
                         }
                     }
                 ]
