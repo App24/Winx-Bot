@@ -46,7 +46,8 @@ class CardCodeCommand extends Command {
                             if (!sendTarget) {
                                 sendTarget = interaction;
                             } else {
-                                await interaction.deferUpdate();
+                                await interaction.reply("Please check your DM");
+                                // await interaction.deferUpdate();
                             }
                             const { value: code, message } = await getStringReply({ sendTarget, author: cmdArgs.author, options: "argument.reply.cardcode" });
                             if (code === undefined) return;

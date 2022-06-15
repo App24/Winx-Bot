@@ -51,7 +51,9 @@
     "wingstemplate.command.description": "Select wings template!",
     "cardtemplate.command.description": "Select card template!",
     "cardwings.command.description": "Change wings on your card!",
-    "cardcode.command.description": "Edit your card",
+    "cardcode.command.description": "Edit your level card",
+    
+    "cardwebsite.command.description": "Get website to edit your level card",
     
     "manageranks.command.description": "Set transformation for each level!",
     "managegifs.command.description": "Manage gifs for each transformation level!",

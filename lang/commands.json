@@ -80,7 +80,7 @@
     "magiclevels.level": "Level: {0}",
     "magiclevels.levels": "{0}/{1}",
     "magiclevels.lb.position": "Rank: #{0}",
-    "magiclevels.generate": "Generating card...",
+    "magiclevels.generate": "Generating card...\nCustomise your card at: https://app24.github.io/cardeditor/",
 
     "setxp.get": "XP per message is `{0}`!",
     "setxp.set": "XP per message is now `{0}`!",

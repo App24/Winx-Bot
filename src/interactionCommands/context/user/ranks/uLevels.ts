@@ -11,7 +11,7 @@ import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } f
 
 class LevelsCommand extends SlashCommand {
     public constructor() {
-        super({ type: "USER", name: "" });
+        super({ type: "USER", name: "Levels" });
 
         this.available = CommandAvailable.Guild;
     }

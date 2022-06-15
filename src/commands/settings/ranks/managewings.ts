@@ -16,6 +16,7 @@ import { createMessageSelection, SelectOption } from "../../../utils/MessageSele
 import { getRank, getRankRoles, getServerUserSettings } from "../../../utils/RankUtils";
 import { getImageReply } from "../../../utils/ReplyUtils";
 import { canvasToMessageAttachment, downloadFile, getServerDatabase } from "../../../utils/Utils";
+import { DEFAULT_CARD_CODE } from "../../../structs/databaseTypes/ServerUserSettings";
 
 class ManageWingsCommand extends Command {
     public constructor() {
@@ -129,6 +130,8 @@ class ManageWingsCommand extends Command {
                                         const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
 
                                         serverUserSettings.animatedCard = false;
+
+                                        serverUserSettings.cardCode = DEFAULT_CARD_CODE;
 
                                         const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, image.url, image.url, undefined, undefined, cmdArgs.member, cmdArgs.guild);
 

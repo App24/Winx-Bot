@@ -1,3 +1,8 @@
+## 3.4.2
+- Removed unused variables and commands relating to the customisation aspect of the level cards
+- Added more customisation
+- Updated Discord.js
+
 ## 3.4.1
 - Fixed issue with levelping outputting the wrong result
 - Added user context commands

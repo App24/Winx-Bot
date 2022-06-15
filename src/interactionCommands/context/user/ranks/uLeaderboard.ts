@@ -10,9 +10,7 @@ import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } f
 
 class LeaderboardCommand extends SlashCommand {
     public constructor() {
-        super({
-            type: "USER", name: ""
-        });
+        super({ type: "USER", name: "Leaderboard" });
 
         this.available = CommandAvailable.Guild;
     }

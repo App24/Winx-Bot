@@ -25,7 +25,8 @@ class RegisterSlashCommandsCommand extends Command {
                             onSelect: async ({ interaction }) => {
                                 const commands = BotUser.SlashCommands.map((c, n) => {
                                     const command = c.commandData;
-                                    command.name = n;
+                                    if (command.name === "")
+                                        command.name = n;
                                     return command;
                                 });
                                 await createMessageSelection({

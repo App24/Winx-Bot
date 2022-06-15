@@ -35,7 +35,7 @@ class CardPfpCommand extends Command {
             sendTarget: cmdArgs.message, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("cardpfp.warning"), buttons: [
                 {
                     customId: "toggle",
-                    emoji: userSettings.levelPing ? "❌" : "✅",
+                    emoji: userSettings.animatedCard ? "❌" : "✅",
                     style: "PRIMARY",
                     onRun: async ({ interaction }) => {
                         userSettings.animatedCard = !userSettings.animatedCard;

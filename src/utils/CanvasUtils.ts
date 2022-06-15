@@ -86,7 +86,7 @@ export function cloneCanvas(oldCanvas: Canvas) {
     return newCanvas;
 }
 
-export function fitTextOnCanvas(ctx: NodeCanvasRenderingContext2D, text: string, width: number, startSize = 100) {
+export function fitTextOnCanvas(ctx: NodeCanvasRenderingContext2D, text: string, width: number, font = CANVAS_FONT, startSize = 100) {
 
     const cached = cache.find(value => value.text === text);
     if (cached)
@@ -97,12 +97,12 @@ export function fitTextOnCanvas(ctx: NodeCanvasRenderingContext2D, text: string,
 
     const prevFont = ctx.font;
 
-    ctx.font = `${fontsize}px ${CANVAS_FONT}`;
+    ctx.font = `${fontsize}px ${font}`;
 
     // lower the font size until the text fits the canvas
     do {
         fontsize--;
-        ctx.font = `${fontsize}px ${CANVAS_FONT}`;
+        ctx.font = `${fontsize}px ${font}`;
     } while (ctx.measureText(text).width > width);
 
     ctx.font = prevFont;

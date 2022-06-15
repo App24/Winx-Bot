@@ -3,7 +3,7 @@ import { Moderator } from "../../structs/Category";
 import { Command, CommandArguments, CommandUsage } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { CardTemplate } from "../../structs/databaseTypes/ServerUserSettings";
+import { DEFAULT_CARD_CODE } from "../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { WinxCharacter } from "../../structs/WinxCharacters";
 import { drawCard } from "../../utils/CardUtils";
@@ -48,8 +48,8 @@ class TestMLCommand extends Command {
         const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
         serverUserSettings.animatedCard = false;
         serverUserSettings.wingsLevel = -1;
-        serverUserSettings.cardTemplate = CardTemplate.Normal;
-        serverUserSettings.wingsTemplate = CardTemplate.Normal;
+        serverUserSettings.wingsLevelB = -1;
+        serverUserSettings.cardCode = DEFAULT_CARD_CODE;
 
         if (winxNumber > 0) {
             await asyncForEach(Object.keys(WinxCharacter), async (val) => {

@@ -162,6 +162,10 @@ class BotClient extends Client {
         return this.commands.get(commandName) || this.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
     }
 
+    public getSlashCommand(commandName: string) {
+        return this.SlashCommands.get(commandName) || this.SlashCommands.find(cmd => cmd.commandData.name === commandName);
+    }
+
     public getCommands(category: Category) {
         return this.commands.filter(command => command.category === category);
     }

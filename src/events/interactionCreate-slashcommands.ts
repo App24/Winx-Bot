@@ -11,7 +11,7 @@ export = () => {
         if (!interaction.isCommand() && !interaction.isContextMenu()) return;
 
 
-        const command = BotUser.SlashCommands.get(interaction.commandName);
+        const command = BotUser.getSlashCommand(interaction.commandName);
         if (!command)
             return <any>interaction.reply("No command");
 

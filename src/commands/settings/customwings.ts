@@ -10,7 +10,7 @@ import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomWings } from "../../structs/databaseTypes/CustomWings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { drawCardWithWings } from "../../utils/CardUtils";
+import { decodeCode, drawCardWithWings } from "../../utils/CardUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
@@ -86,7 +86,19 @@ class CustomWingsCommand extends Command {
                             const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
                             serverUserSettings.animatedCard = false;
 
-                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, image.url, image.url, undefined, undefined, user, cmdArgs.guild);
+                            // const oldImage = userWings.wingsFile;
+
+                            // userWings.wingsFile = filePath;
+                            // customWings[wingsIndex] = userWings;
+                            // await CustomWingsDatabase.set(cmdArgs.guildId, customWings);
+
+                            const { cl_customWings } = decodeCode(serverUserSettings.cardCode);
+
+                            if (!cl_customWings) {
+                                serverUserSettings.cardCode += "|customWings_positionX=300|customWings_positionY=600|customWings_scaleX=1|customWings_scaleY=1|cl_customWings=1";
+                            }
+
+                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, image.url, image.url, undefined, undefined, user, cmdArgs.guild, filePath);
 
                             await createMessageButtons({
                                 sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:
@@ -102,7 +114,6 @@ class CustomWingsCommand extends Command {
                                                     customWings[wingsIndex] = userWings;
                                                     await interaction.deleteReply();
                                                     await interaction.followUp(Localisation.getTranslation("customwings.wings.add", `<@${user.id}>`));
-                                                    await CustomWingsDatabase.set(cmdArgs.guildId, customWings);
                                                 });
                                             }
                                         },
