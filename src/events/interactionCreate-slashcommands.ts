@@ -26,8 +26,8 @@ export = () => {
         } else if (command.available === CommandAvailable.DM && !isDM(interaction.channel)) {
             return reportIssue("command.available.dm");
         }
-        
-        
+
+
         switch (command.access) {
             case CommandAccess.Patreon: {
                 if (isDM(interaction.channel) || !(await isPatreon(interaction.user.id, interaction.guild.id))) {
@@ -52,6 +52,11 @@ export = () => {
             case CommandAccess.BotOwner: {
                 if (interaction.user.id !== process.env.OWNER_ID) {
                     return reportIssue("command.access.botOwner");
+                }
+            } break;
+            case CommandAccess.PatreonOrBooster: {
+                if (isDM(interaction.channel) || (!(await isPatreon(interaction.user.id, interaction.guild.id)) && !isBooster(<GuildMember>interaction.member))) {
+                    return reportIssue("command.access.patreon");
                 }
             } break;
         }

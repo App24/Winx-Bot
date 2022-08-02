@@ -5,6 +5,7 @@ export class ServerInfo {
     public maxMessageLength: number;
     public levelChannel: string;
     public excludeChannels: string[];
+    public wingsRequestChannel: string;
     //public leaderboardColor: string;
     //public leaderboardHighlight: string;
 

@@ -24,6 +24,7 @@ class CustomWingsCommand extends Command {
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;
         this.category = Settings;
+        // this.aliases = ["customwings"];
     }
 
     public async onRun(cmdArgs: CommandArguments) {
@@ -73,14 +74,6 @@ class CustomWingsCommand extends Command {
                             const dir = `${CUSTOM_WINGS_FOLDER}/${cmdArgs.guildId}`;
                             const filePath = `${dir}/${user.id}.png`;
 
-                            if (!existsSync(dir)) {
-                                mkdirSync(dir, { recursive: true });
-                            }
-
-                            if (existsSync(userWings.wingsFile)) {
-                                unlinkSync(userWings.wingsFile);
-                            }
-
                             const userLevel = new UserLevel(user.id);
 
                             const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
@@ -98,7 +91,7 @@ class CustomWingsCommand extends Command {
                                 serverUserSettings.cardCode += "|customWings_positionX=300|customWings_positionY=600|customWings_scaleX=1|customWings_scaleY=1|cl_customWings=1";
                             }
 
-                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, image.url, image.url, undefined, undefined, user, cmdArgs.guild, filePath);
+                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, null, null, undefined, undefined, user, cmdArgs.guild, image.url);
 
                             await createMessageButtons({
                                 sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:
@@ -109,9 +102,19 @@ class CustomWingsCommand extends Command {
                                             label: Localisation.getTranslation("button.accept"),
                                             onRun: async ({ interaction }) => {
                                                 interaction.reply(Localisation.getTranslation("setrank.wings.download"));
+
+                                                if (!existsSync(dir)) {
+                                                    mkdirSync(dir, { recursive: true });
+                                                }
+
+                                                if (existsSync(userWings.wingsFile)) {
+                                                    unlinkSync(userWings.wingsFile);
+                                                }
+
                                                 downloadFile(image.url, filePath, async () => {
                                                     userWings.wingsFile = filePath;
                                                     customWings[wingsIndex] = userWings;
+                                                    await CustomWingsDatabase.set(cmdArgs.guildId, customWings);
                                                     await interaction.deleteReply();
                                                     await interaction.followUp(Localisation.getTranslation("customwings.wings.add", `<@${user.id}>`));
                                                 });

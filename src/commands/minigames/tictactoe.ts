@@ -1,4 +1,4 @@
-import { Canvas, NodeCanvasRenderingContext2D } from "canvas";
+import { Canvas, CanvasRenderingContext2D } from "canvas";
 import { Message, MessageActionRow, MessageButton } from "discord.js";
 import { Localisation } from "../../localisation";
 import { Minigames } from "../../structs/Category";
@@ -161,7 +161,7 @@ class TicTacToeCommand extends Command {
         return [canvas, buttons];
     }
 
-    drawCross(ctx: NodeCanvasRenderingContext2D, x: number, y: number) {
+    drawCross(ctx: CanvasRenderingContext2D, x: number, y: number) {
         ctx.fillStyle = "#ff0000";
         const width = this.squareSize / 5;
         const height = this.squareSize;
@@ -184,7 +184,7 @@ class TicTacToeCommand extends Command {
         ctx.translate(-(xPos + width / 2), -(yPos + height / 2));
     }
 
-    drawCircle(ctx: NodeCanvasRenderingContext2D, x: number, y: number) {
+    drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
         ctx.strokeStyle = "#0000ff";
         ctx.lineWidth = this.squareSize / 5;
         const r = this.squareSize / 2.5;

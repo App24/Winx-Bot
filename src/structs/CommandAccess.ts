@@ -4,5 +4,6 @@ export enum CommandAccess {
     Booster,
     Moderators,
     GuildOwner,
-    BotOwner
+    BotOwner,
+    PatreonOrBooster
 }

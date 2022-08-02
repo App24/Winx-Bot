@@ -9,5 +9,6 @@ export enum DatabaseType {
     CustomCommands = "customCommands",
     CustomNames = "customNames",
     ServerUserSettings = "serverUserSettings",
-    CustomWings = "customWings"
+    CustomWings = "customWings",
+    WingsRequests = "wingsRequests"
 }

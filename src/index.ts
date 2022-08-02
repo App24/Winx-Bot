@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
-import { BotUser } from "./BotClient";
 
 dotenv.config();
+
+import { BotUser } from "./BotClient";
 
 BotUser.login(process.env.TOKEN);

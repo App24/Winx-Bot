@@ -51,6 +51,10 @@ class HelpCommand extends Command {
                             if (isDM(cmdArgs.channel) || cmdArgs.author.id !== cmdArgs.guild.ownerId)
                                 return;
                         } break;
+                        case CommandAccess.PatreonOrBooster: {
+                            if (isDM(cmdArgs.channel) || (!(await isPatreon(cmdArgs.author.id, cmdArgs.channelId) && !isBooster(cmdArgs.member))))
+                                return;
+                        } break;
                         case CommandAccess.None: {
                             switch (category) {
                                 case CustomCommands: {
@@ -72,7 +76,7 @@ class HelpCommand extends Command {
             const options: SelectOption[] = [];
 
             categoryEmojis.forEach(category => {
-                if (BotUser.getCommands(category).size <= 0) return;
+                if (BotUser.getCommands(category).size <= 0 && category !== CustomCommands) return;
                 options.push({
                     label: Localisation.getTranslation(category.name),
                     value: category.name,
@@ -100,7 +104,7 @@ class HelpCommand extends Command {
 
         if (category.availability !== CommandAvailable.Both && (category.availability !== available)) return cmdArgs.message.reply("That category is not available here!");
 
-        if (BotUser.getCommands(category).size <= 0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
+        if (BotUser.getCommands(category).size <= 0 && category !== CustomCommands) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
 
         const embed = await getCommands(category, available, cmdArgs.channel, cmdArgs.guild, cmdArgs.member, cmdArgs.author);
         if (!embed.fields.length) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.category.commands"));
@@ -127,6 +131,11 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                     if (isDM(channel) || !(await isPatreon(author.id, guild.id)))
                         return;
                 } break;
+                case CommandAccess.Booster: {
+                    if (!isDM(channel) || !isBooster(member)) {
+                        return;
+                    }
+                } break;
                 case CommandAccess.Moderators: {
                     if (isDM(channel) || !isModerator(member)) {
                         return;
@@ -142,6 +151,10 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                         return;
                     }
                 } break;
+                case CommandAccess.PatreonOrBooster: {
+                    if (isDM(channel) || (!(await isPatreon(author.id, guild.id) && !isBooster(member))))
+                        return;
+                } break;
             }
             addCommand(customCommand.name, customCommand.description);
         });
@@ -153,6 +166,11 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                         case CommandAccess.Patreon: {
                             if (isDM(channel) || !(await isPatreon(author.id, guild.id)))
                                 return;
+                        } break;
+                        case CommandAccess.Booster: {
+                            if (!isDM(channel) || !isBooster(member)) {
+                                return;
+                            }
                         } break;
                         case CommandAccess.Moderators: {
                             if (isDM(channel) || !isModerator(member)) {
@@ -168,6 +186,10 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                             if (author.id !== process.env.OWNER_ID) {
                                 return;
                             }
+                        } break;
+                        case CommandAccess.PatreonOrBooster: {
+                            if (isDM(channel) || (!(await isPatreon(author.id, guild.id) && !isBooster(member))))
+                                return;
                         } break;
                     }
 

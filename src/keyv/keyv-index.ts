@@ -1,6 +1,29 @@
 import EventEmitter from 'events';
 import JSONB from 'json-buffer';
+import { KeyvMysql } from './KeyvMysql';
 import { KeyvSqlite } from './KeyvSqlite';
+
+const loadStore = opts => {
+    const adapters = {
+        redis: '@keyv/redis',
+        mongodb: '@keyv/mongo',
+        mongo: '@keyv/mongo',
+        sqlite: '@keyv/sqlite',
+        postgresql: '@keyv/postgres',
+        postgres: '@keyv/postgres',
+        mysql: '@keyv/mysql'
+    };
+    if (opts.adapter || opts.uri) {
+        const adapter = opts.adapter || /^[^:]*/.exec(opts.uri)[0];
+        if (adapter === "sqlite") {
+            return new KeyvSqlite(opts);
+        } else if (adapter === "mysql") {
+            return new KeyvMysql(opts);
+        }
+        return new (require(adapters[adapter]))(opts);
+    }
+    return new Map();
+};
 
 export class Keyv extends EventEmitter {
     private opts: any;
@@ -15,8 +38,15 @@ export class Keyv extends EventEmitter {
             (typeof uri === "string") ? { uri } : uri,
             opts);
 
+        if (!this.opts.table) this.opts.table = "keyv";
+
         if (!this.opts.store) {
-            this.opts.store = new KeyvSqlite(this.opts);
+            const adapterOpts = Object.assign({}, this.opts);
+            this.opts.store = loadStore(adapterOpts);
+            if (!(this.opts.store instanceof KeyvSqlite)) {
+                this.opts.namespace = null;
+            }
+            // this.opts.store = new KeyvSqlite(this.opts);
         }
 
         if (typeof this.opts.store.on === "function") {
@@ -27,10 +57,16 @@ export class Keyv extends EventEmitter {
     }
 
     private getKeyPrefix(key: string): string {
+        if (!this.opts.namespace) {
+            return key;
+        }
         return `${this.opts.namespace}:${key}`;
     }
 
     private stripKeyPrefix(fullKey: string): string {
+        if (!this.opts.namespace) {
+            return fullKey;
+        }
         const nsregexp = new RegExp('^' + this.opts.namespace + ':');
         return fullKey.replace(nsregexp, '');
     }
@@ -114,11 +150,11 @@ export class Keyv extends EventEmitter {
 
     public keys(): Promise<string[]> {
         return Promise.resolve()
-            .then(() => this.query("SELECT * FROM keyv"))
+            .then(() => this.query("SELECT * FROM " + this.opts.table))
             .then(data => {
                 const lst = [];
                 data.forEach(element => {
-                    lst.push(this.stripKeyPrefix(element.key));
+                    lst.push(this.stripKeyPrefix(element["key"] ?? element["id"]));
                 });
                 return lst;
             });
@@ -126,11 +162,11 @@ export class Keyv extends EventEmitter {
 
     public values(opts?) {
         return Promise.resolve()
-            .then(() => this.query("SELECT * FROM keyv"))
+            .then(() => this.query("SELECT * FROM " + this.opts.table))
             .then(data => {
                 const lst = [];
                 data.forEach(element => {
-                    lst.push(this.parseValue(element.key, element.value, opts));
+                    lst.push(this.parseValue(element["key"] ?? element["id"], element.value, opts));
                 });
                 return lst;
             });
@@ -138,12 +174,12 @@ export class Keyv extends EventEmitter {
 
     public valuesFrom(key, opts?) {
         return Promise.resolve()
-            .then(() => this.query(`SELECT * FROM keyv`))
+            .then(() => this.query(`SELECT * FROM ` + this.opts.table))
             .then(data => {
                 const lst = [];
                 data.forEach(element => {
-                    if (element.key === this.getKeyPrefix(key))
-                        lst.push(this.parseValue(element.key, element.value, opts));
+                    if ((element["key"] ?? element["id"]) === this.getKeyPrefix(key))
+                        lst.push(this.parseValue(element["key"] ?? element["id"], element.value, opts));
                 });
                 return lst;
             });
@@ -151,13 +187,13 @@ export class Keyv extends EventEmitter {
 
     public entries(opts?) {
         return Promise.resolve()
-            .then(() => this.query("SELECT * FROM keyv"))
+            .then(() => this.query("SELECT * FROM " + this.opts.table))
             .then((data) => {
                 const newData: { "key": string, "value": any }[] = [];
                 data.forEach(e => {
                     newData.push({
-                        "key": this.stripKeyPrefix(e["key"]),
-                        "value": this.parseValue(e["key"], e["value"], opts)
+                        "key": this.stripKeyPrefix(e["key"] ?? e["id"]),
+                        "value": this.parseValue(e["key"] ?? e["id"], e["value"], opts)
                     });
                 });
                 return newData;

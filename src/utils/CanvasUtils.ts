@@ -1,9 +1,9 @@
-import { Canvas, createCanvas, NodeCanvasRenderingContext2D } from "canvas";
+import { Canvas, createCanvas, CanvasRenderingContext2D } from "canvas";
 import { CANVAS_FONT } from "../Constants";
 
-const cache: { text: string, size: number }[] = [];
+const cache: { text: string, size: number, font: string }[] = [];
 
-export function roundRect(ctx: NodeCanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, func: "fill" | "stroke" | "clip" = "fill") {
+export function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, func: "fill" | "stroke" | "clip" = "fill") {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
@@ -86,9 +86,9 @@ export function cloneCanvas(oldCanvas: Canvas) {
     return newCanvas;
 }
 
-export function fitTextOnCanvas(ctx: NodeCanvasRenderingContext2D, text: string, width: number, font = CANVAS_FONT, startSize = 100) {
+export function fitTextOnCanvas(ctx: CanvasRenderingContext2D, text: string, width: number, font = CANVAS_FONT, startSize = 100) {
 
-    const cached = cache.find(value => value.text === text);
+    const cached = cache.find(value => value.text === text && value.font === font);
     if (cached)
         return cached.size;
 
@@ -107,13 +107,13 @@ export function fitTextOnCanvas(ctx: NodeCanvasRenderingContext2D, text: string,
 
     ctx.font = prevFont;
 
-    cache.push({ text, size: fontsize });
+    cache.push({ text, size: fontsize, font });
 
     return fontsize;
 
 }
 
-export function underlineText(ctx: NodeCanvasRenderingContext2D, text: string, x: number, y: number) {
+export function underlineText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
     const metrics = ctx.measureText(text);
     const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
     const fontSize = Math.floor(actualHeight * 1.4);

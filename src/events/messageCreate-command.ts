@@ -56,6 +56,11 @@ export = () => {
                         return message.reply(Localisation.getTranslation("command.access.botOwner"));
                     }
                 } break;
+                case CommandAccess.PatreonOrBooster: {
+                    if (isDM(message.channel) || (!(await isPatreon(message.author.id, message.guild.id)) && !isBooster(message.member))) {
+                        return message.reply(Localisation.getTranslation("command.access.patreon"));
+                    }
+                } break;
             }
 
             const outputs = customCommand.outputs;

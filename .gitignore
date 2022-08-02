@@ -6,5 +6,6 @@ dist/
 guildSpecific/
 wings/
 customWings/
+customWingsRequest/
 emojis/
 .vscode
