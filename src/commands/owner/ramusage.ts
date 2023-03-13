@@ -1,4 +1,5 @@
 import { memoryUsage } from "process";
+import { RamUsageBaseCommand } from "../../baseCommands/owner/RamUsage";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
 import { Command, CommandArguments } from "../../structs/Command";
@@ -9,20 +10,22 @@ class RamUsageCommand extends Command {
         super();
         this.category = Owner;
         this.access = CommandAccess.BotOwner;
+
+        this.baseCommand = new RamUsageBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
-        const bytes = memoryUsage.rss();
-        const exts = ["B", "KB", "MB", "GB", "TB"];
-        let ext = 0;
-        let size = bytes;
-        while (size >= 1024 && ext < exts.length - 1) {
-            size /= 1024;
-            ext++;
-        }
+    // public async onRun(cmdArgs: CommandArguments) {
+    //     const bytes = memoryUsage.rss();
+    //     const exts = ["B", "KB", "MB", "GB", "TB"];
+    //     let ext = 0;
+    //     let size = bytes;
+    //     while (size >= 1024 && ext < exts.length - 1) {
+    //         size /= 1024;
+    //         ext++;
+    //     }
 
-        cmdArgs.message.reply(Localisation.getTranslation("ramusage.output", size.toFixed(2), exts[ext]));
-    }
+    //     cmdArgs.message.reply(Localisation.getTranslation("ramusage.output", size.toFixed(2), exts[ext]));
+    // }
 }
 
 export = RamUsageCommand;

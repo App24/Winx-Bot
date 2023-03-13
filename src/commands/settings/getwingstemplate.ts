@@ -1,3 +1,4 @@
+import { GeTWingsTemplateBaseCommand } from "../../baseCommands/settings/GetWingsTemplate";
 import { Settings } from "../../structs/Category";
 import { Command, CommandArguments } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
@@ -11,11 +12,13 @@ class GetWingsTemplateCommand extends Command {
         this.category = Settings;
         this.available = CommandAvailable.Guild;
         this.access = CommandAccess.Moderators;
+
+        this.baseCommand = new GeTWingsTemplateBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
-        cmdArgs.message.reply({ files: [canvasToMessageAttachment(await drawTemplateCard(cmdArgs.member))] });
-    }
+    // public async onRun(cmdArgs: CommandArguments) {
+    //     cmdArgs.message.reply({ files: [canvasToMessageAttachment(await drawTemplateCard(cmdArgs.member))] });
+    // }
 }
 
 export = GetWingsTemplateCommand;

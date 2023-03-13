@@ -18,3 +18,6 @@ export const MAX_ITEMS_PER_SELECT_MENU = 15;
 
 export const CARD_CANVAS_WIDTH = 1200;
 export const CARD_CANVAS_HEIGHT = 600;
+
+export const FAIRY_PARTS_FOLDER = "fairyParts/data";
+export const FAIRY_PARTS_IMAGES_FOLDER = "fairyParts/images";

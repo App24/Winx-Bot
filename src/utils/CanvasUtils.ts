@@ -67,7 +67,8 @@ export function rgbToHsl(r: number, g: number, b: number) {
 export function canvasColor(color: string, width = 700, height = 320) {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = "#" + color;
+    if (!color.startsWith("#")) color = `#${color}`;
+    ctx.fillStyle = color;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     return canvas;

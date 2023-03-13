@@ -1,5 +1,6 @@
-import { BaseGuildTextChannel, Guild, MessageEmbed, TextChannel } from "discord.js";
+import { BaseGuildTextChannel, Guild, EmbedBuilder, TextChannel, ButtonStyle } from "discord.js";
 import { existsSync, mkdirSync, renameSync, unlinkSync } from "fs";
+import { CustomWingsBaseCommand } from "../../baseCommands/customisation/CustomWings";
 import { BotUser } from "../../BotClient";
 import { CARD_CANVAS_HEIGHT, CARD_CANVAS_WIDTH, CUSTOM_WINGS_FOLDER, CUSTOM_WINGS_REQUEST_FOLDER } from "../../Constants";
 import { Localisation } from "../../localisation";
@@ -22,9 +23,11 @@ class CustomWingsCommand extends Command {
         this.available = CommandAvailable.Guild;
         this.access = CommandAccess.PatreonOrBooster;
         this.category = Customisation;
+
+        this.baseCommand = new CustomWingsBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
@@ -71,17 +74,17 @@ class CustomWingsCommand extends Command {
 
             // channel.send({ embeds, files });
         });
-    }
+    }*/
 }
 
-export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guild, channel: BaseGuildTextChannel) {
+/*export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guild, channel: BaseGuildTextChannel) {
     const CustomWingsDatabase = BotUser.getDatabase(DatabaseType.CustomWings);
     const customWings: CustomWings[] = await getServerDatabase(CustomWingsDatabase, channel.guildId);
 
     const WingsRequests = BotUser.getDatabase(DatabaseType.WingsRequests);
     const wingsRequests: WingsRequest[] = await getServerDatabase(WingsRequests, channel.guildId);
 
-    const embed = new MessageEmbed();
+    const embed = new EmbedBuilder();
 
     embed.setColor(await getBotRoleColor(guild));
 
@@ -96,7 +99,7 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
         sendTarget: <TextChannel>channel, settings: { max: 1 }, options: { embeds: [embed], files: [wingsRequest.wingsFile] }, buttons: [
             {
                 customId: "accept",
-                style: "SUCCESS",
+                style: ButtonStyle.Success,
                 label: Localisation.getTranslation("button.accept"),
                 async onRun({ interaction }) {
                     let wingsIndex = customWings.findIndex(u => u.userId === user.id);
@@ -134,7 +137,7 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
             },
             {
                 customId: "deny",
-                style: "DANGER",
+                style: ButtonStyle.Danger,
                 label: Localisation.getTranslation("button.deny"),
                 async onRun({ interaction }) {
                     const requestWingsIndex = wingsRequests.findIndex(u => u.userId === user.id);
@@ -154,6 +157,6 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
             }
         ]
     });
-}
+}*/
 
 export default CustomWingsCommand;

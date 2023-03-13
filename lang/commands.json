@@ -31,7 +31,7 @@
     "help.command.patreon": "__Patreon Only__",
     "help.command.booster": "__Booster Only__",
     "help.command.aliases": "Aliases: {0}",
-    "help.command.usage": "Usage: {0}",
+    "help.command.usage": "Usage: {0}{1} {2}",
 
     "suggestion.request": "**Request by {0}**\n{1}",
 
@@ -201,5 +201,7 @@
 
     "cardcode.get.output": "Here is your code: `{0}`",
     "cardcode.set.output": "Card code set!",
-    "cardcode.reset.output": "Card code reset!"
+    "cardcode.reset.output": "Card code reset!",
+
+    "cardslots.command.description": "Save your current card into a slot to easily switch to it"
 }

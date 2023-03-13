@@ -23,6 +23,8 @@ export class ServerUserSettings {
 
     public cardCode: string;
 
+    public cardSlots: CardSlot[];
+
     public constructor(id: string) {
         this.userId = id;
         this.wingsLevel = -1;
@@ -42,7 +44,14 @@ export class ServerUserSettings {
         this.winxCharacter = WinxCharacter.None;
         this.winxCharacterB = WinxCharacter.None;
         this.cardCode = DEFAULT_CARD_CODE;
+        this.cardSlots = [];
     }
+}
+
+export interface CardSlot {
+    name: string,
+    code: string,
+    customWings: string
 }
 
 export enum CardTemplate {

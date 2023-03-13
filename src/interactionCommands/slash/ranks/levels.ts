@@ -1,31 +1,28 @@
-import { BotUser } from "../../../BotClient";
-import { Localisation } from "../../../localisation";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
+import { LevelsBaseCommand } from "../../../baseCommands/ranks/Levels";
 import { CommandAvailable } from "../../../structs/CommandAvailable";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
-import { SlashCommand, SlashCommandArguments } from "../../../structs/SlashCommand";
-import { drawCard } from "../../../utils/CardUtils";
-import { getUserFromMention, getMemberById } from "../../../utils/GetterUtils";
-import { getCurrentRank, getNextRank, getServerUserSettings } from "../../../utils/RankUtils";
-import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../../utils/Utils";
+import { SlashCommand } from "../../../structs/SlashCommand";
 
 class LevelsCommand extends SlashCommand {
     public constructor() {
         super({
-            name: "", description: "Show your level!", type: "CHAT_INPUT", options:
+            name: "", description: "Show your level!", type: ApplicationCommandType.ChatInput, options:
                 [
                     {
                         name: "user",
                         description: "Mention user to see their levels",
-                        type: "USER",
+                        type: ApplicationCommandOptionType.User
                     }
-                ]
+                ],
+            dmPermission: false
         });
 
         this.available = CommandAvailable.Guild;
+
+        this.baseCommand = new LevelsBaseCommand();
     }
 
-    public async onRun(cmdArgs: SlashCommandArguments) {
+    /*public async onRun(cmdArgs: SlashCommandArguments) {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
 
@@ -68,7 +65,7 @@ class LevelsCommand extends SlashCommand {
         const { image, extension } = await drawCard(leaderboardPosition, userLevel, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
 
         cmdArgs.interaction.followUp({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
-    }
+    }*/
 }
 
 export = LevelsCommand;

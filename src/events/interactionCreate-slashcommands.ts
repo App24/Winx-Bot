@@ -1,23 +1,26 @@
-import { GuildMember } from "discord.js";
+import { ApplicationCommandOptionType, Collection, GuildMember } from "discord.js";
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 import { CommandAvailable } from "../structs/CommandAvailable";
 import { CommandAccess } from "../structs/CommandAccess";
 import { SlashCommandArguments } from "../structs/SlashCommand";
 import { isBooster, isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
+import { secondsToTime } from "../utils/FormatUtils";
+
+const cooldowns = new Collection<string, Collection<string, number>>();
 
 export = () => {
     BotUser.on("interactionCreate", async (interaction) => {
-        if (!interaction.isCommand() && !interaction.isContextMenu()) return;
+        if (!interaction.isCommand()) return;
 
 
         const command = BotUser.getSlashCommand(interaction.commandName);
         if (!command)
             return <any>interaction.reply("No command");
 
-        const reportIssue = async (text: string) => {
+        const reportIssue = async (text: string, ...args) => {
             await interaction.deferReply({ ephemeral: true }).catch(() => undefined);
-            await interaction.followUp(Localisation.getTranslation(text));
+            await interaction.followUp(Localisation.getTranslation(text, ...args));
         };
 
 
@@ -61,12 +64,33 @@ export = () => {
             } break;
         }
 
+        if (!cooldowns.has(interaction.commandName)) {
+            cooldowns.set(interaction.commandName, new Collection());
+        }
+
+        const now = Date.now();
+        const timestamps = cooldowns.get(interaction.commandName);
+        const cooldownAmount = (command.cooldown === undefined ? 3 : command.cooldown) * 1000;
+
+        if (timestamps.has(interaction.user.id)) {
+            const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
+
+            if (now < expirationTime) {
+                const timeLeft = (expirationTime - now) / 1000;
+                // return message.reply(Localisation.getTranslation("command.cooldown", secondsToTime(timeLeft), commandName));
+                return reportIssue("command.cooldown", secondsToTime(timeLeft), interaction.commandName);
+            }
+        }
+
+        timestamps.set(interaction.user.id, now);
+        setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
+
         await interaction.deferReply({ ephemeral: command.deferEphemeral }).catch(() => undefined);
 
         const args: string[] = [];
 
         for (const option of interaction.options.data) {
-            if (option.type === "SUB_COMMAND") {
+            if (option.type === ApplicationCommandOptionType.Subcommand) {
                 if (option.name) args.push(option.name);
                 option.options?.forEach((x) => {
                     if (x.value) args.push(x.value.toString());

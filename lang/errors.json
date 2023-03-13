@@ -71,5 +71,9 @@
     "error.rank.none": "You have not achieved any transformations yet!",
 
     "error.customwings.user.none": "That user does not have custom wings!",
-    "error.customwings.guild.none": "There are no custom wings in this server!"
+    "error.customwings.guild.none": "There are no custom wings in this server!",
+
+    "error.generic": "Something went wrong!",
+
+    "error.message.too.long": "Message is too long!"
 }

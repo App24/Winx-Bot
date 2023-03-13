@@ -1,4 +1,4 @@
-import { GuildMember, InteractionButtonOptions, InteractionCollector, Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageOptions, TextBasedChannel, User } from "discord.js";
+import {  ActionRowBuilder, ButtonBuilder, ButtonInteraction, CommandInteraction, ComponentType, GuildMember, InteractionButtonComponentData, InteractionCollector, Message, MessageActionRowComponentBuilder, MessageComponentInteraction, MessageOptions, SelectMenuInteraction, TextBasedChannel, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "./Utils";
 
@@ -10,24 +10,30 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
 
     if (buttons.length > 15) buttons.splice(15, buttons.length - 15);
 
-    const rows: MessageActionRow[] = [];
+    const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
     for (let i = 0; i < Math.ceil(buttons.length / 5); i++) {
-        rows.push(new MessageActionRow());
+        rows.push(new ActionRowBuilder());
     }
 
     buttons.forEach((button, index) => {
-        rows[Math.floor(index / 5)].addComponents(new MessageButton(button));
+        // rows[Math.floor(index / 5)].addComponents(new ButtonComponent(button));
+        button.type=ComponentType.Button;
+        rows[Math.floor(index / 5)].addComponents(new ButtonBuilder(button));
     });
 
     let msg: Message<boolean>;
 
     let sendMessage;
 
-    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction) {
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
         sendMessage = sendTarget.reply.bind(sendTarget);
-        if (sendTarget instanceof MessageComponentInteraction) {
+        if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
             if (!sendTarget.deferred && !sendTarget.replied) {
-                await sendTarget.deferUpdate();
+                if(sendTarget instanceof MessageComponentInteraction){
+                    await sendTarget.deferUpdate();
+                }else{
+                    await sendTarget.deferReply();
+                }
             }
             sendMessage = sendTarget.followUp.bind(sendTarget);
         }
@@ -67,14 +73,16 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
     const collector = msg.createMessageComponentCollector({ filter: () => true, time: settings.time });
 
     collector.on("end", () => {
-        const components = msg.components;
-        if (components.length > 0) {
-            components.forEach(component => {
-                component.components.forEach(c => {
-                    c.disabled = true;
-                });
+        const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
+        msg.components.forEach(component => {
+            const row = new ActionRowBuilder<MessageActionRowComponentBuilder>();
+            component.components.forEach(c => {
+                if (c.type === ComponentType.Button) {
+                    row.addComponents(ButtonBuilder.from(c).setDisabled(true));
+                }
             });
-        }
+            components.push(row);
+        });
         msg.edit({ components: components });
     });
 
@@ -111,7 +119,7 @@ export async function createWhatToDoButtons(messageButtonData: MessageButtonData
     return createMessageButtons({ sendTarget: messageButtonData.sendTarget, author: messageButtonData.author, options: Localisation.getTranslation("generic.whattodo"), settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
 }
 
-export type SendTarget = Message | TextBasedChannel | MessageComponentInteraction;
+export type SendTarget = Message | TextBasedChannel | MessageComponentInteraction | CommandInteraction;
 export type MessageAuthor = GuildMember | User | string;
 
 export interface MessageButtonData {
@@ -120,17 +128,17 @@ export interface MessageButtonData {
     options?: string | MessageOptions,
     settings?: { max?: number, time?: number },
     beforeButton?: (interactionData: InteractionData) => void,
-    buttons: InteractiveButton[]
+    buttons: Partial<InteractiveButton>[]
 }
 
 export interface InteractionData {
     interaction: MessageComponentInteraction,
     message: Message,
     data: { information },
-    collector: InteractionCollector<MessageComponentInteraction>;
+    collector: InteractionCollector<ButtonInteraction | SelectMenuInteraction>;
 }
 
-export interface InteractiveButton extends InteractionButtonOptions {
+export interface InteractiveButton extends InteractionButtonComponentData {
     onRun(interactionData: InteractionData): void;
     hidden?: boolean;
 }

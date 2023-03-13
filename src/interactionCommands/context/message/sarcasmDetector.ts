@@ -1,16 +1,11 @@
-import { SlashCommand, SlashCommandArguments } from "../../../structs/SlashCommand";
+import { ApplicationCommandType } from "discord.js";
+import { SarcasmDetectorBaseCommand } from "../../../baseCommands/misc/SarcasmDetector";
+import { SlashCommand } from "../../../structs/SlashCommand";
 
 class SarcasmDetectorSlashCommand extends SlashCommand {
     public constructor() {
-        super({ type: "MESSAGE", name: "Sarcasm Detector" });
-    }
-
-    public async onRun(cmdArgs: SlashCommandArguments) {
-        if (Math.random() > 0.5) {
-            cmdArgs.interaction.followUp("🟢 Sarcasm!");
-        } else {
-            cmdArgs.interaction.followUp("🔴 Not Sarcasm!");
-        }
+        super({ type: ApplicationCommandType.Message, name: "Sarcasm Detector" });
+        this.baseCommand = new SarcasmDetectorBaseCommand();
     }
 }
 

@@ -1,9 +1,9 @@
-import { ButtonInteraction, Guild, GuildMember, MessageActionRow, MessageButton, TextBasedChannel } from "discord.js";
+import { ButtonInteraction, Guild, GuildMember, ActionRowBuilder, ButtonBuilder, TextBasedChannel, ButtonStyle, MessageActionRowComponentBuilder } from "discord.js";
 import { Localisation } from "../localisation";
 import { createMessageEmbed } from "./Utils";
 
 export async function waitForPlayers(maxPlayers: number, minPlayers: number, title: string, guild: Guild, channel: TextBasedChannel, author: GuildMember, startGame: (members: GuildMember[]) => void) {
-    const buttons = new MessageActionRow().addComponents(new MessageButton({ customId: "join", style: "PRIMARY", label: Localisation.getTranslation("button.join") }));
+    const buttons = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(new ButtonBuilder({ customId: "join", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.join") }));
 
     let remainingPlayers = maxPlayers;
 
@@ -47,7 +47,7 @@ export async function waitForPlayers(maxPlayers: number, minPlayers: number, tit
             } else {
                 const newButtons = buttons;
                 if (remainingPlayers <= minPlayers) {
-                    newButtons.addComponents(new MessageButton({ customId: "start", style: "PRIMARY", label: Localisation.getTranslation("button.start") }));
+                    newButtons.addComponents(new ButtonBuilder({ customId: "start", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.start") }));
                 }
                 embed.setDescription(Localisation.getTranslation("generic.waitingplayers", remainingPlayers));
                 await interaction.update({ embeds: [embed], components: [newButtons] });

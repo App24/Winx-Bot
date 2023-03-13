@@ -6,6 +6,7 @@
     "button.remove": "Remove",
     "button.clear": "Clear",
     "button.reset": "Reset",
+    "button.edit": "Edit",
 
     "button.custom": "Custom",
 
@@ -48,5 +49,10 @@
     "button.both": "Both",
 
     "button.username": "Username",
-    "button.nickname": "Nickname"
+    "button.nickname": "Nickname",
+
+    "button.save": "Save",
+    "button.load": "Load",
+
+    "button.new": "New"
 }

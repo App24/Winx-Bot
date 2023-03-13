@@ -1,3 +1,8 @@
+## 3.6.0
+- Updated to Discord.js v14
+- Rewrite of command infrastructure to allow for easy slash command implementation
+- Added Card Slots
+
 ## 3.4.2
 - Removed unused variables and commands relating to the customisation aspect of the level cards
 - Added more customisation

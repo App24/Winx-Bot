@@ -1,7 +1,7 @@
-import { Message, TextBasedChannel, User, MessageSelectOptionData, MessageActionRow, MessageSelectMenu, MessageOptions, MessageComponentInteraction, GuildMember } from "discord.js";
+import { Message, User, MessageOptions, MessageComponentInteraction, GuildMember, ActionRowBuilder, MessageSelectOption, SelectMenuBuilder, ComponentType, MessageActionRowComponentBuilder, CommandInteraction } from "discord.js";
 import { MAX_ITEMS_PER_SELECT_MENU } from "../Constants";
 import { Localisation } from "../localisation";
-import { InteractionData } from "./MessageButtonUtils";
+import { InteractionData, SendTarget } from "./MessageButtonUtils";
 import { asyncForEach } from "./Utils";
 
 export async function createMessageSelection(messageSelectData: MessageSelectData) {
@@ -14,9 +14,9 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 
     const optionsList = (Array.isArray(selectMenuOptions) ? selectMenuOptions : [selectMenuOptions]);
 
-    const rows: MessageActionRow[] = [];
+    const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
     for (let i = 0; i < optionsList.length; i++) {
-        rows.push(new MessageActionRow());
+        rows.push(new ActionRowBuilder());
     }
 
     const selectOptions: { selectMenu: SelectMenuOptions, selectIndex: number, options: SelectOption[][] }[] = [];
@@ -36,10 +36,16 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                     value: "next",
                     onSelect: async ({ interaction }) => {
                         const row = rows[index];
-                        (<MessageSelectMenu>row.components[0]).setOptions(selectOptions[index].options[++selectOptions[index].selectIndex]);
+                        // SelectMenuBuilder.from(row.components[0]).setOptions(selectOptions[index].options[++selectOptions[index].selectIndex])
+                        // (<SelectMenuBuilder>row.components[0]).setOptions(selectOptions[index].options[++selectOptions[index].selectIndex]);
+                        row.components[0] = (new SelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[++selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+                        // row.setComponents(selectOptions[index].options[++selectOptions[index].selectIndex]);
                         rows[index] = row;
                         await interaction.update({ components: rows });
-                    }
+                    },
+                    default: false,
+                    description: null,
+                    emoji: null
                 });
             }
             if (selectIndex > 0) {
@@ -48,10 +54,14 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                     value: "previous",
                     onSelect: async ({ interaction }) => {
                         const row = rows[index];
-                        (<MessageSelectMenu>row.components[0]).setOptions(selectOptions[index].options[--selectOptions[index].selectIndex]);
+                        row.components[0] = (new SelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[--selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+                        // (<SelectMenuBuilder>row.components[0]).setOptions(selectOptions[index].options[--selectOptions[index].selectIndex]);
                         rows[index] = row;
                         await interaction.update({ components: rows });
-                    }
+                    },
+                    default: false,
+                    description: null,
+                    emoji: null
                 });
             }
             selectIndex++;
@@ -59,18 +69,23 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
         } while (options.length > 0);
 
         selectOptions.push({ selectMenu, selectIndex: 0, options: tempOptions });
-        rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], minValues: selectMenu.minValues, maxValues: selectMenu.maxValues }));
+        rows[index].addComponents(new SelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+        // rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], minValues: selectMenu.minValues, maxValues: selectMenu.maxValues }));
     });
 
     let msg: Message<boolean>;
 
     let sendMessage;
 
-    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction) {
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
         sendMessage = sendTarget.reply.bind(sendTarget);
-        if (sendTarget instanceof MessageComponentInteraction) {
+        if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
             if (!sendTarget.deferred && !sendTarget.replied) {
-                await sendTarget.deferUpdate();
+                if (sendTarget instanceof MessageComponentInteraction) {
+                    await sendTarget.deferUpdate();
+                } else {
+                    await sendTarget.deferReply();
+                }
             }
             sendMessage = sendTarget.followUp.bind(sendTarget);
         }
@@ -107,14 +122,16 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
     const collector = msg.createMessageComponentCollector({ filter: () => true, time: settings.time });
 
     collector.on("end", () => {
-        const components = msg.components;
-        if (components.length > 0) {
-            components.forEach(component => {
-                component.components.forEach(c => {
-                    c.disabled = true;
-                });
+        const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
+        msg.components.forEach(component => {
+            const row = new ActionRowBuilder<MessageActionRowComponentBuilder>();
+            component.components.forEach(c => {
+                if (c.type === ComponentType.SelectMenu) {
+                    row.addComponents(SelectMenuBuilder.from(c).setDisabled(true));
+                }
             });
-        }
+            components.push(row);
+        });
         msg.edit({ components: components });
     });
 
@@ -156,7 +173,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 }
 
 export interface MessageSelectData {
-    sendTarget: Message | TextBasedChannel | MessageComponentInteraction,
+    sendTarget: SendTarget,
     author?: User | string | GuildMember,
     options?: string | MessageOptions,
     settings?: { max?: number, time?: number },
@@ -172,6 +189,6 @@ export interface SelectMenuOptions {
     options: SelectOption[]
 }
 
-export interface SelectOption extends MessageSelectOptionData {
+export interface SelectOption extends MessageSelectOption {
     onSelect(interactionData: InteractionData): void;
 }

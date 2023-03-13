@@ -1,13 +1,15 @@
+import { CardWebsiteBaseCommand } from "../../baseCommands/info/CardWebsite";
+import { Info } from "../../structs/Category";
 import { Command, CommandArguments } from "../../structs/Command";
 
 class CardWebsiteCommand extends Command {
     public constructor() {
         super();
         this.aliases = ["cardsite", "website"];
-    }
 
-    public onRun(cmdArgs: CommandArguments) {
-        cmdArgs.message.reply("https://app24.github.io/cardeditor/");
+        this.category = Info;
+
+        this.baseCommand = new CardWebsiteBaseCommand();
     }
 }
 

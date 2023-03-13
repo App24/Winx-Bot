@@ -1,4 +1,5 @@
 import { Guild } from "discord.js";
+import { WinxCharacterBaseCommand } from "../../baseCommands/customisation/WinxCharacter";
 import { BotUser } from "../../BotClient";
 import { Keyv } from "../../keyv/keyv-index";
 import { Localisation } from "../../localisation";
@@ -18,9 +19,11 @@ class WinxCharacterCommand extends Command {
         this.available = CommandAvailable.Guild;
         this.category = Customisation;
         this.aliases = ["setcharacter", "setwinx"];
+
+        this.baseCommand=new WinxCharacterBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
         const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
 
@@ -51,7 +54,10 @@ class WinxCharacterCommand extends Command {
                                         options: await this.updateWings("WINGS_A", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
                                     }
                                 });
-                            }
+                            },
+                            default: false,
+                            description: null,
+                            emoji: null
                         },
                         {
                             label: "Winx Character for Secondary Wings",
@@ -63,7 +69,10 @@ class WinxCharacterCommand extends Command {
                                         options: await this.updateWings("WINGS_B", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
                                     }
                                 });
-                            }
+                            },
+                            default: false,
+                            description: null,
+                            emoji: null
                         },
                         {
                             label: "Both Wings",
@@ -75,7 +84,10 @@ class WinxCharacterCommand extends Command {
                                         options: await this.updateWings("BOTH", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
                                     }
                                 });
-                            }
+                            },
+                            default: false,
+                            description: null,
+                            emoji: null
                         }
                     ]
             }
@@ -120,7 +132,9 @@ class WinxCharacterCommand extends Command {
                 onSelect: async({interaction})=>{
                     setWinxCharacter(WinxCharacter[character]);
                     await interaction.reply(Localisation.getTranslation("winxcharacter.set", character));
-                }
+                },
+                description: null,
+                emoji: null
             });
         });
 
@@ -129,11 +143,14 @@ class WinxCharacterCommand extends Command {
             label: Localisation.getTranslation("generic.cancel"),
             onSelect: async ({ interaction }) => {
                 interaction.deferUpdate();
-            }
+            },
+            default: false,
+            description: null,
+            emoji: null
         });
 
         return options;
-    }
+    }*/
 }
 
 export = WinxCharacterCommand;

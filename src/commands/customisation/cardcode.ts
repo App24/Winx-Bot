@@ -1,4 +1,5 @@
 import { DMChannel, MessageComponentInteraction } from "discord.js";
+import { CardCodeBaseCommand } from "../../baseCommands/customisation/CardCode";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
@@ -15,9 +16,11 @@ class CardCodeCommand extends Command {
         super();
         this.available = CommandAvailable.Guild;
         this.category = Customisation;
+
+        this.baseCommand = new CardCodeBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
         const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
 
@@ -36,7 +39,10 @@ class CardCodeCommand extends Command {
                         value: "get",
                         onSelect: async ({ interaction }) => {
                             await interaction.reply({ content: userSettings.cardCode || DEFAULT_CARD_CODE, ephemeral: true });
-                        }
+                        },
+                        default: false,
+                        description: null,
+                        emoji: null
                     },
                     {
                         label: Localisation.getTranslation("button.set"),
@@ -55,7 +61,10 @@ class CardCodeCommand extends Command {
                             serverUserSettings[userIndex] = userSettings;
                             message.reply(Localisation.getTranslation("cardcode.set.output", code));
                             await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
-                        }
+                        },
+                        default: false,
+                        description: null,
+                        emoji: null
                     },
                     {
                         label: Localisation.getTranslation("button.reset"),
@@ -65,12 +74,15 @@ class CardCodeCommand extends Command {
                             serverUserSettings[userIndex] = userSettings;
                             interaction.reply(Localisation.getTranslation("cardcode.reset.output"));
                             await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
-                        }
+                        },
+                        default: false,
+                        description: null,
+                        emoji: null
                     }
                 ]
             }
         });
-    }
+    }*/
 }
 
 export = CardCodeCommand;

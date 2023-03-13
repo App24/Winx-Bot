@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Guild, GuildMember, Role, ThreadChannel, User } from "discord.js";
+import { BaseGuildTextChannel, ChannelType, Guild, GuildMember, Role, ThreadChannel, User } from "discord.js";
 import { BotUser } from "../BotClient";
 
 //#region User/Member
@@ -74,7 +74,23 @@ export function GetChannelFromMention(mention: string, guild: Guild) {
 
 export function getChannelById(id: string, guild: Guild) {
     if (!id || !guild) return undefined;
-    return guild.channels.cache.find(channel => channel.id === id && channel.isText());
+    return guild.channels.cache.find(channel => channel.id === id && channel.type === ChannelType.GuildText);
+}
+
+export function GetCategoryFromMention(mention: string, guild: Guild) {
+    if (!mention || !guild) return;
+    const matches = mention.match(/^<#!?(\d+)>$/);
+
+    if (!matches) {
+        return getCategoryById(mention, guild);
+    }
+
+    return getCategoryById(matches[1], guild);
+}
+
+export function getCategoryById(id: string, guild: Guild) {
+    if (!id || !guild) return undefined;
+    return guild.channels.cache.find(channel => channel.id === id && channel.type === ChannelType.GuildCategory);
 }
 
 export function getTextChannelFromMention(mention: string, guild: Guild) {
@@ -90,7 +106,7 @@ export function getTextChannelFromMention(mention: string, guild: Guild) {
 
 export function getTextChannelById(id: string, guild: Guild) {
     if (!id || !guild) return undefined;
-    return <BaseGuildTextChannel>guild.channels.cache.find(channel => channel.id === id && channel.isText());
+    return <BaseGuildTextChannel>guild.channels.cache.find(channel => channel.id === id && channel.type === ChannelType.GuildText);
 }
 
 export function getThreadChannelFromMention(mention: string, guild: Guild) {

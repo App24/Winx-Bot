@@ -1,4 +1,4 @@
-import { Message, MessageAttachment, MessageComponentInteraction, MessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember } from "discord.js";
+import { Message, MessageComponentInteraction, MessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember, Attachment, CommandInteraction } from "discord.js";
 import { Localisation } from "../localisation";
 import { getMemberFromMention, getRoleFromMention, getTextChannelFromMention } from "./GetterUtils";
 import { MessageAuthor, SendTarget } from "./MessageButtonUtils";
@@ -11,11 +11,15 @@ export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Messag
 
     let sendMessage;
 
-    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction) {
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
         sendMessage = sendTarget.reply.bind(sendTarget);
-        if (sendTarget instanceof MessageComponentInteraction) {
+        if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
             if (!sendTarget.deferred && !sendTarget.replied) {
-                await sendTarget.deferUpdate();
+                if (sendTarget instanceof MessageComponentInteraction) {
+                    await sendTarget.deferUpdate();
+                } else {
+                    await sendTarget.deferReply();
+                }
             }
             sendMessage = sendTarget.followUp.bind(sendTarget);
         }
@@ -102,6 +106,8 @@ export async function getLevelReply(replyData: ReplyData) {
 }
 
 export async function getStringReply(replyData: ReplyData) {
+    if (!replyData.options) return { value: null, message: null };
+
     return getReply<string>(replyData, (msg, resolve) => {
         resolve({ value: msg.content, message: msg });
     });
@@ -112,7 +118,7 @@ export async function getImageReply(replyData: ReplyData) {
         replyData.options = "argument.reply.image";
     }
 
-    return getReply<MessageAttachment>(replyData, (msg, resolve, reject) => {
+    return getReply<Attachment>(replyData, (msg, resolve, reject) => {
         const image = msg.attachments.first();
         if (!image) {
             reject("missing.image");

@@ -3,7 +3,7 @@ import { copyFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, st
 import request from "request";
 import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, LB_USERS, PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { BaseGuildTextChannel, CommandInteraction, ContextMenuInteraction, Guild, GuildMember, Message, MessageAttachment, MessageComponentInteraction, MessageEmbed, MessageEmbedOptions, TextBasedChannel } from "discord.js";
+import { BaseGuildTextChannel, ChannelType, CommandInteraction, Guild, GuildMember, Message, AttachmentBuilder, MessageComponentInteraction, TextBasedChannel, ContextMenuCommandInteraction, EmbedBuilder, EmbedData } from "discord.js";
 import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
 import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
@@ -127,7 +127,7 @@ export async function getServerDatabase<T>(database: Keyv, guildId: string, defa
  * @returns True if the chanell is DM, false if not
  */
 export function isDM(channel: TextBasedChannel) {
-    return channel.type === "DM";
+    return channel.type === ChannelType.DM;
 }
 
 /**
@@ -154,7 +154,7 @@ export function isBooster(member: GuildMember) {
  * @returns Message Attachment
  */
 export function canvasToMessageAttachment(data: Canvas | Buffer, fileName = "color", fileExtension = "png") {
-    return new MessageAttachment(data instanceof Canvas ? data.toBuffer() : data, `${fileName}.${fileExtension}`);
+    return new AttachmentBuilder(data instanceof Canvas ? data.toBuffer() : data, { name: `${fileName}.${fileExtension}` });
 }
 
 /**
@@ -244,7 +244,7 @@ export function backupDatabases() {
     });
 }
 
-export async function reportError(error, message?: Message | MessageComponentInteraction | CommandInteraction | ContextMenuInteraction) {
+export async function reportError(error, message?: Message | MessageComponentInteraction | CommandInteraction | ContextMenuCommandInteraction) {
     const Errors = BotUser.getDatabase(DatabaseType.Errors);
     let hex: string;
     let errors;
@@ -284,23 +284,33 @@ export async function reportError(error, message?: Message | MessageComponentInt
 
 export function isModerator(member: GuildMember) {
     if (!member) return false;
-    return member.permissions.has("MANAGE_GUILD");
+    return member.permissions.has("ManageGuild");
 }
 
-export async function createMessageEmbed(data: MessageEmbedOptions | MessageEmbed, guild: Guild) {
-    const embed = new MessageEmbed(data);
+export async function createMessageEmbed(data: EmbedData | EmbedBuilder, guild: Guild) {
+    let embed: EmbedBuilder;
+    if (data instanceof EmbedBuilder) {
+        embed = data;
+    } else {
+        embed = new EmbedBuilder(data);
+    }
     embed.setColor(await getBotRoleColor(guild));
     const footers = [Localisation.getTranslation("footer.donate", process.env.npm_package_config_donate), Localisation.getTranslation("footer.suggestion", PREFIX, "suggestion")];
     const option = Math.floor((footers.length * 10) * Math.random());
     if (option < footers.length)
-        embed.setFooter({ text: `${(data.footer && data.footer.text) || ""}\n${footers[option]}` });
+        embed.setFooter({ text: `${(embed.data.footer && embed.data.footer.text) || ""}\n${footers[option]}` });
     return embed;
 }
 
-export function downloadFile(uri: string, fileName: string, callback?: () => void) {
-    request.head(uri, function () {
-        request(uri).pipe(createWriteStream(fileName)).on("close", callback);
+export async function downloadFile(uri: string, fileName: string) {
+    return new Promise((resolve) => {
+        request.head(uri, function () {
+            request(uri).pipe(createWriteStream(fileName)).on("close", () => resolve(null));
+        });
     });
+    // request.head(uri, function () {
+    //     request(uri).pipe(createWriteStream(fileName)).on("close", callback);
+    // });
 }
 
 export function getBrightnessColor(color: Color, brightColor = "white", darkColor = "black") {
@@ -337,4 +347,9 @@ export function toArrayBuffer(buf: Buffer) {
         view[i] = buf[i];
     }
     return ab;
+}
+
+export function removeEmojis(text: string) {
+    const regex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g;
+    return text.replace(regex, '');
 }

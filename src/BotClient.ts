@@ -1,14 +1,15 @@
-import { Client, ClientOptions, Collection, Intents, Options } from "discord.js";
+import { ApplicationCommandType, Client, ClientOptions, Collection, GatewayIntentBits, IntentsBitField, Options, Partials } from "discord.js";
 import path from "path";
 import { DATABASE_FOLDER } from "./Constants";
 import { Keyv } from "./keyv/keyv-index";
 import { Localisation } from "./localisation";
 import { DatabaseType } from "./structs/DatabaseTypes";
-import { loadFiles } from "./utils/Utils";
+import { asyncForEach, loadFiles } from "./utils/Utils";
 import fs from "fs";
 import { Command } from "./structs/Command";
 import { SlashCommand } from "./structs/SlashCommand";
 import { Category } from "./structs/Category";
+import { MultiCommand, MultiSlashCommand } from "./structs/MultiCommand";
 
 interface BotOptions {
     clientOptions?: ClientOptions;
@@ -57,20 +58,25 @@ class BotClient extends Client {
             try {
                 const commandImport = await import(`./${file.substr(5, file.length)}`);
                 const { default: cClass } = commandImport;
-                const command: Command = new cClass();
-                if (!command.deprecated) {
-                    const name = path.basename(file).slice(0, -3);
-                    if (!command.description)
-                        command.description = `${name}.command.description`;
-                    this.commands.set(name, command);
-                    switch (this.botOptions.logLoading) {
-                        case 'complex':
-                        case 'all':
-                            console.log(Localisation.getTranslation("bot.load.command.complex", name));
-                            break;
-                    }
-                    loaded++;
+                const cClasses = [];
+                if (!Array.isArray(cClass)) {
+                    cClasses.push(cClass);
+                } else {
+                    cClasses.push(...cClass);
                 }
+
+                await asyncForEach(cClasses, async (c) => {
+                    let command = c;
+                    let name = path.basename(file).slice(0, -3);
+                    if (c instanceof MultiCommand) {
+                        command = await c.generateCommand();
+                        name = c.name;
+                    }
+                    if (this.loadCommand(command, name)) {
+                        loaded++;
+                    }
+                });
+
             } catch { }
         }
         switch (this.botOptions.logLoading) {
@@ -79,6 +85,33 @@ class BotClient extends Client {
                 console.log(Localisation.getTranslation("bot.load.command.simple", loaded));
                 break;
         }
+    }
+
+    private loadCommand(cClass, name: string) {
+        try {
+            let command: Command;
+            if (cClass instanceof Command) {
+                command = cClass;
+            } else {
+                command = new cClass();
+            }
+            if (!command.deprecated) {
+                if (!command.description)
+                    command.description = `${name}.command.description`;
+                command.commandName = name;
+                this.commands.set(name, command);
+                switch (this.botOptions.logLoading) {
+                    case 'complex':
+                    case 'all':
+                        console.log(Localisation.getTranslation("bot.load.command.complex", name));
+                        break;
+                }
+                // loaded++;
+                return true;
+            }
+            return false;
+        }
+        catch { return false; }
     }
 
     private async loadEvents() {
@@ -119,22 +152,41 @@ class BotClient extends Client {
             try {
                 const commandImport = await import(`./${file.substr(5, file.length)}`);
                 const { default: cClass } = commandImport;
-                const command: SlashCommand = new cClass();
-                const name = path.basename(file).slice(0, -3);
-                if (command.commandData.type === "CHAT_INPUT") {
-                    if (!command.commandData.description) {
-                        console.log(`Slash Command: \`${name}\` has no description, yet it is a \`${command.commandData.type}\` slash command!`);
-                        continue;
+                const cClasses = [];
+                if (!Array.isArray(cClass)) {
+                    cClasses.push(cClass);
+                } else {
+                    cClasses.push(...cClass);
+                }
+
+                await asyncForEach(cClasses, async (c, i) => {
+                    let command = c;
+                    let name = path.basename(file).slice(0, -3);
+                    if (c instanceof MultiSlashCommand) {
+                        command = await c.generateCommand();
+                        name = command.commandData.name;
+                        if (name === "" || !name) return console.log(`Command[${i}] in file ${file} does not have a set name!`);
                     }
-                }
-                this.SlashCommands.set(name, command);
-                switch (this.botOptions.logLoading) {
-                    case 'complex':
-                    case 'all':
-                        console.log(Localisation.getTranslation("bot.load.slashcommand.complex", name));
-                        break;
-                }
-                loaded++;
+                    if (this.loadSlashCommand(command, name)) {
+                        loaded++;
+                    }
+                });
+                // const command: SlashCommand = new cClass();
+                // const name = path.basename(file).slice(0, -3);
+                // if (command.commandData.type === ApplicationCommandType.ChatInput) {
+                //     if (!command.commandData.description) {
+                //         console.log(`Slash Command: \`${name}\` has no description, yet it is a \`${command.commandData.type}\` slash command!`);
+                //         continue;
+                //     }
+                // }
+                // this.SlashCommands.set(name, command);
+                // switch (this.botOptions.logLoading) {
+                //     case 'complex':
+                //     case 'all':
+                //         console.log(Localisation.getTranslation("bot.load.slashcommand.complex", name));
+                //         break;
+                // }
+                // loaded++;
             } catch { }
         }
         switch (this.botOptions.logLoading) {
@@ -143,6 +195,47 @@ class BotClient extends Client {
                 console.log(Localisation.getTranslation("bot.load.slashcommand.simple", loaded));
                 break;
         }
+    }
+
+    private loadSlashCommand(cClass, name: string) {
+        try {
+            let command: SlashCommand;
+            if (cClass instanceof SlashCommand) {
+                command = cClass;
+            } else {
+                command = new cClass();
+            }
+            if (command.commandData.type === ApplicationCommandType.ChatInput) {
+                if (!command.commandData.description || command.commandData.description === "") {
+                    console.log(`Slash Command: \`${name}\` has no description, yet it is a \`${command.commandData.type}\` slash command!`);
+                    return false;
+                }
+            }
+            this.SlashCommands.set(name, command);
+            switch (this.botOptions.logLoading) {
+                case 'complex':
+                case 'all':
+                    console.log(Localisation.getTranslation("bot.load.slashcommand.complex", name));
+                    break;
+            }
+            return true;
+
+            // if (!command.deprecated) {
+            //     if (!command.description)
+            //         command.description = `${name}.command.description`;
+            //     this.commands.set(name, command);
+            //     switch (this.botOptions.logLoading) {
+            //         case 'complex':
+            //         case 'all':
+            //             console.log(Localisation.getTranslation("bot.load.command.complex", name));
+            //             break;
+            //     }
+            //     // loaded++;
+            //     return true;
+            // }
+            return false;
+        }
+        catch { return false; }
     }
 
     public loadLocalisation() {
@@ -171,8 +264,8 @@ class BotClient extends Client {
     }
 }
 
-const intents = new Intents(Intents.FLAGS.DIRECT_MESSAGES | Intents.FLAGS.DIRECT_MESSAGE_REACTIONS | Intents.FLAGS.DIRECT_MESSAGE_TYPING | Intents.FLAGS.GUILDS | Intents.FLAGS.GUILD_BANS | Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS | Intents.FLAGS.GUILD_INTEGRATIONS | Intents.FLAGS.GUILD_INVITES | Intents.FLAGS.GUILD_MEMBERS | Intents.FLAGS.GUILD_MESSAGES | Intents.FLAGS.GUILD_MESSAGE_REACTIONS | Intents.FLAGS.GUILD_MESSAGE_TYPING | Intents.FLAGS.GUILD_VOICE_STATES | Intents.FLAGS.GUILD_WEBHOOKS);
+const intents = new IntentsBitField(GatewayIntentBits.MessageContent | GatewayIntentBits.DirectMessages | GatewayIntentBits.DirectMessageReactions | GatewayIntentBits.DirectMessageTyping | GatewayIntentBits.Guilds | GatewayIntentBits.GuildBans | GatewayIntentBits.GuildEmojisAndStickers | GatewayIntentBits.GuildIntegrations | GatewayIntentBits.GuildInvites | GatewayIntentBits.GuildMembers | GatewayIntentBits.GuildMessages | GatewayIntentBits.GuildMessageReactions | GatewayIntentBits.GuildMessageTyping | GatewayIntentBits.GuildVoiceStates | GatewayIntentBits.GuildWebhooks);
 export const BotUser = new BotClient({
-    clientOptions: { intents: intents, makeCache: Options.cacheEverything(), allowedMentions: { repliedUser: false }, partials: ["CHANNEL"] },
+    clientOptions: { intents: intents, makeCache: Options.cacheEverything(), allowedMentions: { repliedUser: false }, partials: [Partials.Channel] },
     logLoading: 'simplified'
 });

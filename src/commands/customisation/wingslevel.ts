@@ -1,4 +1,5 @@
 import { Guild } from "discord.js";
+import { WingsLevelBaseCommand } from "../../baseCommands/customisation/WingsLevel";
 import { BotUser } from "../../BotClient";
 import { Keyv } from "../../keyv/keyv-index";
 import { Localisation } from "../../localisation";
@@ -19,9 +20,11 @@ class WingsLevelCommand extends Command {
         this.available = CommandAvailable.Guild;
         this.category = Customisation;
         this.aliases = ["wingslevels", "wingselect", "wingsselect"];
+
+        this.baseCommand = new WingsLevelBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
         const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
 
@@ -59,7 +62,10 @@ class WingsLevelCommand extends Command {
                                         options: await this.updateWings("WINGS_A", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild, previousRanks)
                                     }
                                 });
-                            }
+                            },
+                            default: false,
+                            description: null,
+                            emoji: null
                         },
                         {
                             label: "Secondary Wings",
@@ -71,7 +77,10 @@ class WingsLevelCommand extends Command {
                                         options: await this.updateWings("WINGS_B", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild, previousRanks)
                                     }
                                 });
-                            }
+                            },
+                            default: false,
+                            description: null,
+                            emoji: null
                         },
                         {
                             label: "Both Wings",
@@ -83,7 +92,10 @@ class WingsLevelCommand extends Command {
                                         options: await this.updateWings("BOTH", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild, previousRanks)
                                     }
                                 });
-                            }
+                            },
+                            default: false,
+                            description: null,
+                            emoji: null
                         }
                     ]
             }
@@ -126,7 +138,9 @@ class WingsLevelCommand extends Command {
             onSelect: async ({ interaction }) => {
                 setWingsLevel(-1);
                 interaction.reply(Localisation.getTranslation("wingslevel.set", "automatic"));
-            }
+            },
+            description: null,
+            emoji: null
         });
 
         await asyncForEach(previousRanks, async (rank) => {
@@ -140,12 +154,14 @@ class WingsLevelCommand extends Command {
                 onSelect: async ({ interaction }) => {
                     setWingsLevel(rank.level);
                     interaction.reply(Localisation.getTranslation("wingslevel.set", role.name));
-                }
+                },
+                description: null,
+                emoji: null
             });
         });
 
         return options;
-    }
+    }*/
 }
 
 export = WingsLevelCommand;

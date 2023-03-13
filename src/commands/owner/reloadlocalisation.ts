@@ -1,3 +1,4 @@
+import { ReloadLocalisationBaseCommand } from "../../baseCommands/owner/ReloadLocalisation";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
@@ -10,12 +11,14 @@ class ReloadLocalisationCommand extends Command {
         this.access = CommandAccess.BotOwner;
         this.category = Owner;
         this.aliases = ["reloadlocal", "relocal"];
+
+        this.baseCommand = new ReloadLocalisationBaseCommand();
     }
 
-    public onRun(cmdArgs: CommandArguments) {
-        BotUser.loadLocalisation();
-        cmdArgs.message.reply(Localisation.getTranslation("reloadlocalisation.reload"));
-    }
+    // public onRun(cmdArgs: CommandArguments) {
+    //     BotUser.loadLocalisation();
+    //     cmdArgs.message.reply(Localisation.getTranslation("reloadlocalisation.reload"));
+    // }
 }
 
 export = ReloadLocalisationCommand;

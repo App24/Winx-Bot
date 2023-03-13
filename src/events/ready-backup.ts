@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, MessageAttachment } from "discord.js";
+import { BaseGuildTextChannel, AttachmentBuilder } from "discord.js";
 import { BotUser } from "../BotClient";
 import { DATABASE_FOLDER } from "../Constants";
 import { backupDatabases, reportError } from "../utils/Utils";
@@ -34,7 +34,7 @@ async function backup() {
         const file = `${dateToString(newDate, "{dd}_{MM}_{YYYY}")}.zip`;
         await zip(DATABASE_FOLDER, file);
 
-        await backupChannel.send({ files: [new MessageAttachment(file)] });
+        await backupChannel.send({ files: [new AttachmentBuilder(file)] });
         fs.unlinkSync(file);
     } catch (error) {
         await reportError(error.stack);

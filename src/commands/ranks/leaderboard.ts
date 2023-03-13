@@ -8,6 +8,7 @@ import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../utils/Utils";
 import { drawLeaderboard } from "../../utils/CardUtils";
+import { LeaderboardBaseCommand } from "../../baseCommands/ranks/Leaderboard";
 
 class RankCommand extends Command {
     public constructor() {
@@ -16,9 +17,11 @@ class RankCommand extends Command {
         this.usage = [new CommandUsage(false, "argument.user")];
         this.aliases = ["rank", "lb"];
         this.available = CommandAvailable.Guild;
+
+        this.baseCommand = new LeaderboardBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
         if (!levels.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.levels"));
@@ -59,7 +62,7 @@ class RankCommand extends Command {
         cmdArgs.message.reply({ files: [canvasToMessageAttachment(leaderBoard, "leaderboard")] });
 
         msg.delete();
-    }
+    }*/
 }
 
 export = RankCommand;

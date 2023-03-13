@@ -1,3 +1,4 @@
+import { ActivityType } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Activity } from "./Activity";
@@ -5,7 +6,7 @@ import { Activity } from "./Activity";
 export class UsersActivity extends Activity {
     public constructor() {
         super();
-        this.type = "WATCHING";
+        this.type = ActivityType.Watching;
     }
 
     public async getActivity(): Promise<string> {

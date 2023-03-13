@@ -1,31 +1,29 @@
-import { BotUser } from "../../../BotClient";
-import { Localisation } from "../../../localisation";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js";
+import { LeaderboardBaseCommand } from "../../../baseCommands/ranks/Leaderboard";
 import { CommandAvailable } from "../../../structs/CommandAvailable";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
-import { SlashCommand, SlashCommandArguments } from "../../../structs/SlashCommand";
-import { drawLeaderboard } from "../../../utils/CardUtils";
-import { getUserFromMention, getMemberById } from "../../../utils/GetterUtils";
-import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../../utils/Utils";
+import { SlashCommand } from "../../../structs/SlashCommand";
 
 
 class LeaderboardCommand extends SlashCommand {
     public constructor() {
         super({
-            name: "", description: "Shows the leaderboard!", type: "CHAT_INPUT", options:
+            name: "", description: "Shows the leaderboard!", type: ApplicationCommandType.ChatInput, options:
                 [
                     {
                         name: "user",
                         description: "Mention user to see their position",
-                        type: "USER",
+                        type: ApplicationCommandOptionType.User,
                     }
-                ]
+                ],
+            dmPermission: false
         });
 
         this.available = CommandAvailable.Guild;
+
+        this.baseCommand = new LeaderboardBaseCommand();
     }
 
-    public async onRun(cmdArgs: SlashCommandArguments) {
+    /*public async onRun(cmdArgs: SlashCommandArguments) {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
         if (!levels.length) return cmdArgs.interaction.followUp(Localisation.getTranslation("error.empty.levels"));
@@ -61,7 +59,7 @@ class LeaderboardCommand extends SlashCommand {
         const leaderBoard = await drawLeaderboard(leaderboardLevels, user, cmdArgs.guildId);
 
         cmdArgs.interaction.followUp({ files: [canvasToMessageAttachment(leaderBoard, "leaderboard")] });
-    }
+    }*/
 }
 
 export = LeaderboardCommand;

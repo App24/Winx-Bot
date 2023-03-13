@@ -18,6 +18,7 @@
         "@typescript-eslint/no-explicit-any": "off",
         "no-mixed-spaces-and-tabs": "off",
         "no-empty": "off",
-        "no-useless-escape": "off"
+        "no-useless-escape": "off",
+        "no-async-promise-executor": "off"
     }
 }

@@ -6,17 +6,22 @@ import { createGenericButtons } from "../../utils/MessageButtonUtils";
 import { createReadStream, existsSync } from 'fs';
 import { createInterface } from 'readline';
 import { capitalise } from "../../utils/FormatUtils";
+import { ButtonStyle } from "discord.js";
+import { MultiCommand } from "../../structs/MultiCommand";
+import { CharacterLinesBaseCommand } from "../../baseCommands/characters/CharacterLines";
 
-export abstract class RandomLineCommand extends Command {
+class CharacterLinesCommand extends Command {
     private name: string;
 
     public constructor(name: string) {
         super(Localisation.getTranslation("tingz.command.description", capitalise(name)));
         this.name = name;
         this.category = Characters;
+
+        this.baseCommand = new CharacterLinesBaseCommand(name);
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         if (!existsSync(`lines/${this.name}.txt`)) {
             reportError(Localisation.getTranslation("error.missing.character.lines", this.name), cmdArgs.message);
             return;
@@ -40,19 +45,49 @@ export abstract class RandomLineCommand extends Command {
             return;
         }
 
-        await createGenericButtons({
-            sendTarget: cmdArgs.message, options: this.getLine(data), settings: { time: 1000 * 60 * 5 }, buttons: [
-                {
-                    customId: "reroll", style: "PRIMARY", emoji: "♻️",
-                    onRun: async ({ interaction }) => {
-                        await interaction.update(this.getLine(data));
+        if (data.length > 1) {
+            await createGenericButtons({
+                sendTarget: cmdArgs.message, options: this.getLine(data), settings: { time: 1000 * 60 * 5 }, buttons: [
+                    {
+                        customId: "reroll", style: ButtonStyle.Primary, emoji: "♻️",
+                        onRun: async ({ interaction }) => {
+                            let line: string;
+                            do {
+                                line = this.getLine(data);
+                            } while (line === interaction.message.content);
+                            await interaction.update(line);
+                            // const line = this.getLine(data);
+                            // if (interaction.message.content !== line)
+                            //     await interaction.update(line);
+                        }
                     }
-                }
-            ]
-        });
+                ]
+            });
+        } else {
+            cmdArgs.message.reply(this.getLine(data));
+        }
     }
 
     getLine(data: string[]) {
         return data[Math.floor(data.length * Math.random())];
-    }
+    }*/
 }
+
+class CharacterLinesMultiCommand extends MultiCommand {
+    public generateCommand() {
+        return new CharacterLinesCommand(this.name);
+    }
+
+}
+
+export = [
+    new CharacterLinesMultiCommand("aisha"),
+    new CharacterLinesMultiCommand("bloom"),
+    new CharacterLinesMultiCommand("darcy"),
+    new CharacterLinesMultiCommand("flora"),
+    new CharacterLinesMultiCommand("icy"),
+    new CharacterLinesMultiCommand("musa"),
+    new CharacterLinesMultiCommand("stella"),
+    new CharacterLinesMultiCommand("stormy"),
+    new CharacterLinesMultiCommand("tecna"),
+];

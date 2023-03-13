@@ -1,3 +1,5 @@
+import { ButtonStyle } from "discord.js";
+import { LevelPingBaseCommand } from "../../baseCommands/userSettings/LevelPing";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { UserSettings } from "../../structs/Category";
@@ -14,9 +16,11 @@ class LevelPingCommand extends Command {
         this.category = UserSettings;
         this.available = CommandAvailable.Guild;
         this.aliases = ["pinglevel"];
+
+        this.baseCommand = new LevelPingBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
         const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
 
@@ -36,7 +40,7 @@ class LevelPingCommand extends Command {
                 {
                     customId: "toggle",
                     emoji: userSettings.levelPing ? "❌": "✅",
-                    style: "PRIMARY",
+                    style: ButtonStyle.Primary,
                     onRun: async ({ interaction }) => {
                         userSettings.levelPing = !userSettings.levelPing;
                         interaction.reply({ content: Localisation.getTranslation("levelping.reply", userSettings.levelPing ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
@@ -47,14 +51,14 @@ class LevelPingCommand extends Command {
                 {
                     customId: "cancel",
                     label: Localisation.getTranslation("button.cancel"),
-                    style: "DANGER",
+                    style: ButtonStyle.Danger,
                     onRun: async ({ interaction }) => {
                         await interaction.deferUpdate();
                     }
                 }
             ]
         });
-    }
+    }*/
 }
 
 export = LevelPingCommand;

@@ -1,13 +1,15 @@
-import { Guild, GuildMember, Message, TextBasedChannel, User } from "discord.js";
+import { DMChannel, Guild, GuildMember, Message, MessageComponentInteraction, MessageOptions, ReplyMessageOptions, TextBasedChannel, User } from "discord.js";
+import { BaseCommand } from "../baseCommands/BaseCommand";
 import { Localisation } from "../localisation";
-import { asyncForEach } from "../utils/Utils";
+import { asyncForEach, isDM } from "../utils/Utils";
+import { BotSettings } from "./BotSettings";
 import { Category, Other } from "./Category";
 import { CommandAccess } from "./CommandAccess";
 import { CommandAvailable } from "./CommandAvailable";
 import { SubCommand } from "./SubCommand";
 
 export abstract class Command {
-    public enabled: boolean;
+    // public enabled: boolean;
     public deprecated: boolean;
 
     public category: Category;
@@ -24,17 +26,26 @@ export abstract class Command {
 
     public guildIds: string[];
 
-    public subCommands: SubCommand[];
+    //public subCommands: SubCommand[];
+
+    public baseCommand: BaseCommand;
+
+    public commandName: string;
 
     public constructor(description?: string) {
         this.description = description;
-        this.enabled = true;
+        // this.enabled = true;
         this.category = Other;
         this.available = CommandAvailable.Both;
-        this.subCommands = [];
+        //this.subCommands = [];
     }
 
-    protected async onRunSubCommands(cmdArgs: CommandArguments, subCommandName: string, showError = true) {
+    public get enabled() {
+        const command = BotSettings.getSettings().commands.find(c => c.name === this.commandName) ?? { "enabled": true };
+        return command.enabled;
+    }
+
+    /*protected async onRunSubCommands(cmdArgs: CommandArguments, subCommandName: string, showError = true) {
         let found = false;
         await asyncForEach(this.subCommands, async (subCommand: SubCommand) => {
             if (subCommand.name.toLowerCase() === subCommandName.toLowerCase() || (subCommand.aliases && subCommand.aliases.includes(subCommandName.toLowerCase()))) {
@@ -57,9 +68,13 @@ export abstract class Command {
             cmdArgs.message.reply(reply);
         }
         return found;
-    }
+    }*/
 
-    public abstract onRun(cmdArgs: CommandArguments);
+    public async onRun(cmdArgs: CommandArguments) {
+        if (this.baseCommand) {
+            await this.baseCommand.onRun(cmdArgs);
+        }
+    }
 
     public getUsage() {
         let text = "";
@@ -122,5 +137,37 @@ export class CommandArguments {
         this.args = args;
         this.author = message.author;
         this.member = message.member;
+    }
+
+    public get body() {
+        return this.message;
+    }
+
+    public async reply(options: string | ReplyMessageOptions, ...args) {
+        if (typeof options === "string") {
+            options = { content: Localisation.getTranslation(options, ...args) };
+        } else {
+            if (options.content)
+                options.content = Localisation.getTranslation(options.content, ...args);
+        }
+        options.failIfNotExists = false;
+        return this.message.reply(options);
+    }
+
+    public async dmReply(options: string | MessageOptions, ...args) {
+        if (typeof options === "string") {
+            options = Localisation.getTranslation(options, ...args);
+        } else {
+            if (options.content)
+                options.content = Localisation.getTranslation(options.content, ...args);
+        }
+        let sendTarget: DMChannel | TextBasedChannel = await this.author.createDM();
+        if (!sendTarget || isDM(this.channel)) {
+            sendTarget = this.channel;
+        } else {
+            await this.reply("Please check your DM");
+            // await interaction.deferUpdate();
+        }
+        return sendTarget.send(options);
     }
 }

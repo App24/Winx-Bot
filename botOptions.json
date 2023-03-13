@@ -1,0 +1,9 @@
+{
+    "cardGifsEnabled": false,
+    "commands": [
+        {
+            "name": "emojis",
+            "enabled": false
+        }
+    ]
+}

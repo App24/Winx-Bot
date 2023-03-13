@@ -10,6 +10,7 @@ import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { getServerDatabase } from "../../utils/Utils";
 import { showLevelMessage } from "../../utils/XPUtils";
 import { BaseGuildTextChannel } from "discord.js";
+import { TestLevelBaseCommand } from "../../baseCommands/moderator/TestLevel";
 
 class TestLevelCommand extends Command {
     public constructor() {
@@ -18,24 +19,24 @@ class TestLevelCommand extends Command {
         this.usage = [new CommandUsage(true, "argument.level")];
         this.access = CommandAccess.Moderators;
         this.available = CommandAvailable.Guild;
-        this.cooldown = 0;
+        this.baseCommand = new TestLevelBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
-        const level = parseInt(cmdArgs.args[0]);
-        if (isNaN(level) || level < 0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
-        const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-        const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
-        const rankLevel = ranks.find(rank => rank.level === level);
-        let rankDetails;
-        if (rankLevel) {
-            const rank = await getRoleById(rankLevel.roleId, cmdArgs.guild);
-            if (rank) {
-                rankDetails = { rankLevel, rank };
-            }
-        }
-        showLevelMessage(true, <BaseGuildTextChannel>cmdArgs.channel, cmdArgs.member, level, rankDetails);
-    }
+    // public async onRun(cmdArgs: CommandArguments) {
+    //     const level = parseInt(cmdArgs.args[0]);
+    //     if (isNaN(level) || level < 0) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.level"));
+    //     const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
+    //     const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
+    //     const rankLevel = ranks.find(rank => rank.level === level);
+    //     let rankDetails;
+    //     if (rankLevel) {
+    //         const rank = await getRoleById(rankLevel.roleId, cmdArgs.guild);
+    //         if (rank) {
+    //             rankDetails = { rankLevel, rank };
+    //         }
+    //     }
+    //     showLevelMessage(true, <BaseGuildTextChannel>cmdArgs.channel, cmdArgs.member, level, rankDetails);
+    // }
 }
 
 export = TestLevelCommand;

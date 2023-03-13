@@ -1,4 +1,5 @@
-import { MessageEmbed } from "discord.js";
+import { EmbedBuilder } from "discord.js";
+import { RanksBaseCommand } from "../../baseCommands/ranks/Ranks";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
@@ -14,9 +15,11 @@ class RanksCommand extends Command {
         this.available = CommandAvailable.Guild;
         this.category = Rank;
         this.aliases = ["ranks"];
+
+        this.baseCommand = new RanksBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
         const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
         if (!ranks.length) return cmdArgs.message.reply(Localisation.getTranslation("error.empty.ranks"));
@@ -25,11 +28,11 @@ class RanksCommand extends Command {
         await asyncForEach(ranks, async (rank) => {
             data.push(Localisation.getTranslation("transformations.list", rank.level, `<@&${rank.roleId}>`));
         });
-        const embed = new MessageEmbed();
+        const embed = new EmbedBuilder();
         embed.setTitle(Localisation.getTranslation("transformations.title"));
         embed.setDescription(data.join("\n"));
         cmdArgs.message.reply({ embeds: [await createMessageEmbed(embed, cmdArgs.guild)] });
-    }
+    }*/
 }
 
 export = RanksCommand;

@@ -9,6 +9,7 @@ import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase, canvasToMessageAttachment, getLeaderboardMembers } from "../../utils/Utils";
 import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
 import { drawCard } from "../../utils/CardUtils";
+import { LevelsBaseCommand } from "../../baseCommands/ranks/Levels";
 
 class LevelsCommand extends Command {
     public constructor() {
@@ -17,9 +18,11 @@ class LevelsCommand extends Command {
         this.available = CommandAvailable.Guild;
         this.category = Rank;
         this.aliases = ["ml", "magiclevels"];
+
+        this.baseCommand = new LevelsBaseCommand();
     }
 
-    public async onRun(cmdArgs: CommandArguments) {
+    /*public async onRun(cmdArgs: CommandArguments) {
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
         const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
 
@@ -66,7 +69,7 @@ class LevelsCommand extends Command {
         cmdArgs.message.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
 
         msg.delete();
-    }
+    }*/
 }
 
 export = LevelsCommand;
