@@ -4,7 +4,7 @@ import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getServerDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class CustomCommandRemoveBaseCommand extends BaseCommand{
+export class CustomCommandRemoveBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
         const customCommands = await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);

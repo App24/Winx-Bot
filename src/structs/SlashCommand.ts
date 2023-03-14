@@ -73,7 +73,7 @@ export class SlashCommandArguments {
         }
     }
 
-    public async dmReply(options: string | MessageOptions, ...args){
+    public async dmReply(options: string | MessageOptions, ...args) {
         if (typeof options === "string") {
             options = Localisation.getTranslation(options, ...args);
         } else {

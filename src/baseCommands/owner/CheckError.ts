@@ -10,7 +10,7 @@ import { getStringReply } from "../../utils/ReplyUtils";
 import { asyncForEach } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class CheckErrorBaseCommand extends BaseCommand{
+export class CheckErrorBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const Errors = BotUser.getDatabase(DatabaseType.Errors);
 

@@ -23,7 +23,7 @@ export async function getUserLevel(userId: string, guildId: string, createNew = 
     } else if (userIndex < 0) {
         return;
     }
-    
+
     return levels[userIndex];
 }
 
@@ -201,7 +201,7 @@ export async function getRankRoles(guild: Guild, maxLevel = Number.MAX_SAFE_INTE
     await asyncForEach(ranks, async (rank) => {
         if (rank.level <= maxLevel) {
             const role = await getRoleById(rank.roleId, guild);
-            if(!role) return;
+            if (!role) return;
             toReturn.push({ rank, role });
         }
     });

@@ -7,7 +7,7 @@ import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { getServerDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class LevelPingBaseCommand extends BaseCommand{
+export class LevelPingBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
         const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
@@ -27,7 +27,7 @@ export class LevelPingBaseCommand extends BaseCommand{
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, buttons: [
                 {
                     customId: "toggle",
-                    emoji: userSettings.levelPing ? "❌": "✅",
+                    emoji: userSettings.levelPing ? "❌" : "✅",
                     style: ButtonStyle.Primary,
                     onRun: async ({ interaction }) => {
                         userSettings.levelPing = !userSettings.levelPing;

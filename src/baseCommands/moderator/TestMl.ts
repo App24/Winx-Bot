@@ -7,7 +7,7 @@ import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/
 import { asyncForEach, canvasToMessageAttachment } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class TestMlBaseCommand extends BaseCommand{
+export class TestMlBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const level = parseInt(cmdArgs.args[0]);
         if (isNaN(level) || level < 0) return cmdArgs.reply("error.invalid.level");

@@ -11,7 +11,7 @@ class LeaderboardCommand extends SlashCommand {
 
         this.available = CommandAvailable.Guild;
 
-        this.baseCommand=new LeaderboardBaseCommand();
+        this.baseCommand = new LeaderboardBaseCommand();
     }
 
     /*public async onRun(cmdArgs: SlashCommandArguments) {

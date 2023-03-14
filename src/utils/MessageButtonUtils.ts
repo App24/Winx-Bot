@@ -1,4 +1,4 @@
-import {  ActionRowBuilder, ButtonBuilder, ButtonInteraction, CommandInteraction, ComponentType, GuildMember, InteractionButtonComponentData, InteractionCollector, Message, MessageActionRowComponentBuilder, MessageComponentInteraction, MessageOptions, SelectMenuInteraction, TextBasedChannel, User } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, CommandInteraction, ComponentType, GuildMember, InteractionButtonComponentData, InteractionCollector, Message, MessageActionRowComponentBuilder, MessageComponentInteraction, MessageOptions, SelectMenuInteraction, TextBasedChannel, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "./Utils";
 
@@ -17,7 +17,7 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
 
     buttons.forEach((button, index) => {
         // rows[Math.floor(index / 5)].addComponents(new ButtonComponent(button));
-        button.type=ComponentType.Button;
+        button.type = ComponentType.Button;
         rows[Math.floor(index / 5)].addComponents(new ButtonBuilder(button));
     });
 
@@ -29,9 +29,9 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
         sendMessage = sendTarget.reply.bind(sendTarget);
         if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
             if (!sendTarget.deferred && !sendTarget.replied) {
-                if(sendTarget instanceof MessageComponentInteraction){
+                if (sendTarget instanceof MessageComponentInteraction) {
                     await sendTarget.deferUpdate();
-                }else{
+                } else {
                     await sendTarget.deferReply();
                 }
             }

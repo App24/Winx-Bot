@@ -6,7 +6,7 @@ import { CustomNameUser } from "../../structs/databaseTypes/CustomName";
 import { getStringReply } from "../../utils/ReplyUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class CustomNameBaseCommand extends BaseCommand{
+export class CustomNameBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const CustomNames = BotUser.getDatabase(DatabaseType.CustomNames);
 

@@ -10,7 +10,7 @@ class WinxCharacterCommand extends Command {
         this.category = Customisation;
         this.aliases = ["setcharacter", "setwinx"];
 
-        this.baseCommand=new WinxCharacterBaseCommand();
+        this.baseCommand = new WinxCharacterBaseCommand();
     }
 
     /*public async onRun(cmdArgs: CommandArguments) {

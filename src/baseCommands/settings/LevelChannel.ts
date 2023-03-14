@@ -9,7 +9,7 @@ import { getTextChannelReply } from "../../utils/ReplyUtils";
 import { getServerDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class LevelChannelBaseCommand extends BaseCommand{
+export class LevelChannelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);

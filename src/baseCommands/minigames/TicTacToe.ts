@@ -114,7 +114,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
                 message.reply({ content: Localisation.getTranslation("minigame.draw"), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
         });
     }
-    
+
 
     drawCanvas(currentGame: TicTacToeData, currentPlayer: string) {
         const canvas = new Canvas(this.canvasSize, this.canvasSize);

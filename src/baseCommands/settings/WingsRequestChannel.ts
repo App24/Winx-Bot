@@ -7,7 +7,7 @@ import { getTextChannelReply } from "../../utils/ReplyUtils";
 import { getServerDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class wingsRequestChannelBaseCommand extends BaseCommand{
+export class wingsRequestChannelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
         const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);

@@ -2,7 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class RolesBaseCommand extends BaseCommand{
+export class RolesBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const data = [];
         cmdArgs.guild.roles.cache.forEach(role => {

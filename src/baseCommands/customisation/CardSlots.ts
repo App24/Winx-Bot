@@ -47,7 +47,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
         const userFolder = join(CUSTOM_WINGS_FOLDER, cmdArgs.guildId, cmdArgs.author.id);
 
         if (!existsSync(userFolder)) {
-            mkdirSync(userFolder, {recursive: true});
+            mkdirSync(userFolder, { recursive: true });
         }
 
         selectMenuOptions.push({

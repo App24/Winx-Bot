@@ -7,7 +7,7 @@ import { getServerDatabase } from "../../utils/Utils";
 import { showLevelMessage } from "../../utils/XPUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class TestLevelBaseCommand extends BaseCommand{
+export class TestLevelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const level = parseInt(cmdArgs.args[0]);
         if (isNaN(level) || level < 0) return cmdArgs.reply("error.invalid.level");

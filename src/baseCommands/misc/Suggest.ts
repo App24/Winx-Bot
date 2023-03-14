@@ -8,7 +8,7 @@ import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { isDM, genRanHex } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class SuggestBaseCommand extends BaseCommand{
+export class SuggestBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const suggestionsChannel: any = await BotUser.channels.fetch(process.env.SUGGESTION_CHANNEL);
         let channel: BaseGuildTextChannel;

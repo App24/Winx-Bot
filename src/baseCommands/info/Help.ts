@@ -12,7 +12,7 @@ import { SelectOption, createMessageSelection } from "../../utils/MessageSelecti
 import { isDM, asyncForEach, isPatreon, isBooster, isModerator, getServerDatabase, createMessageEmbed, asyncMapForEach } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class HelpBaseCommand extends BaseCommand{
+export class HelpBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const available = isDM(cmdArgs.channel) ? CommandAvailable.DM : CommandAvailable.Guild;
         if (!cmdArgs.args.length) {
