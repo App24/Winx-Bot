@@ -1,14 +1,7 @@
-import { BotUser } from "../../../BotClient";
-import { getMemberFromMention } from "../../../utils/GetterUtils";
-import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../../structs/Command";
+import { Command, CommandUsage } from "../../../structs/Command";
 import { CommandAvailable } from "../../../structs/CommandAvailable";
 import { CommandAccess } from "../../../structs/CommandAccess";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
-import { getServerDatabase } from "../../../utils/Utils";
-import { getLevelXP } from "../../../utils/XPUtils";
 import { SetLevelBaseCommand } from "../../../baseCommands/owner/Debugging/SetLevel";
 
 class SetLevelCommand extends Command {

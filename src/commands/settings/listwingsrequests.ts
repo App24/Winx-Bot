@@ -1,15 +1,8 @@
 import { ListWingsRequestsBaseCommand } from "../../baseCommands/settings/ListWingsRequests";
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { WingsRequest } from "../../structs/databaseTypes/WingsRequest";
-import { getTextChannelById } from "../../utils/GetterUtils";
-import { asyncForEach, getServerDatabase } from "../../utils/Utils";
 
 class ListWingsRequestsCommand extends Command {
     public constructor() {

@@ -1,7 +1,6 @@
 import { WingsInfoBaseCommand } from "../../baseCommands/info/WingsInfo";
-import { CARD_CANVAS_HEIGHT, CARD_CANVAS_WIDTH } from "../../Constants";
 import { Info } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 
 class WingsInfoCommand extends Command {
     public constructor() {

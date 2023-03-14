@@ -1,21 +1,8 @@
-import { BaseGuildTextChannel, Guild, EmbedBuilder, TextChannel, ButtonStyle } from "discord.js";
-import { existsSync, mkdirSync, renameSync, unlinkSync } from "fs";
 import { CustomWingsBaseCommand } from "../../baseCommands/customisation/CustomWings";
-import { BotUser } from "../../BotClient";
-import { CARD_CANVAS_HEIGHT, CARD_CANVAS_WIDTH, CUSTOM_WINGS_FOLDER, CUSTOM_WINGS_REQUEST_FOLDER } from "../../Constants";
-import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { CustomWings } from "../../structs/databaseTypes/CustomWings";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { WingsRequest } from "../../structs/databaseTypes/WingsRequest";
-import { getBotRoleColor, getTextChannelById, getMemberById } from "../../utils/GetterUtils";
-import { createMessageButtons } from "../../utils/MessageButtonUtils";
-import { getImageReply } from "../../utils/ReplyUtils";
-import { downloadFile, getServerDatabase } from "../../utils/Utils";
 
 class CustomWingsCommand extends Command {
     public constructor() {

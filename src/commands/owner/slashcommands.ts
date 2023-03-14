@@ -1,13 +1,6 @@
-import { BotUser } from "../../BotClient";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { createMessageSelection } from "../../utils/MessageSelectionUtils";
-import { reportError } from "../../utils/Utils";
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v9";
 import { Owner } from "../../structs/Category";
-import { Localisation } from "../../localisation";
-import { ApplicationCommandData, ApplicationCommandType } from "discord.js";
 import { RegisterSlashCommandsBaseCommand } from "../../baseCommands/owner/SlashCommands";
 
 class RegisterSlashCommandsCommand extends Command {

@@ -1,10 +1,8 @@
 import { GeTWingsTemplateBaseCommand } from "../../baseCommands/settings/GetWingsTemplate";
 import { Settings } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { drawTemplateCard } from "../../utils/CardUtils";
-import { canvasToMessageAttachment } from "../../utils/Utils";
 
 class GetWingsTemplateCommand extends Command {
     public constructor() {

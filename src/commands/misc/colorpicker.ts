@@ -1,8 +1,5 @@
 import { ColorPickerBaseCommand } from "../../baseCommands/misc/ColorPicker";
-import { Localisation } from "../../localisation";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
-import { canvasColor } from "../../utils/CanvasUtils";
-import { isHexColor, canvasToMessageAttachment } from "../../utils/Utils";
+import { Command, CommandUsage } from "../../structs/Command";
 
 class ColorPickerCommand extends Command {
     public constructor() {

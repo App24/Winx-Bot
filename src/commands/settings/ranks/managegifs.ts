@@ -1,16 +1,7 @@
-import { BotUser } from "../../../BotClient";
-import { Localisation } from "../../../localisation";
 import { Settings } from "../../../structs/Category";
-import { Command, CommandArguments } from "../../../structs/Command";
+import { Command } from "../../../structs/Command";
 import { CommandAvailable } from "../../../structs/CommandAvailable";
 import { CommandAccess } from "../../../structs/CommandAccess";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { RankLevel } from "../../../structs/databaseTypes/RankLevel";
-import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";
-import { getRank, getRankRoles } from "../../../utils/RankUtils";
-import { getServerDatabase } from "../../../utils/Utils";
-import { capitalise } from "../../../utils/FormatUtils";
-import { getStringReply } from "../../../utils/ReplyUtils";
 import { ManageGifsBaseCommand } from "../../../baseCommands/settings/ranks/ManageGifs";
 
 class ManageGifsCommand extends Command {

@@ -1,15 +1,7 @@
-import { DMChannel, MessageComponentInteraction } from "discord.js";
 import { CardCodeBaseCommand } from "../../baseCommands/customisation/CardCode";
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_CARD_CODE, ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
-import { createMessageSelection } from "../../utils/MessageSelectionUtils";
-import { getStringReply } from "../../utils/ReplyUtils";
-import { getServerDatabase } from "../../utils/Utils";
 
 class CardCodeCommand extends Command {
     public constructor() {

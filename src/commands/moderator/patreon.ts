@@ -1,16 +1,7 @@
-import { EmbedBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { getMemberFromMention, getMemberById, getBotRoleColor } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { PatreonInfo } from "../../structs/databaseTypes/PatreonInfo";
-import { SubCommand } from "../../structs/SubCommand";
-import { getServerDatabase, asyncForEach } from "../../utils/Utils";
-import { dateToString } from "../../utils/FormatUtils";
 import { PatreonBaseCommand } from "../../baseCommands/moderator/Patreon";
 
 class PatreonCommand extends Command {

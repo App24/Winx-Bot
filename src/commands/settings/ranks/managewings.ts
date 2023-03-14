@@ -1,23 +1,7 @@
-import { existsSync, mkdirSync, unlinkSync } from "fs";
-import { BotUser } from "../../../BotClient";
-import { WINGS_FOLDER } from "../../../Constants";
-import { Localisation } from "../../../localisation";
 import { Settings } from "../../../structs/Category";
-import { Command, CommandArguments } from "../../../structs/Command";
+import { Command } from "../../../structs/Command";
 import { CommandAvailable } from "../../../structs/CommandAvailable";
 import { CommandAccess } from "../../../structs/CommandAccess";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { DEFAULT_WINGS_DATA, RankLevel } from "../../../structs/databaseTypes/RankLevel";
-import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
-import { drawCardWithWings } from "../../../utils/CardUtils";
-import { capitalise } from "../../../utils/FormatUtils";
-import { createMessageButtons } from "../../../utils/MessageButtonUtils";
-import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";
-import { getRank, getRankRoles, getServerUserSettings } from "../../../utils/RankUtils";
-import { getImageReply } from "../../../utils/ReplyUtils";
-import { canvasToMessageAttachment, downloadFile, getServerDatabase } from "../../../utils/Utils";
-import { DEFAULT_CARD_CODE } from "../../../structs/databaseTypes/ServerUserSettings";
-import { ButtonStyle } from "discord.js";
 import { ManageWingsBaseCommand } from "../../../baseCommands/settings/ranks/ManageWings";
 
 class ManageWingsCommand extends Command {

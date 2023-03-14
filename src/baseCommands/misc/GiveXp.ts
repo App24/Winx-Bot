@@ -1,6 +1,5 @@
 import { BaseGuildTextChannel } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getServerDatabase } from "../../utils/Utils";

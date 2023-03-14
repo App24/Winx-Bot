@@ -1,18 +1,7 @@
-import { Message, BaseGuildTextChannel, GuildBasedChannel } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { PREFIX } from "../../Constants";
-import { getMemberFromMention, getTextChannelFromMention } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, asyncForEach, getAllMessages } from "../../utils/Utils";
-import { addXP } from "../../utils/XPUtils";
-import { secondsToTime } from "../../utils/FormatUtils";
 import { CheckLevelsBaseCommand } from "../../baseCommands/moderator/CheckLevels";
 
 class CheckLevelsCommand extends Command {

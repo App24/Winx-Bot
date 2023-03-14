@@ -1,11 +1,5 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageActionRowComponentBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { CREATORS_ID } from "../../Constants";
-import { getBotMember } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Info } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
-import { createMessageEmbed } from "../../utils/Utils";
+import { Command } from "../../structs/Command";
 import { AboutBaseCommand } from "../../baseCommands/info/About";
 
 class AboutCommand extends Command {

@@ -1,14 +1,6 @@
-import { BaseGuildTextChannel } from "discord.js";
 import { GiveXPBaseCommand } from "../../baseCommands/misc/GiveXp";
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase } from "../../utils/Utils";
-import { addXP, getLevelXP } from "../../utils/XPUtils";
-
 class GiveXPCommand extends Command {
     constructor() {
         super();

@@ -1,13 +1,7 @@
-import { ActionRowBuilder, ButtonBuilder, MessageComponentInteraction, SelectMenuBuilder, MessageSelectOption, ButtonStyle, ComponentType, MessageActionRowComponentBuilder } from "discord.js";
 import { CustomNameBaseCommand } from "../../baseCommands/owner/CustomName";
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { CustomNameUser } from "../../structs/databaseTypes/CustomName";
-import { getStringReply } from "../../utils/ReplyUtils";
 
 class CustomNameCommand extends Command {
     public constructor() {

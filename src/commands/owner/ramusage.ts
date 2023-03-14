@@ -1,8 +1,6 @@
-import { memoryUsage } from "process";
 import { RamUsageBaseCommand } from "../../baseCommands/owner/RamUsage";
-import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
 
 class RamUsageCommand extends Command {

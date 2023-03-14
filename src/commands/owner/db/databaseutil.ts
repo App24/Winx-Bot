@@ -1,15 +1,6 @@
-import { ButtonInteraction, Message, ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from "discord.js";
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER } from "../../../Constants";
-import { Localisation } from "../../../localisation";
 import { Owner } from "../../../structs/Category";
-import { Command, CommandArguments } from "../../../structs/Command";
+import { Command } from "../../../structs/Command";
 import { CommandAccess } from "../../../structs/CommandAccess";
-import { backupDatabases } from "../../../utils/Utils";
-import fs from "fs";
-import { BotUser } from "../../../BotClient";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { createWhatToDoButtons } from "../../../utils/MessageButtonUtils";
-import { zip } from "zip-a-folder";
 import { DatabaseUtilsBaseCommand } from "../../../baseCommands/owner/db/DatabaseUtils";
 
 class DatabaseUtilCommand extends Command {

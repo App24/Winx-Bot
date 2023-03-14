@@ -1,12 +1,4 @@
-import { EmbedBuilder, BaseGuildTextChannel, TextChannel, ButtonStyle } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { getBotRoleColor, getGuildById, getTextChannelById } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { SuggestionStruct, SuggestionState } from "../../structs/databaseTypes/SuggestionStruct";
-import { genRanHex, isDM } from "../../utils/Utils";
-import { createMessageButtons } from "../../utils/MessageButtonUtils";
+import { Command, CommandUsage } from "../../structs/Command";
 import { SuggestBaseCommand } from "../../baseCommands/misc/Suggest";
 
 class SuggestionCommand extends Command {

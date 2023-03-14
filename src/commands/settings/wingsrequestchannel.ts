@@ -1,16 +1,8 @@
 import { wingsRequestChannelBaseCommand } from "../../baseCommands/settings/WingsRequestChannel";
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { createMessageSelection } from "../../utils/MessageSelectionUtils";
-import { getTextChannelReply } from "../../utils/ReplyUtils";
-import { getServerDatabase } from "../../utils/Utils";
-
 class WingsRequestCommand extends Command {
     public constructor() {
         super();

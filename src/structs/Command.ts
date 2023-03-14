@@ -1,12 +1,11 @@
-import { DMChannel, Guild, GuildMember, Message, MessageComponentInteraction, MessageOptions, ReplyMessageOptions, TextBasedChannel, User } from "discord.js";
+import { DMChannel, Guild, GuildMember, Message, MessageOptions, ReplyMessageOptions, TextBasedChannel, User } from "discord.js";
 import { BaseCommand } from "../baseCommands/BaseCommand";
 import { Localisation } from "../localisation";
-import { asyncForEach, isDM } from "../utils/Utils";
+import { isDM } from "../utils/Utils";
 import { BotSettings } from "./BotSettings";
 import { Category, Other } from "./Category";
 import { CommandAccess } from "./CommandAccess";
 import { CommandAvailable } from "./CommandAvailable";
-import { SubCommand } from "./SubCommand";
 
 export abstract class Command {
     // public enabled: boolean;

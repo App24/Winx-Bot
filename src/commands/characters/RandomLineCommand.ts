@@ -1,12 +1,7 @@
 import { Localisation } from "../../localisation";
 import { Characters } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
-import { reportError } from "../../utils/Utils";
-import { createGenericButtons } from "../../utils/MessageButtonUtils";
-import { createReadStream, existsSync } from 'fs';
-import { createInterface } from 'readline';
+import { Command } from "../../structs/Command";
 import { capitalise } from "../../utils/FormatUtils";
-import { ButtonStyle } from "discord.js";
 import { MultiCommand } from "../../structs/MultiCommand";
 import { CharacterLinesBaseCommand } from "../../baseCommands/characters/CharacterLines";
 

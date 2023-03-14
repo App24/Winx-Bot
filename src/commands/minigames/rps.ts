@@ -1,11 +1,7 @@
-import { Message, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageActionRowComponentBuilder } from "discord.js";
 import { RPSBaseCommand } from "../../baseCommands/minigames/RPS";
-import { Localisation } from "../../localisation";
 import { Minigames } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { waitForPlayers } from "../../utils/MinigameUtils";
-import { createMessageEmbed } from "../../utils/Utils";
 
 class RPSCommand extends Command {
     public constructor() {

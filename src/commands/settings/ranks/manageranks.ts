@@ -1,21 +1,7 @@
-import { ButtonStyle, EmbedBuilder } from "discord.js";
-import { BotUser } from "../../../BotClient";
-import { getBotRoleColor } from "../../../utils/GetterUtils";
-import { Localisation } from "../../../localisation";
 import { Settings } from "../../../structs/Category";
-import { Command, CommandArguments } from "../../../structs/Command";
+import { Command } from "../../../structs/Command";
 import { CommandAvailable } from "../../../structs/CommandAvailable";
 import { CommandAccess } from "../../../structs/CommandAccess";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
-import { RankLevel } from "../../../structs/databaseTypes/RankLevel";
-import { getServerDatabase, asyncForEach } from "../../../utils/Utils";
-import { createMessageButtons } from "../../../utils/MessageButtonUtils";
-import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";
-import { getLevelReply, getRoleReply } from "../../../utils/ReplyUtils";
-import { rmSync } from "fs";
-import { WINGS_FOLDER } from "../../../Constants";
-import { getRankRoles } from "../../../utils/RankUtils";
-import { capitalise } from "../../../utils/FormatUtils";
 import { ManageRanksBaseCommand } from "../../../baseCommands/settings/ranks/ManageRanks";
 
 class ManageRanksCommand extends Command {

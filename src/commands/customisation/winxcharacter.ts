@@ -1,17 +1,7 @@
-import { Guild } from "discord.js";
 import { WinxCharacterBaseCommand } from "../../baseCommands/customisation/WinxCharacter";
-import { BotUser } from "../../BotClient";
-import { Keyv } from "../../keyv/keyv-index";
-import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
-import { WinxCharacter } from "../../structs/WinxCharacters";
-import { capitalise } from "../../utils/FormatUtils";
-import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { getServerDatabase } from "../../utils/Utils";
 
 class WinxCharacterCommand extends Command {
     public constructor() {

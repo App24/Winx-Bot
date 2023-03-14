@@ -1,23 +1,8 @@
-import { ButtonStyle, EmbedBuilder } from "discord.js";
-import { existsSync, mkdirSync, unlinkSync } from "fs";
 import { SetCustomWingsBaseCommand } from "../../baseCommands/settings/SetCustomWings";
-import { BotUser } from "../../BotClient";
-import { CUSTOM_WINGS_FOLDER } from "../../Constants";
-import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { CustomWings } from "../../structs/databaseTypes/CustomWings";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { decodeCode, drawCardWithWings } from "../../utils/CardUtils";
-import { getBotRoleColor } from "../../utils/GetterUtils";
-import { createMessageButtons } from "../../utils/MessageButtonUtils";
-import { createMessageSelection } from "../../utils/MessageSelectionUtils";
-import { getServerUserSettings } from "../../utils/RankUtils";
-import { getImageReply, getMemberReply } from "../../utils/ReplyUtils";
-import { canvasToMessageAttachment, downloadFile, getServerDatabase } from "../../utils/Utils";
 
 class CustomWingsCommand extends Command {
     public constructor() {

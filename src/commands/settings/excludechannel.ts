@@ -1,16 +1,7 @@
-import { EmbedBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { getBotRoleColor, getTextChannelById, getTextChannelFromMention, getThreadChannelById } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { getServerDatabase, asyncForEach } from "../../utils/Utils";
-import { getTextChannelReply } from "../../utils/ReplyUtils";
-import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
 import { ExcludeChannelBaseCommand } from "../../baseCommands/settings/ExcludeChannel";
 
 class ExcludeChannelCommand extends Command {

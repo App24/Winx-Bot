@@ -1,18 +1,7 @@
-import { Guild } from "discord.js";
 import { WingsLevelBaseCommand } from "../../baseCommands/customisation/WingsLevel";
-import { BotUser } from "../../BotClient";
-import { Keyv } from "../../keyv/keyv-index";
-import { Localisation } from "../../localisation";
 import { Customisation } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { RankLevel } from "../../structs/databaseTypes/RankLevel";
-import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
-import { getRoleById } from "../../utils/GetterUtils";
-import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { getCurrentRank, getPreviousRanks, getUserLevel } from "../../utils/RankUtils";
-import { asyncForEach, getServerDatabase } from "../../utils/Utils";
 
 class WingsLevelCommand extends Command {
     public constructor() {

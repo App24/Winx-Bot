@@ -1,7 +1,5 @@
-import { getUserById } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Info } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { ContactCreatorBaseCommand } from "../../baseCommands/info/ContactCreator";
 
 class ContactCreatorCommand extends Command {

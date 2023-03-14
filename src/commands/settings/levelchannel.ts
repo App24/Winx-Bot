@@ -1,16 +1,7 @@
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { getServerDatabase } from "../../utils/Utils";
-import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
-import { getTextChannelFromMention } from "../../utils/GetterUtils";
-import { getTextChannelReply } from "../../utils/ReplyUtils";
-import { ButtonStyle } from "discord.js";
 import { LevelChannelBaseCommand } from "../../baseCommands/settings/LevelChannel";
 
 class LevelChannelCommand extends Command {

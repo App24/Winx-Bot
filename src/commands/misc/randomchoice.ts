@@ -1,5 +1,5 @@
 import { RandomChoiceBaseCommand } from "../../baseCommands/misc/RandomChoice";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 
 class RandomChoiceCommand extends Command {
     public constructor() {

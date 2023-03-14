@@ -1,15 +1,6 @@
-import { ButtonInteraction, ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle, MessageActionRowComponentBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { getBotRoleColor, getUserById } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Owner } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { SuggestionStruct, SuggestionState } from "../../structs/databaseTypes/SuggestionStruct";
-import { SubCommand } from "../../structs/SubCommand";
-import { asyncForEach } from "../../utils/Utils";
-import { capitalise } from "../../utils/FormatUtils";
 import { SuggestionsBaseCommand } from "../../baseCommands/owner/Suggestions";
 
 class SuggestionsCommand extends Command {

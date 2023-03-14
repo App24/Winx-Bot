@@ -1,16 +1,5 @@
-import { EmbedBuilder, Guild, GuildMember, User, TextBasedChannel, parseEmoji } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { PREFIX } from "../../Constants";
-import { Localisation } from "../../localisation";
-import { Info, Category, Categories, CustomCommands } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
-import { CommandAvailable } from "../../structs/CommandAvailable";
-import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
-import { getBotRoleColor } from "../../utils/GetterUtils";
-import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { asyncForEach, isDM, isPatreon, getServerDatabase, isModerator, createMessageEmbed, asyncMapForEach, isBooster } from "../../utils/Utils";
+import { Info } from "../../structs/Category";
+import { Command, CommandUsage } from "../../structs/Command";
 import { HelpBaseCommand } from "../../baseCommands/info/Help";
 
 class HelpCommand extends Command {

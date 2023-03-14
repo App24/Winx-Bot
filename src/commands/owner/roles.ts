@@ -1,9 +1,7 @@
-import { EmbedBuilder } from "discord.js";
 import { Owner } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { getBotRoleColor } from "../../utils/GetterUtils";
 import { RolesBaseCommand } from "../../baseCommands/owner/Roles";
 
 class RolesCommand extends Command {

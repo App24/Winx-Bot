@@ -1,14 +1,6 @@
-import { BotUser } from "../../BotClient";
-import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, canvasToMessageAttachment, getLeaderboardMembers } from "../../utils/Utils";
-import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
-import { drawCard } from "../../utils/CardUtils";
 import { LevelsBaseCommand } from "../../baseCommands/ranks/Levels";
 
 class LevelsCommand extends Command {

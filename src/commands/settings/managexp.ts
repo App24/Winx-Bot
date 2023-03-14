@@ -1,15 +1,7 @@
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Settings } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
-import { getServerDatabase } from "../../utils/Utils";
-import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
-import { getNumberReply } from "../../utils/ReplyUtils";
-import { ButtonStyle } from "discord.js";
 import { ManageXpBaseCommand } from "../../baseCommands/settings/ManageXp";
 
 class SetXPCommand extends Command {

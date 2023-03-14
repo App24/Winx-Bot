@@ -1,13 +1,6 @@
-import { BotUser } from "../../BotClient";
-import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
-import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandUsage, CommandArguments } from "../../structs/Command";
+import { Command, CommandUsage } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../utils/Utils";
-import { drawLeaderboard } from "../../utils/CardUtils";
 import { LeaderboardBaseCommand } from "../../baseCommands/ranks/Leaderboard";
 
 class RankCommand extends Command {

@@ -1,12 +1,7 @@
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Moderator } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { getServerDatabase } from "../../utils/Utils";
 import { CheckBansBaseCommand } from "../../baseCommands/moderator/CheckBans";
 
 class CheckBansCommand extends Command {

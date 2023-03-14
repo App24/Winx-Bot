@@ -1,13 +1,7 @@
-import { EmbedBuilder } from "discord.js";
 import { RanksBaseCommand } from "../../baseCommands/ranks/Ranks";
-import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Rank } from "../../structs/Category";
-import { Command, CommandArguments } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { RankLevel } from "../../structs/databaseTypes/RankLevel";
-import { asyncForEach, createMessageEmbed, getServerDatabase } from "../../utils/Utils";
 
 class RanksCommand extends Command {
     public constructor() {
