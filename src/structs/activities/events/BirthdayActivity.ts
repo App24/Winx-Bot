@@ -8,6 +8,7 @@ export class BirthdayActivity extends OneDayEventActivity {
     public constructor(startTime: Date, name: string) {
         super(startTime);
         this.name = name;
+        this.translated = true;
     }
 
     public getActivity(): string | Promise<string> {

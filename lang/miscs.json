@@ -8,6 +8,6 @@
 
     "shard.ready": "Shard {0} is ready!",
 
-    "footer.donate": "Consider donation {0}",
+    "footer.donate": "Consider donating {0}",
     "footer.suggestion": "If you have a suggestion for the bot, do {0}{1}"
 }

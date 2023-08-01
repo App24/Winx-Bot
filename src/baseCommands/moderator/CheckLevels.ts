@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
+import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { secondsToTime } from "../../utils/FormatUtils";
 import { getMemberFromMention, getTextChannelById, getTextChannelFromMention } from "../../utils/GetterUtils";
@@ -16,7 +16,7 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
         const channels = Array.from(cmdArgs.guild.channels.cache.values());
 
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
         const excluded = serverInfo.excludeChannels;
 
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
@@ -24,7 +24,7 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
 
         if (!levels.length) return cmdArgs.reply("error.empty.levels");
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild);
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels);
 
         await asyncForEach(leaderboardLevels, async (topLevel: { userLevel: UserLevel, member: GuildMember }) => {
             topLevel.userLevel.level = 0;
@@ -61,7 +61,7 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
                         totalXp += xp;
                     }
                 });
-                await addXP({ xp: totalXp, member: topLevel.member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel }, false);
+                await addXP({ xp: totalXp, member: topLevel.member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel }, false, true);
             });
             const timeDifferent = new Date().getTime() - startTime;
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index + 1, NTChannels.length, secondsToTime(timeDifferent / 1000)));
@@ -78,7 +78,7 @@ export class CheckLevelsBaseCommand extends BaseCommand {
         const channels = Array.from(cmdArgs.guild.channels.cache.values());
 
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
         const excluded = serverInfo.excludeChannels;
 
         const Levels = BotUser.getDatabase(DatabaseType.Levels);
@@ -115,7 +115,7 @@ export class CheckLevelsBaseCommand extends BaseCommand {
                     totalXp += xp;
                 }
             });
-            await addXP({ xp: totalXp, member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel }, false);
+            await addXP({ xp: totalXp, member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel }, false, true);
             const timeDifferent = new Date().getTime() - startTime;
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index + 1, NTChannels.length, secondsToTime(timeDifferent / 1000)));
         });

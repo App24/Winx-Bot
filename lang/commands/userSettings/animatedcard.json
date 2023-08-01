@@ -1,0 +1,5 @@
+{
+    "animatedcard.command.description": "Enable your card being animated",
+    "animatedcard.warning": "Animated cards will only work if you have an animated pfp!",
+    "animatedcard.reply": "Animated card is now {0}!"
+}

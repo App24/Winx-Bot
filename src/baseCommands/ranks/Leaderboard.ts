@@ -36,7 +36,7 @@ export class LeaderboardBaseCommand extends BaseCommand {
             return b.level - a.level;
         });
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild);
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels);
 
         const index = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id);
         if (index < 0) {
@@ -48,7 +48,7 @@ export class LeaderboardBaseCommand extends BaseCommand {
             }
         }
 
-        const leaderBoard = await drawLeaderboard(leaderboardLevels, user, cmdArgs.guildId);
+        const leaderBoard = await drawLeaderboard(leaderboardLevels, user, cmdArgs.guildId, "Leaderboard");
 
         cmdArgs.reply({ files: [canvasToMessageAttachment(leaderBoard, "leaderboard")] });
 

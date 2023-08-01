@@ -1,7 +1,7 @@
 import { DEFAULT_CARD_CODE } from "../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { WinxCharacter } from "../../structs/WinxCharacters";
-import { drawCard } from "../../utils/CardUtils";
+import { CardData, drawCard } from "../../utils/CardUtils";
 import { getMemberById } from "../../utils/GetterUtils";
 import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
 import { asyncForEach, canvasToMessageAttachment } from "../../utils/Utils";
@@ -20,6 +20,7 @@ export class TestMlBaseCommand extends BaseCommand {
         const user = cmdArgs.author;
 
         const leaderboardPosition = 0;
+        const weekleaderboardPosition = 0;
 
         const member = await getMemberById(user.id, cmdArgs.guild);
         if (!member) return cmdArgs.reply("error.invalid.member");
@@ -38,17 +39,27 @@ export class TestMlBaseCommand extends BaseCommand {
         serverUserSettings.wingsLevelB = -1;
         serverUserSettings.cardCode = DEFAULT_CARD_CODE;
 
+        const cardData: CardData = {
+            leaderboardPosition,
+            weeklyLeaderboardPosition: weekleaderboardPosition,
+            currentRank,
+            nextRank,
+            serverUserSettings,
+            userLevel,
+            member
+        };
+
         if (winxNumber > 0) {
             await asyncForEach(Object.keys(WinxCharacter), async (val) => {
                 if (val === "None") return;
                 if (isNaN(parseInt(val))) {
                     serverUserSettings.winxCharacter = WinxCharacter[val];
-                    const { image, extension } = await drawCard(leaderboardPosition, userLevel, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+                    const { image, extension } = await drawCard(cardData);
                     await cmdArgs.reply({ content: val, files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
                 }
             });
         } else {
-            const { image, extension } = await drawCard(leaderboardPosition, userLevel, serverUserSettings, currentRank, nextRank, member, cmdArgs.guild);
+            const { image, extension } = await drawCard(cardData);
             cmdArgs.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
         }
     }

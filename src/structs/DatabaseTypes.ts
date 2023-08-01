@@ -13,5 +13,7 @@ export enum DatabaseType {
     WingsRequests = "wingsRequests",
     Fairies = "fairies",
     SpookyCategories = "spookyCategories",
-    ServerState = "serverState"
+    ServerState = "serverState",
+    DndStats = "dndStats",
+    RecentLeaderboard = "rLeaderboard"
 }

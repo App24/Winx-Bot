@@ -6,7 +6,7 @@ import { Localisation } from "../../localisation";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomWings } from "../../structs/databaseTypes/CustomWings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { decodeCode, drawCardWithWings } from "../../utils/CardUtils";
+import { CardData, decodeCode, drawCardWithWings } from "../../utils/CardUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
@@ -83,7 +83,18 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                                 serverUserSettings.cardCode += "|customWings_positionX=300|customWings_positionY=600|customWings_scaleX=1|customWings_scaleY=1|cl_customWings=1";
                             }
 
-                            const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, null, null, undefined, undefined, user, cmdArgs.guild, image.url);
+                            const cardData: CardData = {
+                                leaderboardPosition: 0,
+                                weeklyLeaderboardPosition: 0,
+                                currentRank: null,
+                                nextRank: null,
+                                serverUserSettings,
+                                userLevel,
+                                member: user,
+                                customWings: image.url
+                            };
+
+                            const { image: wingsImage, extension } = await drawCardWithWings(cardData);
 
                             await createMessageButtons({
                                 sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:

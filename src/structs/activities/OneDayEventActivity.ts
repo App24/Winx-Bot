@@ -7,9 +7,10 @@ export abstract class OneDayEventActivity extends EventActivity {
 }
 
 function nextDay(date: Date) {
-    date.setHours(24);
-    date.setMinutes(0);
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-    return date;
+    const newDate = new Date(date.getTime());
+    newDate.setHours(24);
+    newDate.setMinutes(0);
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+    return newDate;
 }

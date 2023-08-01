@@ -24,14 +24,14 @@ export class AnimatedCardBaseCommand extends BaseCommand {
         }
 
         createMessageButtons({
-            sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("cardpfp.warning"), buttons: [
+            sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("animatedcard.warning"), buttons: [
                 {
                     customId: "toggle",
                     emoji: userSettings.animatedCard ? "❌" : "✅",
                     style: ButtonStyle.Primary,
                     onRun: async ({ interaction }) => {
                         userSettings.animatedCard = !userSettings.animatedCard;
-                        interaction.reply({ content: Localisation.getTranslation("cardpfp.reply", userSettings.animatedCard ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
+                        interaction.reply({ content: Localisation.getTranslation("animatedcard.reply", userSettings.animatedCard ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
                         serverUserSettings[userIndex] = userSettings;
                         await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
                     }

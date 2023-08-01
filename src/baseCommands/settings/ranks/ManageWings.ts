@@ -7,7 +7,7 @@ import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { DEFAULT_WINGS_DATA, RankLevel } from "../../../structs/databaseTypes/RankLevel";
 import { DEFAULT_CARD_CODE } from "../../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
-import { drawCardWithWings } from "../../../utils/CardUtils";
+import { CardData, drawCardWithWings } from "../../../utils/CardUtils";
 import { capitalise } from "../../../utils/FormatUtils";
 import { createMessageButtons } from "../../../utils/MessageButtonUtils";
 import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";
@@ -142,7 +142,19 @@ export class ManageWingsBaseCommand extends BaseCommand {
 
                                         serverUserSettings.cardCode = DEFAULT_CARD_CODE;
 
-                                        const { image: wingsImage, extension } = await drawCardWithWings(0, userLevel, serverUserSettings, image.url, image.url, undefined, undefined, cmdArgs.member, cmdArgs.guild);
+                                        const cardData: CardData = {
+                                            leaderboardPosition: 0,
+                                            weeklyLeaderboardPosition: 0,
+                                            currentRank: null,
+                                            nextRank: null,
+                                            serverUserSettings,
+                                            userLevel,
+                                            member: cmdArgs.member,
+                                            wingsImageA: image.url,
+                                            wingsImageB: image.url
+                                        };
+
+                                        const { image: wingsImage, extension } = await drawCardWithWings(cardData);
 
                                         await createMessageButtons({
                                             sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:

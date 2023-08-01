@@ -21,6 +21,19 @@ import { getWingsImageByLevel } from "./RankUtils";
 import { getServerDatabase, asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, stream2buffer, toBuffer, isBooster, isPatreon } from "./Utils";
 import { getLevelXP } from "./XPUtils";
 
+export interface CardData {
+    leaderboardPosition: number,
+    weeklyLeaderboardPosition: number,
+    userLevel: UserLevel,
+    serverUserSettings: ServerUserSettings,
+    wingsImageA?: CanvasImage,
+    wingsImageB?: CanvasImage,
+    currentRank: RankLevel,
+    nextRank: RankLevel,
+    member: GuildMember,
+    customWings?: CanvasImage
+}
+
 export function decodeCode(code: string) {
     if (!code) return decodeCode(DEFAULT_CARD_CODE);
 
@@ -40,7 +53,12 @@ export function decodeCode(code: string) {
     return toReturn;
 }
 
-export async function drawCard(leaderboardPosition: number, userLevel: UserLevel, serverUserSettings: ServerUserSettings, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+export async function drawCard(cardData: CardData) {
+    const serverUserSettings = cardData.serverUserSettings;
+    const member = cardData.member;
+    const guild = cardData.member.guild;
+    const userLevel = cardData.userLevel;
+
     const CustomWingsDatabase = BotUser.getDatabase(DatabaseType.CustomWings);
     const customWings: CustomWings[] = await getServerDatabase(CustomWingsDatabase, guild.id);
 
@@ -61,12 +79,19 @@ export async function drawCard(leaderboardPosition: number, userLevel: UserLevel
     const wingsImageA = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, serverUserSettings.winxCharacter, guild.id);
     const wingsImageB = await getWingsImageByLevel(serverUserSettings.wingsLevelB < 0 ? userLevel.level : serverUserSettings.wingsLevelB, serverUserSettings.winxCharacterB ?? serverUserSettings.winxCharacter, guild.id);
 
-    return drawCardWithWings(leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild, wingsImage);
+    cardData.wingsImageA = wingsImageA;
+    cardData.wingsImageB = wingsImageB;
+    cardData.customWings = wingsImage;
+
+    return drawCardWithWings(cardData);
 }
 
 type CanvasImage = string | Buffer | Image;
 
-export async function drawCardWithWings(leaderboardPosition: number, userLevel: UserLevel, serverUserSettings: ServerUserSettings, wingsImageA: CanvasImage, wingsImageB: CanvasImage, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild, customWings: CanvasImage = undefined) {
+export async function drawCardWithWings(cardData: CardData) {
+    const member = cardData.member;
+    const serverUserSettings = cardData.serverUserSettings;
+
     const userPfpUrl = member.displayAvatarURL();
 
     if (serverUserSettings.animatedCard == undefined) {
@@ -93,7 +118,7 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
                     const data = createImageData(frame.data, width, height);
                     pfpCtx.putImageData(data, 0, 0);
 
-                    const canvas = await drawCardFrame(pfpCanvas, leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild, customWings);
+                    const canvas = await drawCardFrame(pfpCanvas, cardData);
                     const ctx = canvas.getContext("2d");
 
                     const array = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -110,12 +135,15 @@ export async function drawCardWithWings(leaderboardPosition: number, userLevel: 
             });
         }).then(buffer => { return { image: buffer, extension: "gif" }; });
     } else {
-        const avatar = await loadImage(member.displayAvatarURL({ extension: 'png' }));
-        return { image: (await drawCardFrame(avatar, leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild, customWings)).toBuffer(), extension: "png" };
+        const avatar = await loadImage(member.displayAvatarURL({ extension: 'png', size: 512 }));
+        return { image: (await drawCardFrame(avatar, cardData)).toBuffer(), extension: "png" };
     }
 }
 
-export async function drawGreenScreenCard(greenScreenColor: string, leaderboardPosition: number, userLevel: UserLevel, serverUserSettings: ServerUserSettings, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild) {
+export async function drawGreenScreenCard(greenScreenColor: string, cardData: CardData) {
+    const { member, serverUserSettings, userLevel } = cardData;
+    const guild = member.guild;
+
     const CustomWingsDatabase = BotUser.getDatabase(DatabaseType.CustomWings);
     const customWings: CustomWings[] = await getServerDatabase(CustomWingsDatabase, guild.id);
 
@@ -138,16 +166,23 @@ export async function drawGreenScreenCard(greenScreenColor: string, leaderboardP
 
     const avatar = canvasColor(greenScreenColor, 64, 64);
 
-    return (await drawCardFrame(avatar, leaderboardPosition, userLevel, serverUserSettings, wingsImageA, wingsImageB, currentRank, nextRank, member, guild, wingsImage)).toBuffer();
+    cardData.customWings = wingsImage;
+    cardData.wingsImageA = wingsImageA;
+    cardData.wingsImageB = wingsImageB;
+
+    return (await drawCardFrame(avatar, cardData)).toBuffer();
 }
 
-async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: number, userLevel: UserLevel, serverUserSettings: ServerUserSettings, wingsImageA: CanvasImage, wingsImageB: CanvasImage, currentRank: RankLevel, nextRank: RankLevel, member: GuildMember, guild: Guild, customWings: CanvasImage) {
+async function drawCardFrame(userAvatar: Image | Canvas, cardData: CardData) {
+    const { member, serverUserSettings, weeklyLeaderboardPosition, leaderboardPosition, currentRank, nextRank, userLevel, customWings, wingsImageA, wingsImageB } = cardData;
+    const guild = member.guild;
+
     const canvas = createCanvas(CARD_CANVAS_WIDTH, CARD_CANVAS_HEIGHT);
     const ctx = canvas.getContext("2d");
 
     const decodedCode = decodeCode(serverUserSettings.cardCode);
 
-    const { cl_roleIcon, cl_background, cl_wings, cl_customWings, cl_pfp, cl_xpBar, cl_pfpCircle, cl_nextTransformation, cl_currentTransformation, cl_rank, cl_xp, cl_levels, cl_name } = decodedCode;
+    const { cl_roleIcon, cl_background, cl_wings, cl_customWings, cl_pfp, cl_xpBar, cl_pfpCircle, cl_nextTransformation, cl_currentTransformation, cl_rank, cl_xp, cl_levels, cl_name, cl_weekrank } = decodedCode;
 
     const varToString = (varObj) => Object.keys(varObj)[0];
 
@@ -161,6 +196,7 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
         { varName: varToString({ cl_nextTransformation }), layer: cl_nextTransformation },
         { varName: varToString({ cl_currentTransformation }), layer: cl_currentTransformation },
         { varName: varToString({ cl_rank }), layer: cl_rank },
+        { varName: varToString({ cl_weekrank }), layer: cl_weekrank },
         { varName: varToString({ cl_xp }), layer: cl_xp },
         { varName: varToString({ cl_levels }), layer: cl_levels },
         { varName: varToString({ cl_name }), layer: cl_name },
@@ -179,13 +215,14 @@ async function drawCardFrame(userAvatar: Image | Canvas, leaderboardPosition: nu
         "cl_nextTransformation": drawCardNextTransformation,
         "cl_currentTransformation": drawCardCurrentTransformation,
         "cl_rank": drawCardRank,
+        "cl_weekrank": drawCardWeeklyRank,
         "cl_xp": drawCardXP,
         "cl_levels": drawCardLevel,
         "cl_name": drawCardName,
         "cl_roleIcon": drawCardRoleIcon
     };
 
-    const data = { customWings, wingsImageA, wingsImageB, member, guild, userLevel, currentRank, nextRank, leaderboardPosition, userAvatar };
+    const data = { customWings, wingsImageA, wingsImageB, member, guild, userLevel, currentRank, nextRank, leaderboardPosition, userAvatar, weeklyLeaderboardPosition };
 
     await asyncForEach(layers, async (layer) => {
         if (layer.layer === undefined) return;
@@ -207,7 +244,17 @@ export async function drawTemplateCard(member: GuildMember) {
 
     serverUserSettings.cardCode = "pfpCircle_width=10|pfpCircle_color=#ffffff|pfp_positionX=600|pfp_positionY=260|pfp_size=1|cl_pfpCircle=4|cl_pfp=5";
 
-    return drawCardFrame(await loadImage(member.displayAvatarURL({ extension: "png" })), 0, userLevel, serverUserSettings, undefined, undefined, undefined, undefined, member, member.guild, undefined);
+    const cardData: CardData = {
+        leaderboardPosition: 0,
+        weeklyLeaderboardPosition: 0,
+        currentRank: null,
+        nextRank: null,
+        member,
+        serverUserSettings,
+        userLevel
+    };
+
+    return drawCardFrame(await loadImage(member.displayAvatarURL({ extension: "png" })), cardData);
 }
 
 async function drawCardBackground(ctx: CanvasRenderingContext2D, decodedCode) {
@@ -604,6 +651,33 @@ async function drawCardRank(ctx: CanvasRenderingContext2D, decodedCode, data) {
     // ctx.fillText(lbPositionText, rank_positionX, rank_positionY);
 }
 
+async function drawCardWeeklyRank(ctx: CanvasRenderingContext2D, decodedCode, data) {
+
+    const { weekrank_textFont, weekrank_positionX, weekrank_positionY, weekrank_strokeColor, weekrank_strokeSize, weekrank_textAlign, weekrank_textBaseline, weekrank_textColor, weekrank_textSize } = decodedCode;
+
+    const { weeklyLeaderboardPosition } = data;
+
+    const lbPositionText = Localisation.getTranslation("magiclevels.weeklb.position", weeklyLeaderboardPosition);
+
+    const cardTopInfoFontSize = 50 * weekrank_textSize;
+
+    drawCardText(ctx, lbPositionText, cardTopInfoFontSize, weekrank_textFont, weekrank_textColor, weekrank_textBaseline, weekrank_textAlign, weekrank_strokeSize, weekrank_strokeColor, weekrank_positionX, weekrank_positionY);
+
+    // ctx.font = `${cardTopInfoFontSize}px ${rank_textFont}`;
+
+    // ctx.textBaseline = rank_textBaseline;
+    // ctx.textAlign = rank_textAlign;
+    // ctx.fillStyle = rank_textColor;
+
+    // if (rank_strokeSize > 0) {
+    //     ctx.strokeStyle = rank_strokeColor;
+    //     ctx.lineWidth = rank_strokeSize;
+    //     ctx.strokeText(lbPositionText, rank_positionX, rank_positionY);
+    // }
+
+    // ctx.fillText(lbPositionText, rank_positionX, rank_positionY);
+}
+
 async function drawCardXP(ctx: CanvasRenderingContext2D, decodedCode, data) {
     const { cl_levels, xp_middleLevel, levels_textSize, levels_textBaseline, levels_textAlign, levels_positionX, levels_positionY } = decodedCode;
     const { xp_textSize, xp_textFont, xp_textColor, xp_textBaseline, xp_textAlign, xp_strokeSize, xp_strokeColor } = decodedCode;
@@ -708,7 +782,7 @@ function drawCardText(ctx: CanvasRenderingContext2D, text: string, fontSize: num
     ctx.fillText(text, positionX, positionY);
 }
 
-export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel, member: GuildMember, position: number }[], user: User, guildId: string) {
+export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel, member: GuildMember, position: number }[], user: User, guildId: string, title: string) {
     const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
     const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, guildId);
 
@@ -740,8 +814,10 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel,
     });
     width = Math.max(width, 1200);
 
+    const leaderboardLength = leaderboardLevels.length + 1;
+
     canvas.width = width;
-    canvas.height = ((pfpPadding) * (leaderboardLevels.length + 1)) + (pfpRadius + pfpPadding) * (leaderboardLevels.length * 2);
+    canvas.height = ((pfpPadding) * (leaderboardLength + 1)) + (pfpRadius + pfpPadding) * (leaderboardLength * 2);
 
     const colors: string[] = [];
 
@@ -759,6 +835,8 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel,
                 return background_secondaryColor ?? default_background_secondaryColor;
         }
     };
+
+    colors.push(getBackgroundColor(null, null, null, null));
 
     await asyncForEach(leaderboardLevels, async (value) => {
         let userSettings = serverUserSettings.find(s => s.userId === value.member.id);
@@ -796,6 +874,24 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel,
 
     ctx.restore();
 
+    {
+
+        const textFontSize = fitTextOnCanvas(ctx, title, canvas.width - (pfpPadding * 2), CANVAS_FONT, 100);
+        const textFont = `${textFontSize}px ${CANVAS_FONT}`;
+
+        const textColor = getBrightnessColor(hexToRGB(colors[0]));
+
+        const x = pfpPadding;
+        const y = ((pfpPadding) * 1) + pfpRadius + (pfpRadius + pfpPadding) * 0;
+
+        ctx.font = textFont;
+        ctx.fillStyle = textColor;
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+
+        ctx.fillText(title, x, y);
+    }
+
     let previousUserSettings: ServerUserSettings;
 
     await asyncForEach(leaderboardLevels, async (value, i) => {
@@ -814,7 +910,7 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel,
         xpBar_endColor = xpBar_endColor ?? default_xpBar_endColor;
 
         const pfpX = pfpRadius + pfpPadding;
-        const pfpY = ((pfpPadding) * (i + 1)) + pfpRadius + (pfpRadius + pfpPadding) * (i * 2);
+        const pfpY = ((pfpPadding) * ((i + 1) + 1)) + pfpRadius + (pfpRadius + pfpPadding) * ((i + 1) * 2);
 
         const userLevel = value.userLevel;
 
@@ -896,6 +992,9 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel,
             default:
             case "tag": {
                 userName = value.member.user.tag;
+
+                if (value.member.user.discriminator === '0')
+                    userName = value.member.user.username;
             } break;
             case "username": {
                 userName = value.member.user.username;
@@ -908,7 +1007,7 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: UserLevel,
         const text = `${value.position + 1}. ${userName} | ${levelText}`;
 
         ctx.fillText(text, textPosx, textPosY);
-        if (user.id === value.member.id) {
+        if (user && user.id === value.member.id) {
             underlineText(ctx, text, textPosx, textPosY);
         }
 

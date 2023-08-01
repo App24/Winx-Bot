@@ -24,10 +24,10 @@ export class RegisterSlashCommandsBaseCommand extends BaseCommand {
                                                 onSelect: async ({ interaction }) => {
                                                     const commands = BotUser.SlashCommands.map((c, n) => {
                                                         if (c.guildIds.length) return;
-                                                        const command: ApplicationCommandData = c.commandData;
+                                                        const command = c.commandData;
                                                         if (command.name === "")
                                                             command.name = n;
-                                                        return command;
+                                                        return <ApplicationCommandData>command;
                                                     }).filter(c => c !== undefined);
                                                     if (!commands.length) return interaction.reply("No commands to register");
                                                     BotUser.application.commands.set(commands).then(() => {
@@ -46,10 +46,10 @@ export class RegisterSlashCommandsBaseCommand extends BaseCommand {
                                                 onSelect: async ({ interaction }) => {
                                                     const commands = BotUser.SlashCommands.map((c, n) => {
                                                         if (c.guildIds.length && !c.guildIds.includes(cmdArgs.guildId)) return;
-                                                        const command: ApplicationCommandData = c.commandData;
+                                                        const command = c.commandData;
                                                         if (command.name === "")
                                                             command.name = n;
-                                                        return command;
+                                                        return <ApplicationCommandData>command;
                                                     }).filter(c => c !== undefined);
                                                     if (!commands.length) return interaction.reply("No commands to register");
                                                     cmdArgs.guild.commands.set(commands).then(() => {
@@ -69,10 +69,10 @@ export class RegisterSlashCommandsBaseCommand extends BaseCommand {
                                                     const commands = BotUser.SlashCommands.map((c, n) => {
                                                         if (!c.guildIds.length) return;
                                                         if (!c.guildIds.includes(cmdArgs.guildId)) return;
-                                                        const command: ApplicationCommandData = c.commandData;
+                                                        const command = c.commandData;
                                                         if (command.name === "")
                                                             command.name = n;
-                                                        return command;
+                                                        return <ApplicationCommandData>command;
                                                     }).filter(c => c !== undefined);
                                                     if (!commands.length) return interaction.reply("No commands to register");
                                                     cmdArgs.guild.commands.set(commands).then(() => {

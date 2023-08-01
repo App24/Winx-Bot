@@ -1,4 +1,4 @@
-import { Message, User, MessageOptions, MessageComponentInteraction, GuildMember, ActionRowBuilder, MessageSelectOption, SelectMenuBuilder, ComponentType, MessageActionRowComponentBuilder, CommandInteraction } from "discord.js";
+import { Message, User, MessageComponentInteraction, GuildMember, ActionRowBuilder, MessageSelectOption, SelectMenuBuilder, ComponentType, MessageActionRowComponentBuilder, CommandInteraction, StringSelectMenuBuilder, BaseMessageOptions } from "discord.js";
 import { MAX_ITEMS_PER_SELECT_MENU } from "../Constants";
 import { Localisation } from "../localisation";
 import { InteractionData, SendTarget } from "./MessageButtonUtils";
@@ -54,7 +54,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                     value: "previous",
                     onSelect: async ({ interaction }) => {
                         const row = rows[index];
-                        row.components[0] = (new SelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[--selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+                        row.components[0] = (new StringSelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[--selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
                         // (<SelectMenuBuilder>row.components[0]).setOptions(selectOptions[index].options[--selectOptions[index].selectIndex]);
                         rows[index] = row;
                         await interaction.update({ components: rows });
@@ -69,7 +69,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
         } while (options.length > 0);
 
         selectOptions.push({ selectMenu, selectIndex: 0, options: tempOptions });
-        rows[index].addComponents(new SelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+        rows[index].addComponents(new StringSelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
         // rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], minValues: selectMenu.minValues, maxValues: selectMenu.maxValues }));
     });
 
@@ -126,8 +126,8 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
         msg.components.forEach(component => {
             const row = new ActionRowBuilder<MessageActionRowComponentBuilder>();
             component.components.forEach(c => {
-                if (c.type === ComponentType.SelectMenu) {
-                    row.addComponents(SelectMenuBuilder.from(c).setDisabled(true));
+                if (c.type === ComponentType.StringSelect) {
+                    row.addComponents(StringSelectMenuBuilder.from(c).setDisabled(true));
                 }
             });
             components.push(row);
@@ -138,7 +138,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
     const data = { information: {} };
 
     collector.on("collect", async (interaction) => {
-        if (interaction.isSelectMenu()) {
+        if (interaction.isStringSelectMenu()) {
             if (author && interaction.user.id !== authorId) {
                 await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
                 return;
@@ -175,7 +175,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 export interface MessageSelectData {
     sendTarget: SendTarget,
     author?: User | string | GuildMember,
-    options?: string | MessageOptions,
+    options?: string | BaseMessageOptions,
     settings?: { max?: number, time?: number },
     selectMenuOptions: SelectMenuOptions[] | SelectMenuOptions
 }

@@ -5,10 +5,6 @@ import { getStringReply } from "../../utils/ReplyUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class CreateFairyBaseCommand extends BaseCommand {
-    public constructor() {
-        super();
-    }
-
     public async onRun(cmdArgs: BaseCommandType) {
         const serverFairies = await Fairy.getServerFairies(cmdArgs.guildId);
 

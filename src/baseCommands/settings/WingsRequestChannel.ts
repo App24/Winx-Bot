@@ -1,16 +1,16 @@
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
+import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { getTextChannelReply } from "../../utils/ReplyUtils";
 import { getServerDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
-export class wingsRequestChannelBaseCommand extends BaseCommand {
+export class WingsRequestChannelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {

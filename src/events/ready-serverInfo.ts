@@ -1,13 +1,13 @@
 import { BotUser } from "../BotClient";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/ServerInfo";
+import { DEFAULT_SERVER_INFO, ServerData } from "../structs/databaseTypes/ServerInfo";
 import { asyncMapForEach, getServerDatabase } from "../utils/Utils";
 
 export = () => {
     BotUser.on("ready", async () => {
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
         await asyncMapForEach(BotUser.guilds.cache, async (_, guild) => {
-            const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, guild.id, DEFAULT_SERVER_INFO);
+            const serverInfo: ServerData = await getServerDatabase(ServerInfo, guild.id, DEFAULT_SERVER_INFO);
 
             if (!serverInfo.maxXpPerMessage) serverInfo.maxXpPerMessage = DEFAULT_SERVER_INFO.maxXpPerMessage;
 

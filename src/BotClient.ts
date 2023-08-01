@@ -99,6 +99,7 @@ class BotClient extends Client {
                 if (!command.description)
                     command.description = `${name}.command.description`;
                 command.commandName = name;
+                //Localisation.getTranslation(command.description);
                 this.commands.set(name, command);
                 switch (this.botOptions.logLoading) {
                     case 'complex':

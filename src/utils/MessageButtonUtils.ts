@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, CommandInteraction, ComponentType, GuildMember, InteractionButtonComponentData, InteractionCollector, Message, MessageActionRowComponentBuilder, MessageComponentInteraction, MessageOptions, SelectMenuInteraction, TextBasedChannel, User } from "discord.js";
+import { ActionRowBuilder, AnySelectMenuInteraction, BaseMessageOptions, ButtonBuilder, ButtonInteraction, CommandInteraction, ComponentType, GuildMember, InteractionButtonComponentData, InteractionCollector, Message, MessageActionRowComponentBuilder, MessageComponentInteraction, TextBasedChannel, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "./Utils";
 
@@ -125,7 +125,7 @@ export type MessageAuthor = GuildMember | User | string;
 export interface MessageButtonData {
     sendTarget: SendTarget,
     author?: MessageAuthor,
-    options?: string | MessageOptions,
+    options?: string | BaseMessageOptions,
     settings?: { max?: number, time?: number },
     beforeButton?: (interactionData: InteractionData) => void,
     buttons: Partial<InteractiveButton>[]
@@ -135,7 +135,7 @@ export interface InteractionData {
     interaction: MessageComponentInteraction,
     message: Message,
     data: { information },
-    collector: InteractionCollector<ButtonInteraction | SelectMenuInteraction>;
+    collector: InteractionCollector<ButtonInteraction | AnySelectMenuInteraction>;
 }
 
 export interface InteractiveButton extends InteractionButtonComponentData {

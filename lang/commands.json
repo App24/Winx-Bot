@@ -80,6 +80,7 @@
     "magiclevels.level": "Level: {0}",
     "magiclevels.levels": "{0}/{1}",
     "magiclevels.lb.position": "Rank: #{0}",
+    "magiclevels.weeklb.position": "Week Rank: #{0}",
     "magiclevels.generate": "Generating card...\nCustomise your card at: https://app24.github.io/cardeditor/",
 
     "setxp.get": "XP per message is `{0}`!",
@@ -192,10 +193,6 @@
 
     "checkerror.reply.code": "Please reply with error code",
 
-    "cardpfp.warning": "Animated cards will only work if you have an animated pfp!",
-    "cardpfp.reply": "Animated card is now {0}!",
-
-    "levelping.reply": "Level pings are now {0}!",
     "cardname.reply": "Card name is now {0}!",
     "cardwings.reply": "Card wings are now {0}!",
 

@@ -1,4 +1,4 @@
-export class ServerInfo {
+export class ServerData {
     public maxMessagePerMinute: number;
     public maxXpPerMessage: number;
     public minMessageLength: number;
@@ -6,6 +6,7 @@ export class ServerInfo {
     public levelChannel: string;
     public excludeChannels: string[];
     public wingsRequestChannel: string;
+    public weeklyAnnoucementChannel: string;
     //public leaderboardColor: string;
     //public leaderboardHighlight: string;
 
@@ -21,4 +22,4 @@ export class ServerInfo {
     }
 }
 
-export const DEFAULT_SERVER_INFO = new ServerInfo(50, 5, 3, 20);
+export const DEFAULT_SERVER_INFO = new ServerData(50, 5, 3, 20);

@@ -1,4 +1,4 @@
-import { DMChannel, Guild, GuildMember, Message, MessageOptions, ReplyMessageOptions, TextBasedChannel, User } from "discord.js";
+import { BaseMessageOptions, DMChannel, Guild, GuildMember, Message, MessageReplyOptions, TextBasedChannel, User } from "discord.js";
 import { BaseCommand } from "../baseCommands/BaseCommand";
 import { Localisation } from "../localisation";
 import { isDM } from "../utils/Utils";
@@ -142,7 +142,7 @@ export class CommandArguments {
         return this.message;
     }
 
-    public async reply(options: string | ReplyMessageOptions, ...args) {
+    public async reply(options: string | MessageReplyOptions, ...args) {
         if (typeof options === "string") {
             options = { content: Localisation.getTranslation(options, ...args) };
         } else {
@@ -153,14 +153,22 @@ export class CommandArguments {
         return this.message.reply(options);
     }
 
-    public async dmReply(options: string | MessageOptions, ...args) {
+    public async localisedReply(options: string | MessageReplyOptions) {
+        if (typeof options === "string") {
+            options = { content: options };
+        }
+        options.failIfNotExists = false;
+        return this.message.reply(options);
+    }
+
+    public async dmReply(options: string | BaseMessageOptions, ...args) {
         if (typeof options === "string") {
             options = Localisation.getTranslation(options, ...args);
         } else {
             if (options.content)
                 options.content = Localisation.getTranslation(options.content, ...args);
         }
-        let sendTarget: DMChannel | TextBasedChannel = await this.author.createDM();
+        let sendTarget: DMChannel | TextBasedChannel = await this.author.createDM().catch(() => undefined);
         if (!sendTarget || isDM(this.channel)) {
             sendTarget = this.channel;
         } else {

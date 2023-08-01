@@ -10,7 +10,7 @@
     "error.invalid.category.commands": "That category has no commands!",
     "error.invalid.namecolor": "You do not have a custom name color!",
     "error.invalid.member": "That is not a member of this server!",
-    "error.invalid.channel": "That is a valid channel!",
+    "error.invalid.channel": "That is not a valid channel!",
     "error.invalid.user": "That is not a valid user!",
     "error.invalid.role": "That is not a valid role!",
 

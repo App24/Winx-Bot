@@ -4,6 +4,14 @@
         {
             "name": "emojis",
             "enabled": false
+        },
+        {
+            "name": "giveroles",
+            "enabled": false
+        },
+        {
+            "name": "resetweeklyleaderboard",
+            "enabled": false
         }
     ]
 }

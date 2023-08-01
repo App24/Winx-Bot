@@ -2,7 +2,7 @@ import { BaseGuildTextChannel, Collection } from "discord.js";
 import { BotUser } from "../BotClient";
 import { PREFIX } from "../Constants";
 import { DatabaseType } from "../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../structs/databaseTypes/ServerInfo";
+import { DEFAULT_SERVER_INFO, ServerData } from "../structs/databaseTypes/ServerInfo";
 import { getServerDatabase, isDM } from "../utils/Utils";
 import { addXP } from "../utils/XPUtils";
 
@@ -24,7 +24,7 @@ export = () => {
     BotUser.on("messageCreate", async (message) => {
         if (message.content.toLowerCase().startsWith(PREFIX) || message.author.bot || isDM(message.channel)) return;
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo: ServerData = await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
         if (message.content.length < serverInfo.minMessageLength) return;
         const excluded = serverInfo.excludeChannels;
         if (excluded && excluded.find(c => c === message.channel.id)) return;
@@ -68,7 +68,7 @@ export = () => {
         }, 60 * 1000);
 
         const xp = Math.ceil((Math.min(message.content.length, serverInfo.maxMessageLength) / serverInfo.maxMessageLength) * serverInfo.maxXpPerMessage);
-        await addXP({ xp, member: message.member, guild: message.guild, channel: <BaseGuildTextChannel>message.channel });
+        await addXP({ xp, member: message.member, guild: message.guild, channel: <BaseGuildTextChannel>message.channel }, true, true);
 
     });
 }

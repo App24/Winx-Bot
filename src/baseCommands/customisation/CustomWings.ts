@@ -5,7 +5,7 @@ import { CARD_CANVAS_WIDTH, CARD_CANVAS_HEIGHT, CUSTOM_WINGS_REQUEST_FOLDER, CUS
 import { Localisation } from "../../localisation";
 import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomWings } from "../../structs/databaseTypes/CustomWings";
-import { DEFAULT_SERVER_INFO, ServerInfo } from "../../structs/databaseTypes/ServerInfo";
+import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
 import { WingsRequest } from "../../structs/databaseTypes/WingsRequest";
 import { getTextChannelById, getBotRoleColor, getMemberById } from "../../utils/GetterUtils";
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
@@ -16,7 +16,7 @@ import { BaseCommand, BaseCommandType } from "../BaseCommand";
 export class CustomWingsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerInfo = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
 
         const WingsRequests = BotUser.getDatabase(DatabaseType.WingsRequests);
         const wingsRequests: WingsRequest[] = await getServerDatabase(WingsRequests, cmdArgs.guildId);
@@ -114,6 +114,18 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
 
                     wingsRequests.splice(requestWingsIndex, 1);
 
+                    const dmChannel = (await user.createDM());
+
+                    if (dmChannel) {
+                        const embed = new EmbedBuilder();
+
+                        embed.setTitle("Your wings submission has been accepted!");
+
+                        embed.setImage(`attachment://${wingsRequest.userId}.png`);
+
+                        await dmChannel.send({ embeds: [embed], files: [wingsRequest.wingsFile] });
+                    }
+
                     renameSync(wingsRequest.wingsFile, filePath);
                     userWings.wingsFile = filePath;
                     customWings[wingsIndex] = userWings;
@@ -133,6 +145,18 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
                     const requestWingsIndex = wingsRequests.findIndex(u => u.userId === user.id);
                     if (requestWingsIndex < 0) {
                         return;
+                    }
+
+                    const dmChannel = (await user.createDM());
+
+                    if (dmChannel) {
+                        const embed = new EmbedBuilder();
+
+                        embed.setTitle("Your wings submission was rejected!");
+
+                        embed.setImage(`attachment://${wingsRequest.userId}.png`);
+
+                        await dmChannel.send({ embeds: [embed], files: [wingsRequest.wingsFile] });
                     }
 
                     if (existsSync(wingsRequest.wingsFile)) {

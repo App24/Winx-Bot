@@ -1,11 +1,11 @@
-import { ApplicationCommandData, Guild, TextBasedChannel, User, GuildMember, CommandInteraction, InteractionReplyOptions, DMChannel, MessageOptions } from "discord.js";
+import { ApplicationCommandData, Guild, TextBasedChannel, User, GuildMember, CommandInteraction, InteractionReplyOptions, DMChannel, BaseMessageOptions } from "discord.js";
 import { CommandAvailable } from "./CommandAvailable";
 import { CommandAccess } from "./CommandAccess";
 import { Localisation } from "../localisation";
 import { BaseCommand } from "../baseCommands/BaseCommand";
 
 export abstract class SlashCommand {
-    public commandData: ApplicationCommandData;
+    public commandData: Partial<ApplicationCommandData>;
     public deferEphemeral: boolean;
 
     public access: CommandAccess;
@@ -17,7 +17,7 @@ export abstract class SlashCommand {
 
     public cooldown: number;
 
-    public constructor(commandData: ApplicationCommandData) {
+    public constructor(commandData: Partial<ApplicationCommandData>) {
         this.commandData = commandData;
         this.deferEphemeral = false;
         this.access = CommandAccess.None;
@@ -73,7 +73,15 @@ export class SlashCommandArguments {
         }
     }
 
-    public async dmReply(options: string | MessageOptions, ...args) {
+    public async localisedReply(options: string | InteractionReplyOptions) {
+        if (this.interaction.deferred || this.interaction.replied) {
+            await this.interaction.followUp(options);
+        } else {
+            await this.interaction.reply(options);
+        }
+    }
+
+    public async dmReply(options: string | BaseMessageOptions, ...args) {
         if (typeof options === "string") {
             options = Localisation.getTranslation(options, ...args);
         } else {

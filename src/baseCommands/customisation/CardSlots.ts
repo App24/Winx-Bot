@@ -1,4 +1,4 @@
-import { ButtonStyle, Message, MessageComponentInteraction } from "discord.js";
+import { ButtonStyle, Message, MessageComponentInteraction, ModalSubmitInteraction, TextInputStyle } from "discord.js";
 import { copyFileSync, existsSync, mkdirSync, rmSync } from "fs";
 import { join } from "path";
 import { BotUser } from "../../BotClient";
@@ -12,6 +12,7 @@ import { createMessageSelection, SelectOption } from "../../utils/MessageSelecti
 import { getStringReply } from "../../utils/ReplyUtils";
 import { getServerDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { createInteractionModal } from "../../utils/InteractionModalUtils";
 
 export class CardSlotsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -59,7 +60,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
             async onSelect({ interaction }) {
                 const options: SelectOption[] = [];
 
-                const saveCode = async (slotName: string, target: MessageComponentInteraction | Message) => {
+                const saveCode = async (slotName: string, target: MessageComponentInteraction | Message | ModalSubmitInteraction) => {
                     const saveSlot = userSettings.cardSlots.find(c => c.name.toLowerCase() === slotName.toLowerCase());
 
                     let wingsFile = "";
@@ -79,7 +80,11 @@ export class CardSlotsBaseCommand extends BaseCommand {
 
                     await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
 
-                    target.reply(Localisation.getTranslation("generic.done"));
+                    if (target instanceof ModalSubmitInteraction) {
+                        target.reply(Localisation.getTranslation("generic.done"));
+                    } else {
+                        target.reply(Localisation.getTranslation("generic.done"));
+                    }
                 };
 
                 options.push({
@@ -89,7 +94,16 @@ export class CardSlotsBaseCommand extends BaseCommand {
                     description: null,
                     emoji: null,
                     async onSelect({ interaction }) {
-                        const { value: name, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "cardslots.output.new.reply" });
+                        await createInteractionModal({
+                            title: "Card Slot",
+                            fields: { custom_id: "name", label: "Name", style: TextInputStyle.Short, required: true },
+                            sendTarget: interaction,
+                            async onSubmit({ data, interaction }) {
+                                saveCode(data.information.name, interaction);
+                            }
+                        });
+
+                        /*const { value: name, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "cardslots.output.new.reply" });
                         if (!name) return;
 
                         if (name.length > 100) {
@@ -98,9 +112,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
 
                         if (slotsMenuOptions.map(s => s.toLowerCase()).includes(name.toLowerCase())) {
                             return message.reply(Localisation.getTranslation("cardslots.error.slot.exists"));
-                        }
-
-                        saveCode(name, message);
+                        }*/
                     }
                 });
 

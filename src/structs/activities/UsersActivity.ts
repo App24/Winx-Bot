@@ -1,6 +1,5 @@
 import { ActivityType } from "discord.js";
 import { BotUser } from "../../BotClient";
-import { Localisation } from "../../localisation";
 import { Activity } from "./Activity";
 
 export class UsersActivity extends Activity {
@@ -9,8 +8,12 @@ export class UsersActivity extends Activity {
         this.type = ActivityType.Watching;
     }
 
-    public async getActivity(): Promise<string> {
+    public getActivity(): string {
+        return "activity.users";
+    }
+
+    public async getActivityArgs(): Promise<any[]> {
         const numUsers = BotUser.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
-        return Localisation.getTranslation("activity.users", numUsers);
+        return [numUsers];
     }
 }

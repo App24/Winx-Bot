@@ -106,7 +106,7 @@ export function getTextChannelFromMention(mention: string, guild: Guild) {
 
 export function getTextChannelById(id: string, guild: Guild) {
     if (!id || !guild) return undefined;
-    return <BaseGuildTextChannel>guild.channels.cache.find(channel => channel.id === id && channel.type === ChannelType.GuildText);
+    return <BaseGuildTextChannel>guild.channels.cache.find(channel => channel.id === id && (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement));
 }
 
 export function getThreadChannelFromMention(mention: string, guild: Guild) {

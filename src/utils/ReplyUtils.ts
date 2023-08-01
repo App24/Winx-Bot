@@ -1,4 +1,4 @@
-import { Message, MessageComponentInteraction, MessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember, Attachment, CommandInteraction } from "discord.js";
+import { Message, MessageComponentInteraction, BaseMessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember, Attachment, CommandInteraction } from "discord.js";
 import { Localisation } from "../localisation";
 import { getMemberFromMention, getRoleFromMention, getTextChannelFromMention } from "./GetterUtils";
 import { MessageAuthor, SendTarget } from "./MessageButtonUtils";
@@ -205,7 +205,7 @@ export async function getMemberReply(replyData: GuildReplyData) {
 export interface ReplyData {
     sendTarget: SendTarget,
     author: MessageAuthor,
-    options?: string | MessageOptions,
+    options?: string | BaseMessageOptions,
     settings?: { max?: number, time?: number }
 }
 
