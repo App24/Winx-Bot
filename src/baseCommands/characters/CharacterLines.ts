@@ -4,7 +4,7 @@ import { createInterface } from "readline";
 import { Localisation } from "../../localisation";
 import { createGenericButtons } from "../../utils/MessageButtonUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
-import { reportError } from "../../utils/Utils";
+import { reportBotError } from "../../utils/Utils";
 
 export class CharacterLinesBaseCommand extends BaseCommand {
     public name: string;
@@ -16,7 +16,7 @@ export class CharacterLinesBaseCommand extends BaseCommand {
 
     public async onRun(cmdArgs: BaseCommandType) {
         if (!existsSync(`lines/${this.name}.txt`)) {
-            reportError(Localisation.getTranslation("error.missing.character.lines", this.name), cmdArgs.body);
+            reportBotError(Localisation.getTranslation("error.missing.character.lines", this.name), cmdArgs.body);
             return;
         }
 
@@ -34,7 +34,7 @@ export class CharacterLinesBaseCommand extends BaseCommand {
         }
 
         if (!data.length) {
-            reportError(Localisation.getTranslation("error.empty.character.lines", this.name), cmdArgs.body);
+            reportBotError(Localisation.getTranslation("error.empty.character.lines", this.name), cmdArgs.body);
             return;
         }
 

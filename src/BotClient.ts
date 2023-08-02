@@ -1,11 +1,7 @@
 import { ApplicationCommandType, Client, ClientOptions, Collection, GatewayIntentBits, IntentsBitField, Options, Partials } from "discord.js";
 import path from "path";
-import { DATABASE_FOLDER } from "./Constants";
-import { Keyv } from "./keyv/keyv-index";
 import { Localisation } from "./localisation";
-import { DatabaseType } from "./structs/DatabaseTypes";
 import { asyncForEach, loadFiles } from "./utils/Utils";
-import fs from "fs";
 import { Command } from "./structs/Command";
 import { SlashCommand } from "./structs/SlashCommand";
 import { Category } from "./structs/Category";
@@ -17,7 +13,6 @@ interface BotOptions {
 }
 
 class BotClient extends Client {
-    private databases = new Collection<DatabaseType, Keyv>();
     private commands = new Collection<string, Command>();
     public SlashCommands = new Collection<string, SlashCommand>();
 
@@ -30,24 +25,11 @@ class BotClient extends Client {
 
         this.loadLocalisation();
 
-        this.loadDatabases();
-
         (async () => {
             await this.loadSlashCommands();
             await this.loadCommands();
             await this.loadEvents();
         })();
-    }
-
-    public loadDatabases() {
-        if (!fs.existsSync(DATABASE_FOLDER)) {
-            fs.mkdirSync(DATABASE_FOLDER, { recursive: true });
-        }
-
-        const values = Object.values(DatabaseType);
-        values.forEach((value) => {
-            this.databases.set(<DatabaseType>value, new Keyv(`sqlite://${DATABASE_FOLDER}/${value}.sqlite`));
-        });
     }
 
     private async loadCommands() {
@@ -246,10 +228,6 @@ class BotClient extends Client {
         for (const file of files) {
             Localisation.loadLocalisation(file);
         }
-    }
-
-    public getDatabase(databaseType: DatabaseType): Keyv {
-        return this.databases.get(databaseType);
     }
 
     public getCommand(commandName: string) {

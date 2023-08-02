@@ -8,7 +8,6 @@ import { CommandAccess } from "./CommandAccess";
 import { CommandAvailable } from "./CommandAvailable";
 
 export abstract class Command {
-    // public enabled: boolean;
     public deprecated: boolean;
 
     public category: Category;
@@ -25,49 +24,20 @@ export abstract class Command {
 
     public guildIds: string[];
 
-    //public subCommands: SubCommand[];
-
     public baseCommand: BaseCommand;
 
     public commandName: string;
 
     public constructor(description?: string) {
         this.description = description;
-        // this.enabled = true;
         this.category = Other;
         this.available = CommandAvailable.Both;
-        //this.subCommands = [];
     }
 
     public get enabled() {
         const command = BotSettings.getSettings().commands.find(c => c.name === this.commandName) ?? { "enabled": true };
         return command.enabled;
     }
-
-    /*protected async onRunSubCommands(cmdArgs: CommandArguments, subCommandName: string, showError = true) {
-        let found = false;
-        await asyncForEach(this.subCommands, async (subCommand: SubCommand) => {
-            if (subCommand.name.toLowerCase() === subCommandName.toLowerCase() || (subCommand.aliases && subCommand.aliases.includes(subCommandName.toLowerCase()))) {
-                if (cmdArgs.args.length < subCommand.minArgs) {
-                    cmdArgs.message.reply(Localisation.getTranslation("error.arguments.few"));
-                } else if (cmdArgs.args.length > subCommand.maxArgs) {
-                    cmdArgs.message.reply(Localisation.getTranslation("error.arguments.many"));
-                } else {
-                    await subCommand.onRun(cmdArgs);
-                }
-                found = true;
-                return true;
-            }
-        });
-        if (showError && !found) {
-            let reply = Localisation.getTranslation("error.invalid.option");
-            if (this.usage) {
-                reply += `\n${Localisation.getTranslation("subCommand.usage", this.getUsage())}`;
-            }
-            cmdArgs.message.reply(reply);
-        }
-        return found;
-    }*/
 
     public async onRun(cmdArgs: CommandArguments) {
         if (this.baseCommand) {
@@ -173,7 +143,6 @@ export class CommandArguments {
             sendTarget = this.channel;
         } else {
             await this.reply("Please check your DM");
-            // await interaction.deferUpdate();
         }
         return sendTarget.send(options);
     }

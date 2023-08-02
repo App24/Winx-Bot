@@ -13,10 +13,6 @@ class GetWingsTemplateCommand extends Command {
 
         this.baseCommand = new GeTWingsTemplateBaseCommand();
     }
-
-    // public async onRun(cmdArgs: CommandArguments) {
-    //     cmdArgs.message.reply({ files: [canvasToMessageAttachment(await drawTemplateCard(cmdArgs.member))] });
-    // }
 }
 
 export = GetWingsTemplateCommand;

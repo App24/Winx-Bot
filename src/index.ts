@@ -3,5 +3,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { BotUser } from "./BotClient";
+import mongoose from "mongoose";
 
-BotUser.login(process.env.TOKEN);
+(async () => {
+    await mongoose.connect(process.env.MONGODB_URI);
+    BotUser.login(process.env.TOKEN);
+})();

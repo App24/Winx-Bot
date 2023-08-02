@@ -1,15 +1,12 @@
 import { EmbedBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
-import { getServerDatabase, asyncForEach, createMessageEmbed } from "../../utils/Utils";
+import { asyncForEach, createMessageEmbed, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class RanksBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-        const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
+        const ranks = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
         if (!ranks.length) return cmdArgs.reply("error.empty.ranks");
         const data = [];
         ranks.sort((a, b) => a.level - b.level);

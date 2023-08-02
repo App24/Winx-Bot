@@ -1,41 +1,20 @@
 import { loadImage } from "canvas";
-import { Guild, Role, User } from "discord.js";
+import { User } from "discord.js";
 import { existsSync } from "fs";
-import { BotUser } from "../BotClient";
-import { DatabaseType } from "../structs/DatabaseTypes";
-import { RankLevel } from "../structs/databaseTypes/RankLevel";
+import { RankLevel, RankLevelData } from "../structs/databaseTypes/RankLevel";
 import { ServerUserSettings } from "../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
-import { UserSetting } from "../structs/databaseTypes/UserSetting";
 import { WinxCharacter } from "../structs/WinxCharacters";
-import { getRoleById } from "./GetterUtils";
-import { asyncForEach, getServerDatabase } from "./Utils";
-
-export async function getUserLevel(userId: string, guildId: string, createNew = true) {
-    const Levels = BotUser.getDatabase(DatabaseType.Levels);
-    const levels: UserLevel[] = await getServerDatabase(Levels, guildId);
-
-    let userIndex = levels.findIndex(u => u.userId === userId);
-    if (userIndex < 0 && createNew) {
-        levels.push(new UserLevel(userId));
-        userIndex = levels.length - 1;
-        await Levels.set(guildId, levels);
-    } else if (userIndex < 0) {
-        return;
-    }
-
-    return levels[userIndex];
-}
+import { getDatabase, getOneDatabase } from "./Utils";
+import { Document } from "mongoose";
 
 export async function getRank(level: number, guildId: string) {
-    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-    const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
-    return ranks.find(r => r.level === level);
+    const rank = await getOneDatabase(RankLevel, { guildId, level });
+    return rank;
 }
 
 export async function getNextRank(currentLevel: number, guildId: string) {
-    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-    const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
+    const ranks = await getDatabase(RankLevel, { guildId });
 
     if (!ranks.length) return;
 
@@ -43,7 +22,39 @@ export async function getNextRank(currentLevel: number, guildId: string) {
         return a.level - b.level;
     });
 
-    let rankToReturn: RankLevel;
+    let rankToReturn: Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    };
     for (const rank of ranks) {
         if (rank.level <= currentLevel) continue;
         rankToReturn = rank;
@@ -54,8 +65,7 @@ export async function getNextRank(currentLevel: number, guildId: string) {
 }
 
 export async function getCurrentRank(currentLevel: number, guildId: string) {
-    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-    const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
+    const ranks = await getDatabase(RankLevel, { guildId });
 
     if (!ranks.length) return;
 
@@ -63,7 +73,39 @@ export async function getCurrentRank(currentLevel: number, guildId: string) {
         return a.level - b.level;
     });
 
-    let rankToReturn: RankLevel;
+    let rankToReturn: Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    };
     for (const rank of ranks) {
         if (rank.level > currentLevel) break;
         if (rank.level <= currentLevel) {
@@ -75,8 +117,7 @@ export async function getCurrentRank(currentLevel: number, guildId: string) {
 }
 
 export async function getPreviousRank(currentLevel: number, guildId: string) {
-    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-    const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
+    const ranks = await getDatabase(RankLevel, { guildId });
 
     if (!ranks.length) return;
 
@@ -84,7 +125,39 @@ export async function getPreviousRank(currentLevel: number, guildId: string) {
         return a.level - b.level;
     });
 
-    let currentRank: RankLevel;
+    let currentRank: Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    };
     for (const rank of ranks) {
         if (rank.level > currentLevel) break;
         if (rank.level <= currentLevel) {
@@ -92,7 +165,39 @@ export async function getPreviousRank(currentLevel: number, guildId: string) {
         }
     }
 
-    let rankToReturn: RankLevel;
+    let rankToReturn: Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    };
     for (const rank of ranks) {
         if (rank.level >= currentLevel || rank.level === currentRank.level) break;
         if (rank.level < currentLevel) {
@@ -104,8 +209,7 @@ export async function getPreviousRank(currentLevel: number, guildId: string) {
 }
 
 export async function getPreviousRanks(currentLevel: number, guildId: string) {
-    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-    const ranks: RankLevel[] = await getServerDatabase(Ranks, guildId);
+    const ranks = await getDatabase(RankLevel, { guildId });
 
     if (!ranks.length) return;
 
@@ -113,7 +217,39 @@ export async function getPreviousRanks(currentLevel: number, guildId: string) {
         return a.level - b.level;
     });
 
-    let currentRank: RankLevel;
+    let currentRank: Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    };
     for (const rank of ranks) {
         if (rank.level > currentLevel) break;
         if (rank.level <= currentLevel) {
@@ -121,7 +257,39 @@ export async function getPreviousRanks(currentLevel: number, guildId: string) {
         }
     }
 
-    const ranksToReturn: RankLevel[] = [];
+    const ranksToReturn: (Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        gifs: string[];
+        wings: {
+            aisha?: string;
+            stella?: string;
+            bloom?: string;
+            tecna?: string;
+            musa?: string;
+            flora?: string;
+        };
+        roleId?: string;
+        level?: number;
+    })[] = [];
     for (const rank of ranks) {
         if (rank.level >= currentLevel || rank.level === currentRank.level) break;
         if (rank.level < currentLevel) {
@@ -132,33 +300,15 @@ export async function getPreviousRanks(currentLevel: number, guildId: string) {
     return ranksToReturn;
 }
 
-export async function getUserSettings(userId: string) {
-    const UserSettings = BotUser.getDatabase(DatabaseType.UserSettings);
-    const userSettings: UserSetting = await UserSettings.get(userId);
-    if (!userSettings) {
-        return new UserSetting();
-    }
-    return userSettings;
-}
-
 export async function getServerUserSettings(userId: string, guildId: string) {
-    const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
-    const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, guildId);
-
-    let userIndex = serverUserSettings.findIndex(u => u.userId === userId);
-    if (userIndex < 0) {
-        serverUserSettings.push(new ServerUserSettings(userId));
-        userIndex = serverUserSettings.length - 1;
-        await ServerUserSettingsDatabase.set(guildId, serverUserSettings);
-    }
-    return serverUserSettings[userIndex];
+    return await getOneDatabase(ServerUserSettings, { guildId, userId }, () => new ServerUserSettings({ guildId, userId }));
 }
 
 export async function getWingsImage(user: User, guildId: string) {
     const serverUserSettings = await getServerUserSettings(user.id, guildId);
-    const userLevel = await getUserLevel(user.id, guildId);
+    const userLevel = await getOneDatabase(UserLevel, { guildId: guildId, "levelData.userId": user.id }, () => new UserLevel({ guildId: guildId, levelData: { userId: user.id } }));
 
-    let level = userLevel.level;
+    let level = userLevel.levelData.level;
     if (serverUserSettings.wingsLevel >= 0) {
         level = serverUserSettings.wingsLevel;
     }
@@ -169,10 +319,10 @@ export async function getWingsImage(user: User, guildId: string) {
 export async function getWingsImageByLevel(level: number, winxCharacter: WinxCharacter, guildId: string) {
     const rank = await getCurrentRank(level, guildId);
 
-    return getWingsImageByRank(rank, winxCharacter);
+    return getWingsImageByRank(rank ? rank.toObject() : null, winxCharacter);
 }
 
-export async function getWingsImageByRank(rank: RankLevel, winxCharacter: WinxCharacter) {
+export async function getWingsImageByRank(rank: RankLevelData, winxCharacter: WinxCharacter) {
     if (winxCharacter <= 0)
         return;
 
@@ -188,15 +338,14 @@ export async function getWingsImageByRank(rank: RankLevel, winxCharacter: WinxCh
     return;
 }
 
-export async function getRankRoles(guild: Guild, maxLevel = Number.MAX_SAFE_INTEGER) {
-    const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-    const ranks: RankLevel[] = await getServerDatabase(Ranks, guild.id);
+/*export async function getRankRoles(guild: Guild, maxLevel = Number.MAX_SAFE_INTEGER) {
+    const ranks = await getDatabase(RankLevel, { guildId: guild.id });
 
     ranks.sort((a, b) => {
         return a.level - b.level;
     });
 
-    const toReturn: { rank: RankLevel, role: Role }[] = [];
+    const toReturn: { rank: typeof RankLevel, role: Role }[] = [];
 
     await asyncForEach(ranks, async (rank) => {
         if (rank.level <= maxLevel) {
@@ -207,4 +356,4 @@ export async function getRankRoles(guild: Guild, maxLevel = Number.MAX_SAFE_INTE
     });
 
     return toReturn;
-}
+}*/

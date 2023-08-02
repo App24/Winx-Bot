@@ -5,11 +5,10 @@ import { Localisation } from "../../localisation";
 import { Category, Categories, CustomCommands } from "../../structs/Category";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { CommandAvailable } from "../../structs/CommandAvailable";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { SelectOption, createMessageSelection } from "../../utils/MessageSelectionUtils";
-import { isDM, asyncForEach, isPatreon, isBooster, isModerator, getServerDatabase, createMessageEmbed, asyncMapForEach } from "../../utils/Utils";
+import { isDM, asyncForEach, isPatreon, isBooster, isModerator, createMessageEmbed, asyncMapForEach, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class HelpBaseCommand extends BaseCommand {
@@ -52,8 +51,7 @@ export class HelpBaseCommand extends BaseCommand {
                         case CommandAccess.None: {
                             switch (category) {
                                 case CustomCommands: {
-                                    const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
-                                    const customCommands = await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
+                                    const customCommands = await getDatabase(CustomCommand, { guildId: cmdArgs.guildId });
                                     if (!customCommands.length)
                                         return;
                                 } break;
@@ -118,8 +116,7 @@ async function getCommands(category: Category, available: CommandAvailable, chan
     };
 
     if (category === CustomCommands) {
-        const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
-        const customCommands: CustomCommand[] = await getServerDatabase(CustomCommands, guild.id);
+        const customCommands = await getDatabase(CustomCommand, { guildId: guild.id });
         await asyncForEach(customCommands, async (customCommand) => {
             switch (customCommand.access) {
                 case CommandAccess.Patreon: {

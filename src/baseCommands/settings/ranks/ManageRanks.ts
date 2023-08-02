@@ -1,24 +1,18 @@
 import { ButtonStyle, EmbedBuilder } from "discord.js";
 import { rmSync } from "fs";
-import { BotUser } from "../../../BotClient";
 import { WINGS_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { RankLevel } from "../../../structs/databaseTypes/RankLevel";
 import { capitalise } from "../../../utils/FormatUtils";
-import { getBotRoleColor } from "../../../utils/GetterUtils";
+import { getBotRoleColor, getRoleById } from "../../../utils/GetterUtils";
 import { createMessageButtons } from "../../../utils/MessageButtonUtils";
 import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";
-import { getRankRoles } from "../../../utils/RankUtils";
 import { getLevelReply, getRoleReply } from "../../../utils/ReplyUtils";
-import { getServerDatabase, asyncForEach } from "../../../utils/Utils";
+import { asyncForEach, getDatabase, getOneDatabase } from "../../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../../BaseCommand";
 
 export class ManageRanksBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-        const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
-
         await createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
             {
@@ -33,21 +27,18 @@ export class ManageRanksBaseCommand extends BaseCommand {
                             const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.body, author: cmdArgs.author });
                             if (level === undefined || level < 0) return;
 
-                            let rankLevel = ranks.find(rank => rank.level === level);
 
                             const { value: role } = await getRoleReply({ sendTarget: message, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!role) return;
+
+                            const rankLevel = await getOneDatabase(RankLevel, { guildId: cmdArgs.guildId, level }, () => new RankLevel({ guildId: cmdArgs.guildId, level, roleId: role.id }));
+
                             if (rankLevel) {
                                 rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${level}`, { recursive: true, force: true });
-                                const index = ranks.findIndex(rank => rank.level === rankLevel.level);
                                 rankLevel.level = level;
                                 rankLevel.roleId = role.id;
-                                ranks.splice(index, 1);
-                            } else {
-                                rankLevel = new RankLevel(level, role.id);
                             }
-                            ranks.push(rankLevel);
-                            await Ranks.set(cmdArgs.guildId, ranks);
+                            await rankLevel.save();
                             return interaction.followUp(Localisation.getTranslation("setrank.role.set"));
                         },
                         default: false,
@@ -58,7 +49,7 @@ export class ManageRanksBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.remove"),
                         value: "remove",
                         onSelect: async () => {
-                            const rankRoles = await getRankRoles(cmdArgs.guild);
+                            const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             const options: SelectOption[] = [];
 
                             options.push({
@@ -72,14 +63,12 @@ export class ManageRanksBaseCommand extends BaseCommand {
                                 emoji: null
                             });
 
-                            rankRoles.forEach(rankRole => {
+                            await asyncForEach(rankRoles, (async (rankRole) => {
+                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
                                 options.push({
-                                    label: capitalise(rankRole.role.name),
-                                    value: rankRole.role.name,
+                                    label: capitalise(role.name),
+                                    value: role.name,
                                     onSelect: async ({ interaction }) => {
-                                        const rankLevelIndex = ranks.findIndex(rank => rank.level === rankRole.rank.level);
-                                        if (rankLevelIndex < 0) return interaction.reply(Localisation.getTranslation("error.missing.rank"));
-
                                         createMessageButtons({
                                             sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("generic.confirmation"), buttons: [
                                                 {
@@ -87,9 +76,8 @@ export class ManageRanksBaseCommand extends BaseCommand {
                                                     style: ButtonStyle.Primary,
                                                     label: Localisation.getTranslation("button.accept"),
                                                     onRun: async ({ interaction }) => {
-                                                        rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${rankRole.rank.level}`, { recursive: true, force: true });
-                                                        ranks.splice(rankLevelIndex, 1);
-                                                        await Ranks.set(cmdArgs.guildId, ranks);
+                                                        rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${rankRole.level}`, { recursive: true, force: true });
+                                                        await RankLevel.deleteOne({ guildId: cmdArgs.guildId, level: rankRole.level });
                                                         interaction.reply(Localisation.getTranslation("setrank.role.remove"));
                                                     }
                                                 },
@@ -108,7 +96,7 @@ export class ManageRanksBaseCommand extends BaseCommand {
                                     description: null,
                                     emoji: null
                                 });
-                            });
+                            }));
 
                             createMessageSelection({
                                 sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
@@ -124,13 +112,14 @@ export class ManageRanksBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.list"),
                         value: "list",
                         onSelect: async ({ interaction }) => {
+                            const ranks = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             if (!ranks || !ranks.length) {
                                 return interaction.followUp(Localisation.getTranslation("error.empty.ranks"));
                             }
 
                             ranks.sort((a, b) => a.level - b.level);
                             const data = [];
-                            await asyncForEach(ranks, async (rank: RankLevel) => {
+                            await asyncForEach(ranks, async (rank) => {
                                 data.push(Localisation.getTranslation("transformations.list", rank.level, `<@&${rank.roleId}>`));
                             });
 

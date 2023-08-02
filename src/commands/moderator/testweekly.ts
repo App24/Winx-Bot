@@ -1,5 +1,5 @@
 import { Moderator } from "../../structs/Category";
-import { Command, CommandUsage } from "../../structs/Command";
+import { Command } from "../../structs/Command";
 import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { TestWeeklyBaseCommand } from "../../baseCommands/moderator/TestWeekly";

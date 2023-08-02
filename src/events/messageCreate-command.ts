@@ -6,10 +6,9 @@ import { Localisation } from "../localisation";
 import { CommandArguments } from "../structs/Command";
 import { CommandAvailable } from "../structs/CommandAvailable";
 import { CommandAccess } from "../structs/CommandAccess";
-import { DatabaseType } from "../structs/DatabaseTypes";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
 import { formatString, secondsToTime } from "../utils/FormatUtils";
-import { getServerDatabase, isBooster, isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
+import { getOneDatabase, isBooster, isDM, isModerator, isPatreon, reportBotError } from "../utils/Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -26,9 +25,7 @@ export = () => {
 
         if (!command) {
             if (isDM(message.channel)) return;
-            const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
-            const customCommands = await getServerDatabase<CustomCommand[]>(CustomCommands, message.guild.id);
-            const customCommand = customCommands.find(c => c.name === commandName);
+            const customCommand = await getOneDatabase(CustomCommand, { guildId: message.guildId, name: commandName });
             if (!customCommand) return;
             switch (customCommand.access) {
                 case CommandAccess.Patreon: {
@@ -149,7 +146,7 @@ export = () => {
             const cmdArgs = new CommandArguments(message, args);
             await command.onRun(cmdArgs);
         } catch (error) {
-            await reportError(error.stack, message);
+            await reportBotError(error.stack, message);
         }
 
     });

@@ -1,18 +1,15 @@
 import { EmbedBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { capitalise } from "../../utils/FormatUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";
-import { getServerDatabase, createMessageEmbed } from "../../utils/Utils";
+import { createMessageEmbed, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class CustomCommandListBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
-        const customCommands = await getServerDatabase<CustomCommand[]>(CustomCommands, cmdArgs.guildId);
+        const customCommands = await getDatabase(CustomCommand, { guildId: cmdArgs.guildId });
 
         if (!customCommands.length) return cmdArgs.reply("error.empty.customcommands");
 

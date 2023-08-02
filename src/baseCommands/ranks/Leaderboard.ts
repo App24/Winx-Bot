@@ -1,17 +1,14 @@
 import { Message } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { CommandArguments } from "../../structs/Command";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { drawLeaderboard } from "../../utils/CardUtils";
 import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
-import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment } from "../../utils/Utils";
+import { getLeaderboardMembers, canvasToMessageAttachment, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class LeaderboardBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const Levels = BotUser.getDatabase(DatabaseType.Levels);
-        const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
+        const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
         if (!levels.length) return cmdArgs.reply("error.empty.levels");
 
         let user = cmdArgs.author;
@@ -30,19 +27,19 @@ export class LeaderboardBaseCommand extends BaseCommand {
         }
 
         levels.sort((a, b) => {
-            if (a.level === b.level) {
-                return b.xp - a.xp;
+            if (a.levelData.level === b.levelData.level) {
+                return b.levelData.xp - a.levelData.xp;
             }
-            return b.level - a.level;
+            return b.levelData.level - a.levelData.level;
         });
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels);
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels.map(l => l.levelData));
 
         const index = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id);
         if (index < 0) {
-            const i = levels.findIndex(u => u.userId === user.id);
+            const i = levels.findIndex(u => u.levelData.userId === user.id);
             if (i >= 0) {
-                leaderboardLevels.push({ userLevel: levels[i], member, position: i });
+                leaderboardLevels.push({ userLevel: levels[i].levelData, member, position: i });
             } else {
                 return cmdArgs.reply("error.null.userLevel");
             }

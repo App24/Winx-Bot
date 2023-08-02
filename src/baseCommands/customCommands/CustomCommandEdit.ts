@@ -1,23 +1,16 @@
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { CommandAccess } from "../../structs/CommandAccess";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { capitalise } from "../../utils/FormatUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
 import { getStringReply } from "../../utils/ReplyUtils";
-import { getServerDatabase } from "../../utils/Utils";
+import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class CustomCommandEditBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const CustomCommands = BotUser.getDatabase(DatabaseType.CustomCommands);
-        const customCommands: CustomCommand[] = await getServerDatabase(CustomCommands, cmdArgs.guildId);
-
-        if (!customCommands.length) return cmdArgs.reply("error.empty.customcommands");
-
         const cmdName = cmdArgs.args[0].toLowerCase();
-        const customCommand = customCommands.find(c => c.name === cmdName);
+        const customCommand = await getOneDatabase(CustomCommand, { guildId: cmdArgs.guild, name: cmdName });
         if (!customCommand) return cmdArgs.reply("customcommand.error.command.not.exist");
 
         createMessageSelection({
@@ -37,7 +30,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                             customCommand.description = newDescription;
 
-                            await CustomCommands.set(cmdArgs.guildId, customCommands);
+                            await customCommand.save();
                             message.reply(Localisation.getTranslation("customcommand.success.edit"));
                         },
                     },
@@ -65,7 +58,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                                         customCommand.access = intIndex;
 
-                                        await CustomCommands.set(cmdArgs.guildId, customCommands);
+                                        await customCommand.save();
 
                                         interaction.reply(Localisation.getTranslation("customcommand.success.edit"));
                                     },
@@ -126,7 +119,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                                                             customCommand.outputs[i] = newOutput;
 
-                                                            await CustomCommands.set(cmdArgs.guildId, customCommands);
+                                                            await customCommand.save();
                                                             message.reply(Localisation.getTranslation("customcommand.success.edit"));
                                                         }
                                                     },
@@ -139,7 +132,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                                                         async onSelect({ interaction }) {
                                                             customCommand.outputs.splice(i, 1);
 
-                                                            await CustomCommands.set(cmdArgs.guildId, customCommands);
+                                                            await customCommand.save();
 
                                                             interaction.reply(Localisation.getTranslation("customcommand.success.edit"));
                                                         }
@@ -173,7 +166,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                                     customCommand.outputs.push(newOutput);
 
-                                    await CustomCommands.set(cmdArgs.guildId, customCommands);
+                                    await customCommand.save();
                                     message.reply(Localisation.getTranslation("customcommand.success.edit"));
                                 }
                             });

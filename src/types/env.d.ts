@@ -4,6 +4,6 @@ declare namespace NodeJS {
         readonly OWNER_ID: string
         readonly CREATOR_ID: string
         readonly SUGGESTION_CHANNEL: string
-        readonly BACKUP_CHANNEL: string
+        readonly MONGODB_URI: string
     }
 }

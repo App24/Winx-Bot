@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const customWingsSchema = new Schema({
+const patronInfoSchema = new Schema({
     userId: {
         type: String,
         required: true
@@ -9,10 +9,7 @@ const customWingsSchema = new Schema({
         type: String,
         required: true
     },
-    wingsFile: {
-        type: String,
-        default: ""
-    }
+    date: Date
 }, { timestamps: true });
 
-export const CustomWings = model("Custom Wings", customWingsSchema);
+export const PatronData = model("Patron Data", patronInfoSchema);

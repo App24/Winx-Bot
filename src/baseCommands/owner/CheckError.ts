@@ -1,19 +1,15 @@
 import { EmbedBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { ErrorStruct } from "../../structs/databaseTypes/ErrorStruct";
 import { dateToString } from "../../utils/FormatUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { getStringReply } from "../../utils/ReplyUtils";
-import { asyncForEach } from "../../utils/Utils";
+import { asyncForEach, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { ErrorData } from "../../structs/databaseTypes/ErrorData";
 
 export class CheckErrorBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const Errors = BotUser.getDatabase(DatabaseType.Errors);
-
         await createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, selectMenuOptions:
             {
@@ -25,9 +21,9 @@ export class CheckErrorBaseCommand extends BaseCommand {
                             const { value: errorCode } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "checkerror.reply.code" });
                             if (errorCode === undefined)
                                 return;
-                            const error: ErrorStruct = await Errors.get(errorCode);
+                            const error = await getOneDatabase(ErrorData, { errorId: errorCode });
                             if (!error) return <any>interaction.followUp(Localisation.getTranslation("error.invalid.errorCode"));
-                            interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(new Date(error.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
+                            interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(error.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
                         },
                         default: false,
                         description: null,
@@ -38,11 +34,11 @@ export class CheckErrorBaseCommand extends BaseCommand {
                         value: "list",
                         onSelect: async ({ interaction }) => {
 
-                            const errors: { key: string, value: ErrorStruct }[] = await Errors.entries();
+                            const errors = await ErrorData.find();
                             if (!errors || !errors.length) return interaction.reply(Localisation.getTranslation("error.empty.errors"));
                             const data = [];
                             errors.forEach(error => {
-                                data.push(Localisation.getTranslation("checkerror.list", error.key, dateToString(new Date(error.value.time), "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
+                                data.push(Localisation.getTranslation("checkerror.list", error.errorId, dateToString(error.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
                             });
                             const embed = new EmbedBuilder();
                             embed.setColor((await getBotRoleColor(cmdArgs.guild)));
@@ -57,7 +53,7 @@ export class CheckErrorBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.prune"),
                         value: "prune",
                         onSelect: async ({ interaction }) => {
-                            const errors: { key: string, value: ErrorStruct }[] = await Errors.entries();
+                            const errors = await ErrorData.find();
                             if (!errors || !errors.length) return interaction.reply(Localisation.getTranslation("error.empty.errors"));
 
                             const msPerMinute = 60 * 1000;
@@ -65,9 +61,9 @@ export class CheckErrorBaseCommand extends BaseCommand {
                             const msPerDay = msPerHour * 24;
                             const msPerWeek = msPerDay * 7;
                             const currentTime = new Date().getTime();
-                            await asyncForEach(errors, async (error: { key: string, value: ErrorStruct }) => {
-                                if (currentTime - error.value.time > msPerWeek * 2) {
-                                    await Errors.delete(error.key);
+                            await asyncForEach(errors, async (error) => {
+                                if (currentTime - error.createdAt.getTime() > msPerWeek * 2) {
+                                    await ErrorData.deleteOne({ errorId: error.errorId });
                                 }
                             });
                             return interaction.reply(Localisation.getTranslation("checkerror.prune"));
@@ -80,7 +76,7 @@ export class CheckErrorBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.clear"),
                         value: "clear",
                         onSelect: async ({ interaction }) => {
-                            await Errors.clear();
+                            await ErrorData.deleteMany();
                             return interaction.reply(Localisation.getTranslation("checkerror.clear"));
                         },
                         default: false,

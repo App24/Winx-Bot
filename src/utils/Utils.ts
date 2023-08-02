@@ -1,23 +1,20 @@
 import { join } from "path";
-import { copyFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, statSync } from "fs";
+import { createWriteStream, existsSync, readdirSync, statSync } from "fs";
 import request from "request";
-import { DATABASE_BACKUP_FOLDER, DATABASE_FOLDER, LB_USERS, PREFIX } from "../Constants";
-import { DatabaseType } from "../structs/DatabaseTypes";
+import { LB_USERS, PREFIX } from "../Constants";
 import { BaseGuildTextChannel, ChannelType, CommandInteraction, Guild, GuildMember, Message, AttachmentBuilder, MessageComponentInteraction, TextBasedChannel, ContextMenuCommandInteraction, EmbedBuilder, EmbedData } from "discord.js";
-import { BotUser } from "../BotClient";
 import { Localisation } from "../localisation";
-import { ErrorStruct } from "../structs/databaseTypes/ErrorStruct";
 import { getBotRoleColor, getMemberById, getRoleById, getTextChannelById, getUserById } from "./GetterUtils";
-import { PatreonInfo } from "../structs/databaseTypes/PatreonInfo";
-import { Keyv } from "../keyv/keyv-index";
 import { Canvas } from "canvas";
-import { UserLevel } from "../structs/databaseTypes/UserLevel";
 import { Color } from "../structs/Color";
-import { Stream } from "stream";
-import { RecentLeaderboardData } from "../structs/databaseTypes/RecentLeaderboard";
-import { DEFAULT_SERVER_INFO, ServerData } from "../structs/databaseTypes/ServerInfo";
 import { dateToString } from "./FormatUtils";
 import { drawLeaderboard } from "./CardUtils";
+import { FilterQuery, IfAny, Model, Document, Require_id } from "mongoose";
+import { ServerData } from "../structs/databaseTypes/ServerData";
+import { WeeklyLeaderboard } from "../structs/databaseTypes/WeeklyLeaderboard";
+import { LevelData } from "../structs/databaseTypes/LevelData";
+import { PatronData } from "../structs/databaseTypes/PatronData";
+import { ErrorData } from "../structs/databaseTypes/ErrorData";
 
 const WEEKLY_TIME = 1000 * 60 * 60 * 24 * 7;
 
@@ -111,20 +108,35 @@ export function toHexString(byteArray: number[]) {
     }).join('');
 }
 
-/**
- * 
- * @param database Database to get the data from
- * @param guildId Guild ID of the server
- * @param defaultValue The default value to set if there isn't any
- * @returns Data stored in database
- */
-export async function getServerDatabase<T>(database: Keyv, guildId: string, defaultValue: any = []): Promise<T> {
-    let serverDatabase = await database.get(guildId);
-    if (!serverDatabase) {
-        serverDatabase = defaultValue;
-        await database.set(guildId, serverDatabase);
+export async function getOneDatabase<
+    TRawDocType,
+    TSchema = any>
+    (model: Model<TSchema>,
+        filter: FilterQuery<TRawDocType>,
+        createDefault?: () => IfAny<TSchema, any, Document<unknown, Record<string, unknown>, TSchema> & Require_id<TSchema>>) {
+    let database = await model.findOne(filter);
+
+    if (!database && createDefault !== undefined) {
+        database = await createDefault();
+
+        await database.save();
     }
-    return serverDatabase;
+
+    return database;
+}
+
+export async function getDatabase<
+    TRawDocType,
+    TSchema = any>
+    (model: Model<TSchema>,
+        filter: FilterQuery<TRawDocType>) {
+    let database = await model.find(filter);
+
+    if (!database) {
+        database = [];
+    }
+
+    return database;
 }
 
 /**
@@ -144,9 +156,8 @@ export function isDM(channel: TextBasedChannel) {
  */
 export async function isPatreon(userId: string, guildId: string) {
     if (!userId || !guildId) return false;
-    const Patreon = BotUser.getDatabase(DatabaseType.Paid);
-    const patreon: PatreonInfo[] = await getServerDatabase(Patreon, guildId);
-    return patreon.find(user => user.userId === userId) !== undefined;
+    const patron = await getOneDatabase(PatronData, { guildId: guildId, userId: userId });
+    return patron !== null;
 }
 
 export function isBooster(member: GuildMember) {
@@ -216,16 +227,16 @@ export async function getAllMessages(channel: BaseGuildTextChannel) {
     return messages;
 }
 
-export async function getLeaderboardMembers(guild: Guild, levels: UserLevel[], maxCount = LB_USERS) {
+export async function getLeaderboardMembers(guild: Guild, levels: LevelData[], maxCount = LB_USERS) {
     levels.sort((a, b) => {
         if (a.level === b.level) {
             return b.xp - a.xp;
         }
         return b.level - a.level;
     });
-    const leaderboardLevels: { userLevel: UserLevel, member: GuildMember, position: number }[] = [];
+    const leaderboardLevels: { userLevel: LevelData, member: GuildMember, position: number }[] = [];
     let userIndex = 0;
-    await asyncForEach(levels, async (level: UserLevel) => {
+    await asyncForEach(levels, async (level) => {
         const member = await getMemberById(level.userId, guild);
         if (member) {
             leaderboardLevels.push({ userLevel: level, member, position: userIndex });
@@ -237,30 +248,14 @@ export async function getLeaderboardMembers(guild: Guild, levels: UserLevel[], m
     return leaderboardLevels;
 }
 
-export function backupDatabases() {
-    if (!existsSync(DATABASE_BACKUP_FOLDER)) {
-        mkdirSync(DATABASE_BACKUP_FOLDER);
-    }
-
-    const values = Object.values(DatabaseType);
-    values.forEach((value) => {
-        copyFileSync(`${DATABASE_FOLDER}/${value}.sqlite`, `${DATABASE_BACKUP_FOLDER}/${value}.sqlite`);
-    });
-}
-
-export async function reportError(error, message?: Message | MessageComponentInteraction | CommandInteraction | ContextMenuCommandInteraction) {
-    const Errors = BotUser.getDatabase(DatabaseType.Errors);
+export async function reportBotError(error, message?: Message | MessageComponentInteraction | CommandInteraction | ContextMenuCommandInteraction) {
     let hex: string;
-    let errors;
     do {
         hex = genRanHex(16);
-        errors = await Errors.get(hex);
-    } while (errors);
+    } while ((await ErrorData.count({ errorId: hex })) > 0);
     console.error(`Code: ${hex}\n${error}`);
-    const errorObj = new ErrorStruct();
-    errorObj.time = new Date().getTime();
-    errorObj.error = error;
-    await Errors.set(hex, errorObj);
+    const errorObj = new ErrorData({ errorId: hex, error });
+    await errorObj.save();
 
     const owner = await getUserById(process.env.OWNER_ID);
 
@@ -322,37 +317,6 @@ export function getBrightnessColor(color: Color, brightColor = "white", darkColo
     return (brightness > 125) ? darkColor : brightColor;
 }
 
-export async function stream2buffer(stream: Stream): Promise<Buffer> {
-
-    return new Promise<Buffer>((resolve, reject) => {
-
-        const _buf = Array<any>();
-
-        stream.on("data", chunk => _buf.push(chunk));
-        stream.on("end", () => resolve(Buffer.concat(_buf)));
-        stream.on("error", err => reject(`error converting stream - ${err}`));
-
-    });
-}
-
-export function toBuffer(ab: ArrayBuffer) {
-    const buf = Buffer.alloc(ab.byteLength);
-    const view = new Uint8Array(ab);
-    for (let i = 0; i < buf.length; ++i) {
-        buf[i] = view[i];
-    }
-    return buf;
-}
-
-export function toArrayBuffer(buf: Buffer) {
-    const ab = new ArrayBuffer(buf.length);
-    const view = new Uint8Array(ab);
-    for (let i = 0; i < buf.length; ++i) {
-        view[i] = buf[i];
-    }
-    return ab;
-}
-
 export function removeEmojis(text: string) {
     const regex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g;
     return text.replace(regex, '');
@@ -361,14 +325,13 @@ export function removeEmojis(text: string) {
 export async function resetWeeklyLeaderboard(guild: Guild) {
     const date = new Date();
 
-    const RecentLeaderboard = BotUser.getDatabase(DatabaseType.RecentLeaderboard);
-    const recentLeaderboard: RecentLeaderboardData = await getServerDatabase(RecentLeaderboard, guild.id, new RecentLeaderboardData());
+    const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
 
-    recentLeaderboard.startDate = date.getTime();
-    recentLeaderboard.users = [];
+    recentLeaderboard.startDate = date;
+    recentLeaderboard.set("levels", []);
     recentLeaderboard.previousTop = [];
 
-    await RecentLeaderboard.set(guild.id, recentLeaderboard);
+    await recentLeaderboard.save();
 }
 
 export async function checkWeeklyLeaderboard(guild: Guild) {
@@ -377,10 +340,10 @@ export async function checkWeeklyLeaderboard(guild: Guild) {
     date.setMinutes(0);
     date.setSeconds(0);
     date.setMilliseconds(0);
-    const RecentLeaderboard = BotUser.getDatabase(DatabaseType.RecentLeaderboard);
-    const recentLeaderboard: RecentLeaderboardData = await getServerDatabase(RecentLeaderboard, guild.id, new RecentLeaderboardData());
 
-    const oldDate = new Date(recentLeaderboard.startDate);
+    const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
+
+    const oldDate = recentLeaderboard.startDate;
     oldDate.setHours(0);
     oldDate.setMinutes(0);
     oldDate.setSeconds(0);
@@ -394,9 +357,8 @@ export async function checkWeeklyLeaderboard(guild: Guild) {
 }
 
 export async function applyWeeklyLeaderboard(guild: Guild) {
-    const RecentLeaderboard = BotUser.getDatabase(DatabaseType.RecentLeaderboard);
-    const recentLeaderboard: RecentLeaderboardData = await getServerDatabase(RecentLeaderboard, guild.id, new RecentLeaderboardData());
-    const startDate = new Date(recentLeaderboard.startDate);
+    const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
+    const startDate = recentLeaderboard.startDate;
 
     if (recentLeaderboard.topRoleId) {
         const role = await getRoleById(recentLeaderboard.topRoleId, guild);
@@ -413,7 +375,7 @@ export async function applyWeeklyLeaderboard(guild: Guild) {
 
             recentLeaderboard.previousTop = [];
 
-            const userLevels = await getLeaderboardMembers(guild, recentLeaderboard.users, 3);
+            const userLevels = await getLeaderboardMembers(guild, recentLeaderboard.levels, 3);
 
             await asyncForEach(userLevels, async (userLevel) => {
                 const member = userLevel.member;
@@ -445,39 +407,37 @@ export async function applyWeeklyLeaderboard(guild: Guild) {
         }
     }
 
-    recentLeaderboard.startDate = startDate.getTime();
-    recentLeaderboard.users = [];
+    recentLeaderboard.startDate = startDate;
+    recentLeaderboard.set("levels", []);
 
-    await RecentLeaderboard.set(guild.id, recentLeaderboard);
+    await recentLeaderboard.save();
 }
 
 export async function showWeeklyLeaderboardMessage(guild: Guild) {
-    const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-    const serverInfo: ServerData = await getServerDatabase(ServerInfo, guild.id, DEFAULT_SERVER_INFO);
+    /*const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
+    const serverInfo: ServerData = await getServerDatabase(ServerInfo, guild.id, DEFAULT_SERVER_INFO);*/
 
-    const RecentLeaderboard = BotUser.getDatabase(DatabaseType.RecentLeaderboard);
-    const recentLeaderboard: RecentLeaderboardData = await getServerDatabase(RecentLeaderboard, guild.id, new RecentLeaderboardData());
+    const serverInfo = await getOneDatabase(ServerData, { guildId: guild.id }, () => new ServerData({ guildId: guild.id }));
 
-    const startDate = new Date(recentLeaderboard.startDate);
-    const endDate = new Date(recentLeaderboard.startDate + WEEKLY_TIME);
+    const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
+
+    const startDate = recentLeaderboard.startDate;
+    const endDate = new Date(recentLeaderboard.startDate.getTime() + WEEKLY_TIME);
 
     //const userLevels = await getLeaderboardMembers(guild, recentLeaderboard.users, 3);
 
-    if (serverInfo.weeklyAnnoucementChannel) {
-        const channel = await getTextChannelById(serverInfo.weeklyAnnoucementChannel, guild);
+    if (serverInfo.weeklyLeaderboardAnnouncementChannel) {
+        const channel = await getTextChannelById(serverInfo.weeklyLeaderboardAnnouncementChannel, guild);
 
         if (channel) {
-            const Levels = BotUser.getDatabase(DatabaseType.RecentLeaderboard);
-            const levels: RecentLeaderboardData = await getServerDatabase(Levels, guild.id, new RecentLeaderboardData());
-
-            levels.users.sort((a, b) => {
+            recentLeaderboard.levels.sort((a, b) => {
                 if (a.level === b.level) {
                     return b.xp - a.xp;
                 }
                 return b.level - a.level;
             });
 
-            const leaderboardLevels = await getLeaderboardMembers(guild, levels.users);
+            const leaderboardLevels = await getLeaderboardMembers(guild, recentLeaderboard.levels.toObject());
 
             const leaderBoard = await drawLeaderboard(leaderboardLevels, null, guild.id, `Weekly ${dateToString(startDate, "{dd}/{MM}/{YYYY}")} - ${dateToString(endDate, "{dd}/{MM}/{YYYY}")}`);
 

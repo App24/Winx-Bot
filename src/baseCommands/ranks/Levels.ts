@@ -1,22 +1,16 @@
 import { Message } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { CommandArguments } from "../../structs/Command";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { CardData, drawCard, drawGreenScreenCard } from "../../utils/CardUtils";
 import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
 import { getCurrentRank, getNextRank, getServerUserSettings } from "../../utils/RankUtils";
-import { getServerDatabase, getLeaderboardMembers, canvasToMessageAttachment, isHexColor } from "../../utils/Utils";
+import { canvasToMessageAttachment, isHexColor, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
-import { RecentLeaderboardData } from "../../structs/databaseTypes/RecentLeaderboard";
 import { getLeaderboardPosition, getWeeklyLeaderboardPosition } from "../../utils/XPUtils";
 import { Localisation } from "../../localisation";
 
 export class LevelsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const Levels = BotUser.getDatabase(DatabaseType.Levels);
-        const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
-
         let user = cmdArgs.author;
         if (cmdArgs.args.length) {
             const tempUser = await getUserFromMention(cmdArgs.args[0]);
@@ -41,51 +35,27 @@ export class LevelsBaseCommand extends BaseCommand {
         const leaderboardPosition = (await getLeaderboardPosition(member)) + 1;
         const weekleaderboardPosition = (await getWeeklyLeaderboardPosition(member)) + 1;
 
-        /*const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels);
-        let leaderboardPosition = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id);
-        if (leaderboardPosition < 0) {
-            leaderboardPosition = levels.findIndex(u => u.userId === user.id);
-        }
-        leaderboardPosition += 1;
+        const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": user.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: user.id } }));
 
-        const weekleaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, recentLeaderboard.users);
-        let weekleaderboardPosition = weekleaderboardLevels.findIndex(u => u.userLevel.userId === user.id);
-        if (weekleaderboardPosition < 0) {
-            weekleaderboardPosition = recentLeaderboard.users.findIndex(u => u.userId === user.id);
-        }
-        weekleaderboardPosition += 1;*/
-
-        let userLevel = levels.find(u => u.userId === user.id);
-        if (!userLevel) {
-            levels.push(new UserLevel(user.id));
-            userLevel = levels.find(u => u.userId === user.id);
-        }
-
-        const currentRank = await getCurrentRank(userLevel.level, cmdArgs.guildId);
-        const nextRank = await getNextRank(userLevel.level, cmdArgs.guildId);
+        const currentRank = await getCurrentRank(userLevel.levelData.level, cmdArgs.guildId);
+        const nextRank = await getNextRank(userLevel.levelData.level, cmdArgs.guildId);
 
         const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 
         const cardData: CardData = {
             leaderboardPosition,
             weeklyLeaderboardPosition: weekleaderboardPosition,
-            currentRank,
-            nextRank,
-            serverUserSettings,
-            userLevel,
+            currentRank: currentRank ? currentRank.toObject() : null,
+            nextRank: nextRank ? nextRank.toObject() : null,
+            serverUserSettings: serverUserSettings.toObject(),
+            userLevel: userLevel.levelData,
             member
         };
 
         const { image, extension } = await drawCard(cardData);
 
         setTimeout(async () => {
-            try {
-                cmdArgs.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
-            } catch {
-                await cmdArgs.localisedReply("Failed to create animated card");
-                serverUserSettings.animatedCard = false;
-                cmdArgs.reply({ files: [canvasToMessageAttachment(await (await drawCard(cardData)).image, "magiclevels")] });
-            }
+            cmdArgs.reply({ files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
 
             if (cmdArgs instanceof CommandArguments) {
                 msg.delete();
@@ -97,9 +67,6 @@ export class LevelsBaseCommand extends BaseCommand {
 
 export class GreenScreenLevelsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const Levels = BotUser.getDatabase(DatabaseType.Levels);
-        const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
-
         let greenScreenColor = "#00ff00";
 
         let user = cmdArgs.author;
@@ -127,24 +94,20 @@ export class GreenScreenLevelsBaseCommand extends BaseCommand {
         const leaderboardPosition = (await getLeaderboardPosition(member)) + 1;
         const weekleaderboardPosition = (await getWeeklyLeaderboardPosition(member)) + 1;
 
-        let userLevel = levels.find(u => u.userId === user.id);
-        if (!userLevel) {
-            await levels.push(new UserLevel(user.id));
-            userLevel = levels.find(u => u.userId === user.id);
-        }
+        const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": user.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: user.id } }));
 
-        const currentRank = await getCurrentRank(userLevel.level, cmdArgs.guildId);
-        const nextRank = await getNextRank(userLevel.level, cmdArgs.guildId);
+        const currentRank = await getCurrentRank(userLevel.levelData.level, cmdArgs.guildId);
+        const nextRank = await getNextRank(userLevel.levelData.level, cmdArgs.guildId);
 
         const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 
         const cardData: CardData = {
             leaderboardPosition,
             weeklyLeaderboardPosition: weekleaderboardPosition,
-            currentRank,
-            nextRank,
-            serverUserSettings,
-            userLevel,
+            currentRank: currentRank ? currentRank.toObject() : null,
+            nextRank: currentRank ? nextRank.toObject() : null,
+            serverUserSettings: serverUserSettings.toObject(),
+            userLevel: userLevel.levelData,
             member
         };
 

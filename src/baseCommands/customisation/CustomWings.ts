@@ -1,25 +1,19 @@
 import { Guild, BaseGuildTextChannel, EmbedBuilder, TextChannel, ButtonStyle } from "discord.js";
 import { existsSync, mkdirSync, unlinkSync, renameSync } from "fs";
-import { BotUser } from "../../BotClient";
 import { CARD_CANVAS_WIDTH, CARD_CANVAS_HEIGHT, CUSTOM_WINGS_REQUEST_FOLDER, CUSTOM_WINGS_FOLDER } from "../../Constants";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomWings } from "../../structs/databaseTypes/CustomWings";
-import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
-import { WingsRequest } from "../../structs/databaseTypes/WingsRequest";
+import { WingsRequest, WingsRequestData } from "../../structs/databaseTypes/WingsRequest";
 import { getTextChannelById, getBotRoleColor, getMemberById } from "../../utils/GetterUtils";
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { getImageReply } from "../../utils/ReplyUtils";
-import { getServerDatabase, downloadFile } from "../../utils/Utils";
+import { downloadFile, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { ServerData } from "../../structs/databaseTypes/ServerData";
 
 export class CustomWingsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
-
-        const WingsRequests = BotUser.getDatabase(DatabaseType.WingsRequests);
-        const wingsRequests: WingsRequest[] = await getServerDatabase(WingsRequests, cmdArgs.guildId);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
         if (!serverInfo.wingsRequestChannel) {
             return cmdArgs.reply("There is no set wings request channel, tell the mods to set one!");
@@ -30,14 +24,9 @@ export class CustomWingsBaseCommand extends BaseCommand {
         const { value: image, message: msg } = await getImageReply({ sendTarget: cmdArgs.body, author: cmdArgs.author });
         if (!image) return;
 
-        let wingsIndex = wingsRequests.findIndex(u => u.userId === cmdArgs.author.id);
-        if (wingsIndex < 0) {
-            wingsRequests.push(new WingsRequest(cmdArgs.author.id));
-            wingsIndex = wingsRequests.length - 1;
-        }
-        const wingsRequest = wingsRequests[wingsIndex];
+        const wingsRequest = await getOneDatabase(WingsRequest, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new WingsRequest({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 
-        const dir = `${CUSTOM_WINGS_REQUEST_FOLDER}/${cmdArgs.guildId}`;
+        const dir = `${CUSTOM_WINGS_REQUEST_FOLDER} /${cmdArgs.guildId}`;
         const filePath = `${dir}/${cmdArgs.author.id}.png`;
 
         const download = await msg.reply(Localisation.getTranslation("setrank.wings.download"));
@@ -53,22 +42,16 @@ export class CustomWingsBaseCommand extends BaseCommand {
         await downloadFile(image.url, filePath);
 
         wingsRequest.wingsFile = filePath;
-        wingsRequests[wingsIndex] = wingsRequest;
-        await WingsRequests.set(cmdArgs.guildId, wingsRequests);
+
+        await wingsRequest.save();
         await download.delete();
         await msg.reply(Localisation.getTranslation("generic.sent"));
         const channel = await getTextChannelById(serverInfo.wingsRequestChannel, cmdArgs.guild);
-        await createWingsRequest(wingsRequest, cmdArgs.guild, channel);
+        await createWingsRequest(wingsRequest.toObject(), cmdArgs.guild, channel);
     }
 }
 
-export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guild, channel: BaseGuildTextChannel) {
-    const CustomWingsDatabase = BotUser.getDatabase(DatabaseType.CustomWings);
-    const customWings: CustomWings[] = await getServerDatabase(CustomWingsDatabase, channel.guildId);
-
-    const WingsRequests = BotUser.getDatabase(DatabaseType.WingsRequests);
-    const wingsRequests: WingsRequest[] = await getServerDatabase(WingsRequests, channel.guildId);
-
+export async function createWingsRequest(wingsRequest: WingsRequestData, guild: Guild, channel: BaseGuildTextChannel) {
     const embed = new EmbedBuilder();
 
     embed.setColor(await getBotRoleColor(guild));
@@ -89,12 +72,7 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
                 style: ButtonStyle.Success,
                 label: Localisation.getTranslation("button.accept"),
                 async onRun({ interaction }) {
-                    let wingsIndex = customWings.findIndex(u => u.userId === user.id);
-                    if (wingsIndex < 0) {
-                        customWings.push(new CustomWings(user.id));
-                        wingsIndex = customWings.length - 1;
-                    }
-                    const userWings = customWings[wingsIndex];
+                    const userWings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: user.id }, () => new CustomWings({ guildId: guild.id, userId: user.id }));
 
                     const dir = `${CUSTOM_WINGS_FOLDER}/${channel.guildId}`;
                     const filePath = `${dir}/${user.id}.png`;
@@ -107,12 +85,10 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
                         unlinkSync(userWings.wingsFile);
                     }
 
-                    const requestWingsIndex = wingsRequests.findIndex(u => u.userId === user.id);
-                    if (requestWingsIndex < 0) {
+                    const requestWingsIndex = await getOneDatabase(WingsRequest, { guildId: wingsRequest.guildId, userId: wingsRequest.userId });
+                    if (!requestWingsIndex) {
                         return;
                     }
-
-                    wingsRequests.splice(requestWingsIndex, 1);
 
                     const dmChannel = (await user.createDM());
 
@@ -128,9 +104,9 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
 
                     renameSync(wingsRequest.wingsFile, filePath);
                     userWings.wingsFile = filePath;
-                    customWings[wingsIndex] = userWings;
-                    await CustomWingsDatabase.set(channel.guildId, customWings);
-                    await WingsRequests.set(channel.guildId, wingsRequests);
+                    await userWings.save();
+
+                    await WingsRequest.deleteOne({ guildId: wingsRequest.guildId, userId: wingsRequest.userId });
                     // interaction.deferUpdate();
                     const embed = EmbedBuilder.from(interaction.message.embeds[0]);
                     embed.setTitle(title + ` - Accepted by __${interaction.user.username}__`);
@@ -142,8 +118,8 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
                 style: ButtonStyle.Danger,
                 label: Localisation.getTranslation("button.deny"),
                 async onRun({ interaction }) {
-                    const requestWingsIndex = wingsRequests.findIndex(u => u.userId === user.id);
-                    if (requestWingsIndex < 0) {
+                    const requestWingsIndex = await getOneDatabase(WingsRequest, { guildId: wingsRequest.guildId, userId: wingsRequest.userId });
+                    if (!requestWingsIndex) {
                         return;
                     }
 
@@ -163,9 +139,7 @@ export async function createWingsRequest(wingsRequest: WingsRequest, guild: Guil
                         unlinkSync(wingsRequest.wingsFile);
                     }
 
-                    wingsRequests.splice(requestWingsIndex, 1);
-
-                    await WingsRequests.set(channel.guildId, wingsRequests);
+                    await WingsRequest.deleteOne({ guildId: wingsRequest.guildId, userId: wingsRequest.userId });
                     // interaction.deferUpdate();
                     const embed = EmbedBuilder.from(interaction.message.embeds[0]);
                     embed.setTitle(title + ` - Rejected by __${interaction.user.username}__`);

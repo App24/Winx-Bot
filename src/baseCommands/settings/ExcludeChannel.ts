@@ -1,18 +1,15 @@
 import { EmbedBuilder } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
 import { getTextChannelById, getThreadChannelById, getTextChannelFromMention, getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
 import { getTextChannelReply } from "../../utils/ReplyUtils";
-import { getServerDatabase, asyncForEach } from "../../utils/Utils";
+import { asyncForEach, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { ServerData } from "../../structs/databaseTypes/ServerData";
 
 export class ExcludeChannelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
@@ -28,7 +25,8 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
 
                             serverInfo.excludeChannels.push(channel.id);
 
-                            await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                            await serverInfo.save();
+
                             msg.reply(Localisation.getTranslation("excludechannel.add", channel));
                         },
                         default: false,
@@ -64,7 +62,8 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                                     onSelect: async ({ interaction }) => {
                                         serverInfo.excludeChannels.splice(index, 1);
 
-                                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                                        await serverInfo.save();
+
                                         interaction.reply(Localisation.getTranslation("excludechannel.remove", channel));
                                     },
                                     default: false,
@@ -94,7 +93,7 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                                     serverInfo.excludeChannels.splice(index, 1);
                                 }
                             });
-                            await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                            await serverInfo.save();
                             interaction.editReply(Localisation.getTranslation("excludechannel.clear"));
                         },
                         default: false,

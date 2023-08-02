@@ -1,11 +1,26 @@
-export class SuggestionStruct {
-    public userId: string;
-    public request: string;
-    public state: SuggestionState;
-}
+import { Schema, model } from "mongoose";
 
 export enum SuggestionState {
-    Rejected = "rejected",
-    Completed = "completed",
-    Non = "non"
+    Sent,
+    Accepted,
+    Rejected,
+    Completed
 }
+
+const suggestionDataSchema = new Schema({
+    key: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: String
+    },
+    request: String,
+    state: {
+        type: Number,
+        enum: SuggestionState,
+        default: SuggestionState.Sent
+    }
+}, { timestamps: true });
+
+export const SuggestionData = model("Suggestion Data", suggestionDataSchema);

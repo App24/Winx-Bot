@@ -1,14 +1,11 @@
-import { BotUser } from "../../BotClient";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { RecentLeaderboardData } from "../../structs/databaseTypes/RecentLeaderboard";
+import { WeeklyLeaderboard } from "../../structs/databaseTypes/WeeklyLeaderboard";
 import { getRoleFromMention } from "../../utils/GetterUtils";
-import { getServerDatabase } from "../../utils/Utils";
+import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class SetTopRankRoleBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const RecentLeaderboard = BotUser.getDatabase(DatabaseType.RecentLeaderboard);
-        const recentLeaderboard: RecentLeaderboardData = await getServerDatabase(RecentLeaderboard, cmdArgs.guildId, new RecentLeaderboardData());
+        const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: cmdArgs.guildId }, () => new WeeklyLeaderboard({ guildId: cmdArgs.guildId }));
 
         const role = await getRoleFromMention(cmdArgs.args[0], cmdArgs.guild);
 
@@ -18,7 +15,7 @@ export class SetTopRankRoleBaseCommand extends BaseCommand {
 
         recentLeaderboard.topRoleId = role.id;
 
-        await RecentLeaderboard.set(cmdArgs.guildId, recentLeaderboard);
+        await recentLeaderboard.save();
 
         cmdArgs.reply("generic.done");
     }

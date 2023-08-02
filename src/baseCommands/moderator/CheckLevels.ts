@@ -1,40 +1,38 @@
-import { GuildMember, GuildBasedChannel, BaseGuildTextChannel, Message } from "discord.js";
-import { BotUser } from "../../BotClient";
+import { GuildBasedChannel, BaseGuildTextChannel, Message } from "discord.js";
 import { PREFIX } from "../../Constants";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { secondsToTime } from "../../utils/FormatUtils";
 import { getMemberFromMention, getTextChannelById, getTextChannelFromMention } from "../../utils/GetterUtils";
-import { getServerDatabase, getLeaderboardMembers, asyncForEach, getAllMessages } from "../../utils/Utils";
+import { getLeaderboardMembers, asyncForEach, getAllMessages, getOneDatabase, getDatabase } from "../../utils/Utils";
 import { addXP } from "../../utils/XPUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { ServerData } from "../../structs/databaseTypes/ServerData";
 
 export class CheckLbLevelsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const channels = Array.from(cmdArgs.guild.channels.cache.values());
 
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
         const excluded = serverInfo.excludeChannels;
 
-        const Levels = BotUser.getDatabase(DatabaseType.Levels);
-        const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
+        const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
 
         if (!levels.length) return cmdArgs.reply("error.empty.levels");
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels);
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels.map(l => l.levelData));
 
-        await asyncForEach(leaderboardLevels, async (topLevel: { userLevel: UserLevel, member: GuildMember }) => {
+        await asyncForEach(leaderboardLevels, async (topLevel) => {
             topLevel.userLevel.level = 0;
             topLevel.userLevel.xp = 0;
         });
         leaderboardLevels.forEach(level => {
-            const index = levels.findIndex(u => u.userId === level.userLevel.userId);
-            levels[index] = level.userLevel;
+            const index = levels.findIndex(u => u.levelData.userId === level.userLevel.userId);
+            levels[index].levelData = level.userLevel;
         });
-        await Levels.set(cmdArgs.guildId, levels);
+        await asyncForEach(levels, async (level) => {
+            await level.save();
+        });
 
         await cmdArgs.reply("checklevels.start");
         const NTChannels = [];
@@ -51,7 +49,7 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
             await cmdArgs.channel.send(Localisation.getTranslation("checklevels.start.channel", channel, index + 1, NTChannels.length));
             const startTime = new Date().getTime();
             const messages = await getAllMessages(channel);
-            await asyncForEach(leaderboardLevels, async (topLevel: { userLevel: UserLevel, member: GuildMember }) => {
+            await asyncForEach(leaderboardLevels, async (topLevel) => {
                 let totalXp = 0;
                 await asyncForEach(messages, async (msg: Message) => {
                     if (msg.content.toLowerCase().startsWith(PREFIX)) return;
@@ -77,19 +75,17 @@ export class CheckLevelsBaseCommand extends BaseCommand {
         if (member.user.bot) return cmdArgs.reply("error.user.bot");
         const channels = Array.from(cmdArgs.guild.channels.cache.values());
 
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
         const excluded = serverInfo.excludeChannels;
 
-        const Levels = BotUser.getDatabase(DatabaseType.Levels);
-        const levels: UserLevel[] = await getServerDatabase(Levels, cmdArgs.guildId);
+        const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
 
         if (!levels.length) return cmdArgs.reply("error.empty.levels");
 
-        const user = levels.find(u => u.userId === member.id);
-        user.level = 0;
-        user.xp = 0;
-        await Levels.set(cmdArgs.guildId, levels);
+        const user = levels.find(u => u.levelData.userId === member.id);
+        user.levelData.level = 0;
+        user.levelData.xp = 0;
+        await user.save();
 
         await cmdArgs.reply("checklevels.start");
         const NTChannels = [];

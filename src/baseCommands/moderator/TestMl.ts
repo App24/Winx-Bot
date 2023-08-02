@@ -27,25 +27,23 @@ export class TestMlBaseCommand extends BaseCommand {
 
         const userLevel = new UserLevel(user.id);
 
-        userLevel.xp = 0;
-        userLevel.level = level;
+        userLevel.levelData.xp = 0;
+        userLevel.levelData.level = level;
 
-        const currentRank = await getCurrentRank(userLevel.level, cmdArgs.guildId);
-        const nextRank = await getNextRank(userLevel.level, cmdArgs.guildId);
+        const currentRank = await getCurrentRank(userLevel.levelData.level, cmdArgs.guildId);
+        const nextRank = await getNextRank(userLevel.levelData.level, cmdArgs.guildId);
 
         const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
-        serverUserSettings.animatedCard = false;
         serverUserSettings.wingsLevel = -1;
-        serverUserSettings.wingsLevelB = -1;
         serverUserSettings.cardCode = DEFAULT_CARD_CODE;
 
         const cardData: CardData = {
             leaderboardPosition,
             weeklyLeaderboardPosition: weekleaderboardPosition,
-            currentRank,
-            nextRank,
-            serverUserSettings,
-            userLevel,
+            currentRank: currentRank ? currentRank.toObject() : null,
+            nextRank: currentRank ? nextRank.toObject() : null,
+            serverUserSettings: serverUserSettings.toObject(),
+            userLevel: userLevel.levelData,
             member
         };
 

@@ -1,122 +1,79 @@
 import { Guild } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { Keyv } from "../../keyv/keyv-index";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { RankLevel } from "../../structs/databaseTypes/RankLevel";
+import { RankLevelData } from "../../structs/databaseTypes/RankLevel";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { getRoleById } from "../../utils/GetterUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { getUserLevel, getCurrentRank, getPreviousRanks } from "../../utils/RankUtils";
-import { getServerDatabase, asyncForEach } from "../../utils/Utils";
+import { getCurrentRank, getPreviousRanks } from "../../utils/RankUtils";
+import { asyncForEach, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { UserLevel } from "../../structs/databaseTypes/UserLevel";
+import { Document, Types } from "mongoose";
 
 export class WingsLevelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
-        const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
+        const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 
-        let userIndex = serverUserSettings.findIndex(u => u.userId === cmdArgs.author.id);
-        if (userIndex < 0) {
-            serverUserSettings.push(new ServerUserSettings(cmdArgs.author.id));
-            userIndex = serverUserSettings.length - 1;
-        }
-        const userSettings = serverUserSettings[userIndex];
+        const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": cmdArgs.author.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: cmdArgs.author.id } }));
 
-        const userLevel = await getUserLevel(cmdArgs.author.id, cmdArgs.guildId);
-
-        const currentRank = await getCurrentRank(userLevel.level, cmdArgs.guildId);
+        const currentRank = await getCurrentRank(userLevel.levelData.level, cmdArgs.guildId);
 
         if (!currentRank) {
             return cmdArgs.reply("error.rank.none");
         }
 
-        const previousRanks = await getPreviousRanks(userLevel.level, cmdArgs.guildId);
+        const previousRanks = await getPreviousRanks(userLevel.levelData.level, cmdArgs.guildId);
 
         previousRanks.push(currentRank);
 
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
             {
-                options:
-                    [
-                        {
-                            label: "Primary Wings",
-                            value: "wings_a",
-                            onSelect: async ({ interaction }) => {
-                                createMessageSelection({
-                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                    {
-                                        options: await this.updateWings("WINGS_A", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild, previousRanks)
-                                    }
-                                });
-                            },
-                            default: false,
-                            description: null,
-                            emoji: null
-                        },
-                        {
-                            label: "Secondary Wings",
-                            value: "wings_b",
-                            onSelect: async ({ interaction }) => {
-                                createMessageSelection({
-                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                    {
-                                        options: await this.updateWings("WINGS_B", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild, previousRanks)
-                                    }
-                                });
-                            },
-                            default: false,
-                            description: null,
-                            emoji: null
-                        },
-                        {
-                            label: "Both Wings",
-                            value: "both",
-                            onSelect: async ({ interaction }) => {
-                                createMessageSelection({
-                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                    {
-                                        options: await this.updateWings("BOTH", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild, previousRanks)
-                                    }
-                                });
-                            },
-                            default: false,
-                            description: null,
-                            emoji: null
-                        }
-                    ]
+                options: await this.updateWings(userSettings, cmdArgs.guild, previousRanks.filter(r => r !== undefined).map(r => r.toObject()))
             }
         });
     }
 
-    async updateWings(setType: "WINGS_A" | "WINGS_B" | "BOTH", ServerUserSettingsDatabase: Keyv, serverUserSettings: ServerUserSettings[], userSettings: ServerUserSettings, userIndex: number, guild: Guild, previousRanks: RankLevel[]) {
+    async updateWings(userSettings: Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        wingsLevel: number;
+        levelPing: boolean;
+        winxCharacter: number;
+        cardCode: string;
+        cardSlots: Types.DocumentArray<{
+            name?: string;
+            code?: string;
+            customWings?: string;
+        }>;
+        userId?: string;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        wingsLevel: number;
+        levelPing: boolean;
+        winxCharacter: number;
+        cardCode: string;
+        cardSlots: Types.DocumentArray<{
+            name?: string;
+            code?: string;
+            customWings?: string;
+        }>;
+        userId?: string;
+    }, guild: Guild, previousRanks: RankLevelData[]) {
         const options: SelectOption[] = [];
 
         const setWingsLevel = async (level: number) => {
-            if (setType === "WINGS_A" || setType === "BOTH") {
-                userSettings.wingsLevel = level;
-            }
-            if (setType === "WINGS_B" || setType === "BOTH") {
-                userSettings.wingsLevelB = level;
-            }
-            serverUserSettings[userIndex] = userSettings;
-            await ServerUserSettingsDatabase.set(guild.id, serverUserSettings);
+            userSettings.wingsLevel = level;
+            await userSettings.save();
         };
 
         const isDefault = (level: number) => {
-            if (setType === "WINGS_A") {
-                return userSettings.wingsLevel === level;
-            } else if (setType === "WINGS_B") {
-                return userSettings.wingsLevelB === level;
-            }
-
-            const wingsA = userSettings.wingsLevel;
-            const wingsB = userSettings.wingsLevelB;
-
-            if (wingsA === level)
-                return wingsA === wingsB;
-            return false;
+            return userSettings.wingsLevel === level;
         };
 
         options.push({

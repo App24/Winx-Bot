@@ -1,18 +1,15 @@
 import { ButtonStyle } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
 import { getTextChannelFromMention } from "../../utils/GetterUtils";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
 import { getTextChannelReply } from "../../utils/ReplyUtils";
-import { getServerDatabase } from "../../utils/Utils";
+import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { ServerData } from "../../structs/databaseTypes/ServerData";
 
 export class LevelChannelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
         await createWhatToDoButtons({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { time: 1000 * 60 * 5, max: 1 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
@@ -23,7 +20,7 @@ export class LevelChannelBaseCommand extends BaseCommand {
 
                         serverInfo.levelChannel = channel.id;
 
-                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                        await serverInfo.save();
                         msg.reply(Localisation.getTranslation("levelchannel.set", channel));
                     }
                 },
@@ -41,7 +38,7 @@ export class LevelChannelBaseCommand extends BaseCommand {
 
                         serverInfo.levelChannel = "";
 
-                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                        await serverInfo.save();
 
                         cmdArgs.reply("levelchannel.remove");
                     }

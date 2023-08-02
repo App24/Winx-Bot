@@ -1,41 +1,21 @@
 import { ButtonStyle, Message, MessageComponentInteraction, ModalSubmitInteraction, TextInputStyle } from "discord.js";
 import { copyFileSync, existsSync, mkdirSync, rmSync } from "fs";
 import { join } from "path";
-import { BotUser } from "../../BotClient";
 import { CUSTOM_WINGS_FOLDER } from "../../Constants";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomWings } from "../../structs/databaseTypes/CustomWings";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { getStringReply } from "../../utils/ReplyUtils";
-import { getServerDatabase } from "../../utils/Utils";
+import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { createInteractionModal } from "../../utils/InteractionModalUtils";
 
 export class CardSlotsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
-        const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
+        const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 
-        const CustomWingsDatabase = BotUser.getDatabase(DatabaseType.CustomWings);
-        const customWings: CustomWings[] = await getServerDatabase(CustomWingsDatabase, cmdArgs.guildId);
-
-        let userIndex = serverUserSettings.findIndex(u => u.userId === cmdArgs.author.id);
-        if (userIndex < 0) {
-            serverUserSettings.push(new ServerUserSettings(cmdArgs.author.id));
-            userIndex = serverUserSettings.length - 1;
-        }
-        const userSettings = serverUserSettings[userIndex];
-
-        const wingsIndex = customWings.findIndex(u => u.userId === cmdArgs.author.id);
-        if (wingsIndex < 0) {
-            //return interaction.followUp(Localisation.getTranslation("error.customwings.user.none"));
-        }
-        const userWings = wingsIndex >= 0 ? customWings[wingsIndex] : null;
-
-        if (!userSettings.cardSlots) userSettings.cardSlots = [];
+        let userWings = await getOneDatabase(CustomWings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id });
 
         const slotsMenuOptions: string[] = [];
 
@@ -78,7 +58,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
                         userSettings.cardSlots.push({ name: slotName, code: userSettings.cardCode, customWings: wingsFile });
                     }
 
-                    await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
+                    await userSettings.save();
 
                     if (target instanceof ModalSubmitInteraction) {
                         target.reply(Localisation.getTranslation("generic.done"));
@@ -102,17 +82,6 @@ export class CardSlotsBaseCommand extends BaseCommand {
                                 saveCode(data.information.name, interaction);
                             }
                         });
-
-                        /*const { value: name, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "cardslots.output.new.reply" });
-                        if (!name) return;
-
-                        if (name.length > 100) {
-                            return message.reply(Localisation.getTranslation("error.message.too.long"));
-                        }
-
-                        if (slotsMenuOptions.map(s => s.toLowerCase()).includes(name.toLowerCase())) {
-                            return message.reply(Localisation.getTranslation("cardslots.error.slot.exists"));
-                        }*/
                     }
                 });
 
@@ -170,15 +139,15 @@ export class CardSlotsBaseCommand extends BaseCommand {
                                     if (userWings) {
                                         userWings.wingsFile = wingsFile;
                                     } else {
-                                        customWings.push({ userId: cmdArgs.author.id, wingsFile: wingsFile });
+                                        userWings = new CustomWings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id, wingsFile });
                                     }
 
-                                    await CustomWingsDatabase.set(cmdArgs.guildId, customWings);
+                                    await userWings.save();
                                 }
 
                                 userSettings.cardCode = cardSlot.code;
 
-                                await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
+                                await userSettings.save();
 
                                 interaction.reply(Localisation.getTranslation("generic.done"));
                             },
@@ -240,8 +209,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
 
                                                 userSettings.cardSlots.splice(slotIndex, 1);
 
-
-                                                await ServerUserSettingsDatabase.set(cmdArgs.guildId, serverUserSettings);
+                                                await userSettings.save();
 
                                                 interaction.reply(Localisation.getTranslation("generic.done"));
                                             }

@@ -3,7 +3,7 @@ import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
-import { reportError } from "../../utils/Utils";
+import { reportBotError } from "../../utils/Utils";
 
 export class RegisterSlashCommandsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -33,7 +33,7 @@ export class RegisterSlashCommandsBaseCommand extends BaseCommand {
                                                     BotUser.application.commands.set(commands).then(() => {
                                                         interaction.reply(Localisation.getTranslation("generic.done"));
                                                     }).catch(r => {
-                                                        reportError(r, interaction);
+                                                        reportBotError(r, interaction);
                                                     });
                                                 },
                                                 default: false,
@@ -55,7 +55,7 @@ export class RegisterSlashCommandsBaseCommand extends BaseCommand {
                                                     cmdArgs.guild.commands.set(commands).then(() => {
                                                         interaction.reply(Localisation.getTranslation("generic.done"));
                                                     }).catch(r => {
-                                                        reportError(r, interaction);
+                                                        reportBotError(r, interaction);
                                                     });
                                                 },
                                                 default: false,
@@ -78,7 +78,7 @@ export class RegisterSlashCommandsBaseCommand extends BaseCommand {
                                                     cmdArgs.guild.commands.set(commands).then(() => {
                                                         interaction.reply(Localisation.getTranslation("generic.done"));
                                                     }).catch(r => {
-                                                        reportError(r, interaction);
+                                                        reportBotError(r, interaction);
                                                     });
                                                 },
                                                 default: false,

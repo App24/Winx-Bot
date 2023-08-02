@@ -15,7 +15,7 @@
     "checklblevels.command.description": "Checks the levels of all the users in the leaderboad!",
     "checklevels.command.description": "Checks the levels of a specific user!",
     "checkranks.command.description": "Adds/removes transformation roles from users depending on their level!",
-    "patreon.command.description": "Set or get list of patreons!",
+    "patron.command.description": "Set or get list of patrons!",
     "checkerror.command.description": "Checks logged errors!",
     "messageuser.command.description": "Message user!",
     "reloadlocalisation.command.description": "Reload Localisation!",

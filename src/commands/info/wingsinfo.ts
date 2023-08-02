@@ -10,10 +10,6 @@ class WingsInfoCommand extends Command {
 
         this.baseCommand = new WingsInfoBaseCommand();
     }
-
-    // public onRun(cmdArgs: CommandArguments) {
-    //     cmdArgs.message.reply(`Recommended custom wings image size: ${CARD_CANVAS_WIDTH}px by ${CARD_CANVAS_HEIGHT}px to prevent any empty space or image being cut off`);
-    // }
 }
 
 export = WingsInfoCommand;

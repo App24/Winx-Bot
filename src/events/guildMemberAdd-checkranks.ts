@@ -1,26 +1,23 @@
 import { GuildMember } from "discord.js";
 import { BotUser } from "../BotClient";
 import { getRoleById } from "../utils/GetterUtils";
-import { DatabaseType } from "../structs/DatabaseTypes";
 import { RankLevel } from "../structs/databaseTypes/RankLevel";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
-import { getServerDatabase, asyncForEach } from "../utils/Utils";
+import { asyncForEach, getDatabase } from "../utils/Utils";
 
 export = () => {
     BotUser.on("guildMemberAdd", async (member: GuildMember) => {
-        const Levels = BotUser.getDatabase(DatabaseType.Levels);
-        const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-        const levels: UserLevel[] = await getServerDatabase(Levels, member.guild.id);
-        const ranks: RankLevel[] = await getServerDatabase(Ranks, member.guild.id);
+        const levels = await getDatabase(UserLevel, { guildId: member.guild.id });
+        const ranks = await getDatabase(RankLevel, { guildId: member.guild.id });
         if (!levels.length || !ranks.length) return;
-        const user = levels.find(u => u.userId === member.id);
+        const user = levels.find(u => u.levelData.userId === member.id);
         if (user) {
-            await asyncForEach(ranks, async (rank: RankLevel) => {
+            await asyncForEach(ranks, async (rank) => {
                 const role = await getRoleById(rank.roleId, member.guild);
                 if (!role) return;
-                if (user.level >= rank.level && !member.roles.cache.has(role.id)) {
+                if (user.levelData.level >= rank.level && !member.roles.cache.has(role.id)) {
                     await member.roles.add(role);
-                } else if (user.level < rank.level && member.roles.cache.has(role.id)) {
+                } else if (user.levelData.level < rank.level && member.roles.cache.has(role.id)) {
                     await member.roles.remove(role);
                 }
             });

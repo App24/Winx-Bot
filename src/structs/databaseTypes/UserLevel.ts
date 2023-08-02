@@ -1,11 +1,21 @@
-export class UserLevel {
-    public userId: string;
-    public level: number;
-    public xp: number;
+import { Schema, model } from "mongoose";
+import { levelDataSchema } from "./LevelData";
 
-    public constructor(id: string) {
-        this.userId = id;
-        this.level = 0;
-        this.xp = 0;
+
+
+const userLevelSchema = new Schema({
+    guildId: {
+        type: String,
+        required: true
+    },
+    levelData: {
+        type: levelDataSchema,
+        default: {
+            userId: "",
+            level: 0,
+            xp: 0
+        }
     }
-}
+}, { timestamps: true });
+
+export const UserLevel = model("User Level", userLevelSchema);

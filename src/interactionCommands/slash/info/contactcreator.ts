@@ -18,13 +18,6 @@ class ContactCreator extends SlashCommand {
 
         this.baseCommand = new ContactCreatorBaseCommand();
     }
-
-    /*public async onRun(cmdArgs: SlashCommandArguments) {
-        const messageContent = cmdArgs.args[0];
-        const owner = await getUserById(process.env.OWNER_ID);
-        (await owner.createDM()).send(`${cmdArgs.author}: ${messageContent}`);
-        cmdArgs.interaction.followUp(Localisation.getTranslation("generic.sent"));
-    }*/
 }
 
 export = ContactCreator;

@@ -1,16 +1,13 @@
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
+import { ServerData } from "../../structs/databaseTypes/ServerData";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { getTextChannelReply } from "../../utils/ReplyUtils";
-import { getServerDatabase } from "../../utils/Utils";
+import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class WingsRequestChannelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
@@ -37,7 +34,7 @@ export class WingsRequestChannelBaseCommand extends BaseCommand {
 
                             serverInfo.wingsRequestChannel = channel.id;
 
-                            ServerInfo.set(cmdArgs.guildId, serverInfo);
+                            await serverInfo.save();
 
                             msg.reply(Localisation.getTranslation("generic.done"));
                         },
@@ -51,7 +48,7 @@ export class WingsRequestChannelBaseCommand extends BaseCommand {
                         async onSelect({ interaction }) {
                             serverInfo.wingsRequestChannel = "";
 
-                            ServerInfo.set(cmdArgs.guildId, serverInfo);
+                            await serverInfo.save();
 
                             interaction.reply(Localisation.getTranslation("generic.done"));
                         },

@@ -1,3 +1,6 @@
+## 3.7.0
+- Changed to using MongoDB instead of local mysql databases
+
 ## 3.6.0
 - Updated to Discord.js v14
 - Rewrite of command infrastructure to allow for easy slash command implementation

@@ -1,19 +1,15 @@
-import { BotUser } from "../../BotClient";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
+import { ServerData } from "../../structs/databaseTypes/ServerData";
 import { WingsRequest } from "../../structs/databaseTypes/WingsRequest";
 import { getTextChannelById } from "../../utils/GetterUtils";
-import { getServerDatabase, asyncForEach } from "../../utils/Utils";
+import { asyncForEach, getOneDatabase, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { createWingsRequest } from "../customisation/CustomWings";
 
 export class ListWingsRequestsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
-        const WingsRequests = BotUser.getDatabase(DatabaseType.WingsRequests);
-        const wingsRequests: WingsRequest[] = await getServerDatabase(WingsRequests, cmdArgs.guildId);
+        const wingsRequests = await getDatabase(WingsRequest, { guildId: cmdArgs.guildId });
 
         if (!serverInfo.wingsRequestChannel) {
             return cmdArgs.reply("There is no set wings request channel!");
@@ -22,7 +18,7 @@ export class ListWingsRequestsBaseCommand extends BaseCommand {
         const channel = await getTextChannelById(serverInfo.wingsRequestChannel, cmdArgs.guild);
 
         await asyncForEach(wingsRequests, async (wingsRequest) => {
-            createWingsRequest(wingsRequest, cmdArgs.guild, channel);
+            createWingsRequest(wingsRequest.toObject(), cmdArgs.guild, channel);
         });
 
         cmdArgs.reply("generic.done");

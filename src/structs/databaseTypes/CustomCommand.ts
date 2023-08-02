@@ -1,8 +1,26 @@
+import { Schema, model } from "mongoose";
 import { CommandAccess } from "../CommandAccess";
 
-export class CustomCommand {
-    public name: string;
-    public description: string;
-    public access: CommandAccess;
-    public outputs: string[];
-}
+const customCommandSchema = new Schema({
+    guildId: {
+        type: String,
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+    },
+    access: {
+        type: Number,
+        enum: CommandAccess
+    },
+    outputs: {
+        type: [String],
+        default: []
+    }
+}, { timestamps: true });
+
+export const CustomCommand = model("Custom Command", customCommandSchema);

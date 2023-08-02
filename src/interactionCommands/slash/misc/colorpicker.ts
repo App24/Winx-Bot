@@ -17,15 +17,6 @@ class ColorPickerCommand extends SlashCommand {
 
         this.baseCommand = new ColorPickerBaseCommand();
     }
-
-    /*public async onRun(cmdArgs: SlashCommandArguments) {
-        let color = cmdArgs.args[0].toLowerCase();
-        if (color.startsWith("#")) {
-            color = color.substring(1);
-        }
-        if (!isHexColor(color)) return cmdArgs.reply("error.invalid.hexcolor");
-        cmdArgs.reply({ content: "generic.hexcolor", files: [canvasToMessageAttachment(canvasColor(color))] }, color);
-    }*/
 }
 
 export = ColorPickerCommand;

@@ -1,9 +1,7 @@
 import { ButtonStyle, EmbedBuilder } from "discord.js";
 import { existsSync, mkdirSync, unlinkSync } from "fs";
-import { BotUser } from "../../BotClient";
 import { CUSTOM_WINGS_FOLDER } from "../../Constants";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { CustomWings } from "../../structs/databaseTypes/CustomWings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { CardData, decodeCode, drawCardWithWings } from "../../utils/CardUtils";
@@ -12,14 +10,11 @@ import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { getServerUserSettings } from "../../utils/RankUtils";
 import { getMemberReply, getImageReply } from "../../utils/ReplyUtils";
-import { getServerDatabase, canvasToMessageAttachment, downloadFile } from "../../utils/Utils";
+import { canvasToMessageAttachment, downloadFile, getOneDatabase, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class SetCustomWingsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const CustomWingsDatabase = BotUser.getDatabase(DatabaseType.CustomWings);
-        const customWings: CustomWings[] = await getServerDatabase(CustomWingsDatabase, cmdArgs.guildId);
-
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
                 options: [
@@ -30,11 +25,10 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                             const { value: user } = await getMemberReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!user) return;
 
-                            const wingsIndex = customWings.findIndex(u => u.userId === user.id);
-                            if (wingsIndex < 0) {
+                            const userWings = await getOneDatabase(CustomWings, { guildId: cmdArgs.guildId, userId: user.id });
+                            if (!userWings) {
                                 return interaction.followUp(Localisation.getTranslation("error.customwings.user.none"));
                             }
-                            const userWings = customWings[wingsIndex];
 
                             if (existsSync(userWings.wingsFile)) {
                                 await interaction.followUp({ files: [userWings.wingsFile] });
@@ -53,12 +47,7 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                             const { value: user, message } = await getMemberReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!user) return;
 
-                            let wingsIndex = customWings.findIndex(u => u.userId === user.id);
-                            if (wingsIndex < 0) {
-                                customWings.push(new CustomWings(user.id));
-                                wingsIndex = customWings.length - 1;
-                            }
-                            const userWings = customWings[wingsIndex];
+                            const userWings = await getOneDatabase(CustomWings, { guildId: cmdArgs.guildId, userId: user.id }, () => new CustomWings({ guildId: cmdArgs.guildId, userId: user.id }));
 
                             const { value: image, message: msg } = await getImageReply({ sendTarget: message, author: cmdArgs.author });
                             if (!image) return;
@@ -69,7 +58,6 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                             const userLevel = new UserLevel(user.id);
 
                             const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
-                            serverUserSettings.animatedCard = false;
 
                             // const oldImage = userWings.wingsFile;
 
@@ -88,8 +76,8 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                                 weeklyLeaderboardPosition: 0,
                                 currentRank: null,
                                 nextRank: null,
-                                serverUserSettings,
-                                userLevel,
+                                serverUserSettings: serverUserSettings.toObject(),
+                                userLevel: userLevel.levelData,
                                 member: user,
                                 customWings: image.url
                             };
@@ -117,8 +105,7 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                                                 await downloadFile(image.url, filePath);
 
                                                 userWings.wingsFile = filePath;
-                                                customWings[wingsIndex] = userWings;
-                                                await CustomWingsDatabase.set(cmdArgs.guildId, customWings);
+                                                await userWings.save();
                                                 await interaction.deleteReply();
                                                 await interaction.followUp(Localisation.getTranslation("customwings.wings.add", `<@${user.id}>`));
                                             }
@@ -145,18 +132,17 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                             const { value: user } = await getMemberReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!user) return;
 
-                            const wingsIndex = customWings.findIndex(u => u.userId === user.id);
-                            if (wingsIndex < 0) {
+                            const userWings = await getOneDatabase(CustomWings, { guildId: cmdArgs.guildId, userId: user.id });
+                            if (!userWings) {
                                 return interaction.followUp(Localisation.getTranslation("error.customwings.user.none"));
                             }
-                            const userWings = customWings[wingsIndex];
 
                             if (existsSync(userWings.wingsFile)) {
                                 unlinkSync(userWings.wingsFile);
                             }
 
-                            customWings.splice(wingsIndex, 1);
-                            await CustomWingsDatabase.set(cmdArgs.guildId, customWings);
+                            await CustomWings.deleteOne({ guildId: cmdArgs.guildId, userId: user.id });
+
                             await interaction.followUp(Localisation.getTranslation("customwings.wings.remove", `<@${user.id}>`));
                         },
                         default: false,
@@ -167,6 +153,8 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.list"),
                         value: "list",
                         onSelect: async ({ interaction }) => {
+                            const customWings = await getDatabase(CustomWings, { guildId: cmdArgs.guildId });
+
                             if (!customWings.length) {
                                 return interaction.reply(Localisation.getTranslation("error.customwings.guild.none"));
                             }

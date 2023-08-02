@@ -1,9 +1,7 @@
 import { ButtonStyle } from "discord.js";
 import { existsSync, mkdirSync, unlinkSync } from "fs";
-import { BotUser } from "../../../BotClient";
 import { WINGS_FOLDER } from "../../../Constants";
 import { Localisation } from "../../../localisation";
-import { DatabaseType } from "../../../structs/DatabaseTypes";
 import { DEFAULT_WINGS_DATA, RankLevel } from "../../../structs/databaseTypes/RankLevel";
 import { DEFAULT_CARD_CODE } from "../../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
@@ -11,10 +9,11 @@ import { CardData, drawCardWithWings } from "../../../utils/CardUtils";
 import { capitalise } from "../../../utils/FormatUtils";
 import { createMessageButtons } from "../../../utils/MessageButtonUtils";
 import { createMessageSelection, SelectOption } from "../../../utils/MessageSelectionUtils";
-import { getRankRoles, getServerUserSettings, getRank } from "../../../utils/RankUtils";
+import { getServerUserSettings, getRank } from "../../../utils/RankUtils";
 import { getImageReply } from "../../../utils/ReplyUtils";
-import { canvasToMessageAttachment, getServerDatabase, downloadFile } from "../../../utils/Utils";
+import { canvasToMessageAttachment, downloadFile, asyncForEach, getDatabase } from "../../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../../BaseCommand";
+import { getRoleById } from "../../../utils/GetterUtils";
 
 export class ManageWingsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -29,7 +28,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.get"),
                         value: "get",
                         onSelect: async ({ interaction }) => {
-                            const rankRoles = await getRankRoles(cmdArgs.guild);
+                            const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             const options: SelectOption[] = [];
 
                             options.push({
@@ -43,12 +42,14 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                 emoji: null
                             });
 
-                            rankRoles.forEach(rankRole => {
+                            await asyncForEach(rankRoles, async (rankRole) => {
+                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+
                                 options.push({
-                                    label: capitalise(rankRole.role.name),
-                                    value: rankRole.role.name,
+                                    label: capitalise(role.name),
+                                    value: role.name,
                                     onSelect: async ({ interaction }) => {
-                                        const wings = await this.getLevelWings(rankRole.rank.level, cmdArgs.guildId);
+                                        const wings = await this.getLevelWings(rankRole.level, cmdArgs.guildId);
                                         if (wings === DEFAULT_WINGS_DATA) {
                                             return interaction.followUp(Localisation.getTranslation("error.empty.wings"));
                                         }
@@ -110,7 +111,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.add"),
                         value: "set",
                         onSelect: async ({ interaction }) => {
-                            const rankRoles = await getRankRoles(cmdArgs.guild);
+                            const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             const options: SelectOption[] = [];
 
                             options.push({
@@ -124,21 +125,21 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                 emoji: null
                             });
 
-                            rankRoles.forEach(rankRole => {
+                            await asyncForEach(rankRoles, async (rankRole) => {
+                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+
                                 options.push({
-                                    label: capitalise(rankRole.role.name),
-                                    value: rankRole.role.name,
+                                    label: capitalise(role.name),
+                                    value: role.name,
                                     onSelect: async ({ interaction }) => {
                                         const { value: image, message: msg } = await getImageReply({ sendTarget: interaction, author: cmdArgs.author });
                                         if (!image) return;
 
-                                        const rankLevel = rankRole.rank;
+                                        const rankLevel = rankRole;
 
                                         const userLevel = new UserLevel(cmdArgs.author.id);
 
                                         const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
-
-                                        serverUserSettings.animatedCard = false;
 
                                         serverUserSettings.cardCode = DEFAULT_CARD_CODE;
 
@@ -147,11 +148,10 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                             weeklyLeaderboardPosition: 0,
                                             currentRank: null,
                                             nextRank: null,
-                                            serverUserSettings,
-                                            userLevel,
+                                            serverUserSettings: serverUserSettings.toObject(),
+                                            userLevel: userLevel.levelData,
                                             member: cmdArgs.member,
-                                            wingsImageA: image.url,
-                                            wingsImageB: image.url
+                                            wingsImage: image.url
                                         };
 
                                         const { image: wingsImage, extension } = await drawCardWithWings(cardData);
@@ -177,10 +177,6 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                                 emoji: null
                                                             });
 
-                                                            const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-                                                            const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
-                                                            const index = ranks.findIndex(r => r.level === rankLevel.level);
-
                                                             if (!rankLevel.wings) rankLevel.wings = DEFAULT_WINGS_DATA;
 
                                                             Object.keys(rankLevel.wings).forEach(name => {
@@ -199,13 +195,11 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                                         await interaction.reply(Localisation.getTranslation("setrank.wings.download"));
                                                                         await downloadFile(image.url, filePath);
 
-                                                                        if (index >= 0) {
-                                                                            rankLevel.wings[name] = filePath;
-                                                                            ranks[index] = rankLevel;
-                                                                        }
+                                                                        rankLevel.wings[name] = filePath;
+                                                                        await rankLevel.save();
+
                                                                         await interaction.deleteReply();
                                                                         await interaction.followUp(Localisation.getTranslation("setrank.wings.add", capitalise(name)));
-                                                                        await Ranks.set(cmdArgs.guildId, ranks);
                                                                     },
                                                                     default: false,
                                                                     description: null,
@@ -252,7 +246,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.remove"),
                         value: "delete",
                         onSelect: async ({ interaction }) => {
-                            const rankRoles = await getRankRoles(cmdArgs.guild);
+                            const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             const options: SelectOption[] = [];
 
                             options.push({
@@ -266,14 +260,16 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                 emoji: null
                             });
 
-                            rankRoles.forEach(rankRole => {
+                            await asyncForEach(rankRoles, async (rankRole) => {
+                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+
                                 options.push({
-                                    label: capitalise(rankRole.role.name),
-                                    value: rankRole.role.name,
+                                    label: capitalise(role.name),
+                                    value: role.name,
                                     onSelect: async ({ interaction }) => {
                                         const options: SelectOption[] = [];
 
-                                        const rankLevel = rankRole.rank;
+                                        const rankLevel = rankRole;
                                         const wings = await this.getLevelWings(rankLevel.level, cmdArgs.guildId);
                                         if (wings === DEFAULT_WINGS_DATA) {
                                             return interaction.followUp(Localisation.getTranslation("error.empty.wings"));
@@ -296,17 +292,11 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                     label: capitalise(wing),
                                                     value: wing,
                                                     onSelect: async ({ interaction }) => {
-                                                        const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-                                                        const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
-                                                        const index = ranks.findIndex(r => r.level === rankLevel.level);
-                                                        if (index >= 0) {
-                                                            if (existsSync(rankLevel.wings[wing]))
-                                                                unlinkSync(rankLevel.wings[wing]);
-                                                            rankLevel.wings[wing] = "";
-                                                            ranks[index] = rankLevel;
-                                                        }
+                                                        if (existsSync(rankLevel.wings[wing]))
+                                                            unlinkSync(rankLevel.wings[wing]);
+                                                        rankLevel.wings[wing] = "";
+                                                        await rankLevel.save();
                                                         await interaction.reply(Localisation.getTranslation("setrank.wings.remove", capitalise(wing)));
-                                                        await Ranks.set(cmdArgs.guildId, ranks);
                                                     },
                                                     default: false,
                                                     description: null,
@@ -333,53 +323,6 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                     options
                                 }
                             });
-
-                            /*const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.message, author: cmdArgs.author, options: Localisation.getTranslation("argument.reply.level") });
-                            if (level === undefined || level < 0) return;
-                            const wings = await this.getLevelWings(level, cmdArgs.guildId);
-                            if (wings === DEFAULT_WINGS_DATA) {
-                                return interaction.followUp(Localisation.getTranslation("error.empty.wings"));
-                            }
-                            const rankLevel = await getRank(level, cmdArgs.guildId);
-
-                            const options: SelectOption[] = [];
-
-                            options.push({
-                                label: Localisation.getTranslation("button.cancel"),
-                                value: "-1",
-                                onSelect: async ({ interaction }) => {
-                                    interaction.deferUpdate();
-                                }
-                            });
-
-                            Object.keys(wings).forEach(wing => {
-                                if (wings[wing] !== "") {
-                                    options.push({
-                                        label: capitalise(wing),
-                                        value: wing,
-                                        onSelect: async ({ interaction }) => {
-                                            const Ranks = BotUser.getDatabase(DatabaseType.Ranks);
-                                            const ranks: RankLevel[] = await getServerDatabase(Ranks, cmdArgs.guildId);
-                                            const index = ranks.findIndex(r => r.level === rankLevel.level);
-                                            if (index >= 0) {
-                                                if (existsSync(rankLevel.wings[wing]))
-                                                    unlinkSync(rankLevel.wings[wing]);
-                                                rankLevel.wings[wing] = "";
-                                                ranks[index] = rankLevel;
-                                            }
-                                            await interaction.reply(Localisation.getTranslation("setrank.wings.remove", capitalise(wing)));
-                                            await Ranks.set(cmdArgs.guildId, ranks);
-                                        }
-                                    });
-                                }
-                            });
-
-                            createMessageSelection({
-                                sendTarget: message, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                {
-                                    options
-                                }
-                            });*/
                         },
                         default: false,
                         description: null,

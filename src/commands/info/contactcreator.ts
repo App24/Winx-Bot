@@ -10,13 +10,6 @@ class ContactCreatorCommand extends Command {
 
         this.baseCommand = new ContactCreatorBaseCommand();
     }
-
-    /*public async onRun(cmdArgs: CommandArguments) {
-        const messageContent = cmdArgs.args.join(" ");
-        const owner = await getUserById(process.env.OWNER_ID);
-        (await owner.createDM()).send(`${cmdArgs.author}: ${messageContent}`);
-        cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
-    }*/
 }
 
 export = ContactCreatorCommand;

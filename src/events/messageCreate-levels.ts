@@ -1,10 +1,9 @@
 import { BaseGuildTextChannel, Collection } from "discord.js";
 import { BotUser } from "../BotClient";
 import { PREFIX } from "../Constants";
-import { DatabaseType } from "../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerData } from "../structs/databaseTypes/ServerInfo";
-import { getServerDatabase, isDM } from "../utils/Utils";
+import { getOneDatabase, isDM } from "../utils/Utils";
 import { addXP } from "../utils/XPUtils";
+import { ServerData } from "../structs/databaseTypes/ServerData";
 
 const levelCooldowns = new Collection<string, Collection<string, number>>();
 
@@ -23,8 +22,7 @@ class XpCap {
 export = () => {
     BotUser.on("messageCreate", async (message) => {
         if (message.content.toLowerCase().startsWith(PREFIX) || message.author.bot || isDM(message.channel)) return;
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, message.guild.id, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: message.guildId }, () => new ServerData({ guildId: message.guildId }));
         if (message.content.length < serverInfo.minMessageLength) return;
         const excluded = serverInfo.excludeChannels;
         if (excluded && excluded.find(c => c === message.channel.id)) return;

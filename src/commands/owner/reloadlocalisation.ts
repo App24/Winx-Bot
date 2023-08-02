@@ -12,11 +12,6 @@ class ReloadLocalisationCommand extends Command {
 
         this.baseCommand = new ReloadLocalisationBaseCommand();
     }
-
-    // public onRun(cmdArgs: CommandArguments) {
-    //     BotUser.loadLocalisation();
-    //     cmdArgs.message.reply(Localisation.getTranslation("reloadlocalisation.reload"));
-    // }
 }
 
 export = ReloadLocalisationCommand;

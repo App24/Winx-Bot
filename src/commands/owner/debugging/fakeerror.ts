@@ -11,10 +11,6 @@ class FakeErrorCommand extends Command {
 
         this.baseCommand = new FakeErrorBaseCommand();
     }
-
-    // public async onRun(cmdArgs: CommandArguments) {
-    //     reportError("Test", cmdArgs.message);
-    // }
 }
 
 export = FakeErrorCommand;

@@ -11,17 +11,6 @@ class SetPFPCommand extends Command {
 
         this.baseCommand = new SetPfpBaseCommand();
     }
-
-    // public async onRun(cmdArgs: CommandArguments) {
-    //     const image = cmdArgs.message.attachments.first();
-    //     if (!image) return cmdArgs.message.reply("Please upload an image as well!");
-
-    //     if (!image.name.toLowerCase().endsWith(".png")) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.image"));
-
-    //     BotUser.user.setAvatar(image.url);
-
-    //     cmdArgs.message.reply("Updated pfp!");
-    // }
 }
 
 export = SetPFPCommand;

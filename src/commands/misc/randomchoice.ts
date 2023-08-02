@@ -8,10 +8,6 @@ class RandomChoiceCommand extends Command {
 
         this.baseCommand = new RandomChoiceBaseCommand();
     }
-
-    // public onRun(cmdArgs: CommandArguments) {
-    //     cmdArgs.message.reply(cmdArgs.args[Math.floor(cmdArgs.args.length * Math.random())]);
-    // }
 }
 
 export = RandomChoiceCommand;

@@ -14,18 +14,6 @@ class RolesCommand extends Command {
 
         this.baseCommand = new RolesBaseCommand();
     }
-
-    // public async onRun(cmdArgs: CommandArguments) {
-    //     const data = [];
-    //     cmdArgs.guild.roles.cache.forEach(role => {
-    //         data.push(`${role}: ${role.id}`);
-    //     });
-
-    //     const embed = new EmbedBuilder();
-    //     embed.setColor((await getBotRoleColor(cmdArgs.guild)));
-    //     embed.setDescription(data.join("\n"));
-    //     cmdArgs.message.reply({ embeds: [embed] });
-    // }
 }
 
 export = RolesCommand;

@@ -1,114 +1,64 @@
-import { Guild } from "discord.js";
-import { BotUser } from "../../BotClient";
-import { Keyv } from "../../keyv/keyv-index";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { WinxCharacter } from "../../structs/WinxCharacters";
 import { capitalise } from "../../utils/FormatUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { getServerDatabase } from "../../utils/Utils";
+import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { Document, Types } from "mongoose";
 
 export class WinxCharacterBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerUserSettingsDatabase = BotUser.getDatabase(DatabaseType.ServerUserSettings);
-        const serverUserSettings: ServerUserSettings[] = await getServerDatabase(ServerUserSettingsDatabase, cmdArgs.guildId);
-
-        let userIndex = serverUserSettings.findIndex(u => u.userId === cmdArgs.author.id);
-        if (userIndex < 0) {
-            serverUserSettings.push(new ServerUserSettings(cmdArgs.author.id));
-            userIndex = serverUserSettings.length - 1;
-        }
-        const userSettings = serverUserSettings[userIndex];
-
-        if (!userSettings.winxCharacter) userSettings.winxCharacter = WinxCharacter.None;
-        if (!userSettings.winxCharacterB) userSettings.winxCharacterB = WinxCharacter.None;
-
-
+        const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
             {
-                options:
-                    [
-                        {
-                            label: "Winx Character for Primary Wings",
-                            value: "wings_a",
-                            onSelect: async ({ interaction }) => {
-                                createMessageSelection({
-                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                    {
-                                        options: await this.updateWings("WINGS_A", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
-                                    }
-                                });
-                            },
-                            default: false,
-                            description: null,
-                            emoji: null
-                        },
-                        {
-                            label: "Winx Character for Secondary Wings",
-                            value: "wings_b",
-                            onSelect: async ({ interaction }) => {
-                                createMessageSelection({
-                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                    {
-                                        options: await this.updateWings("WINGS_B", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
-                                    }
-                                });
-                            },
-                            default: false,
-                            description: null,
-                            emoji: null
-                        },
-                        {
-                            label: "Both Wings",
-                            value: "both",
-                            onSelect: async ({ interaction }) => {
-                                createMessageSelection({
-                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
-                                    {
-                                        options: await this.updateWings("BOTH", ServerUserSettingsDatabase, serverUserSettings, userSettings, userIndex, cmdArgs.guild)
-                                    }
-                                });
-                            },
-                            default: false,
-                            description: null,
-                            emoji: null
-                        }
-                    ]
+                options: await this.updateWings(userSettings)
             }
         });
     }
 
-    async updateWings(setType: "WINGS_A" | "WINGS_B" | "BOTH", ServerUserSettingsDatabase: Keyv, serverUserSettings: ServerUserSettings[], userSettings: ServerUserSettings, userIndex: number, guild: Guild) {
+    async updateWings(userSettings: Document<unknown, Record<string, unknown>, {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        wingsLevel: number;
+        levelPing: boolean;
+        winxCharacter: number;
+        cardCode: string;
+        cardSlots: Types.DocumentArray<{
+            name?: string;
+            code?: string;
+            customWings?: string;
+        }>;
+        userId?: string;
+    }> & {
+        createdAt: NativeDate;
+        updatedAt: NativeDate;
+    } & {
+        guildId: string;
+        wingsLevel: number;
+        levelPing: boolean;
+        winxCharacter: number;
+        cardCode: string;
+        cardSlots: Types.DocumentArray<{
+            name?: string;
+            code?: string;
+            customWings?: string;
+        }>;
+        userId?: string;
+    }) {
         const options: SelectOption[] = [];
 
         const setWinxCharacter = async (character: WinxCharacter) => {
-            if (setType === "WINGS_A" || setType === "BOTH") {
-                userSettings.winxCharacter = character;
-            }
-            if (setType === "WINGS_B" || setType === "BOTH") {
-                userSettings.winxCharacterB = character;
-            }
-            serverUserSettings[userIndex] = userSettings;
-            await ServerUserSettingsDatabase.set(guild.id, serverUserSettings);
+            userSettings.winxCharacter = character;
+            await userSettings.save();
         };
 
         const isDefault = (character: string) => {
-            if (setType === "WINGS_A") {
-                return WinxCharacter[userSettings.winxCharacter] === character;
-            } else if (setType === "WINGS_B") {
-                return WinxCharacter[userSettings.winxCharacterB] === character;
-            }
-
-            const wingsA = userSettings.winxCharacter;
-            const wingsB = userSettings.winxCharacterB;
-
-            if (WinxCharacter[wingsA] === character)
-                return wingsA === wingsB;
-            return false;
+            return WinxCharacter[userSettings.winxCharacter] === character;
         };
 
         Object.keys(WinxCharacter).forEach((character) => {

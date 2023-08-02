@@ -12,18 +12,6 @@ class MessageUserCommand extends Command {
 
         this.baseCommand = new MessageUserBaseCommand();
     }
-
-    // public async onRun(cmdArgs: CommandArguments) {
-    //     const user = await getUserFromMention(cmdArgs.args.shift());
-    //     if (!user) return cmdArgs.message.reply(Localisation.getTranslation("error.invalid.user"));
-    //     const msg = cmdArgs.args.join(" ");
-    //     user.createDM().then(channel => {
-    //         channel.send(msg);
-    //         cmdArgs.message.reply(Localisation.getTranslation("generic.sent"));
-    //     }).catch(() => {
-    //         cmdArgs.message.reply(Localisation.getTranslation("error.unable.dm"));
-    //     });
-    // }
 }
 
 export = MessageUserCommand;

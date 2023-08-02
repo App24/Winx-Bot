@@ -1,18 +1,14 @@
 import { ButtonStyle, TextInputStyle } from "discord.js";
-import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { DEFAULT_SERVER_INFO, ServerData } from "../../structs/databaseTypes/ServerInfo";
 import { createWhatToDoButtons } from "../../utils/MessageButtonUtils";
-import { getNumberReply } from "../../utils/ReplyUtils";
-import { getServerDatabase } from "../../utils/Utils";
+import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { createInteractionModal } from "../../utils/InteractionModalUtils";
+import { ServerData } from "../../structs/databaseTypes/ServerData";
 
 export class MessageMaxBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
-        const ServerInfo = BotUser.getDatabase(DatabaseType.ServerInfo);
-        const serverInfo: ServerData = await getServerDatabase(ServerInfo, cmdArgs.guildId, DEFAULT_SERVER_INFO);
+        const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
         await createWhatToDoButtons({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1, time: 1000 * 60 * 6 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
@@ -29,19 +25,14 @@ export class MessageMaxBaseCommand extends BaseCommand {
                                 }
 
                                 serverInfo.maxMessagePerMinute = xp;
-                                await ServerInfo.set(cmdArgs.guildId, serverInfo);
+                                await serverInfo.save();
                                 await submission.reply(Localisation.getTranslation("setmaxmessage.set", serverInfo.maxMessagePerMinute));
                             },
-                            filter: ({ interaction, data }) => {
+                            filter: ({ data }) => {
                                 const xp = parseInt(data.information.xp);
                                 return !isNaN(xp);
                             }
                         });
-                        /*const { value: amount, message: msg } = await getNumberReply({ sendTarget: interaction, author: cmdArgs.author }, { min: 1 });
-                        if (!amount) return;
-                        serverInfo.maxMessagePerMinute = amount;
-                        await ServerInfo.set(cmdArgs.guildId, serverInfo);
-                        return msg.reply(Localisation.getTranslation("setmaxmessage.set", serverInfo.maxMessagePerMinute));*/
                     }
                 },
                 {

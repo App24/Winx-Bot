@@ -4,7 +4,7 @@ import { Localisation } from "../localisation";
 import { CommandAvailable } from "../structs/CommandAvailable";
 import { CommandAccess } from "../structs/CommandAccess";
 import { SlashCommandArguments } from "../structs/SlashCommand";
-import { isBooster, isDM, isModerator, isPatreon, reportError } from "../utils/Utils";
+import { isBooster, isDM, isModerator, isPatreon, reportBotError } from "../utils/Utils";
 import { secondsToTime } from "../utils/FormatUtils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
@@ -104,7 +104,7 @@ export = () => {
             const cmdArgs = new SlashCommandArguments(interaction, args);
             await command.onRun(cmdArgs);
         } catch (error) {
-            await reportError(error.stack, interaction);
+            await reportBotError(error.stack, interaction);
         }
     });
 }

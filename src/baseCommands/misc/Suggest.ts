@@ -1,12 +1,11 @@
 import { BaseGuildTextChannel, EmbedBuilder, TextChannel, ButtonStyle } from "discord.js";
 import { BotUser } from "../../BotClient";
 import { Localisation } from "../../localisation";
-import { DatabaseType } from "../../structs/DatabaseTypes";
-import { SuggestionStruct, SuggestionState } from "../../structs/databaseTypes/SuggestionStruct";
 import { getTextChannelById, getGuildById, getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { isDM, genRanHex } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { SuggestionData, SuggestionState } from "../../structs/databaseTypes/SuggestionStruct";
 
 export class SuggestBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -27,6 +26,14 @@ export class SuggestBaseCommand extends BaseCommand {
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));
         cmdArgs.reply("generic.sent");
 
+        let hex: string;
+        do {
+            hex = genRanHex(16);
+        } while ((await SuggestionData.count({ key: hex })) > 0);
+        const suggestion = new SuggestionData({ key: hex, userId: user.id, request });
+
+        await suggestion.save();
+
         await createMessageButtons({
             sendTarget: <TextChannel>channel, author: process.env.OWNER_ID, options: { embeds: [embed] }, settings: { max: 1, time: -1 }, buttons: [
                 {
@@ -34,20 +41,10 @@ export class SuggestBaseCommand extends BaseCommand {
                         const embed = EmbedBuilder.from(message.embeds[0]);
                         embed.setTitle(Localisation.getTranslation("generic.accepted"));
                         interaction.update({ embeds: [embed], components: [] });
-                        const Suggestions = BotUser.getDatabase(DatabaseType.Suggestions);
-                        let hex = genRanHex(16);
-                        let suggestions = await Suggestions.get(hex);
-                        while (suggestions) {
-                            hex = genRanHex(16);
-                            suggestions = await Suggestions.get(hex);
-                        }
-                        const suggestion = new SuggestionStruct();
 
-                        suggestion.userId = user.id;
-                        suggestion.request = request;
-                        suggestion.state = SuggestionState.Non;
+                        suggestion.state = SuggestionState.Accepted;
 
-                        await Suggestions.set(hex, suggestion);
+                        await suggestion.save();
                     }
                 },
                 {
@@ -55,6 +52,10 @@ export class SuggestBaseCommand extends BaseCommand {
                         const embed = EmbedBuilder.from(message.embeds[0]);
                         embed.setTitle(Localisation.getTranslation("generic.rejected"));
                         interaction.update({ embeds: [embed], components: [] });
+
+                        suggestion.state = SuggestionState.Rejected;
+
+                        await suggestion.save();
                     }
                 }
             ]
