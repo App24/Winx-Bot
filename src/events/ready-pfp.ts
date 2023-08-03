@@ -1,5 +1,6 @@
 import { existsSync } from "fs";
 import { BotUser } from "../BotClient";
+import { reportBotError } from "../utils/Utils";
 
 const pfps: { startDate: Date, endDate: Date, path: string }[] = [
     {
@@ -117,29 +118,33 @@ export = () => {
 };
 
 async function updatePfp() {
-    const currentDay = new Date();
-    currentDay.setFullYear(2);
+    try {
+        const currentDay = new Date();
+        currentDay.setFullYear(2);
 
-    const pfp = getPfp(currentDay);
+        const pfp = getPfp(currentDay);
 
-    const previousDay = new Date(Date.now() - 86400000);
-    previousDay.setFullYear(2);
+        const previousDay = new Date(Date.now() - 86400000);
+        previousDay.setFullYear(2);
 
-    const previousPfp = getPfp(previousDay);
+        const previousPfp = getPfp(previousDay);
 
-    if (pfp === previousPfp) return;
+        if (pfp === previousPfp) return;
 
-    if (!pfp) {
-        BotUser.user.setAvatar("./pfps/default_uk.png");
-        return;
+        if (!pfp) {
+            BotUser.user.setAvatar("./pfps/default_uk.png");
+            return;
+        }
+
+        if (!existsSync(`./pfps/${pfp.path}.png`)) {
+            console.error(`Couldnt find pfp '${pfp.path}'`);
+            return;
+        }
+
+        BotUser.user.setAvatar(`./pfps/${pfp.path}.png`);
+    } catch (error) {
+        reportBotError(error);
     }
-
-    if (!existsSync(`./pfps/${pfp.path}.png`)) {
-        console.error(`Couldnt find pfp '${pfp.path}'`);
-        return;
-    }
-
-    BotUser.user.setAvatar(`./pfps/${pfp.path}.png`);
 }
 
 function getPfp(date: Date) {

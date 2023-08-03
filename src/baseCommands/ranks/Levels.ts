@@ -37,18 +37,18 @@ export class LevelsBaseCommand extends BaseCommand {
 
         const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": user.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: user.id } }));
 
-        const currentRank = await getCurrentRank(userLevel.levelData.level, cmdArgs.guildId);
-        const nextRank = await getNextRank(userLevel.levelData.level, cmdArgs.guildId);
+        const currentRank = await getCurrentRank(userLevel.document.levelData.level, cmdArgs.guildId);
+        const nextRank = await getNextRank(userLevel.document.levelData.level, cmdArgs.guildId);
 
         const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 
         const cardData: CardData = {
             leaderboardPosition,
             weeklyLeaderboardPosition: weekleaderboardPosition,
-            currentRank: currentRank ? currentRank.toObject() : null,
-            nextRank: nextRank ? nextRank.toObject() : null,
-            serverUserSettings: serverUserSettings.toObject(),
-            userLevel: userLevel.levelData,
+            currentRank,
+            nextRank,
+            serverUserSettings,
+            userLevel: userLevel.document.levelData,
             member
         };
 
@@ -96,18 +96,18 @@ export class GreenScreenLevelsBaseCommand extends BaseCommand {
 
         const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": user.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: user.id } }));
 
-        const currentRank = await getCurrentRank(userLevel.levelData.level, cmdArgs.guildId);
-        const nextRank = await getNextRank(userLevel.levelData.level, cmdArgs.guildId);
+        const currentRank = await getCurrentRank(userLevel.document.levelData.level, cmdArgs.guildId);
+        const nextRank = await getNextRank(userLevel.document.levelData.level, cmdArgs.guildId);
 
         const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 
         const cardData: CardData = {
             leaderboardPosition,
             weeklyLeaderboardPosition: weekleaderboardPosition,
-            currentRank: currentRank ? currentRank.toObject() : null,
-            nextRank: currentRank ? nextRank.toObject() : null,
-            serverUserSettings: serverUserSettings.toObject(),
-            userLevel: userLevel.levelData,
+            currentRank,
+            nextRank,
+            serverUserSettings,
+            userLevel: userLevel.document.levelData,
             member
         };
 

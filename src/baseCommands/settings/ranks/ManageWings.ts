@@ -14,6 +14,7 @@ import { getImageReply } from "../../../utils/ReplyUtils";
 import { canvasToMessageAttachment, downloadFile, asyncForEach, getDatabase } from "../../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../../BaseCommand";
 import { getRoleById } from "../../../utils/GetterUtils";
+import { ModelWrapper } from "../../../structs/ModelWrapper";
 
 export class ManageWingsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -43,13 +44,13 @@ export class ManageWingsBaseCommand extends BaseCommand {
                             });
 
                             await asyncForEach(rankRoles, async (rankRole) => {
-                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+                                const role = await getRoleById(rankRole.document.roleId, cmdArgs.guild);
 
                                 options.push({
                                     label: capitalise(role.name),
                                     value: role.name,
                                     onSelect: async ({ interaction }) => {
-                                        const wings = await this.getLevelWings(rankRole.level, cmdArgs.guildId);
+                                        const wings = await this.getLevelWings(rankRole.document.level, cmdArgs.guildId);
                                         if (wings === DEFAULT_WINGS_DATA) {
                                             return interaction.followUp(Localisation.getTranslation("error.empty.wings"));
                                         }
@@ -126,7 +127,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                             });
 
                             await asyncForEach(rankRoles, async (rankRole) => {
-                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+                                const role = await getRoleById(rankRole.document.roleId, cmdArgs.guild);
 
                                 options.push({
                                     label: capitalise(role.name),
@@ -141,14 +142,14 @@ export class ManageWingsBaseCommand extends BaseCommand {
 
                                         const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
 
-                                        serverUserSettings.cardCode = DEFAULT_CARD_CODE;
+                                        serverUserSettings.document.cardCode = DEFAULT_CARD_CODE;
 
                                         const cardData: CardData = {
                                             leaderboardPosition: 0,
                                             weeklyLeaderboardPosition: 0,
-                                            currentRank: null,
-                                            nextRank: null,
-                                            serverUserSettings: serverUserSettings.toObject(),
+                                            currentRank: new ModelWrapper(null),
+                                            nextRank: new ModelWrapper(null),
+                                            serverUserSettings,
                                             userLevel: userLevel.levelData,
                                             member: cmdArgs.member,
                                             wingsImage: image.url
@@ -177,25 +178,25 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                                 emoji: null
                                                             });
 
-                                                            if (!rankLevel.wings) rankLevel.wings = DEFAULT_WINGS_DATA;
+                                                            if (!rankLevel.document.wings) rankLevel.document.wings = DEFAULT_WINGS_DATA;
 
-                                                            Object.keys(rankLevel.wings).forEach(name => {
+                                                            Object.keys(rankLevel.document.wings).forEach(name => {
                                                                 options.push({
                                                                     label: capitalise(name),
                                                                     value: name,
                                                                     onSelect: async ({ interaction }) => {
-                                                                        const dir = `${WINGS_FOLDER}/${cmdArgs.guildId}/${rankLevel.level}`;
+                                                                        const dir = `${WINGS_FOLDER}/${cmdArgs.guildId}/${rankLevel.document.level}`;
                                                                         const filePath = `${dir}/${name}_${image.name}`;
                                                                         if (!existsSync(dir)) {
                                                                             mkdirSync(dir, { recursive: true });
                                                                         }
-                                                                        if (existsSync(rankLevel.wings[name])) {
-                                                                            unlinkSync(rankLevel.wings[name]);
+                                                                        if (existsSync(rankLevel.document.wings[name])) {
+                                                                            unlinkSync(rankLevel.document.wings[name]);
                                                                         }
                                                                         await interaction.reply(Localisation.getTranslation("setrank.wings.download"));
                                                                         await downloadFile(image.url, filePath);
 
-                                                                        rankLevel.wings[name] = filePath;
+                                                                        rankLevel.document.wings[name] = filePath;
                                                                         await rankLevel.save();
 
                                                                         await interaction.deleteReply();
@@ -261,7 +262,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                             });
 
                             await asyncForEach(rankRoles, async (rankRole) => {
-                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+                                const role = await getRoleById(rankRole.document.roleId, cmdArgs.guild);
 
                                 options.push({
                                     label: capitalise(role.name),
@@ -270,7 +271,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                         const options: SelectOption[] = [];
 
                                         const rankLevel = rankRole;
-                                        const wings = await this.getLevelWings(rankLevel.level, cmdArgs.guildId);
+                                        const wings = await this.getLevelWings(rankLevel.document.level, cmdArgs.guildId);
                                         if (wings === DEFAULT_WINGS_DATA) {
                                             return interaction.followUp(Localisation.getTranslation("error.empty.wings"));
                                         }
@@ -292,9 +293,9 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                     label: capitalise(wing),
                                                     value: wing,
                                                     onSelect: async ({ interaction }) => {
-                                                        if (existsSync(rankLevel.wings[wing]))
-                                                            unlinkSync(rankLevel.wings[wing]);
-                                                        rankLevel.wings[wing] = "";
+                                                        if (existsSync(rankLevel.document.wings[wing]))
+                                                            unlinkSync(rankLevel.document.wings[wing]);
+                                                        rankLevel.document.wings[wing] = "";
                                                         await rankLevel.save();
                                                         await interaction.reply(Localisation.getTranslation("setrank.wings.remove", capitalise(wing)));
                                                     },
@@ -335,8 +336,8 @@ export class ManageWingsBaseCommand extends BaseCommand {
 
     async getLevelWings(level: number, guildId: string) {
         const rank = await getRank(level, guildId);
-        if (!rank || !rank.wings)
+        if (rank.isNull() || !rank.document.wings)
             return DEFAULT_WINGS_DATA;
-        return rank.wings;
+        return rank.document.wings;
     }
 }

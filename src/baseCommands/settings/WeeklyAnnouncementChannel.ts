@@ -16,10 +16,10 @@ export class WeeklyAnnouncementChannelBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.get"),
                         value: "get",
                         async onSelect({ interaction }) {
-                            if (!serverInfo.weeklyLeaderboardAnnouncementChannel) {
+                            if (!serverInfo.document.weeklyLeaderboardAnnouncementChannel) {
                                 return interaction.reply("No Weekly Top Announcement Channel Set");
                             }
-                            return interaction.reply(`<#${serverInfo.weeklyLeaderboardAnnouncementChannel}>`);
+                            return interaction.reply(`<#${serverInfo.document.weeklyLeaderboardAnnouncementChannel}>`);
                         },
                         default: false,
                         description: null,
@@ -32,7 +32,7 @@ export class WeeklyAnnouncementChannelBaseCommand extends BaseCommand {
                             const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!channel) return;
 
-                            serverInfo.weeklyLeaderboardAnnouncementChannel = channel.id;
+                            serverInfo.document.weeklyLeaderboardAnnouncementChannel = channel.id;
 
                             await serverInfo.save();
 
@@ -46,7 +46,7 @@ export class WeeklyAnnouncementChannelBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.clear"),
                         value: "clear",
                         async onSelect({ interaction }) {
-                            serverInfo.weeklyLeaderboardAnnouncementChannel = "";
+                            serverInfo.document.weeklyLeaderboardAnnouncementChannel = "";
 
                             await serverInfo.save();
 

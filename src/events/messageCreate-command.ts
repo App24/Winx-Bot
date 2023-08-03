@@ -26,8 +26,8 @@ export = () => {
         if (!command) {
             if (isDM(message.channel)) return;
             const customCommand = await getOneDatabase(CustomCommand, { guildId: message.guildId, name: commandName });
-            if (!customCommand) return;
-            switch (customCommand.access) {
+            if (customCommand.isNull()) return;
+            switch (customCommand.document.access) {
                 case CommandAccess.Patreon: {
                     if (isDM(message.channel) || !(await isPatreon(message.author.id, message.guild.id))) {
                         return message.reply(Localisation.getTranslation("command.access.patreon"));
@@ -60,7 +60,7 @@ export = () => {
                 } break;
             }
 
-            const outputs = customCommand.outputs;
+            const outputs = customCommand.document.outputs;
             const randomMsg = outputs[Math.floor(outputs.length * Math.random())];
             let msgToReply = message;
             if (message.reference) {

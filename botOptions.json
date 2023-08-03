@@ -11,6 +11,14 @@
         {
             "name": "resetweeklyleaderboard",
             "enabled": false
+        },
+        {
+            "name": "checklevels",
+            "enabled": false
+        },
+        {
+            "name": "checklblevels",
+            "enabled": false
         }
     ]
 }

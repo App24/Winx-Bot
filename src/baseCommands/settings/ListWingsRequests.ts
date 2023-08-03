@@ -11,14 +11,14 @@ export class ListWingsRequestsBaseCommand extends BaseCommand {
 
         const wingsRequests = await getDatabase(WingsRequest, { guildId: cmdArgs.guildId });
 
-        if (!serverInfo.wingsRequestChannel) {
+        if (!serverInfo.document.wingsRequestChannel) {
             return cmdArgs.reply("There is no set wings request channel!");
         }
 
-        const channel = await getTextChannelById(serverInfo.wingsRequestChannel, cmdArgs.guild);
+        const channel = await getTextChannelById(serverInfo.document.wingsRequestChannel, cmdArgs.guild);
 
         await asyncForEach(wingsRequests, async (wingsRequest) => {
-            createWingsRequest(wingsRequest.toObject(), cmdArgs.guild, channel);
+            createWingsRequest(wingsRequest, cmdArgs.guild, channel);
         });
 
         cmdArgs.reply("generic.done");

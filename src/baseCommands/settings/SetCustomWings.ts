@@ -12,6 +12,7 @@ import { getServerUserSettings } from "../../utils/RankUtils";
 import { getMemberReply, getImageReply } from "../../utils/ReplyUtils";
 import { canvasToMessageAttachment, downloadFile, getOneDatabase, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { ModelWrapper } from "../../structs/ModelWrapper";
 
 export class SetCustomWingsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -30,8 +31,8 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                                 return interaction.followUp(Localisation.getTranslation("error.customwings.user.none"));
                             }
 
-                            if (existsSync(userWings.wingsFile)) {
-                                await interaction.followUp({ files: [userWings.wingsFile] });
+                            if (existsSync(userWings.document.wingsFile)) {
+                                await interaction.followUp({ files: [userWings.document.wingsFile] });
                             } else {
                                 return interaction.followUp(Localisation.getTranslation("error.customwings.user.none"));
                             }
@@ -65,18 +66,18 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                             // customWings[wingsIndex] = userWings;
                             // await CustomWingsDatabase.set(cmdArgs.guildId, customWings);
 
-                            const { cl_customWings } = decodeCode(serverUserSettings.cardCode);
+                            const { cl_customWings } = decodeCode(serverUserSettings.document.cardCode);
 
                             if (!cl_customWings) {
-                                serverUserSettings.cardCode += "|customWings_positionX=300|customWings_positionY=600|customWings_scaleX=1|customWings_scaleY=1|cl_customWings=1";
+                                serverUserSettings.document.cardCode += "|customWings_positionX=300|customWings_positionY=600|customWings_scaleX=1|customWings_scaleY=1|cl_customWings=1";
                             }
 
                             const cardData: CardData = {
                                 leaderboardPosition: 0,
                                 weeklyLeaderboardPosition: 0,
-                                currentRank: null,
-                                nextRank: null,
-                                serverUserSettings: serverUserSettings.toObject(),
+                                currentRank: new ModelWrapper(null),
+                                nextRank: new ModelWrapper(null),
+                                serverUserSettings,
                                 userLevel: userLevel.levelData,
                                 member: user,
                                 customWings: image.url
@@ -98,13 +99,13 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                                                     mkdirSync(dir, { recursive: true });
                                                 }
 
-                                                if (existsSync(userWings.wingsFile)) {
-                                                    unlinkSync(userWings.wingsFile);
+                                                if (existsSync(userWings.document.wingsFile)) {
+                                                    unlinkSync(userWings.document.wingsFile);
                                                 }
 
                                                 await downloadFile(image.url, filePath);
 
-                                                userWings.wingsFile = filePath;
+                                                userWings.document.wingsFile = filePath;
                                                 await userWings.save();
                                                 await interaction.deleteReply();
                                                 await interaction.followUp(Localisation.getTranslation("customwings.wings.add", `<@${user.id}>`));
@@ -137,8 +138,8 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                                 return interaction.followUp(Localisation.getTranslation("error.customwings.user.none"));
                             }
 
-                            if (existsSync(userWings.wingsFile)) {
-                                unlinkSync(userWings.wingsFile);
+                            if (existsSync(userWings.document.wingsFile)) {
+                                unlinkSync(userWings.document.wingsFile);
                             }
 
                             await CustomWings.deleteOne({ guildId: cmdArgs.guildId, userId: user.id });
@@ -160,7 +161,7 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                             }
 
                             const embed = new EmbedBuilder();
-                            embed.setDescription(customWings.map(w => `<@${w.userId}>`).join("\n"));
+                            embed.setDescription(customWings.map(wing => `<@${wing.document.userId}>`).join("\n"));
                             embed.setColor(await getBotRoleColor(cmdArgs.guild));
 
                             return interaction.reply({ embeds: [embed] });

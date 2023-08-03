@@ -6,10 +6,11 @@ export class CheckBansBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
         if (!levels.length) return cmdArgs.reply("error.empty.levels");
+        await cmdArgs.localisedReply("Checking");
         const bans = await cmdArgs.guild.bans.fetch();
         let amount = 0;
         bans.forEach(ban => {
-            const index = levels.findIndex(u => u.levelData.userId === ban.user.id);
+            const index = levels.findIndex(u => u.document.levelData.userId === ban.user.id);
             if (index > -1) {
                 levels.splice(index, 1);
                 amount++;

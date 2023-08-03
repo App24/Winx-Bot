@@ -11,7 +11,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const cmdName = cmdArgs.args[0].toLowerCase();
         const customCommand = await getOneDatabase(CustomCommand, { guildId: cmdArgs.guild, name: cmdName });
-        if (!customCommand) return cmdArgs.reply("customcommand.error.command.not.exist");
+        if (customCommand.isNull()) return cmdArgs.reply("customcommand.error.command.not.exist");
 
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, selectMenuOptions: {
@@ -23,12 +23,12 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                         description: null,
                         default: false,
                         async onSelect({ interaction }) {
-                            await interaction.reply(`Current Description: "${customCommand.description}"`);
+                            await interaction.reply(`Current Description: "${customCommand.document.description}"`);
 
                             const { value: newDescription, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "Enter new description" });
                             if (!newDescription) return;
 
-                            customCommand.description = newDescription;
+                            customCommand.document.description = newDescription;
 
                             await customCommand.save();
                             message.reply(Localisation.getTranslation("customcommand.success.edit"));
@@ -43,7 +43,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                         async onSelect({ interaction }) {
                             const accessStrings = ["", "Everyone", "Patron", "Booster", "Moderators", "Server Owner", "Bot Owner", "Patron or Booster"];
 
-                            await interaction.reply(`Current Access Level: ${accessStrings[customCommand.access ?? 1]}`);
+                            await interaction.reply(`Current Access Level: ${accessStrings[customCommand.document.access ?? 1]}`);
 
                             const options: SelectOption[] = [];
 
@@ -53,10 +53,10 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                                 options.push({
                                     value: accessStrings[intIndex],
                                     label: capitalise(accessStrings[intIndex]),
-                                    default: intIndex === customCommand.access,
+                                    default: intIndex === customCommand.document.access,
                                     onSelect: async ({ interaction }) => {
 
-                                        customCommand.access = intIndex;
+                                        customCommand.document.access = intIndex;
 
                                         await customCommand.save();
 
@@ -94,7 +94,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                         async onSelect({ interaction }) {
                             const options: SelectOption[] = [];
 
-                            customCommand.outputs.forEach((output, i) => {
+                            customCommand.document.outputs.forEach((output, i) => {
                                 options.push({
                                     label: output.substring(0, Math.min(output.length, 100)),
                                     value: `output_${i}`,
@@ -117,7 +117,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                                                             const { value: newOutput, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "Enter new output" });
                                                             if (!newOutput) return;
 
-                                                            customCommand.outputs[i] = newOutput;
+                                                            customCommand.document.outputs[i] = newOutput;
 
                                                             await customCommand.save();
                                                             message.reply(Localisation.getTranslation("customcommand.success.edit"));
@@ -130,7 +130,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                                                         description: null,
                                                         emoji: null,
                                                         async onSelect({ interaction }) {
-                                                            customCommand.outputs.splice(i, 1);
+                                                            customCommand.document.outputs.splice(i, 1);
 
                                                             await customCommand.save();
 
@@ -164,7 +164,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                                     const { value: newOutput, message } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "Enter new output" });
                                     if (!newOutput) return;
 
-                                    customCommand.outputs.push(newOutput);
+                                    customCommand.document.outputs.push(newOutput);
 
                                     await customCommand.save();
                                     message.reply(Localisation.getTranslation("customcommand.success.edit"));

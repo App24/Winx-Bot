@@ -6,6 +6,7 @@ import { BirthdayActivity } from "../structs/activities/events/BirthdayActivity"
 import { GenericEventActivity } from "../structs/activities/GenericEventActivity";
 import { GenericOneDayEventActivity } from "../structs/activities/GenericOneDayEventActivity";
 import { UsersActivity } from "../structs/activities/UsersActivity";
+import { reportBotError } from "../utils/Utils";
 
 let i = -1;
 const activities = [
@@ -50,16 +51,20 @@ export = () => {
 };
 
 async function setActivity() {
-    i++;
-    if (i >= activities.length)
-        i = 0;
-    if (activities[i].isShowable()) {
-        let activity = await activities[i].getActivity();
-        if (!activities[i].translated) {
-            activity = Localisation.getTranslation(activity, await activities[i].getActivityArgs());
+    try {
+        i++;
+        if (i >= activities.length)
+            i = 0;
+        if (activities[i].isShowable()) {
+            let activity = await activities[i].getActivity();
+            if (!activities[i].translated) {
+                activity = Localisation.getTranslation(activity, await activities[i].getActivityArgs());
+            }
+            BotUser.user.setActivity(activity, { type: activities[i].type });
+        } else {
+            setActivity();
         }
-        BotUser.user.setActivity(activity, { type: activities[i].type });
-    } else {
-        setActivity();
+    } catch (error) {
+        reportBotError(error);
     }
 }

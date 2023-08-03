@@ -34,15 +34,15 @@ export class TestMlBaseCommand extends BaseCommand {
         const nextRank = await getNextRank(userLevel.levelData.level, cmdArgs.guildId);
 
         const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
-        serverUserSettings.wingsLevel = -1;
-        serverUserSettings.cardCode = DEFAULT_CARD_CODE;
+        serverUserSettings.document.wingsLevel = -1;
+        serverUserSettings.document.cardCode = DEFAULT_CARD_CODE;
 
         const cardData: CardData = {
             leaderboardPosition,
             weeklyLeaderboardPosition: weekleaderboardPosition,
-            currentRank: currentRank ? currentRank.toObject() : null,
-            nextRank: currentRank ? nextRank.toObject() : null,
-            serverUserSettings: serverUserSettings.toObject(),
+            currentRank,
+            nextRank,
+            serverUserSettings,
             userLevel: userLevel.levelData,
             member
         };
@@ -51,7 +51,7 @@ export class TestMlBaseCommand extends BaseCommand {
             await asyncForEach(Object.keys(WinxCharacter), async (val) => {
                 if (val === "None") return;
                 if (isNaN(parseInt(val))) {
-                    serverUserSettings.winxCharacter = WinxCharacter[val];
+                    serverUserSettings.document.winxCharacter = WinxCharacter[val];
                     const { image, extension } = await drawCard(cardData);
                     await cmdArgs.reply({ content: val, files: [canvasToMessageAttachment(image, "magiclevels", extension)] });
                 }

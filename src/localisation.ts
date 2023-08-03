@@ -25,6 +25,10 @@ class Language {
         }
         return formatString(toReturn, ...args);
     }
+
+    public hasLocalisation(key: string) {
+        return this.localisation[key] !== undefined;
+    }
 }
 
 export const Localisation = new Language();

@@ -9,7 +9,7 @@ import { WeeklyLeaderboard } from "../../structs/databaseTypes/WeeklyLeaderboard
 export class WeeklyLeaderboardBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: cmdArgs.guildId }, () => new WeeklyLeaderboard({ guildId: cmdArgs.guildId }));
-        if (!recentLeaderboard.levels.length) return cmdArgs.reply("error.empty.levels");
+        if (!recentLeaderboard.document.levels.length) return cmdArgs.reply("error.empty.levels");
 
         let user = cmdArgs.author;
         if (cmdArgs.args.length) {
@@ -26,26 +26,26 @@ export class WeeklyLeaderboardBaseCommand extends BaseCommand {
             msg = await cmdArgs.reply("leaderboard.generate");
         }
 
-        recentLeaderboard.levels.sort((a, b) => {
+        recentLeaderboard.document.levels.sort((a, b) => {
             if (a.level === b.level) {
                 return b.xp - a.xp;
             }
             return b.level - a.level;
         });
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, recentLeaderboard.levels);
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, recentLeaderboard.document.levels);
 
         const index = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id);
         if (index < 0) {
-            const i = recentLeaderboard.levels.findIndex(u => u.userId === user.id);
+            const i = recentLeaderboard.document.levels.findIndex(u => u.userId === user.id);
             if (i >= 0) {
-                leaderboardLevels.push({ userLevel: recentLeaderboard.levels[i], member, position: i });
+                leaderboardLevels.push({ userLevel: recentLeaderboard.document.levels[i], member, position: i });
             } else {
                 return cmdArgs.reply("error.null.userLevel");
             }
         }
 
-        const leaderBoard = await drawLeaderboard(leaderboardLevels, user, cmdArgs.guildId, "Weekly");
+        const leaderBoard = await drawLeaderboard(leaderboardLevels, user, cmdArgs.guildId, "Weekly Leaderboard");
 
         cmdArgs.reply({ files: [canvasToMessageAttachment(leaderBoard, "leaderboard")] });
 

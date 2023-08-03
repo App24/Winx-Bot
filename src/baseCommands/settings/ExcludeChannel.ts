@@ -21,9 +21,9 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                             const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!channel) return;
 
-                            if (serverInfo.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.already"));
+                            if (serverInfo.document.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.already"));
 
-                            serverInfo.excludeChannels.push(channel.id);
+                            serverInfo.document.excludeChannels.push(channel.id);
 
                             await serverInfo.save();
 
@@ -38,7 +38,7 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                         value: "remove",
                         onSelect: async ({ interaction }) => {
                             await interaction.deferReply();
-                            if (!serverInfo.excludeChannels.length) return interaction.editReply(Localisation.getTranslation("error.empty.excludedchannels"));
+                            if (!serverInfo.document.excludeChannels.length) return interaction.editReply(Localisation.getTranslation("error.empty.excludedchannels"));
 
                             const options: SelectOption[] = [];
 
@@ -53,14 +53,14 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                                 emoji: null
                             });
 
-                            await asyncForEach(serverInfo.excludeChannels, async (excludedChannel, index) => {
+                            await asyncForEach(serverInfo.document.excludeChannels, async (excludedChannel, index) => {
                                 const channel = await getTextChannelById(excludedChannel, cmdArgs.guild);
                                 if (!channel) return;
                                 options.push({
                                     label: channel.name,
                                     value: index.toString(),
                                     onSelect: async ({ interaction }) => {
-                                        serverInfo.excludeChannels.splice(index, 1);
+                                        serverInfo.document.excludeChannels.splice(index, 1);
 
                                         await serverInfo.save();
 
@@ -87,10 +87,10 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                         value: "clear",
                         onSelect: async ({ interaction }) => {
                             await interaction.deferReply();
-                            await asyncForEach(serverInfo.excludeChannels, async (excludedChannel, index) => {
+                            await asyncForEach(serverInfo.document.excludeChannels, async (excludedChannel, index) => {
                                 const channel = await getThreadChannelById(excludedChannel, cmdArgs.guild);
                                 if (!channel) {
-                                    serverInfo.excludeChannels.splice(index, 1);
+                                    serverInfo.document.excludeChannels.splice(index, 1);
                                 }
                             });
                             await serverInfo.save();
@@ -106,7 +106,7 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                         onSelect: async ({ interaction }) => {
                             await interaction.deferReply();
                             const data = [];
-                            await asyncForEach(serverInfo.excludeChannels, async (excludedChannel) => {
+                            await asyncForEach(serverInfo.document.excludeChannels, async (excludedChannel) => {
                                 const channel = await getTextChannelFromMention(excludedChannel, cmdArgs.guild);
                                 if (channel) {
                                     data.push(channel);

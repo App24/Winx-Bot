@@ -16,10 +16,10 @@ export class WingsRequestChannelBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.get"),
                         value: "get",
                         async onSelect({ interaction }) {
-                            if (!serverInfo.wingsRequestChannel) {
+                            if (!serverInfo.document.wingsRequestChannel) {
                                 return interaction.reply("No Wings Request Channel Set");
                             }
-                            return interaction.reply(`<#${serverInfo.wingsRequestChannel}>`);
+                            return interaction.reply(`<#${serverInfo.document.wingsRequestChannel}>`);
                         },
                         default: false,
                         description: null,
@@ -32,7 +32,7 @@ export class WingsRequestChannelBaseCommand extends BaseCommand {
                             const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!channel) return;
 
-                            serverInfo.wingsRequestChannel = channel.id;
+                            serverInfo.document.wingsRequestChannel = channel.id;
 
                             await serverInfo.save();
 
@@ -46,7 +46,7 @@ export class WingsRequestChannelBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.clear"),
                         value: "clear",
                         async onSelect({ interaction }) {
-                            serverInfo.wingsRequestChannel = "";
+                            serverInfo.document.wingsRequestChannel = "";
 
                             await serverInfo.save();
 

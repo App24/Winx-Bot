@@ -30,7 +30,7 @@ class AddPatronSubBaseCommand extends BaseSubBaseCommand {
 
         const patrons = await getDatabase(PatronData, { guildId: cmdArgs.guildId });
 
-        if (patrons.find(u => u.userId === member.id)) return cmdArgs.reply("patreon.user.already");
+        if (!patrons.find(u => u.document.userId === member.id).isNull()) return cmdArgs.reply("patreon.user.already");
 
         const patron = new PatronData({ guildId: cmdArgs.guildId, userId: member.id, date: new Date() });
         await patron.save();
@@ -51,7 +51,7 @@ class RemovePatronSubBaseCommand extends BaseSubBaseCommand {
 
         const patron = await getOneDatabase(PatronData, { guildId: cmdArgs.guildId, userId: member.id });
 
-        if (!patron) return cmdArgs.reply("patreon.user.not");
+        if (patron.isNull()) return cmdArgs.reply("patreon.user.not");
 
         await PatronData.deleteOne({ guildId: cmdArgs.guildId, userId: member.id });
         return cmdArgs.reply("patreon.remove", member);
@@ -70,9 +70,9 @@ class ListPatronSubBaseCommand extends BaseSubBaseCommand {
 
         const data = [];
         await asyncForEach(patrons, async (patron) => {
-            const member = await getMemberById(patron.userId, cmdArgs.guild);
+            const member = await getMemberById(patron.document.userId, cmdArgs.guild);
             if (!member) return;
-            data.push(Localisation.getTranslation("patreon.list", member, dateToString(new Date(patron.date), "{dd}/{MM}/{YYYY}")));
+            data.push(Localisation.getTranslation("patreon.list", member, dateToString(patron.document.date, "{dd}/{MM}/{YYYY}")));
         });
         const embed = new EmbedBuilder();
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));

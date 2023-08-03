@@ -16,14 +16,14 @@ export class CheckRanksBaseCommand extends BaseCommand {
         const members = await cmdArgs.guild.members.fetch().then(promise => Array.from(promise.values()));
         await cmdArgs.reply("checkranks.start");
         await asyncForEach(members, async (member: GuildMember) => {
-            const user = levels.find(u => u.levelData.userId === member.id);
+            const user = levels.find(u => u.document.levelData.userId === member.id);
             if (user) {
                 await asyncForEach(ranks, async (rank) => {
-                    const role = await getRoleById(rank.roleId, cmdArgs.guild);
+                    const role = await getRoleById(rank.document.roleId, cmdArgs.guild);
                     if (!role) return;
-                    if (user.levelData.level >= rank.level && !member.roles.cache.has(role.id)) {
+                    if (user.document.levelData.level >= rank.document.level && !member.roles.cache.has(role.id)) {
                         await member.roles.add(role);
-                    } else if (user.levelData.level < rank.level && member.roles.cache.has(role.id)) {
+                    } else if (user.document.levelData.level < rank.document.level && member.roles.cache.has(role.id)) {
                         await member.roles.remove(role);
                     }
                 });

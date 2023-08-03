@@ -18,7 +18,7 @@ export class LevelChannelBaseCommand extends BaseCommand {
                         const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                         if (!channel) return;
 
-                        serverInfo.levelChannel = channel.id;
+                        serverInfo.document.levelChannel = channel.id;
 
                         await serverInfo.save();
                         msg.reply(Localisation.getTranslation("levelchannel.set", channel));
@@ -26,17 +26,17 @@ export class LevelChannelBaseCommand extends BaseCommand {
                 },
                 {
                     customId: "get", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.get"), onRun: async () => {
-                        if (!serverInfo.levelChannel) return cmdArgs.reply("error.empty.levelchannel");
-                        const channel = await getTextChannelFromMention(serverInfo.levelChannel, cmdArgs.guild);
+                        if (!serverInfo.document.levelChannel) return cmdArgs.reply("error.empty.levelchannel");
+                        const channel = await getTextChannelFromMention(serverInfo.document.levelChannel, cmdArgs.guild);
                         if (!channel) return cmdArgs.reply("levelchannel.missing.channel");
                         cmdArgs.reply(`${channel}`);
                     }
                 },
                 {
                     customId: "clear", style: ButtonStyle.Danger, label: Localisation.getTranslation("button.clear"), onRun: async () => {
-                        if (!serverInfo.levelChannel) return cmdArgs.reply("error.empty.levelchannel");
+                        if (!serverInfo.document.levelChannel) return cmdArgs.reply("error.empty.levelchannel");
 
-                        serverInfo.levelChannel = "";
+                        serverInfo.document.levelChannel = "";
 
                         await serverInfo.save();
 

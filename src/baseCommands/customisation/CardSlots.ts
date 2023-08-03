@@ -15,11 +15,11 @@ export class CardSlotsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 
-        let userWings = await getOneDatabase(CustomWings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id });
+        const userWings = await getOneDatabase(CustomWings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id });
 
         const slotsMenuOptions: string[] = [];
 
-        userSettings.cardSlots.forEach(cardSlot => {
+        userSettings.document.cardSlots.forEach(cardSlot => {
             slotsMenuOptions.push(cardSlot.name);
         });
 
@@ -41,21 +41,21 @@ export class CardSlotsBaseCommand extends BaseCommand {
                 const options: SelectOption[] = [];
 
                 const saveCode = async (slotName: string, target: MessageComponentInteraction | Message | ModalSubmitInteraction) => {
-                    const saveSlot = userSettings.cardSlots.find(c => c.name.toLowerCase() === slotName.toLowerCase());
+                    const saveSlot = userSettings.document.cardSlots.find(c => c.name.toLowerCase() === slotName.toLowerCase());
 
                     let wingsFile = "";
 
-                    if (userWings) {
+                    if (!userWings.isNull()) {
                         wingsFile = join(userFolder, `${slotName}.png`);
-                        copyFileSync(userWings.wingsFile, wingsFile);
+                        copyFileSync(userWings.document.wingsFile, wingsFile);
                     }
 
                     if (saveSlot) {
                         saveSlot.name = slotName;
-                        saveSlot.code = userSettings.cardCode;
+                        saveSlot.code = userSettings.document.cardCode;
                         saveSlot.customWings = wingsFile;
                     } else {
-                        userSettings.cardSlots.push({ name: slotName, code: userSettings.cardCode, customWings: wingsFile });
+                        userSettings.document.cardSlots.push({ name: slotName, code: userSettings.document.cardCode, customWings: wingsFile });
                     }
 
                     await userSettings.save();
@@ -125,7 +125,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
                             description: null,
                             emoji: null,
                             async onSelect({ interaction }) {
-                                const cardSlot = userSettings.cardSlots.find(c => c.name === slot);
+                                const cardSlot = userSettings.document.cardSlots.find(c => c.name === slot);
 
                                 if (!cardSlot) {
                                     return interaction.reply(Localisation.getTranslation("error.generic"));
@@ -137,15 +137,15 @@ export class CardSlotsBaseCommand extends BaseCommand {
                                     copyFileSync(cardSlot.customWings, wingsFile);
 
                                     if (userWings) {
-                                        userWings.wingsFile = wingsFile;
+                                        userWings.document.wingsFile = wingsFile;
                                     } else {
-                                        userWings = new CustomWings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id, wingsFile });
+                                        userWings.document = new CustomWings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id, wingsFile });
                                     }
 
                                     await userWings.save();
                                 }
 
-                                userSettings.cardCode = cardSlot.code;
+                                userSettings.document.cardCode = cardSlot.code;
 
                                 await userSettings.save();
 
@@ -197,17 +197,17 @@ export class CardSlotsBaseCommand extends BaseCommand {
                                             style: ButtonStyle.Primary,
                                             label: Localisation.getTranslation("button.accept"),
                                             onRun: async ({ interaction }) => {
-                                                const slotIndex = userSettings.cardSlots.findIndex(c => c.name === slot);
+                                                const slotIndex = userSettings.document.cardSlots.findIndex(c => c.name === slot);
 
                                                 if (slotIndex < 0) return interaction.reply(Localisation.getTranslation("error.generic"));
 
-                                                const cardSlot = userSettings.cardSlots[slotIndex];
+                                                const cardSlot = userSettings.document.cardSlots[slotIndex];
 
                                                 if (cardSlot.customWings !== "" && existsSync(cardSlot.customWings)) {
                                                     rmSync(cardSlot.customWings);
                                                 }
 
-                                                userSettings.cardSlots.splice(slotIndex, 1);
+                                                userSettings.document.cardSlots.splice(slotIndex, 1);
 
                                                 await userSettings.save();
 

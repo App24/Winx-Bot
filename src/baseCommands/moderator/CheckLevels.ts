@@ -14,21 +14,21 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
         const channels = Array.from(cmdArgs.guild.channels.cache.values());
 
         const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
-        const excluded = serverInfo.excludeChannels;
+        const excluded = serverInfo.document.excludeChannels;
 
         const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
 
         if (!levels.length) return cmdArgs.reply("error.empty.levels");
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels.map(l => l.levelData));
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels.map(l => l.document.levelData));
 
         await asyncForEach(leaderboardLevels, async (topLevel) => {
             topLevel.userLevel.level = 0;
             topLevel.userLevel.xp = 0;
         });
         leaderboardLevels.forEach(level => {
-            const index = levels.findIndex(u => u.levelData.userId === level.userLevel.userId);
-            levels[index].levelData = level.userLevel;
+            const index = levels.findIndex(u => u.document.levelData.userId === level.userLevel.userId);
+            levels[index].document.levelData = level.userLevel;
         });
         await asyncForEach(levels, async (level) => {
             await level.save();
@@ -54,8 +54,8 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
                 await asyncForEach(messages, async (msg: Message) => {
                     if (msg.content.toLowerCase().startsWith(PREFIX)) return;
                     if (msg.author.id === topLevel.member.id) {
-                        if (msg.content.length < serverInfo.minMessageLength) return;
-                        const xp = Math.ceil((Math.min(msg.content.length, serverInfo.maxMessageLength) / serverInfo.maxMessageLength) * serverInfo.maxXpPerMessage);
+                        if (msg.content.length < serverInfo.document.minMessageLength) return;
+                        const xp = Math.ceil((Math.min(msg.content.length, serverInfo.document.maxMessageLength) / serverInfo.document.maxMessageLength) * serverInfo.document.maxXpPerMessage);
                         totalXp += xp;
                     }
                 });
@@ -76,15 +76,15 @@ export class CheckLevelsBaseCommand extends BaseCommand {
         const channels = Array.from(cmdArgs.guild.channels.cache.values());
 
         const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
-        const excluded = serverInfo.excludeChannels;
+        const excluded = serverInfo.document.excludeChannels;
 
         const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
 
         if (!levels.length) return cmdArgs.reply("error.empty.levels");
 
-        const user = levels.find(u => u.levelData.userId === member.id);
-        user.levelData.level = 0;
-        user.levelData.xp = 0;
+        const user = levels.find(u => u.document.levelData.userId === member.id);
+        user.document.levelData.level = 0;
+        user.document.levelData.xp = 0;
         await user.save();
 
         await cmdArgs.reply("checklevels.start");
@@ -106,8 +106,8 @@ export class CheckLevelsBaseCommand extends BaseCommand {
             await asyncForEach(messages, async (msg: Message) => {
                 if (msg.content.toLowerCase().startsWith(PREFIX)) return;
                 if (msg.author.id === member.id) {
-                    if (msg.content.length < serverInfo.minMessageLength) return;
-                    const xp = Math.ceil((Math.min(msg.content.length, serverInfo.maxMessageLength) / serverInfo.maxMessageLength) * serverInfo.maxXpPerMessage);
+                    if (msg.content.length < serverInfo.document.minMessageLength) return;
+                    const xp = Math.ceil((Math.min(msg.content.length, serverInfo.document.maxMessageLength) / serverInfo.document.maxMessageLength) * serverInfo.document.maxXpPerMessage);
                     totalXp += xp;
                 }
             });

@@ -15,6 +15,7 @@ import { WeeklyLeaderboard } from "../structs/databaseTypes/WeeklyLeaderboard";
 import { LevelData } from "../structs/databaseTypes/LevelData";
 import { PatronData } from "../structs/databaseTypes/PatronData";
 import { ErrorData } from "../structs/databaseTypes/ErrorData";
+import { DocumentWrapper } from "../structs/ModelWrapper";
 
 const WEEKLY_TIME = 1000 * 60 * 60 * 24 * 7;
 
@@ -122,7 +123,7 @@ export async function getOneDatabase<
         await database.save();
     }
 
-    return database;
+    return new DocumentWrapper<TSchema>(database);
 }
 
 export async function getDatabase<
@@ -136,7 +137,7 @@ export async function getDatabase<
         database = [];
     }
 
-    return database;
+    return database.map(d => new DocumentWrapper<TSchema>(d));
 }
 
 /**
@@ -327,9 +328,9 @@ export async function resetWeeklyLeaderboard(guild: Guild) {
 
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
 
-    recentLeaderboard.startDate = date;
+    recentLeaderboard.document.startDate = date;
     recentLeaderboard.set("levels", []);
-    recentLeaderboard.previousTop = [];
+    recentLeaderboard.document.previousTop = [];
 
     await recentLeaderboard.save();
 }
@@ -343,7 +344,7 @@ export async function checkWeeklyLeaderboard(guild: Guild) {
 
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
 
-    const oldDate = recentLeaderboard.startDate;
+    const oldDate = recentLeaderboard.document.startDate;
     oldDate.setHours(0);
     oldDate.setMinutes(0);
     oldDate.setSeconds(0);
@@ -358,14 +359,14 @@ export async function checkWeeklyLeaderboard(guild: Guild) {
 
 export async function applyWeeklyLeaderboard(guild: Guild) {
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
-    const startDate = recentLeaderboard.startDate;
+    const startDate = recentLeaderboard.document.startDate;
 
-    if (recentLeaderboard.topRoleId) {
-        const role = await getRoleById(recentLeaderboard.topRoleId, guild);
+    if (recentLeaderboard.document.topRoleId) {
+        const role = await getRoleById(recentLeaderboard.document.topRoleId, guild);
 
         if (role) {
-            if (recentLeaderboard.previousTop) {
-                await asyncForEach(recentLeaderboard.previousTop, async (id) => {
+            if (recentLeaderboard.document.previousTop) {
+                await asyncForEach(recentLeaderboard.document.previousTop, async (id) => {
                     const member = await getMemberById(id, guild);
                     if (member) {
                         await member.roles.remove(role);
@@ -373,14 +374,14 @@ export async function applyWeeklyLeaderboard(guild: Guild) {
                 });
             }
 
-            recentLeaderboard.previousTop = [];
+            recentLeaderboard.document.previousTop = [];
 
-            const userLevels = await getLeaderboardMembers(guild, recentLeaderboard.levels, 3);
+            const userLevels = await getLeaderboardMembers(guild, recentLeaderboard.document.levels, 3);
 
             await asyncForEach(userLevels, async (userLevel) => {
                 const member = userLevel.member;
                 await member.roles.add(role);
-                recentLeaderboard.previousTop.push(userLevel.member.id);
+                recentLeaderboard.document.previousTop.push(userLevel.member.id);
             });
 
             await showWeeklyLeaderboardMessage(guild);
@@ -407,7 +408,7 @@ export async function applyWeeklyLeaderboard(guild: Guild) {
         }
     }
 
-    recentLeaderboard.startDate = startDate;
+    recentLeaderboard.document.startDate = startDate;
     recentLeaderboard.set("levels", []);
 
     await recentLeaderboard.save();
@@ -421,23 +422,23 @@ export async function showWeeklyLeaderboardMessage(guild: Guild) {
 
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
 
-    const startDate = recentLeaderboard.startDate;
-    const endDate = new Date(recentLeaderboard.startDate.getTime() + WEEKLY_TIME);
+    const startDate = recentLeaderboard.document.startDate;
+    const endDate = new Date(recentLeaderboard.document.startDate.getTime() + WEEKLY_TIME);
 
     //const userLevels = await getLeaderboardMembers(guild, recentLeaderboard.users, 3);
 
-    if (serverInfo.weeklyLeaderboardAnnouncementChannel) {
-        const channel = await getTextChannelById(serverInfo.weeklyLeaderboardAnnouncementChannel, guild);
+    if (serverInfo.document.weeklyLeaderboardAnnouncementChannel) {
+        const channel = await getTextChannelById(serverInfo.document.weeklyLeaderboardAnnouncementChannel, guild);
 
         if (channel) {
-            recentLeaderboard.levels.sort((a, b) => {
+            recentLeaderboard.document.levels.sort((a, b) => {
                 if (a.level === b.level) {
                     return b.xp - a.xp;
                 }
                 return b.level - a.level;
             });
 
-            const leaderboardLevels = await getLeaderboardMembers(guild, recentLeaderboard.levels.toObject());
+            const leaderboardLevels = await getLeaderboardMembers(guild, recentLeaderboard.document.levels);
 
             const leaderBoard = await drawLeaderboard(leaderboardLevels, null, guild.id, `Weekly ${dateToString(startDate, "{dd}/{MM}/{YYYY}")} - ${dateToString(endDate, "{dd}/{MM}/{YYYY}")}`);
 

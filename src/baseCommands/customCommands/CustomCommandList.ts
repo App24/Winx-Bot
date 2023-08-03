@@ -18,7 +18,7 @@ export class CustomCommandListBaseCommand extends BaseCommand {
             const data = [];
             embed.setTitle(Localisation.getTranslation("customcommand.list.title"));
             customCommands.forEach(customCommand => {
-                switch (customCommand.access) {
+                switch (customCommand.document.access) {
                     case CommandAccess.Moderators: {
                         if (!cmdArgs.member.permissions.has("ManageGuild")) {
                             return;
@@ -35,16 +35,16 @@ export class CustomCommandListBaseCommand extends BaseCommand {
                         }
                     } break;
                 }
-                data.push(customCommand.name);
+                data.push(customCommand.document.name);
             });
             embed.setDescription(data.join("\n"));
             cmdArgs.reply({ embeds: [await createMessageEmbed(embed, cmdArgs.guild)] });
         } else {
-            const customCommand = customCommands.find(c => c.name.toLowerCase() === cmdArgs.args[0].toLowerCase());
+            const customCommand = customCommands.find(c => c.document.name.toLowerCase() === cmdArgs.args[0].toLowerCase());
             if (!customCommand) return cmdArgs.reply("customcommand.error.command.not.exist");
             const embed = new EmbedBuilder();
-            embed.setTitle(capitalise(customCommand.name));
-            embed.setDescription(customCommand.outputs.join("\n"));
+            embed.setTitle(capitalise(customCommand.document.name));
+            embed.setDescription(customCommand.document.outputs.join("\n"));
             embed.setColor((await getBotRoleColor(cmdArgs.guild)));
             cmdArgs.reply({ embeds: [embed] });
         }

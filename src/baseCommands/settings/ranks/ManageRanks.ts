@@ -33,10 +33,10 @@ export class ManageRanksBaseCommand extends BaseCommand {
 
                             const rankLevel = await getOneDatabase(RankLevel, { guildId: cmdArgs.guildId, level }, () => new RankLevel({ guildId: cmdArgs.guildId, level, roleId: role.id }));
 
-                            if (rankLevel) {
+                            if (!rankLevel.isNull()) {
                                 rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${level}`, { recursive: true, force: true });
-                                rankLevel.level = level;
-                                rankLevel.roleId = role.id;
+                                rankLevel.document.level = level;
+                                rankLevel.document.roleId = role.id;
                             }
                             await rankLevel.save();
                             return interaction.followUp(Localisation.getTranslation("setrank.role.set"));
@@ -64,7 +64,7 @@ export class ManageRanksBaseCommand extends BaseCommand {
                             });
 
                             await asyncForEach(rankRoles, (async (rankRole) => {
-                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+                                const role = await getRoleById(rankRole.document.roleId, cmdArgs.guild);
                                 options.push({
                                     label: capitalise(role.name),
                                     value: role.name,
@@ -76,8 +76,8 @@ export class ManageRanksBaseCommand extends BaseCommand {
                                                     style: ButtonStyle.Primary,
                                                     label: Localisation.getTranslation("button.accept"),
                                                     onRun: async ({ interaction }) => {
-                                                        rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${rankRole.level}`, { recursive: true, force: true });
-                                                        await RankLevel.deleteOne({ guildId: cmdArgs.guildId, level: rankRole.level });
+                                                        rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${rankRole.document.level}`, { recursive: true, force: true });
+                                                        await RankLevel.deleteOne({ guildId: cmdArgs.guildId, level: rankRole.document.level });
                                                         interaction.reply(Localisation.getTranslation("setrank.role.remove"));
                                                     }
                                                 },
@@ -117,10 +117,10 @@ export class ManageRanksBaseCommand extends BaseCommand {
                                 return interaction.followUp(Localisation.getTranslation("error.empty.ranks"));
                             }
 
-                            ranks.sort((a, b) => a.level - b.level);
+                            ranks.sort((a, b) => a.document.level - b.document.level);
                             const data = [];
                             await asyncForEach(ranks, async (rank) => {
-                                data.push(Localisation.getTranslation("transformations.list", rank.level, `<@&${rank.roleId}>`));
+                                data.push(Localisation.getTranslation("transformations.list", rank.document.level, `<@&${rank.document.roleId}>`));
                             });
 
                             const embed = new EmbedBuilder();

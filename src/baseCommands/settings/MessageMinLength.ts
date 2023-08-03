@@ -16,18 +16,18 @@ export class MessageMinLengthBaseCommand extends BaseCommand {
                     customId: "set", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
                         await createInteractionModal({
                             title: "Message Min Length",
-                            fields: { custom_id: "length", required: true, style: TextInputStyle.Short, label: "Length", value: serverInfo.minMessageLength.toString() },
+                            fields: { custom_id: "length", required: true, style: TextInputStyle.Short, label: "Length", value: serverInfo.document.minMessageLength.toString() },
                             sendTarget: interaction,
                             async onSubmit({ data, interaction: submission }) {
                                 const len = parseInt(data.information.length);
                                 if (isNaN(len)) {
                                     return submission.reply(Localisation.getTranslation("error.invalid.number"));
                                 }
-                                if (len < serverInfo.maxMessageLength) return submission.reply(Localisation.getTranslation("setminlength.error"));
+                                if (len < serverInfo.document.maxMessageLength) return submission.reply(Localisation.getTranslation("setminlength.error"));
 
-                                serverInfo.minMessageLength = len;
+                                serverInfo.document.minMessageLength = len;
                                 await serverInfo.save();
-                                await submission.reply(Localisation.getTranslation("setmaxlength.set", serverInfo.minMessageLength));
+                                await submission.reply(Localisation.getTranslation("setmaxlength.set", serverInfo.document.minMessageLength));
                             },
                             filter: ({ data }) => {
                                 const length = parseInt(data.information.length);
@@ -38,7 +38,7 @@ export class MessageMinLengthBaseCommand extends BaseCommand {
                 },
                 {
                     customId: "get", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.get"), onRun: async ({ interaction }) => {
-                        interaction.editReply(Localisation.getTranslation("setminlength.get", serverInfo.minMessageLength));
+                        interaction.editReply(Localisation.getTranslation("setminlength.get", serverInfo.document.minMessageLength));
                     }
                 }
             ]

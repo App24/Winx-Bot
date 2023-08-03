@@ -16,7 +16,7 @@ export class ManageXpBaseCommand extends BaseCommand {
                     customId: "set", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
                         await createInteractionModal({
                             title: "XP per Message",
-                            fields: { custom_id: "xp", required: true, style: TextInputStyle.Short, label: "XP", value: serverInfo.maxXpPerMessage.toString() },
+                            fields: { custom_id: "xp", required: true, style: TextInputStyle.Short, label: "XP", value: serverInfo.document.maxXpPerMessage.toString() },
                             sendTarget: interaction,
                             async onSubmit({ data, interaction: submission }) {
                                 const xp = parseInt(data.information.xp);
@@ -24,9 +24,9 @@ export class ManageXpBaseCommand extends BaseCommand {
                                     return submission.reply(Localisation.getTranslation("error.invalid.number"));
                                 }
 
-                                serverInfo.maxXpPerMessage = xp;
+                                serverInfo.document.maxXpPerMessage = xp;
                                 await serverInfo.save();
-                                await submission.reply(Localisation.getTranslation("setxp.set", serverInfo.maxXpPerMessage));
+                                await submission.reply(Localisation.getTranslation("setxp.set", serverInfo.document.maxXpPerMessage));
                             },
                             filter: ({ data }) => {
                                 const xp = parseInt(data.information.xp);
@@ -37,7 +37,7 @@ export class ManageXpBaseCommand extends BaseCommand {
                 },
                 {
                     customId: "get", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.get"), onRun: async ({ interaction }) => {
-                        interaction.update({ content: Localisation.getTranslation("setxp.get", serverInfo.maxXpPerMessage) });
+                        interaction.update({ content: Localisation.getTranslation("setxp.get", serverInfo.document.maxXpPerMessage) });
                     }
                 }
             ]

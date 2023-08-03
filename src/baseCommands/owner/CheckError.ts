@@ -22,8 +22,8 @@ export class CheckErrorBaseCommand extends BaseCommand {
                             if (errorCode === undefined)
                                 return;
                             const error = await getOneDatabase(ErrorData, { errorId: errorCode });
-                            if (!error) return <any>interaction.followUp(Localisation.getTranslation("error.invalid.errorCode"));
-                            interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(error.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.error));
+                            if (error.isNull()) return <any>interaction.followUp(Localisation.getTranslation("error.invalid.errorCode"));
+                            interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(error.document.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.document.error));
                         },
                         default: false,
                         description: null,

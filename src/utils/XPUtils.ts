@@ -9,6 +9,7 @@ import { getServerUserSettings } from "./RankUtils";
 import { ServerData } from "../structs/databaseTypes/ServerData";
 import { WeeklyLeaderboard } from "../structs/databaseTypes/WeeklyLeaderboard";
 import { LevelData } from "../structs/databaseTypes/LevelData";
+import { ModelWrapper } from "../structs/ModelWrapper";
 
 export interface XPInfo {
     readonly xp: number;
@@ -33,39 +34,42 @@ export async function removeXP(xpInfo: XPInfo) {
 
     const userLevel = await getOneDatabase(UserLevel, { guildId: xpInfo.guild.id, "levelData.userId": xpInfo.member.id }, () => new UserLevel({ guildId: xpInfo.guild.id, levelData: { userId: xpInfo.member.id } }));
 
-    userLevel.levelData.xp -= xpInfo.xp;
+    userLevel.document.levelData.xp -= xpInfo.xp;
     let levelChannel = xpInfo.channel;
-    if (serverInfo.levelChannel) {
-        const temp = await getTextChannelById(serverInfo.levelChannel, xpInfo.guild);
+    if (serverInfo.document.levelChannel) {
+        const temp = await getTextChannelById(serverInfo.document.levelChannel, xpInfo.guild);
         if (temp) levelChannel = temp;
     }
 
-    while (userLevel.levelData.xp < 0) {
-        if (userLevel.levelData.level <= 0) {
-            userLevel.levelData.xp = 0;
+    while (userLevel.document.levelData.xp < 0) {
+        if (userLevel.document.levelData.level <= 0) {
+            userLevel.document.levelData.xp = 0;
             break;
         }
-        userLevel.levelData.level--;
-        userLevel.levelData.xp += getLevelXP(userLevel.levelData.level);
-        let rankDetails: { rankLevel: RankLevelData, rank: Role };
+        userLevel.document.levelData.level--;
+        userLevel.document.levelData.xp += getLevelXP(userLevel.document.levelData.level);
+        let rankDetails: { rankLevel: ModelWrapper<typeof RankLevel.schema>, rank: Role };
         if (ranks) {
-            const rankLevel = ranks.find(rank => rank.level === userLevel.levelData.level + 1);
-            if (rankLevel) {
-                const rank = await getRoleById(rankLevel.roleId, xpInfo.guild);
+            const rankLevel = ranks.find(rank => rank.document.level === userLevel.document.levelData.level + 1);
+            if (rankLevel && !rankLevel.isNull()) {
+                const rank = await getRoleById(rankLevel.document.roleId, xpInfo.guild);
                 if (rank) {
                     if (xpInfo.member.roles.cache.has(rank.id))
                         await xpInfo.member.roles.remove(rank, "lost transformation").catch(console.error);
-                    rankDetails = { rankLevel: rankLevel.toObject(), rank };
+                    rankDetails = { rankLevel, rank };
                 }
             }
         }
-        await showLevelMessage(false, levelChannel, xpInfo.member, userLevel.levelData.level, rankDetails);
+        await showLevelMessage(false, levelChannel, xpInfo.member, userLevel.document.levelData.level, rankDetails);
     }
 
     await userLevel.save();
 }
 
 export async function addXP(xpInfo: XPInfo, levelUpMessage = true, fromMessage = false) {
+    const member = await getMemberById(xpInfo.member.id, xpInfo.guild);
+    if (!member) return;
+
     const ranks = await getDatabase(RankLevel, { guildId: xpInfo.guild.id });
 
     const serverInfo = await getOneDatabase(ServerData, { guildId: xpInfo.guild.id }, () => new ServerData({ guildId: xpInfo.guild.id }));
@@ -73,22 +77,19 @@ export async function addXP(xpInfo: XPInfo, levelUpMessage = true, fromMessage =
     //await checkWeeklyLeaderboard(xpInfo.member.guild);
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: xpInfo.guild.id }, () => new WeeklyLeaderboard({ guildId: xpInfo.guild.id }));
 
-    let user = recentLeaderboard.levels.find(u => u.userId === xpInfo.member.user.id);
+    let user = recentLeaderboard.document.levels.find(u => u.userId === xpInfo.member.user.id);
     if (!user) {
-        recentLeaderboard.levels.push({ userId: xpInfo.member.user.id, xp: 0, level: 0 });
-        user = recentLeaderboard.levels[recentLeaderboard.levels.length - 1];
+        recentLeaderboard.document.levels.push({ userId: xpInfo.member.user.id, xp: 0, level: 0 });
+        user = recentLeaderboard.document.levels[recentLeaderboard.document.levels.length - 1];
     }
-
-    const member = await getMemberById(xpInfo.member.id, xpInfo.guild);
-    if (!member) return;
 
     const userLevel = await getOneDatabase(UserLevel, { guildId: xpInfo.guild.id, "levelData.userId": xpInfo.member.id }, () => new UserLevel({ guildId: xpInfo.guild.id, levelData: { userId: xpInfo.member.id } }));
 
-    userLevel.levelData.xp += xpInfo.xp;
+    userLevel.document.levelData.xp += xpInfo.xp;
     user.xp += xpInfo.xp;
     let levelChannel = xpInfo.channel;
-    if (serverInfo.levelChannel) {
-        const temp = await getTextChannelById(serverInfo.levelChannel, xpInfo.guild);
+    if (serverInfo.document.levelChannel) {
+        const temp = await getTextChannelById(serverInfo.document.levelChannel, xpInfo.guild);
         if (temp) levelChannel = temp;
     }
 
@@ -99,49 +100,49 @@ export async function addXP(xpInfo: XPInfo, levelUpMessage = true, fromMessage =
         }
     }
 
-    while (userLevel.levelData.xp >= getLevelXP(userLevel.levelData.level)) {
-        userLevel.levelData.xp -= getLevelXP(userLevel.levelData.level);
-        userLevel.levelData.level++;
-        let rankDetails: { rankLevel: RankLevelData, rank: Role };
+    while (userLevel.document.levelData.xp >= getLevelXP(userLevel.document.levelData.level)) {
+        userLevel.document.levelData.xp -= getLevelXP(userLevel.document.levelData.level);
+        userLevel.document.levelData.level++;
+        let rankDetails: { rankLevel: ModelWrapper<typeof RankLevel.schema>, rank: Role };
         if (ranks) {
-            const rankLevel = ranks.find(rank => rank.level === userLevel.levelData.level);
-            if (rankLevel) {
-                const rank = await getRoleById(rankLevel.roleId, xpInfo.guild);
+            const rankLevel = ranks.find(rank => rank.document.level === userLevel.document.levelData.level);
+            if (rankLevel && !rankLevel.isNull()) {
+                const rank = await getRoleById(rankLevel.document.roleId, xpInfo.guild);
                 if (rank) {
                     if (!member.roles.cache.has(rank.id))
                         member.roles.add(rank).catch(console.error);
-                    rankDetails = { rankLevel: rankLevel.toObject(), rank };
+                    rankDetails = { rankLevel, rank };
                 }
             }
         }
         if (levelUpMessage)
-            await showLevelMessage(true, levelChannel, xpInfo.member, userLevel.levelData.level, rankDetails);
+            await showLevelMessage(true, levelChannel, xpInfo.member, userLevel.document.levelData.level, rankDetails);
     }
 
     await userLevel.save();
     await recentLeaderboard.save();
 }
 
-export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuildTextChannel, member: GuildMember, level: number, rankDetails: { rankLevel: RankLevelData, rank: Role }) {
+export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuildTextChannel, member: GuildMember, level: number, rankDetails: { rankLevel: ModelWrapper<typeof RankLevel.schema>, rank: Role }) {
     const userSettings = await getServerUserSettings(member.id, levelChannel.guildId);
 
-    if (userSettings.levelPing === undefined) {
-        userSettings.levelPing = false;
+    if (userSettings.document.levelPing === undefined) {
+        userSettings.document.levelPing = false;
     }
 
     const options: BaseMessageOptions = {
         content: Localisation.getTranslation(levelUp ? "xp.level.up" : "xp.level.down", member, level)
     };
 
-    if (userSettings.levelPing) {
+    if (userSettings.document.levelPing) {
         options.allowedMentions = { users: [member.id] };
     }
 
     await levelChannel.send(options);
-    if (rankDetails) {
+    if (rankDetails && !rankDetails.rankLevel.isNull()) {
         await levelChannel.send(Localisation.getTranslation(levelUp ? "xp.transformation.earn" : "xp.transformation.lost", member, capitalise(rankDetails.rank.name)));
-        if (rankDetails.rankLevel.gifs && rankDetails.rankLevel.gifs.length) {
-            await levelChannel.send(rankDetails.rankLevel.gifs[Math.floor(Math.random() * rankDetails.rankLevel.gifs.length)]);
+        if (rankDetails.rankLevel.document.gifs && rankDetails.rankLevel.document.gifs.length) {
+            await levelChannel.send(rankDetails.rankLevel.document.gifs[Math.floor(Math.random() * rankDetails.rankLevel.document.gifs.length)]);
         }
     }
 }
@@ -149,14 +150,14 @@ export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuild
 export async function getLeaderboardPosition(member: GuildMember) {
     const levels = await getDatabase(UserLevel, { guildId: member.guild.id });
 
-    return getLeaderboardPositionFromList(member, levels.map(l => l.levelData));
+    return getLeaderboardPositionFromList(member, levels.map(l => l.document.levelData));
 }
 
 export async function getWeeklyLeaderboardPosition(member: GuildMember) {
 
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: member.guild.id }, () => new WeeklyLeaderboard({ guildId: member.guild.id }));
 
-    return getLeaderboardPositionFromList(member, recentLeaderboard.levels.toObject());
+    return getLeaderboardPositionFromList(member, recentLeaderboard.document.levels);
 }
 
 export async function getLeaderboardPositionFromList(member: GuildMember, levels: LevelData[]) {

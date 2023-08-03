@@ -10,12 +10,13 @@ import { getImageReply } from "../../utils/ReplyUtils";
 import { downloadFile, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { ServerData } from "../../structs/databaseTypes/ServerData";
+import { ModelWrapper } from "../../structs/ModelWrapper";
 
 export class CustomWingsBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
-        if (!serverInfo.wingsRequestChannel) {
+        if (!serverInfo.document.wingsRequestChannel) {
             return cmdArgs.reply("There is no set wings request channel, tell the mods to set one!");
         }
 
@@ -35,38 +36,38 @@ export class CustomWingsBaseCommand extends BaseCommand {
             mkdirSync(dir, { recursive: true });
         }
 
-        if (existsSync(wingsRequest.wingsFile)) {
-            unlinkSync(wingsRequest.wingsFile);
+        if (existsSync(wingsRequest.document.wingsFile)) {
+            unlinkSync(wingsRequest.document.wingsFile);
         }
 
         await downloadFile(image.url, filePath);
 
-        wingsRequest.wingsFile = filePath;
+        wingsRequest.document.wingsFile = filePath;
 
         await wingsRequest.save();
         await download.delete();
         await msg.reply(Localisation.getTranslation("generic.sent"));
-        const channel = await getTextChannelById(serverInfo.wingsRequestChannel, cmdArgs.guild);
-        await createWingsRequest(wingsRequest.toObject(), cmdArgs.guild, channel);
+        const channel = await getTextChannelById(serverInfo.document.wingsRequestChannel, cmdArgs.guild);
+        await createWingsRequest(wingsRequest, cmdArgs.guild, channel);
     }
 }
 
-export async function createWingsRequest(wingsRequest: WingsRequestData, guild: Guild, channel: BaseGuildTextChannel) {
+export async function createWingsRequest(wingsRequest: ModelWrapper<typeof WingsRequest.schema>, guild: Guild, channel: BaseGuildTextChannel) {
     const embed = new EmbedBuilder();
 
     embed.setColor(await getBotRoleColor(guild));
 
-    const user = await getMemberById(wingsRequest.userId, channel.guild);
+    const user = await getMemberById(wingsRequest.document.userId, channel.guild);
 
-    const username = (user && (user.nickname || user.user.username)) || wingsRequest.userId;
+    const username = (user && (user.nickname || user.user.username)) || wingsRequest.document.userId;
 
     const title = `Requested Wings for ${username}`;
 
     embed.setTitle(title);
-    embed.setImage(`attachment://${wingsRequest.userId}.png`);
+    embed.setImage(`attachment://${wingsRequest.document.userId}.png`);
 
     createMessageButtons({
-        sendTarget: <TextChannel>channel, settings: { max: 1, time: -1 }, options: { embeds: [embed], files: [wingsRequest.wingsFile] }, buttons: [
+        sendTarget: <TextChannel>channel, settings: { max: 1, time: -1 }, options: { embeds: [embed], files: [wingsRequest.document.wingsFile] }, buttons: [
             {
                 customId: "accept",
                 style: ButtonStyle.Success,
@@ -81,11 +82,11 @@ export async function createWingsRequest(wingsRequest: WingsRequestData, guild: 
                         mkdirSync(dir, { recursive: true });
                     }
 
-                    if (existsSync(userWings.wingsFile)) {
-                        unlinkSync(userWings.wingsFile);
+                    if (existsSync(userWings.document.wingsFile)) {
+                        unlinkSync(userWings.document.wingsFile);
                     }
 
-                    const requestWingsIndex = await getOneDatabase(WingsRequest, { guildId: wingsRequest.guildId, userId: wingsRequest.userId });
+                    const requestWingsIndex = await getOneDatabase(WingsRequest, { guildId: wingsRequest.document.guildId, userId: wingsRequest.document.userId });
                     if (!requestWingsIndex) {
                         return;
                     }
@@ -97,16 +98,16 @@ export async function createWingsRequest(wingsRequest: WingsRequestData, guild: 
 
                         embed.setTitle("Your wings submission has been accepted!");
 
-                        embed.setImage(`attachment://${wingsRequest.userId}.png`);
+                        embed.setImage(`attachment://${wingsRequest.document.userId}.png`);
 
-                        await dmChannel.send({ embeds: [embed], files: [wingsRequest.wingsFile] });
+                        await dmChannel.send({ embeds: [embed], files: [wingsRequest.document.wingsFile] });
                     }
 
-                    renameSync(wingsRequest.wingsFile, filePath);
-                    userWings.wingsFile = filePath;
+                    renameSync(wingsRequest.document.wingsFile, filePath);
+                    userWings.document.wingsFile = filePath;
                     await userWings.save();
 
-                    await WingsRequest.deleteOne({ guildId: wingsRequest.guildId, userId: wingsRequest.userId });
+                    await WingsRequest.deleteOne({ guildId: wingsRequest.document.guildId, userId: wingsRequest.document.userId });
                     // interaction.deferUpdate();
                     const embed = EmbedBuilder.from(interaction.message.embeds[0]);
                     embed.setTitle(title + ` - Accepted by __${interaction.user.username}__`);
@@ -118,7 +119,7 @@ export async function createWingsRequest(wingsRequest: WingsRequestData, guild: 
                 style: ButtonStyle.Danger,
                 label: Localisation.getTranslation("button.deny"),
                 async onRun({ interaction }) {
-                    const requestWingsIndex = await getOneDatabase(WingsRequest, { guildId: wingsRequest.guildId, userId: wingsRequest.userId });
+                    const requestWingsIndex = await getOneDatabase(WingsRequest, { guildId: wingsRequest.document.guildId, userId: wingsRequest.document.userId });
                     if (!requestWingsIndex) {
                         return;
                     }
@@ -130,16 +131,16 @@ export async function createWingsRequest(wingsRequest: WingsRequestData, guild: 
 
                         embed.setTitle("Your wings submission was rejected!");
 
-                        embed.setImage(`attachment://${wingsRequest.userId}.png`);
+                        embed.setImage(`attachment://${wingsRequest.document.userId}.png`);
 
-                        await dmChannel.send({ embeds: [embed], files: [wingsRequest.wingsFile] });
+                        await dmChannel.send({ embeds: [embed], files: [wingsRequest.document.wingsFile] });
                     }
 
-                    if (existsSync(wingsRequest.wingsFile)) {
-                        unlinkSync(wingsRequest.wingsFile);
+                    if (existsSync(wingsRequest.document.wingsFile)) {
+                        unlinkSync(wingsRequest.document.wingsFile);
                     }
 
-                    await WingsRequest.deleteOne({ guildId: wingsRequest.guildId, userId: wingsRequest.userId });
+                    await WingsRequest.deleteOne({ guildId: wingsRequest.document.guildId, userId: wingsRequest.document.userId });
                     // interaction.deferUpdate();
                     const embed = EmbedBuilder.from(interaction.message.embeds[0]);
                     embed.setTitle(title + ` - Rejected by __${interaction.user.username}__`);

@@ -36,13 +36,13 @@ export class ManageGifsBaseCommand extends BaseCommand {
                             });
 
                             await asyncForEach(rankRoles, async (rankRole) => {
-                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+                                const role = await getRoleById(rankRole.document.roleId, cmdArgs.guild);
 
                                 options.push({
                                     label: capitalise(role.name),
                                     value: role.name,
                                     onSelect: async ({ interaction }) => {
-                                        const gifs = await this.getLevelGifs(rankRole.level, cmdArgs.guildId);
+                                        const gifs = await this.getLevelGifs(rankRole.document.level, cmdArgs.guildId);
                                         if (!gifs || gifs.length <= 0) {
                                             return interaction.reply(Localisation.getTranslation("error.missing.gifs"));
                                         }
@@ -115,7 +115,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
                             });
 
                             await asyncForEach(rankRoles, async (rankRole) => {
-                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+                                const role = await getRoleById(rankRole.document.roleId, cmdArgs.guild);
 
                                 options.push({
                                     label: capitalise(role.name),
@@ -126,7 +126,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
                                         const { value: gif } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "argument.reply.gif" });
                                         if (gif === undefined) return;
 
-                                        rankLevel.gifs.push(gif);
+                                        rankLevel.document.gifs.push(gif);
                                         await rankLevel.save();
                                         interaction.followUp(Localisation.getTranslation("setrank.gifs.add"));
                                     },
@@ -165,13 +165,13 @@ export class ManageGifsBaseCommand extends BaseCommand {
                             });
 
                             await asyncForEach(rankRoles, async (rankRole) => {
-                                const role = await getRoleById(rankRole.roleId, cmdArgs.guild);
+                                const role = await getRoleById(rankRole.document.roleId, cmdArgs.guild);
 
                                 options.push({
                                     label: capitalise(role.name),
                                     value: role.name,
                                     onSelect: async ({ interaction }) => {
-                                        const gifs = await this.getLevelGifs(rankRole.level, cmdArgs.guildId);
+                                        const gifs = await this.getLevelGifs(rankRole.document.level, cmdArgs.guildId);
                                         if (!gifs || gifs.length <= 0) {
                                             return interaction.reply(Localisation.getTranslation("error.missing.gifs"));
                                         }
@@ -196,7 +196,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
                                                 label: gif,
                                                 value: i.toString(),
                                                 onSelect: async ({ interaction }) => {
-                                                    rankLevel.gifs.splice(i, 1);
+                                                    rankLevel.document.gifs.splice(i, 1);
                                                     await rankLevel.save();
                                                     interaction.reply(Localisation.getTranslation("setrank.gifs.remove"));
                                                 },
@@ -236,8 +236,8 @@ export class ManageGifsBaseCommand extends BaseCommand {
 
     async getLevelGifs(level: number, guildId: string) {
         const rank = await getRank(level, guildId);
-        if (!rank || !rank.gifs)
+        if (rank.isNull() || !rank.document.gifs)
             return [];
-        return rank.gifs;
+        return rank.document.gifs;
     }
 }

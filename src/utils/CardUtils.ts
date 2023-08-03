@@ -4,7 +4,7 @@ import { existsSync } from "fs";
 import { CANVAS_FONT, CARD_CANVAS_HEIGHT, CARD_CANVAS_WIDTH, CARD_TEMPLATES_FOLDER, LB_USERS } from "../Constants";
 import { Localisation } from "../localisation";
 import { CustomWings } from "../structs/databaseTypes/CustomWings";
-import { RankLevelData } from "../structs/databaseTypes/RankLevel";
+import { RankLevel, RankLevelData } from "../structs/databaseTypes/RankLevel";
 import { CardTemplate, DEFAULT_CARD_CODE, ServerUserSettings, ServerUserSettingsData } from "../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../structs/databaseTypes/UserLevel";
 import { rgbToHsl, fitTextOnCanvas, roundRect, underlineText, canvasColor } from "./CanvasUtils";
@@ -14,15 +14,16 @@ import { getWingsImageByLevel } from "./RankUtils";
 import { asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, isBooster, isPatreon, getOneDatabase, getDatabase } from "./Utils";
 import { getLevelXP } from "./XPUtils";
 import { LevelData } from "../structs/databaseTypes/LevelData";
+import { DocumentWrapper, ModelWrapper } from "../structs/ModelWrapper";
 
 export interface CardData {
     leaderboardPosition: number,
     weeklyLeaderboardPosition: number,
     userLevel: LevelData,
-    serverUserSettings: ServerUserSettingsData,
+    serverUserSettings: ModelWrapper<typeof ServerUserSettings.schema>,
     wingsImage?: CanvasImage,
-    currentRank: RankLevelData,
-    nextRank: RankLevelData,
+    currentRank: ModelWrapper<typeof RankLevel.schema>,
+    nextRank: ModelWrapper<typeof RankLevel.schema>,
     member: GuildMember,
     customWings?: CanvasImage
 }
@@ -55,16 +56,15 @@ export async function drawCard(cardData: CardData) {
     // if (serverUserSettings.cardWings === undefined)
     //     serverUserSettings.cardWings = "ENABLED";
 
-    const { cl_customWings } = decodeCode(serverUserSettings.cardCode);
+    const { cl_customWings } = decodeCode(serverUserSettings.document.cardCode);
 
     const wings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: member.id });
     let wingsImage: Image;
-    if (cl_customWings && ((await isPatreon(member.id, guild.id)) || isBooster(member)) && wings && existsSync(wings.wingsFile)) {
-        console.log("Booster");
-        wingsImage = await loadImage(wings.wingsFile);
+    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatreon(member.id, guild.id)) || isBooster(member))) {
+        wingsImage = await loadImage(wings.document.wingsFile);
     }
 
-    const wingsImageA = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, serverUserSettings.winxCharacter, guild.id);
+    const wingsImageA = await getWingsImageByLevel(serverUserSettings.document.wingsLevel < 0 ? userLevel.level : serverUserSettings.document.wingsLevel, serverUserSettings.document.winxCharacter, guild.id);
 
     cardData.wingsImage = wingsImageA;
     cardData.customWings = wingsImage;
@@ -88,15 +88,15 @@ export async function drawGreenScreenCard(greenScreenColor: string, cardData: Ca
     // if (serverUserSettings.cardWings === undefined)
     //     serverUserSettings.cardWings = "ENABLED";
 
-    const { cl_customWings } = decodeCode(serverUserSettings.cardCode);
+    const { cl_customWings } = decodeCode(serverUserSettings.document.cardCode);
 
     const wings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: member.id });
     let wingsImage: Image;
-    if (cl_customWings && wings && existsSync(wings.wingsFile) && ((await isPatreon(member.id, guild.id)) || isBooster(member))) {
-        wingsImage = await loadImage(wings.wingsFile);
+    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatreon(member.id, guild.id)) || isBooster(member))) {
+        wingsImage = await loadImage(wings.document.wingsFile);
     }
 
-    const wingsImageA = await getWingsImageByLevel(serverUserSettings.wingsLevel < 0 ? userLevel.level : serverUserSettings.wingsLevel, serverUserSettings.winxCharacter, guild.id);
+    const wingsImageA = await getWingsImageByLevel(serverUserSettings.document.wingsLevel < 0 ? userLevel.level : serverUserSettings.document.wingsLevel, serverUserSettings.document.winxCharacter, guild.id);
 
     const avatar = canvasColor(greenScreenColor, 64, 64);
 
@@ -113,7 +113,7 @@ async function drawCardFrame(userAvatar: Image | Canvas, cardData: CardData) {
     const canvas = createCanvas(CARD_CANVAS_WIDTH, CARD_CANVAS_HEIGHT);
     const ctx = canvas.getContext("2d");
 
-    const decodedCode = decodeCode(serverUserSettings.cardCode);
+    const decodedCode = decodeCode(serverUserSettings.document.cardCode);
 
     const { cl_roleIcon, cl_background, cl_wings, cl_customWings, cl_pfp, cl_xpBar, cl_pfpCircle, cl_nextTransformation, cl_currentTransformation, cl_rank, cl_xp, cl_levels, cl_name, cl_weekrank } = decodedCode;
 
@@ -155,7 +155,7 @@ async function drawCardFrame(userAvatar: Image | Canvas, cardData: CardData) {
         "cl_roleIcon": drawCardRoleIcon
     };
 
-    const data = { customWings, wingsImageA, member, guild, userLevel, currentRank, nextRank, leaderboardPosition, userAvatar, weeklyLeaderboardPosition };
+    const data = { customWings, wingsImageA, member, guild, userLevel, currentRank: currentRank.document, nextRank: nextRank.document, leaderboardPosition, userAvatar, weeklyLeaderboardPosition };
 
     await asyncForEach(layers, async (layer) => {
         if (layer.layer === undefined) return;
@@ -170,20 +170,20 @@ async function drawCardFrame(userAvatar: Image | Canvas, cardData: CardData) {
 }
 
 export async function drawTemplateCard(member: GuildMember) {
-    const serverUserSettings = new ServerUserSettings(member.id);
+    const serverUserSettings = new ServerUserSettings({ guildId: member.guild.id, userId: member.id });
     // serverUserSettings.specialCircleColor = "ffffff";
 
-    const userLevel = new UserLevel(member.id);
+    const userLevel = new UserLevel({ guildId: member.guild.id, levelData: { userd: member.id } });
 
     serverUserSettings.cardCode = "pfpCircle_width=10|pfpCircle_color=#ffffff|pfp_positionX=600|pfp_positionY=260|pfp_size=1|cl_pfpCircle=4|cl_pfp=5";
 
     const cardData: CardData = {
         leaderboardPosition: 0,
         weeklyLeaderboardPosition: 0,
-        currentRank: null,
-        nextRank: null,
+        currentRank: new ModelWrapper(null),
+        nextRank: new ModelWrapper(null),
         member,
-        serverUserSettings: serverUserSettings.toObject(),
+        serverUserSettings: new ModelWrapper(serverUserSettings),
         userLevel: userLevel.levelData
     };
 
@@ -671,12 +671,12 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
     colors.push(getBackgroundColor(null, null, null, null));
 
     await asyncForEach(leaderboardLevels, async (value) => {
-        let userSettings = serverUserSettings.find(s => s.userId === value.member.id);
-        if (!userSettings) {
-            userSettings = new ServerUserSettings({ guildId, userId: value.member.id });
+        const userSettings = serverUserSettings.find(s => s.document.userId === value.member.id);
+        if (userSettings.isNull()) {
+            userSettings.document = new ServerUserSettings({ guildId, userId: value.member.id });
             await userSettings.save();
         }
-        const { background_primaryColor, background_secondaryColor, lb_primaryColor, lb_backgroundColorType } = decodeCode(userSettings.cardCode);
+        const { background_primaryColor, background_secondaryColor, lb_primaryColor, lb_backgroundColorType } = decodeCode(userSettings.document.cardCode);
         const color = getBackgroundColor(background_primaryColor, background_secondaryColor, lb_backgroundColorType, lb_primaryColor);
         colors.push(color);
     });
@@ -724,17 +724,17 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
         ctx.fillText(title, x, y);
     }
 
-    let previousUserSettings;
+    let previousUserSettings: ModelWrapper<typeof ServerUserSettings.schema>;
 
     await asyncForEach(leaderboardLevels, async (value, i) => {
-        let userSettings = serverUserSettings.find(s => s.userId === value.member.id);
-        if (!userSettings) {
-            userSettings = new ServerUserSettings({ guildId, userId: value.member.id });
+        const userSettings = serverUserSettings.find(s => s.document.userId === value.member.id);
+        if (userSettings.isNull()) {
+            userSettings.document = new ServerUserSettings({ guildId, userId: value.member.id });
             await userSettings.save();
         }
 
-        const { lb_nameType, background_primaryColor, background_secondaryColor, pfpCircle_color, lb_backgroundColorType, lb_primaryColor } = decodeCode(userSettings.cardCode);
-        let { xpBar_startColor, xpBar_endColor } = decodeCode(userSettings.cardCode);
+        const { lb_nameType, background_primaryColor, background_secondaryColor, pfpCircle_color, lb_backgroundColorType, lb_primaryColor } = decodeCode(userSettings.document.cardCode);
+        let { xpBar_startColor, xpBar_endColor } = decodeCode(userSettings.document.cardCode);
         const { xpBar_startColor: default_xpBar_startColor, xpBar_endColor: default_xpBar_endColor, lb_nameType: default_lb_nameType } = decodeCode(DEFAULT_CARD_CODE);
 
         const color = getBackgroundColor(background_primaryColor, background_secondaryColor, lb_backgroundColorType, lb_primaryColor);
@@ -760,7 +760,7 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
         const textColor = getBrightnessColor(hexToRGB(color));
 
         if (value.position >= LB_USERS) {
-            const { background_primaryColor, background_secondaryColor, lb_backgroundColorType, lb_primaryColor } = decodeCode(previousUserSettings.cardCode);
+            const { background_primaryColor, background_secondaryColor, lb_backgroundColorType, lb_primaryColor } = decodeCode(previousUserSettings.document.cardCode);
             ctx.fillStyle = getBrightnessColor(hexToRGB(getBackgroundColor(background_primaryColor, background_secondaryColor, lb_backgroundColorType, lb_primaryColor)));
             ctx.fillRect(0, pfpY - pfpRadius - pfpPadding - (separatorHeight / 2.), canvas.width, separatorHeight);
         }

@@ -27,19 +27,19 @@ export class LeaderboardBaseCommand extends BaseCommand {
         }
 
         levels.sort((a, b) => {
-            if (a.levelData.level === b.levelData.level) {
-                return b.levelData.xp - a.levelData.xp;
+            if (a.document.levelData.level === b.document.levelData.level) {
+                return b.document.levelData.xp - a.document.levelData.xp;
             }
-            return b.levelData.level - a.levelData.level;
+            return b.document.levelData.level - a.document.levelData.level;
         });
 
-        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels.map(l => l.levelData));
+        const leaderboardLevels = await getLeaderboardMembers(cmdArgs.guild, levels.map(l => l.document.levelData));
 
         const index = leaderboardLevels.findIndex(u => u.userLevel.userId === user.id);
         if (index < 0) {
-            const i = levels.findIndex(u => u.levelData.userId === user.id);
+            const i = levels.findIndex(u => u.document.levelData.userId === user.id);
             if (i >= 0) {
-                leaderboardLevels.push({ userLevel: levels[i].levelData, member, position: i });
+                leaderboardLevels.push({ userLevel: levels[i].document.levelData, member, position: i });
             } else {
                 return cmdArgs.reply("error.null.userLevel");
             }

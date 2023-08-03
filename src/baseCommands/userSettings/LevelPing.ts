@@ -13,11 +13,11 @@ export class LevelPingBaseCommand extends BaseCommand {
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, buttons: [
                 {
                     customId: "toggle",
-                    emoji: userSettings.levelPing ? "❌" : "✅",
+                    emoji: userSettings.document.levelPing ? "❌" : "✅",
                     style: ButtonStyle.Primary,
                     onRun: async ({ interaction }) => {
-                        userSettings.levelPing = !userSettings.levelPing;
-                        interaction.reply({ content: Localisation.getTranslation("levelping.reply", userSettings.levelPing ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
+                        userSettings.document.levelPing = !userSettings.document.levelPing;
+                        interaction.reply({ content: Localisation.getTranslation("levelping.reply", userSettings.document.levelPing ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
                         await userSettings.save();
                     }
                 },

@@ -13,15 +13,15 @@ export class SetLevelBaseCommand extends BaseCommand {
         if (isNaN(level)) return cmdArgs.reply("error.invalid.level");
         const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": cmdArgs.author.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: cmdArgs.author.id } }));
 
-        let xp = Math.round((userLevel.levelData.xp / getLevelXP(userLevel.levelData.level)) * getLevelXP(level));
+        let xp = Math.round((userLevel.document.levelData.xp / getLevelXP(userLevel.document.levelData.level)) * getLevelXP(level));
         if (cmdArgs.args[1]) {
             xp = parseInt(cmdArgs.args[1]);
             if (isNaN(xp) || xp < 0 || xp >= getLevelXP(level)) return cmdArgs.reply("error.invalid.xp");
         }
-        console.log(userLevel.levelData.level);
-        console.log(userLevel.levelData.xp);
-        userLevel.levelData.level = level;
-        userLevel.levelData.xp = xp;
+        console.log(userLevel.document.levelData.level);
+        console.log(userLevel.document.levelData.xp);
+        userLevel.document.levelData.level = level;
+        userLevel.document.levelData.xp = xp;
 
         await userLevel.save();
         cmdArgs.reply("setlevel.output", member, level, xp);

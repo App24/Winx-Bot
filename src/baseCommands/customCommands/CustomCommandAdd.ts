@@ -9,7 +9,7 @@ export class CustomCommandAddBaseCommand extends BaseCommand {
         const customCommands = await getDatabase(CustomCommand, { guildId: cmdArgs.guildId });
 
         const cmdName = cmdArgs.args.shift().toLowerCase();
-        if (customCommands.find(c => c.name === cmdName) || (BotUser.getCommand(cmdName)))
+        if (customCommands.find(c => c.document.name === cmdName) || (BotUser.getCommand(cmdName)))
             return cmdArgs.reply("customcommand.error.command.exist");
 
         const cmdDescription = cmdArgs.args.shift();

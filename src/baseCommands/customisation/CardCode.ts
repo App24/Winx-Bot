@@ -17,7 +17,7 @@ export class CardCodeBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.get"),
                         value: "get",
                         onSelect: async ({ interaction }) => {
-                            await interaction.reply({ content: userSettings.cardCode || DEFAULT_CARD_CODE, ephemeral: true });
+                            await interaction.reply({ content: userSettings.document.cardCode || DEFAULT_CARD_CODE, ephemeral: true });
                         },
                         default: false,
                         description: null,
@@ -38,7 +38,7 @@ export class CardCodeBaseCommand extends BaseCommand {
                                     const code = data.information.code;
 
                                     if (code === undefined) return;
-                                    userSettings.cardCode = code;
+                                    userSettings.document.cardCode = code;
                                     await userSettings.save();
                                 }
                             });
@@ -51,7 +51,7 @@ export class CardCodeBaseCommand extends BaseCommand {
                         label: Localisation.getTranslation("button.reset"),
                         value: "reset",
                         onSelect: async ({ interaction }) => {
-                            userSettings.cardCode = DEFAULT_CARD_CODE;
+                            userSettings.document.cardCode = DEFAULT_CARD_CODE;
                             await userSettings.save();
                             interaction.reply(Localisation.getTranslation("cardcode.reset.output"));
                         },

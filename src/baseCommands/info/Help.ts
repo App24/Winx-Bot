@@ -118,7 +118,7 @@ async function getCommands(category: Category, available: CommandAvailable, chan
     if (category === CustomCommands) {
         const customCommands = await getDatabase(CustomCommand, { guildId: guild.id });
         await asyncForEach(customCommands, async (customCommand) => {
-            switch (customCommand.access) {
+            switch (customCommand.document.access) {
                 case CommandAccess.Patreon: {
                     if (isDM(channel) || !(await isPatreon(author.id, guild.id)))
                         return;
@@ -148,7 +148,7 @@ async function getCommands(category: Category, available: CommandAvailable, chan
                         return;
                 } break;
             }
-            addCommand(customCommand.name, customCommand.description);
+            addCommand(customCommand.document.name, customCommand.document.description);
         });
     } else {
         await asyncMapForEach(BotUser.getCommands(category), async (name, command) => {

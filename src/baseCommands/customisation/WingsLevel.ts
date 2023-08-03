@@ -1,6 +1,6 @@
 import { Guild } from "discord.js";
 import { Localisation } from "../../localisation";
-import { RankLevelData } from "../../structs/databaseTypes/RankLevel";
+import { RankLevel, RankLevelData } from "../../structs/databaseTypes/RankLevel";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { getRoleById } from "../../utils/GetterUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
@@ -9,6 +9,7 @@ import { asyncForEach, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { Document, Types } from "mongoose";
+import { ModelWrapper } from "../../structs/ModelWrapper";
 
 export class WingsLevelBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -16,64 +17,34 @@ export class WingsLevelBaseCommand extends BaseCommand {
 
         const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": cmdArgs.author.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: cmdArgs.author.id } }));
 
-        const currentRank = await getCurrentRank(userLevel.levelData.level, cmdArgs.guildId);
+        const currentRank = await getCurrentRank(userLevel.document.levelData.level, cmdArgs.guildId);
 
-        if (!currentRank) {
+        if (currentRank.isNull()) {
             return cmdArgs.reply("error.rank.none");
         }
 
-        const previousRanks = await getPreviousRanks(userLevel.levelData.level, cmdArgs.guildId);
+        const previousRanks = await getPreviousRanks(userLevel.document.levelData.level, cmdArgs.guildId);
 
         previousRanks.push(currentRank);
 
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
             {
-                options: await this.updateWings(userSettings, cmdArgs.guild, previousRanks.filter(r => r !== undefined).map(r => r.toObject()))
+                options: await this.updateWings(userSettings, cmdArgs.guild, previousRanks.filter(r => !r.isNull()))
             }
         });
     }
 
-    async updateWings(userSettings: Document<unknown, Record<string, unknown>, {
-        createdAt: NativeDate;
-        updatedAt: NativeDate;
-    } & {
-        guildId: string;
-        wingsLevel: number;
-        levelPing: boolean;
-        winxCharacter: number;
-        cardCode: string;
-        cardSlots: Types.DocumentArray<{
-            name?: string;
-            code?: string;
-            customWings?: string;
-        }>;
-        userId?: string;
-    }> & {
-        createdAt: NativeDate;
-        updatedAt: NativeDate;
-    } & {
-        guildId: string;
-        wingsLevel: number;
-        levelPing: boolean;
-        winxCharacter: number;
-        cardCode: string;
-        cardSlots: Types.DocumentArray<{
-            name?: string;
-            code?: string;
-            customWings?: string;
-        }>;
-        userId?: string;
-    }, guild: Guild, previousRanks: RankLevelData[]) {
+    async updateWings(userSettings: ModelWrapper<typeof ServerUserSettings.schema>, guild: Guild, previousRanks: ModelWrapper<typeof RankLevel.schema>[]) {
         const options: SelectOption[] = [];
 
         const setWingsLevel = async (level: number) => {
-            userSettings.wingsLevel = level;
+            userSettings.document.wingsLevel = level;
             await userSettings.save();
         };
 
         const isDefault = (level: number) => {
-            return userSettings.wingsLevel === level;
+            return userSettings.document.wingsLevel === level;
         };
 
         options.push({
@@ -89,15 +60,15 @@ export class WingsLevelBaseCommand extends BaseCommand {
         });
 
         await asyncForEach(previousRanks, async (rank) => {
-            const role = await getRoleById(rank.roleId, guild);
+            const role = await getRoleById(rank.document.roleId, guild);
             if (!role)
                 return;
             options.push({
                 label: role.name,
-                value: rank.level.toString(),
-                default: isDefault(rank.level),
+                value: rank.document.level.toString(),
+                default: isDefault(rank.document.level),
                 onSelect: async ({ interaction }) => {
-                    setWingsLevel(rank.level);
+                    setWingsLevel(rank.document.level);
                     interaction.reply(Localisation.getTranslation("wingslevel.set", role.name));
                 },
                 description: null,

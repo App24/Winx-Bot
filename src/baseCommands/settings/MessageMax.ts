@@ -16,7 +16,7 @@ export class MessageMaxBaseCommand extends BaseCommand {
                     customId: "set", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
                         await createInteractionModal({
                             title: "Max XP per Minute",
-                            fields: { custom_id: "xp", required: true, style: TextInputStyle.Short, label: "XP", value: serverInfo.maxMessagePerMinute.toString() },
+                            fields: { custom_id: "xp", required: true, style: TextInputStyle.Short, label: "XP", value: serverInfo.document.maxMessagePerMinute.toString() },
                             sendTarget: interaction,
                             async onSubmit({ data, interaction: submission }) {
                                 const xp = parseInt(data.information.xp);
@@ -24,9 +24,9 @@ export class MessageMaxBaseCommand extends BaseCommand {
                                     return submission.reply(Localisation.getTranslation("error.invalid.number"));
                                 }
 
-                                serverInfo.maxMessagePerMinute = xp;
+                                serverInfo.document.maxMessagePerMinute = xp;
                                 await serverInfo.save();
-                                await submission.reply(Localisation.getTranslation("setmaxmessage.set", serverInfo.maxMessagePerMinute));
+                                await submission.reply(Localisation.getTranslation("setmaxmessage.set", serverInfo.document.maxMessagePerMinute));
                             },
                             filter: ({ data }) => {
                                 const xp = parseInt(data.information.xp);
@@ -37,7 +37,7 @@ export class MessageMaxBaseCommand extends BaseCommand {
                 },
                 {
                     customId: "get", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.get"), onRun: async ({ interaction }) => {
-                        interaction.editReply(Localisation.getTranslation("setmaxmessage.get", serverInfo.maxMessagePerMinute));
+                        interaction.editReply(Localisation.getTranslation("setmaxmessage.get", serverInfo.document.maxMessagePerMinute));
                     }
                 }
             ]

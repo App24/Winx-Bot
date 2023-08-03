@@ -13,7 +13,7 @@ export class SetTopRankRoleBaseCommand extends BaseCommand {
             return cmdArgs.reply("error.invalid.role");
         }
 
-        recentLeaderboard.topRoleId = role.id;
+        recentLeaderboard.document.topRoleId = role.id;
 
         await recentLeaderboard.save();
 

@@ -6,7 +6,7 @@ export class CustomCommandRemoveBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
         const cmdName = cmdArgs.args[0].toLowerCase();
         const customCommand = await getOneDatabase(CustomCommand, { guildId: cmdArgs.guildId, name: cmdName });
-        if (!customCommand) {
+        if (customCommand.isNull()) {
             return cmdArgs.reply("customcommand.error.command.not.exist");
         }
 

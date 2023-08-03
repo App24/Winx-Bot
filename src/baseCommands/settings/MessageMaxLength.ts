@@ -16,18 +16,18 @@ export class MessageMaxLengthBaseCommand extends BaseCommand {
                     customId: "set", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
                         await createInteractionModal({
                             title: "Message Max Length",
-                            fields: { custom_id: "length", required: true, style: TextInputStyle.Short, label: "Length", value: serverInfo.maxMessageLength.toString() },
+                            fields: { custom_id: "length", required: true, style: TextInputStyle.Short, label: "Length", value: serverInfo.document.maxMessageLength.toString() },
                             sendTarget: interaction,
                             async onSubmit({ data, interaction: submission }) {
                                 const len = parseInt(data.information.length);
                                 if (isNaN(len)) {
                                     return submission.reply(Localisation.getTranslation("error.invalid.number"));
                                 }
-                                if (len < serverInfo.minMessageLength) return submission.reply(Localisation.getTranslation("setmaxlength.error"));
+                                if (len < serverInfo.document.minMessageLength) return submission.reply(Localisation.getTranslation("setmaxlength.error"));
 
-                                serverInfo.maxMessageLength = len;
+                                serverInfo.document.maxMessageLength = len;
                                 await serverInfo.save();
-                                await submission.reply(Localisation.getTranslation("setmaxlength.set", serverInfo.maxMessageLength));
+                                await submission.reply(Localisation.getTranslation("setmaxlength.set", serverInfo.document.maxMessageLength));
                             },
                             filter: ({ data }) => {
                                 const length = parseInt(data.information.length);
@@ -38,7 +38,7 @@ export class MessageMaxLengthBaseCommand extends BaseCommand {
                 },
                 {
                     customId: "get", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.get"), onRun: async ({ interaction }) => {
-                        interaction.editReply(Localisation.getTranslation("setmaxlength.get", serverInfo.maxMessageLength));
+                        interaction.editReply(Localisation.getTranslation("setmaxlength.get", serverInfo.document.maxMessageLength));
                     }
                 }
             ]
