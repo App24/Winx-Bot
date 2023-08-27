@@ -135,10 +135,10 @@ export async function getWingsImageByRank(rank: ModelWrapper<typeof RankLevel.sc
     if (winxCharacter <= 0)
         return;
 
-    if (rank.isNull() || !rank.document.wings)
+    if (rank.isNull())
         return;
 
-    const characterWingFile = Object.values(rank.document.wings)[winxCharacter - 1];
+    const characterWingFile = rank.document.wings[WinxCharacter[winxCharacter].toLowerCase()];
 
     if (characterWingFile !== "" && existsSync(characterWingFile)) {
         return loadImage(characterWingFile);

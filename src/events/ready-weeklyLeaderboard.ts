@@ -5,13 +5,13 @@ export = () => {
     BotUser.on("ready", async () => {
         const midnight = new Date();
         midnight.setHours(24);
-        midnight.setMinutes(0);
+        midnight.setMinutes(1);
         midnight.setSeconds(0);
         midnight.setMilliseconds(0);
+        BotUser.guilds.cache.forEach(guild => {
+            checkWeeklyLeaderboard(guild);
+        });
         setTimeout(() => {
-            BotUser.guilds.cache.forEach(guild => {
-                checkWeeklyLeaderboard(guild);
-            });
             setInterval(() => {
                 BotUser.guilds.cache.forEach(guild => {
                     checkWeeklyLeaderboard(guild);

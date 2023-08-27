@@ -60,10 +60,10 @@ export class SlashCommandArguments {
 
     public async reply(options: string | InteractionReplyOptions, ...args) {
         if (typeof options === "string")
-            options = Localisation.getTranslation(options, ...args);
+            options = Localisation.getLocalisation(options, ...args);
         else {
             if (options.content) {
-                options.content = Localisation.getTranslation(options.content, ...args);
+                options.content = Localisation.getLocalisation(options.content, ...args);
             }
         }
         if (this.interaction.deferred || this.interaction.replied) {
@@ -83,10 +83,10 @@ export class SlashCommandArguments {
 
     public async dmReply(options: string | BaseMessageOptions, ...args) {
         if (typeof options === "string") {
-            options = Localisation.getTranslation(options, ...args);
+            options = Localisation.getLocalisation(options, ...args);
         } else {
             if (options.content)
-                options.content = Localisation.getTranslation(options.content, ...args);
+                options.content = Localisation.getLocalisation(options.content, ...args);
         }
         let sendTarget: DMChannel | TextBasedChannel = await this.author.createDM();
         if (!sendTarget) {

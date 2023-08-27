@@ -1,7 +1,7 @@
 import { join } from "path";
 import { createWriteStream, existsSync, readdirSync, statSync } from "fs";
 import request from "request";
-import { LB_USERS, PREFIX } from "../Constants";
+import { LB_USERS, PREFIX, WEEKLY_TIME } from "../Constants";
 import { BaseGuildTextChannel, ChannelType, CommandInteraction, Guild, GuildMember, Message, AttachmentBuilder, MessageComponentInteraction, TextBasedChannel, ContextMenuCommandInteraction, EmbedBuilder, EmbedData } from "discord.js";
 import { Localisation } from "../localisation";
 import { getBotRoleColor, getMemberById, getRoleById, getTextChannelById, getUserById } from "./GetterUtils";
@@ -16,8 +16,6 @@ import { LevelData } from "../structs/databaseTypes/LevelData";
 import { PatronData } from "../structs/databaseTypes/PatronData";
 import { ErrorData } from "../structs/databaseTypes/ErrorData";
 import { DocumentWrapper } from "../structs/ModelWrapper";
-
-const WEEKLY_TIME = 1000 * 60 * 60 * 24 * 7;
 
 /**
  * 
@@ -155,7 +153,7 @@ export function isDM(channel: TextBasedChannel) {
  * @param guildId The ID of the guild
  * @returns True if the user is a patreon, false if the user is not a patreon
  */
-export async function isPatreon(userId: string, guildId: string) {
+export async function isPatron(userId: string, guildId: string) {
     if (!userId || !guildId) return false;
     const patron = await getOneDatabase(PatronData, { guildId: guildId, userId: userId });
     return patron !== null;
@@ -273,11 +271,11 @@ export async function reportBotError(error, message?: Message | MessageComponent
             await dm.send(text);
         }
         if (message instanceof Message) {
-            message.reply(Localisation.getTranslation("error.execution"));
+            message.reply(Localisation.getLocalisation("error.execution"));
         } else {
             if (!message.deferred && !message.replied)
                 await message.deferReply();
-            message.followUp(Localisation.getTranslation("error.execution"));
+            message.followUp(Localisation.getLocalisation("error.execution"));
         }
     }
 }
@@ -295,7 +293,7 @@ export async function createMessageEmbed(data: EmbedData | EmbedBuilder, guild: 
         embed = new EmbedBuilder(data);
     }
     embed.setColor(await getBotRoleColor(guild));
-    const footers = [Localisation.getTranslation("footer.donate", process.env.npm_package_config_donate), Localisation.getTranslation("footer.suggestion", PREFIX, "suggestion")];
+    const footers = [Localisation.getLocalisation("footer.donate", process.env.npm_package_config_donate), Localisation.getLocalisation("footer.suggestion", PREFIX, "suggestion")];
     const option = Math.floor((footers.length * 10) * Math.random());
     if (option < footers.length)
         embed.setFooter({ text: `${(embed.data.footer && embed.data.footer.text) || ""}\n${footers[option]}` });
@@ -344,7 +342,7 @@ export async function checkWeeklyLeaderboard(guild: Guild) {
 
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
 
-    const oldDate = recentLeaderboard.document.startDate;
+    const oldDate = new Date(recentLeaderboard.document.startDate);
     oldDate.setHours(0);
     oldDate.setMinutes(0);
     oldDate.setSeconds(0);
@@ -359,7 +357,6 @@ export async function checkWeeklyLeaderboard(guild: Guild) {
 
 export async function applyWeeklyLeaderboard(guild: Guild) {
     const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: guild.id }, () => new WeeklyLeaderboard({ guildId: guild.id }));
-    const startDate = recentLeaderboard.document.startDate;
 
     if (recentLeaderboard.document.topRoleId) {
         const role = await getRoleById(recentLeaderboard.document.topRoleId, guild);
@@ -408,7 +405,13 @@ export async function applyWeeklyLeaderboard(guild: Guild) {
         }
     }
 
-    recentLeaderboard.document.startDate = startDate;
+    const date = new Date();
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+
+    recentLeaderboard.document.startDate = date;
     recentLeaderboard.set("levels", []);
 
     await recentLeaderboard.save();

@@ -58,7 +58,7 @@ async function setActivity() {
         if (activities[i].isShowable()) {
             let activity = await activities[i].getActivity();
             if (!activities[i].translated) {
-                activity = Localisation.getTranslation(activity, await activities[i].getActivityArgs());
+                activity = Localisation.getLocalisation(activity, await activities[i].getActivityArgs());
             }
             BotUser.user.setActivity(activity, { type: activities[i].type });
         } else {

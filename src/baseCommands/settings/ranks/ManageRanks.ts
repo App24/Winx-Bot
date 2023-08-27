@@ -21,7 +21,7 @@ export class ManageRanksBaseCommand extends BaseCommand {
                 },
                 options: [
                     {
-                        label: Localisation.getTranslation("button.add"),
+                        label: Localisation.getLocalisation("button.add"),
                         value: "add",
                         onSelect: async ({ interaction }) => {
                             const { value: level, message } = await getLevelReply({ sendTarget: cmdArgs.body, author: cmdArgs.author });
@@ -39,21 +39,21 @@ export class ManageRanksBaseCommand extends BaseCommand {
                                 rankLevel.document.roleId = role.id;
                             }
                             await rankLevel.save();
-                            return interaction.followUp(Localisation.getTranslation("setrank.role.set"));
+                            return interaction.followUp(Localisation.getLocalisation("setrank.role.set"));
                         },
                         default: false,
                         description: null,
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.remove"),
+                        label: Localisation.getLocalisation("button.remove"),
                         value: "remove",
                         onSelect: async () => {
                             const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             const options: SelectOption[] = [];
 
                             options.push({
-                                label: Localisation.getTranslation("button.cancel"),
+                                label: Localisation.getLocalisation("button.cancel"),
                                 value: "cancel",
                                 onSelect: async ({ interaction }) => {
                                     interaction.deferUpdate();
@@ -70,21 +70,21 @@ export class ManageRanksBaseCommand extends BaseCommand {
                                     value: role.name,
                                     onSelect: async ({ interaction }) => {
                                         createMessageButtons({
-                                            sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("generic.confirmation"), buttons: [
+                                            sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getLocalisation("generic.confirmation"), buttons: [
                                                 {
                                                     customId: "accept",
                                                     style: ButtonStyle.Primary,
-                                                    label: Localisation.getTranslation("button.accept"),
+                                                    label: Localisation.getLocalisation("button.accept"),
                                                     onRun: async ({ interaction }) => {
                                                         rmSync(`${WINGS_FOLDER}/${cmdArgs.guildId}/${rankRole.document.level}`, { recursive: true, force: true });
                                                         await RankLevel.deleteOne({ guildId: cmdArgs.guildId, level: rankRole.document.level });
-                                                        interaction.reply(Localisation.getTranslation("setrank.role.remove"));
+                                                        interaction.reply(Localisation.getLocalisation("setrank.role.remove"));
                                                     }
                                                 },
                                                 {
                                                     customId: "cancel",
                                                     style: ButtonStyle.Danger,
-                                                    label: Localisation.getTranslation("button.cancel"),
+                                                    label: Localisation.getLocalisation("button.cancel"),
                                                     onRun: async ({ interaction }) => {
                                                         await interaction.deferUpdate();
                                                     }
@@ -109,18 +109,18 @@ export class ManageRanksBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.list"),
+                        label: Localisation.getLocalisation("button.list"),
                         value: "list",
                         onSelect: async ({ interaction }) => {
                             const ranks = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             if (!ranks || !ranks.length) {
-                                return interaction.followUp(Localisation.getTranslation("error.empty.ranks"));
+                                return interaction.followUp(Localisation.getLocalisation("error.empty.ranks"));
                             }
 
                             ranks.sort((a, b) => a.document.level - b.document.level);
                             const data = [];
                             await asyncForEach(ranks, async (rank) => {
-                                data.push(Localisation.getTranslation("transformations.list", rank.document.level, `<@&${rank.document.roleId}>`));
+                                data.push(Localisation.getLocalisation("transformations.list", rank.document.level, `<@&${rank.document.roleId}>`));
                             });
 
                             const embed = new EmbedBuilder();

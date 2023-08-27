@@ -72,7 +72,7 @@ class ListPatronSubBaseCommand extends BaseSubBaseCommand {
         await asyncForEach(patrons, async (patron) => {
             const member = await getMemberById(patron.document.userId, cmdArgs.guild);
             if (!member) return;
-            data.push(Localisation.getTranslation("patreon.list", member, dateToString(patron.document.date, "{dd}/{MM}/{YYYY}")));
+            data.push(Localisation.getLocalisation("patreon.list", member, dateToString(patron.document.date, "{dd}/{MM}/{YYYY}")));
         });
         const embed = new EmbedBuilder();
         embed.setColor((await getBotRoleColor(cmdArgs.guild)));

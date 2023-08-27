@@ -30,7 +30,7 @@ export class CustomWingsBaseCommand extends BaseCommand {
         const dir = `${CUSTOM_WINGS_REQUEST_FOLDER} /${cmdArgs.guildId}`;
         const filePath = `${dir}/${cmdArgs.author.id}.png`;
 
-        const download = await msg.reply(Localisation.getTranslation("setrank.wings.download"));
+        const download = await msg.reply(Localisation.getLocalisation("setrank.wings.download"));
 
         if (!existsSync(dir)) {
             mkdirSync(dir, { recursive: true });
@@ -46,7 +46,7 @@ export class CustomWingsBaseCommand extends BaseCommand {
 
         await wingsRequest.save();
         await download.delete();
-        await msg.reply(Localisation.getTranslation("generic.sent"));
+        await msg.reply(Localisation.getLocalisation("generic.sent"));
         const channel = await getTextChannelById(serverInfo.document.wingsRequestChannel, cmdArgs.guild);
         await createWingsRequest(wingsRequest, cmdArgs.guild, channel);
     }
@@ -71,7 +71,7 @@ export async function createWingsRequest(wingsRequest: ModelWrapper<typeof Wings
             {
                 customId: "accept",
                 style: ButtonStyle.Success,
-                label: Localisation.getTranslation("button.accept"),
+                label: Localisation.getLocalisation("button.accept"),
                 async onRun({ interaction }) {
                     const userWings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: user.id }, () => new CustomWings({ guildId: guild.id, userId: user.id }));
 
@@ -117,7 +117,7 @@ export async function createWingsRequest(wingsRequest: ModelWrapper<typeof Wings
             {
                 customId: "deny",
                 style: ButtonStyle.Danger,
-                label: Localisation.getTranslation("button.deny"),
+                label: Localisation.getLocalisation("button.deny"),
                 async onRun({ interaction }) {
                     const requestWingsIndex = await getOneDatabase(WingsRequest, { guildId: wingsRequest.document.guildId, userId: wingsRequest.document.userId });
                     if (!requestWingsIndex) {

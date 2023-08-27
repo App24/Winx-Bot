@@ -8,7 +8,7 @@ class CustomWingsCommand extends Command {
     public constructor() {
         super();
         this.available = CommandAvailable.Guild;
-        this.access = CommandAccess.PatreonOrBooster;
+        this.access = CommandAccess.PatronOrBooster;
         this.category = Customisation;
 
         this.baseCommand = new CustomWingsBaseCommand();

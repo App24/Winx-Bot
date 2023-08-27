@@ -11,10 +11,10 @@ export class RanksBaseCommand extends BaseCommand {
         const data = [];
         ranks.sort((a, b) => a.document.level - b.document.level);
         await asyncForEach(ranks, async (rank) => {
-            data.push(Localisation.getTranslation("transformations.list", rank.document.level, `<@&${rank.document.roleId}>`));
+            data.push(Localisation.getLocalisation("transformations.list", rank.document.level, `<@&${rank.document.roleId}>`));
         });
         const embed = new EmbedBuilder();
-        embed.setTitle(Localisation.getTranslation("transformations.title"));
+        embed.setTitle(Localisation.getLocalisation("transformations.title"));
         embed.setDescription(data.join("\n"));
         cmdArgs.reply({ embeds: [await createMessageEmbed(embed, cmdArgs.guild)] });
     }

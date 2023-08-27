@@ -46,7 +46,7 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
             }
         });
         await asyncForEach(NTChannels, async (channel: BaseGuildTextChannel, index: number) => {
-            await cmdArgs.channel.send(Localisation.getTranslation("checklevels.start.channel", channel, index + 1, NTChannels.length));
+            await cmdArgs.channel.send(Localisation.getLocalisation("checklevels.start.channel", channel, index + 1, NTChannels.length));
             const startTime = new Date().getTime();
             const messages = await getAllMessages(channel);
             await asyncForEach(leaderboardLevels, async (topLevel) => {
@@ -62,7 +62,7 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
                 await addXP({ xp: totalXp, member: topLevel.member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel }, false, true);
             });
             const timeDifferent = new Date().getTime() - startTime;
-            await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index + 1, NTChannels.length, secondsToTime(timeDifferent / 1000)));
+            await cmdArgs.channel.send(Localisation.getLocalisation("checklevels.end.channel", channel, index + 1, NTChannels.length, secondsToTime(timeDifferent / 1000)));
         });
         cmdArgs.reply("generic.done");
     }
@@ -99,7 +99,7 @@ export class CheckLevelsBaseCommand extends BaseCommand {
             }
         });
         await asyncForEach(NTChannels, async (channel: BaseGuildTextChannel, index: number) => {
-            await cmdArgs.channel.send(Localisation.getTranslation("checklevels.start.channel", channel, index + 1, NTChannels.length));
+            await cmdArgs.channel.send(Localisation.getLocalisation("checklevels.start.channel", channel, index + 1, NTChannels.length));
             const startTime = new Date().getTime();
             const messages = await getAllMessages(channel);
             let totalXp = 0;
@@ -113,7 +113,7 @@ export class CheckLevelsBaseCommand extends BaseCommand {
             });
             await addXP({ xp: totalXp, member, guild: cmdArgs.guild, channel: <BaseGuildTextChannel>cmdArgs.channel }, false, true);
             const timeDifferent = new Date().getTime() - startTime;
-            await cmdArgs.channel.send(Localisation.getTranslation("checklevels.end.channel", channel, index + 1, NTChannels.length, secondsToTime(timeDifferent / 1000)));
+            await cmdArgs.channel.send(Localisation.getLocalisation("checklevels.end.channel", channel, index + 1, NTChannels.length, secondsToTime(timeDifferent / 1000)));
         });
         cmdArgs.reply("generic.done");
     }

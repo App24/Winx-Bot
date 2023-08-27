@@ -13,7 +13,7 @@ export class WeeklyAnnouncementChannelBaseCommand extends BaseCommand {
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
                 options: [
                     {
-                        label: Localisation.getTranslation("button.get"),
+                        label: Localisation.getLocalisation("button.get"),
                         value: "get",
                         async onSelect({ interaction }) {
                             if (!serverInfo.document.weeklyLeaderboardAnnouncementChannel) {
@@ -26,7 +26,7 @@ export class WeeklyAnnouncementChannelBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.set"),
+                        label: Localisation.getLocalisation("button.set"),
                         value: "set",
                         async onSelect({ interaction }) {
                             const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
@@ -36,21 +36,21 @@ export class WeeklyAnnouncementChannelBaseCommand extends BaseCommand {
 
                             await serverInfo.save();
 
-                            msg.reply(Localisation.getTranslation("generic.done"));
+                            msg.reply(Localisation.getLocalisation("generic.done"));
                         },
                         default: false,
                         description: null,
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.clear"),
+                        label: Localisation.getLocalisation("button.clear"),
                         value: "clear",
                         async onSelect({ interaction }) {
                             serverInfo.document.weeklyLeaderboardAnnouncementChannel = "";
 
                             await serverInfo.save();
 
-                            interaction.reply(Localisation.getTranslation("generic.done"));
+                            interaction.reply(Localisation.getLocalisation("generic.done"));
                         },
                         default: false,
                         description: null,

@@ -1,4 +1,4 @@
-import { Message, MessageComponentInteraction, BaseMessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember, Attachment, CommandInteraction } from "discord.js";
+import { Message, MessageComponentInteraction, BaseMessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember, Attachment, CommandInteraction, ModalSubmitInteraction } from "discord.js";
 import { Localisation } from "../localisation";
 import { getMemberFromMention, getRoleFromMention, getTextChannelFromMention } from "./GetterUtils";
 import { MessageAuthor, SendTarget } from "./MessageButtonUtils";
@@ -11,9 +11,9 @@ export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Messag
 
     let sendMessage;
 
-    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction || sendTarget instanceof ModalSubmitInteraction) {
         sendMessage = sendTarget.reply.bind(sendTarget);
-        if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
+        if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction || sendTarget instanceof ModalSubmitInteraction) {
             if (!sendTarget.deferred && !sendTarget.replied) {
                 if (sendTarget instanceof MessageComponentInteraction) {
                     await sendTarget.deferUpdate();
@@ -30,10 +30,10 @@ export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Messag
     let message: Message<boolean>;
 
     if (typeof options === "string")
-        message = await sendMessage({ content: Localisation.getTranslation(options) });
+        message = await sendMessage({ content: Localisation.getLocalisation(options) });
     else {
         if (options.content !== undefined) {
-            options.content = Localisation.getTranslation(options.content);
+            options.content = Localisation.getLocalisation(options.content);
         }
         message = await sendMessage(options);
     }
@@ -65,7 +65,7 @@ export async function getReply<T>(replyData: ReplyData, callbackFn: (msg: Messag
                     collector.emit("end", "");
                 }
             } else {
-                msg.reply({ content: Localisation.getTranslation("generic.not.author"), allowedMentions: { users: [msg.author.id] } });
+                msg.reply({ content: Localisation.getLocalisation("generic.not.author"), allowedMentions: { users: [msg.author.id] } });
             }
         });
     }).then(value => value, () => {
@@ -90,7 +90,7 @@ export async function getNumberReply(replyData: ReplyData, bounds: { min?: numbe
         const level = parseInt(msg.content);
         if (isNaN(level) || level < bounds.min || level > bounds.max) {
             reject("invalid.number");
-            return msg.reply(Localisation.getTranslation("error.invalid.number"));
+            return msg.reply(Localisation.getLocalisation("error.invalid.number"));
         }
 
         resolve({ value: level, message: msg });
@@ -122,15 +122,36 @@ export async function getImageReply(replyData: ReplyData) {
         const image = msg.attachments.first();
         if (!image) {
             reject("missing.image");
-            return msg.reply(Localisation.getTranslation("error.missing.image"));
+            return msg.reply(Localisation.getLocalisation("error.missing.image"));
         }
 
         if (![".png", ".jpg", ".jpeg"].some(extension => image.name.toLowerCase().endsWith(extension))) {
             reject("invalid.image.format");
-            return msg.reply(Localisation.getTranslation("error.invalid.image"));
+            return msg.reply(Localisation.getLocalisation("error.invalid.image"));
         }
 
         resolve({ value: image, message: msg });
+    });
+}
+
+export async function getImagesReply(replyData: ReplyData) {
+    if (!replyData.options) {
+        replyData.options = "argument.reply.images";
+    }
+
+    return getReply<Attachment[]>(replyData, (msg, resolve, reject) => {
+        const images = msg.attachments?.map(v => v).filter(image => [".png", ".jpg", ".jpeg", ".webp"].some(extension => image.name.toLowerCase().endsWith(extension)));
+        if (!images) {
+            reject("missing.image");
+            return msg.reply(Localisation.getLocalisation("error.missing.image"));
+        }
+        
+        if(!images.length){
+            reject("invalid.image.format");
+            return msg.reply(Localisation.getLocalisation("error.invalid.image"));
+        }
+
+        resolve({ value: images, message: msg });
     });
 }
 
@@ -147,7 +168,7 @@ export async function getHexReply(replyData: ReplyData) {
 
         if (!isHexColor(hex)) {
             reject("invalid.hexcolor");
-            return msg.reply(Localisation.getTranslation("error.invalid.hexcolor"));
+            return msg.reply(Localisation.getLocalisation("error.invalid.hexcolor"));
         }
 
         resolve({ value: hex, message: msg });
@@ -163,7 +184,7 @@ export async function getRoleReply(replyData: GuildReplyData) {
         const role = await getRoleFromMention(msg.content, replyData.guild);
         if (!role) {
             reject("invalid.role");
-            return msg.reply(Localisation.getTranslation("error.invalid.role"));
+            return msg.reply(Localisation.getLocalisation("error.invalid.role"));
         }
 
         resolve({ value: role, message: msg });
@@ -179,7 +200,7 @@ export async function getTextChannelReply(replyData: GuildReplyData) {
         const channel = await getTextChannelFromMention(msg.content, replyData.guild);
         if (!channel) {
             reject("invalid.channel");
-            return msg.reply(Localisation.getTranslation("error.invalid.channel"));
+            return msg.reply(Localisation.getLocalisation("error.invalid.channel"));
         }
 
         resolve({ value: channel, message: msg });
@@ -195,7 +216,7 @@ export async function getMemberReply(replyData: GuildReplyData) {
         const member = await getMemberFromMention(msg.content, replyData.guild);
         if (!member) {
             reject("invalid.member");
-            return msg.reply(Localisation.getTranslation("error.invalid.member"));
+            return msg.reply(Localisation.getLocalisation("error.invalid.member"));
         }
 
         resolve({ value: member, message: msg });

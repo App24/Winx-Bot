@@ -26,14 +26,14 @@ export class ManageWingsBaseCommand extends BaseCommand {
                 },
                 options: [
                     {
-                        label: Localisation.getTranslation("button.get"),
+                        label: Localisation.getLocalisation("button.get"),
                         value: "get",
                         onSelect: async ({ interaction }) => {
                             const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             const options: SelectOption[] = [];
 
                             options.push({
-                                label: Localisation.getTranslation("button.cancel"),
+                                label: Localisation.getLocalisation("button.cancel"),
                                 value: "cancel",
                                 onSelect: async ({ interaction }) => {
                                     interaction.deferUpdate();
@@ -52,13 +52,13 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                     onSelect: async ({ interaction }) => {
                                         const wings = await this.getLevelWings(rankRole.document.level, cmdArgs.guildId);
                                         if (wings === DEFAULT_WINGS_DATA) {
-                                            return interaction.followUp(Localisation.getTranslation("error.empty.wings"));
+                                            return interaction.followUp(Localisation.getLocalisation("error.empty.wings"));
                                         }
 
                                         const options: SelectOption[] = [];
 
                                         options.push({
-                                            label: Localisation.getTranslation("button.cancel"),
+                                            label: Localisation.getLocalisation("button.cancel"),
                                             value: "-1",
                                             onSelect: async ({ interaction }) => {
                                                 interaction.deferUpdate();
@@ -75,8 +75,8 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                     value: wing,
                                                     onSelect: async ({ interaction }) => {
                                                         if (!existsSync(wings[wing]))
-                                                            return interaction.reply(Localisation.getTranslation("error.not.findfile"));
-                                                        await interaction.reply({ content: Localisation.getTranslation("setrank.wings.get", capitalise(wing)), files: [wings[wing]] });
+                                                            return interaction.reply(Localisation.getLocalisation("error.not.findfile"));
+                                                        await interaction.reply({ content: Localisation.getLocalisation("setrank.wings.get", capitalise(wing)), files: [wings[wing]] });
                                                     },
                                                     default: false,
                                                     description: null,
@@ -109,7 +109,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.add"),
+                        label: Localisation.getLocalisation("button.add"),
                         value: "set",
                         onSelect: async ({ interaction }) => {
                             const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
@@ -158,17 +158,17 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                         const { image: wingsImage, extension } = await drawCardWithWings(cardData);
 
                                         await createMessageButtons({
-                                            sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getTranslation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:
+                                            sendTarget: msg, author: cmdArgs.author, settings: { max: 1 }, options: { content: Localisation.getLocalisation("generic.allcorrect"), files: [canvasToMessageAttachment(wingsImage, "testCard", extension)] }, buttons:
                                                 [
                                                     {
                                                         customId: "accept",
                                                         style: ButtonStyle.Primary,
-                                                        label: Localisation.getTranslation("button.accept"),
+                                                        label: Localisation.getLocalisation("button.accept"),
                                                         onRun: async ({ interaction }) => {
                                                             const options: SelectOption[] = [];
 
                                                             options.push({
-                                                                label: Localisation.getTranslation("button.cancel"),
+                                                                label: Localisation.getLocalisation("button.cancel"),
                                                                 value: "-1",
                                                                 onSelect: async ({ interaction }) => {
                                                                     interaction.deferUpdate();
@@ -193,14 +193,14 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                                         if (existsSync(rankLevel.document.wings[name])) {
                                                                             unlinkSync(rankLevel.document.wings[name]);
                                                                         }
-                                                                        await interaction.reply(Localisation.getTranslation("setrank.wings.download"));
+                                                                        await interaction.reply(Localisation.getLocalisation("setrank.wings.download"));
                                                                         await downloadFile(image.url, filePath);
 
                                                                         rankLevel.document.wings[name] = filePath;
                                                                         await rankLevel.save();
 
                                                                         await interaction.deleteReply();
-                                                                        await interaction.followUp(Localisation.getTranslation("setrank.wings.add", capitalise(name)));
+                                                                        await interaction.followUp(Localisation.getLocalisation("setrank.wings.add", capitalise(name)));
                                                                     },
                                                                     default: false,
                                                                     description: null,
@@ -218,10 +218,10 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                     },
                                                     {
                                                         customId: "cancel",
-                                                        label: Localisation.getTranslation("button.cancel"),
+                                                        label: Localisation.getLocalisation("button.cancel"),
                                                         style: ButtonStyle.Danger,
                                                         onRun: async ({ interaction }) => {
-                                                            interaction.update({ content: Localisation.getTranslation("generic.canceled") });
+                                                            interaction.update({ content: Localisation.getLocalisation("generic.canceled") });
                                                         }
                                                     }
                                                 ]
@@ -244,7 +244,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.remove"),
+                        label: Localisation.getLocalisation("button.remove"),
                         value: "delete",
                         onSelect: async ({ interaction }) => {
                             const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
@@ -273,11 +273,11 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                         const rankLevel = rankRole;
                                         const wings = await this.getLevelWings(rankLevel.document.level, cmdArgs.guildId);
                                         if (wings === DEFAULT_WINGS_DATA) {
-                                            return interaction.followUp(Localisation.getTranslation("error.empty.wings"));
+                                            return interaction.followUp(Localisation.getLocalisation("error.empty.wings"));
                                         }
 
                                         options.push({
-                                            label: Localisation.getTranslation("button.cancel"),
+                                            label: Localisation.getLocalisation("button.cancel"),
                                             value: "-1",
                                             onSelect: async ({ interaction }) => {
                                                 interaction.deferUpdate();
@@ -297,7 +297,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
                                                             unlinkSync(rankLevel.document.wings[wing]);
                                                         rankLevel.document.wings[wing] = "";
                                                         await rankLevel.save();
-                                                        await interaction.reply(Localisation.getTranslation("setrank.wings.remove", capitalise(wing)));
+                                                        await interaction.reply(Localisation.getLocalisation("setrank.wings.remove", capitalise(wing)));
                                                     },
                                                     default: false,
                                                     description: null,

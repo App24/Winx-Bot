@@ -9,7 +9,7 @@ class CharacterLinesCommand extends Command {
     private name: string;
 
     public constructor(name: string) {
-        super(Localisation.getTranslation("tingz.command.description", capitalise(name)));
+        super(Localisation.getLocalisation("tingz.command.description", capitalise(name)));
         this.name = name;
         this.category = Characters;
 

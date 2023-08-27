@@ -5,6 +5,7 @@ import { drawLeaderboard } from "../../utils/CardUtils";
 import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
 import { getLeaderboardMembers, canvasToMessageAttachment, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { DocumentWrapper } from "../../structs/ModelWrapper";
 
 export class LeaderboardBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -24,6 +25,15 @@ export class LeaderboardBaseCommand extends BaseCommand {
         let msg: Message;
         if (cmdArgs instanceof CommandArguments) {
             msg = await cmdArgs.reply("leaderboard.generate");
+        }
+
+        {
+            const i = levels.findIndex(u => u.document.levelData.userId === user.id);
+            if (i < 0) {
+                const userLevel = new DocumentWrapper(new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: user.id } }));
+                await userLevel.save();
+                levels.push(userLevel);
+            }
         }
 
         levels.sort((a, b) => {

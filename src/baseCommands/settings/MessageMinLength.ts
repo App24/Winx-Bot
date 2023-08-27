@@ -13,7 +13,7 @@ export class MessageMinLengthBaseCommand extends BaseCommand {
         await createWhatToDoButtons({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1, time: 1000 * 60 * 6 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
                 {
-                    customId: "set", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
+                    customId: "set", style: ButtonStyle.Primary, label: Localisation.getLocalisation("button.set"), onRun: async ({ interaction }) => {
                         await createInteractionModal({
                             title: "Message Min Length",
                             fields: { custom_id: "length", required: true, style: TextInputStyle.Short, label: "Length", value: serverInfo.document.minMessageLength.toString() },
@@ -21,13 +21,13 @@ export class MessageMinLengthBaseCommand extends BaseCommand {
                             async onSubmit({ data, interaction: submission }) {
                                 const len = parseInt(data.information.length);
                                 if (isNaN(len)) {
-                                    return submission.reply(Localisation.getTranslation("error.invalid.number"));
+                                    return submission.reply(Localisation.getLocalisation("error.invalid.number"));
                                 }
-                                if (len < serverInfo.document.maxMessageLength) return submission.reply(Localisation.getTranslation("setminlength.error"));
+                                if (len < serverInfo.document.maxMessageLength) return submission.reply(Localisation.getLocalisation("setminlength.error"));
 
                                 serverInfo.document.minMessageLength = len;
                                 await serverInfo.save();
-                                await submission.reply(Localisation.getTranslation("setmaxlength.set", serverInfo.document.minMessageLength));
+                                await submission.reply(Localisation.getLocalisation("setmaxlength.set", serverInfo.document.minMessageLength));
                             },
                             filter: ({ data }) => {
                                 const length = parseInt(data.information.length);
@@ -37,8 +37,8 @@ export class MessageMinLengthBaseCommand extends BaseCommand {
                     }
                 },
                 {
-                    customId: "get", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.get"), onRun: async ({ interaction }) => {
-                        interaction.editReply(Localisation.getTranslation("setminlength.get", serverInfo.document.minMessageLength));
+                    customId: "get", style: ButtonStyle.Primary, label: Localisation.getLocalisation("button.get"), onRun: async ({ interaction }) => {
+                        interaction.editReply(Localisation.getLocalisation("setminlength.get", serverInfo.document.minMessageLength));
                     }
                 }
             ]

@@ -38,14 +38,14 @@ export class TicTacToeBaseCommand extends BaseCommand {
         const canvas: Canvas = canvasInfo[0];
         const buttons: ActionRowBuilder<MessageActionRowComponentBuilder>[] = canvasInfo[1];
 
-        const msg = await message.reply({ content: Localisation.getTranslation("tictactoe.turn", currentPlayer), files: [canvasToMessageAttachment(canvas, "tictactoe")], components: buttons, allowedMentions: { users: [currentPlayer] } });
+        const msg = await message.reply({ content: Localisation.getLocalisation("tictactoe.turn", currentPlayer), files: [canvasToMessageAttachment(canvas, "tictactoe")], components: buttons, allowedMentions: { users: [currentPlayer] } });
 
         const collector = msg.createMessageComponentCollector({ filter: () => true, time: 5 * 60 * 1000 });
 
         collector.on("collect", async (interaction) => {
             if (!interaction.isButton()) return;
             if (interaction.user.id !== currentPlayer) {
-                await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
+                await interaction.reply({ ephemeral: true, content: Localisation.getLocalisation("generic.not.author") });
                 return;
             }
             const data: any[] = interaction.customId.split("_");
@@ -54,7 +54,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
             const val = data[2];
 
             if (val != TicTacToeValue.Empty) {
-                await interaction.reply({ content: Localisation.getTranslation("tictactoe.error.alreadyplaced"), ephemeral: true });
+                await interaction.reply({ content: Localisation.getLocalisation("tictactoe.error.alreadyplaced"), ephemeral: true });
                 return;
             }
 
@@ -72,7 +72,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
                 if (currentGame.positions[i * this.nSquares + x] !== playerVal)
                     break;
                 if (i === this.nSquares - 1) {
-                    message.reply({ content: Localisation.getTranslation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
+                    message.reply({ content: Localisation.getLocalisation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
                     return;
                 }
             }
@@ -81,7 +81,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
                 if (currentGame.positions[y * this.nSquares + i] !== playerVal)
                     break;
                 if (i === this.nSquares - 1) {
-                    message.reply({ content: Localisation.getTranslation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
+                    message.reply({ content: Localisation.getLocalisation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
                     return;
                 }
             }
@@ -91,7 +91,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
                     if (currentGame.positions[i * this.nSquares + i] !== playerVal)
                         break;
                     if (i === this.nSquares - 1) {
-                        message.reply({ content: Localisation.getTranslation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
+                        message.reply({ content: Localisation.getLocalisation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
                         return;
                     }
                 }
@@ -102,7 +102,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
                     if (currentGame.positions[((this.nSquares - 1) - i) * this.nSquares + i] !== playerVal)
                         break;
                     if (i === this.nSquares - 1) {
-                        message.reply({ content: Localisation.getTranslation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
+                        message.reply({ content: Localisation.getLocalisation("minigame.win", currentPlayer), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
                         return;
                     }
                 }
@@ -111,7 +111,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
             if (currentGame.positions.filter((val) => val === TicTacToeValue.Empty).length > 0)
                 this.playGame(currentGame, currentPlayer === currentGame.player1 ? currentGame.player2 : currentGame.player1, message);
             else
-                message.reply({ content: Localisation.getTranslation("minigame.draw"), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
+                message.reply({ content: Localisation.getLocalisation("minigame.draw"), files: [canvasToMessageAttachment(<any>this.drawCanvas(currentGame, currentPlayer)[0], "tictactoe")], allowedMentions: { users: [currentGame.player1, currentGame.player2] } });
         });
     }
 

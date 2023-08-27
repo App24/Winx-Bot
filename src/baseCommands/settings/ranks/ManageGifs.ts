@@ -18,14 +18,14 @@ export class ManageGifsBaseCommand extends BaseCommand {
                 },
                 options: [
                     {
-                        label: Localisation.getTranslation("button.get"),
+                        label: Localisation.getLocalisation("button.get"),
                         value: "get",
                         onSelect: async ({ interaction }) => {
                             const rankRoles = await getDatabase(RankLevel, { guild: cmdArgs.guild });
                             const options: SelectOption[] = [];
 
                             options.push({
-                                label: Localisation.getTranslation("button.cancel"),
+                                label: Localisation.getLocalisation("button.cancel"),
                                 value: "cancel",
                                 onSelect: async ({ interaction }) => {
                                     interaction.deferUpdate();
@@ -44,13 +44,13 @@ export class ManageGifsBaseCommand extends BaseCommand {
                                     onSelect: async ({ interaction }) => {
                                         const gifs = await this.getLevelGifs(rankRole.document.level, cmdArgs.guildId);
                                         if (!gifs || gifs.length <= 0) {
-                                            return interaction.reply(Localisation.getTranslation("error.missing.gifs"));
+                                            return interaction.reply(Localisation.getLocalisation("error.missing.gifs"));
                                         }
 
                                         const options: SelectOption[] = [];
 
                                         options.push({
-                                            label: Localisation.getTranslation("button.cancel"),
+                                            label: Localisation.getLocalisation("button.cancel"),
                                             value: "-1",
                                             onSelect: async ({ interaction }) => {
                                                 interaction.deferUpdate();
@@ -97,14 +97,14 @@ export class ManageGifsBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.add"),
+                        label: Localisation.getLocalisation("button.add"),
                         value: "set",
                         onSelect: async ({ interaction }) => {
                             const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
                             const options: SelectOption[] = [];
 
                             options.push({
-                                label: Localisation.getTranslation("button.cancel"),
+                                label: Localisation.getLocalisation("button.cancel"),
                                 value: "cancel",
                                 onSelect: async ({ interaction }) => {
                                     interaction.deferUpdate();
@@ -128,7 +128,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
 
                                         rankLevel.document.gifs.push(gif);
                                         await rankLevel.save();
-                                        interaction.followUp(Localisation.getTranslation("setrank.gifs.add"));
+                                        interaction.followUp(Localisation.getLocalisation("setrank.gifs.add"));
                                     },
                                     default: false,
                                     description: null,
@@ -147,7 +147,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.remove"),
+                        label: Localisation.getLocalisation("button.remove"),
                         value: "delete",
                         onSelect: async ({ interaction }) => {
                             const rankRoles = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
@@ -173,7 +173,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
                                     onSelect: async ({ interaction }) => {
                                         const gifs = await this.getLevelGifs(rankRole.document.level, cmdArgs.guildId);
                                         if (!gifs || gifs.length <= 0) {
-                                            return interaction.reply(Localisation.getTranslation("error.missing.gifs"));
+                                            return interaction.reply(Localisation.getLocalisation("error.missing.gifs"));
                                         }
 
                                         const rankLevel = rankRole;
@@ -181,7 +181,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
                                         const options: SelectOption[] = [];
 
                                         options.push({
-                                            label: Localisation.getTranslation("button.cancel"),
+                                            label: Localisation.getLocalisation("button.cancel"),
                                             value: "-1",
                                             onSelect: async ({ interaction }) => {
                                                 interaction.deferUpdate();
@@ -198,7 +198,7 @@ export class ManageGifsBaseCommand extends BaseCommand {
                                                 onSelect: async ({ interaction }) => {
                                                     rankLevel.document.gifs.splice(i, 1);
                                                     await rankLevel.save();
-                                                    interaction.reply(Localisation.getTranslation("setrank.gifs.remove"));
+                                                    interaction.reply(Localisation.getLocalisation("setrank.gifs.remove"));
                                                 },
                                                 default: false,
                                                 description: null,

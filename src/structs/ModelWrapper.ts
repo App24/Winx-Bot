@@ -1,4 +1,4 @@
-import { Document, InferSchemaType, Schema } from "mongoose";
+import { Document, InferSchemaType } from "mongoose";
 
 export class DocumentWrapper<TSchema = any>{
     public document: Document<unknown, Record<string, unknown>, TSchema> & TSchema;

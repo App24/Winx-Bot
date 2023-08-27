@@ -11,7 +11,7 @@ import { rgbToHsl, fitTextOnCanvas, roundRect, underlineText, canvasColor } from
 import { capitalise } from "./FormatUtils";
 import { getRoleById } from "./GetterUtils";
 import { getWingsImageByLevel } from "./RankUtils";
-import { asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, isBooster, isPatreon, getOneDatabase, getDatabase } from "./Utils";
+import { asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, isBooster, isPatron, getOneDatabase, getDatabase } from "./Utils";
 import { getLevelXP } from "./XPUtils";
 import { LevelData } from "../structs/databaseTypes/LevelData";
 import { DocumentWrapper, ModelWrapper } from "../structs/ModelWrapper";
@@ -60,7 +60,7 @@ export async function drawCard(cardData: CardData) {
 
     const wings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: member.id });
     let wingsImage: Image;
-    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatreon(member.id, guild.id)) || isBooster(member))) {
+    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatron(member.id, guild.id)) || isBooster(member))) {
         wingsImage = await loadImage(wings.document.wingsFile);
     }
 
@@ -92,7 +92,7 @@ export async function drawGreenScreenCard(greenScreenColor: string, cardData: Ca
 
     const wings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: member.id });
     let wingsImage: Image;
-    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatreon(member.id, guild.id)) || isBooster(member))) {
+    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatron(member.id, guild.id)) || isBooster(member))) {
         wingsImage = await loadImage(wings.document.wingsFile);
     }
 
@@ -450,14 +450,14 @@ async function drawCardNextTransformation(ctx: CanvasRenderingContext2D, decoded
 
     const { nextRank, guild } = data;
 
-    let nextRankText = Localisation.getTranslation("generic.none");
+    let nextRankText = Localisation.getLocalisation("generic.none");
     if (nextRank) {
         const role = await getRoleById(nextRank.roleId, guild);
-        nextRankText = role ? capitalise(role.name) : Localisation.getTranslation("generic.unknown");
+        nextRankText = role ? capitalise(role.name) : Localisation.getLocalisation("generic.unknown");
     }
-    nextRankText = Localisation.getTranslation("magiclevels.transformation.next", nextRankText);
+    nextRankText = Localisation.getLocalisation("magiclevels.transformation.next", nextRankText);
     if (nextRank)
-        nextRankText += ` ${Localisation.getTranslation("magiclevels.transformation.next.level", nextRank.level)}`;
+        nextRankText += ` ${Localisation.getLocalisation("magiclevels.transformation.next.level", nextRank.level)}`;
 
     const fontSize = fitTextOnCanvas(ctx, nextRankText, CARD_CANVAS_WIDTH, nextTransformation_textFont);
 
@@ -482,14 +482,14 @@ async function drawCardCurrentTransformation(ctx: CanvasRenderingContext2D, deco
 
     const { currentRank, guild } = data;
 
-    let currentRankText = Localisation.getTranslation("generic.none");
+    let currentRankText = Localisation.getLocalisation("generic.none");
     if (currentRank) {
         const role = await getRoleById(currentRank.roleId, guild);
-        currentRankText = role ? capitalise(role.name) : Localisation.getTranslation("generic.unknown");
+        currentRankText = role ? capitalise(role.name) : Localisation.getLocalisation("generic.unknown");
     }
-    currentRankText = Localisation.getTranslation("magiclevels.transformation.current", currentRankText);
+    currentRankText = Localisation.getLocalisation("magiclevels.transformation.current", currentRankText);
     if (currentRank)
-        currentRankText += ` ${Localisation.getTranslation("magiclevels.transformation.current.level", currentRank.level)}`;
+        currentRankText += ` ${Localisation.getLocalisation("magiclevels.transformation.current.level", currentRank.level)}`;
 
     const fontSize = fitTextOnCanvas(ctx, currentRankText, CARD_CANVAS_WIDTH, currentTransformation_textFont);
 
@@ -513,7 +513,7 @@ async function drawCardRank(ctx: CanvasRenderingContext2D, decodedCode, data) {
 
     const { leaderboardPosition } = data;
 
-    const lbPositionText = Localisation.getTranslation("magiclevels.lb.position", leaderboardPosition);
+    const lbPositionText = Localisation.getLocalisation("magiclevels.lb.position", leaderboardPosition);
 
     const cardTopInfoFontSize = 50 * rank_textSize;
 
@@ -526,7 +526,7 @@ async function drawCardWeeklyRank(ctx: CanvasRenderingContext2D, decodedCode, da
 
     const { weeklyLeaderboardPosition } = data;
 
-    const lbPositionText = Localisation.getTranslation("magiclevels.weeklb.position", weeklyLeaderboardPosition);
+    const lbPositionText = Localisation.getLocalisation("magiclevels.weeklb.position", weeklyLeaderboardPosition);
 
     const cardTopInfoFontSize = 50 * weekrank_textSize;
 
@@ -547,7 +547,7 @@ async function drawCardXP(ctx: CanvasRenderingContext2D, decodedCode, data) {
     if (xp_middleLevel === "true" && cl_levels !== undefined) {
         const fontSize = 50 * levels_textSize;
 
-        const levelsText = Localisation.getTranslation("magiclevels.level", userLevel.level);
+        const levelsText = Localisation.getLocalisation("magiclevels.level", userLevel.level);
 
         ctx.textBaseline = levels_textBaseline;
         ctx.font = `${fontSize}px ${levels_textFont}`;
@@ -567,7 +567,7 @@ async function drawCardXP(ctx: CanvasRenderingContext2D, decodedCode, data) {
 
     const fontSize = 33.33333333333333 * xp_textSize;
 
-    drawCardText(ctx, Localisation.getTranslation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), fontSize, xp_textFont, xp_textColor, xp_textBaseline, xp_textAlign, xp_strokeSize, xp_strokeColor, xp_positionX, xp_positionY);
+    drawCardText(ctx, Localisation.getLocalisation("magiclevels.levels", userLevel.xp, getLevelXP(userLevel.level)), fontSize, xp_textFont, xp_textColor, xp_textBaseline, xp_textAlign, xp_strokeSize, xp_strokeColor, xp_positionX, xp_positionY);
 }
 
 async function drawCardLevel(ctx: CanvasRenderingContext2D, decodedCode, data) {
@@ -577,7 +577,7 @@ async function drawCardLevel(ctx: CanvasRenderingContext2D, decodedCode, data) {
 
     const fontSize = 50 * levels_textSize;
 
-    const levelsText = Localisation.getTranslation("magiclevels.level", userLevel.level);
+    const levelsText = Localisation.getLocalisation("magiclevels.level", userLevel.level);
 
     drawCardText(ctx, levelsText, fontSize, levels_textFont, levels_textColor, levels_textBaseline, levels_textAlign, levels_strokeSize, levels_strokeColor, levels_positionX, levels_positionY);
 }
@@ -636,7 +636,7 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
 
     ctx.font = textFont;
     leaderboardLevels.forEach((value) => {
-        const levelText = Localisation.getTranslation("leaderboard.output", value.userLevel.level);
+        const levelText = Localisation.getLocalisation("leaderboard.output", value.userLevel.level);
         textSizes.push(ctx.measureText(`${value.position + 1}. ${value.member.user.tag} ${levelText}`).width + ((pfpRadius + pfpPadding) + (pfpRadius + borderThickness + pfpPadding * 2)));
     });
 
@@ -671,9 +671,9 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
     colors.push(getBackgroundColor(null, null, null, null));
 
     await asyncForEach(leaderboardLevels, async (value) => {
-        const userSettings = serverUserSettings.find(s => s.document.userId === value.member.id);
-        if (userSettings.isNull()) {
-            userSettings.document = new ServerUserSettings({ guildId, userId: value.member.id });
+        let userSettings = serverUserSettings.find(s => s.document.userId === value.member.id);
+        if (!userSettings || userSettings.isNull()) {
+            userSettings = new DocumentWrapper(new ServerUserSettings({ guildId, userId: value.member.id }));
             await userSettings.save();
         }
         const { background_primaryColor, background_secondaryColor, lb_primaryColor, lb_backgroundColorType } = decodeCode(userSettings.document.cardCode);
@@ -727,9 +727,9 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
     let previousUserSettings: ModelWrapper<typeof ServerUserSettings.schema>;
 
     await asyncForEach(leaderboardLevels, async (value, i) => {
-        const userSettings = serverUserSettings.find(s => s.document.userId === value.member.id);
-        if (userSettings.isNull()) {
-            userSettings.document = new ServerUserSettings({ guildId, userId: value.member.id });
+        let userSettings = serverUserSettings.find(s => s.document.userId === value.member.id);
+        if (!userSettings || userSettings.isNull()) {
+            userSettings = new DocumentWrapper(new ServerUserSettings({ guildId, userId: value.member.id }));
             await userSettings.save();
         }
 
@@ -747,7 +747,7 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
 
         const userLevel = value.userLevel;
 
-        const levelText = Localisation.getTranslation("leaderboard.output", value.userLevel.level);
+        const levelText = Localisation.getLocalisation("leaderboard.output", value.userLevel.level);
 
         const filled = userLevel.xp / getLevelXP(userLevel.level);
 

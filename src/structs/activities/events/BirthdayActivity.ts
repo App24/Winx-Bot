@@ -12,6 +12,6 @@ export class BirthdayActivity extends OneDayEventActivity {
     }
 
     public getActivity(): string | Promise<string> {
-        return Localisation.getTranslation("activity.event.birthday", capitalise(this.name));
+        return Localisation.getLocalisation("activity.event.birthday", capitalise(this.name));
     }
 }

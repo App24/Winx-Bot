@@ -26,7 +26,7 @@
 
     "error.empty.levels": "There are no levels in this server!",
     "error.empty.ranks": "There are no transformations in this server!",
-    "error.empty.patreon": "There are no patreons in this server!",
+    "error.empty.patreon": "There are no patrons in this server!",
     "error.empty.errors": "There are no errors!",
     "error.empty.suggestions": "There are no suggestions!",
     "error.empty.excludedchannels": "There are no excluded channels!",
@@ -53,7 +53,7 @@
     "command.available.server": "This is a server only command!",
     "command.available.dm": "This is a DM only command!",
 
-    "command.access.patreon": "You cannot run this command! It is a patreon only feature! Contact a mod to find out how to gain access to it!",
+    "command.access.patreon": "You cannot run this command! It is a patron only feature! Contact a mod to find out how to gain access to it!",
     "command.access.booster": "You cannot run this command! It is a booster only feature!",
     "command.access.moderator": "You cannot run this command!",
     "command.access.guildOwner": "You cannot run this command!",

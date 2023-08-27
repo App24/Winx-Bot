@@ -4,7 +4,7 @@ backupDatabases/
 node_modules/
 dist/
 guildSpecific/
-wings/
+wings/**
 customWings/
 customWingsRequest/
 emojis/

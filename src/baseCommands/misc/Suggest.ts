@@ -18,7 +18,7 @@ export class SuggestBaseCommand extends BaseCommand {
         }
         const user = cmdArgs.author;
         const request = cmdArgs.args.join(" ");
-        const text = Localisation.getTranslation("suggestion.request", user, request);
+        const text = Localisation.getLocalisation("suggestion.request", user, request);
         const embed = new EmbedBuilder();
         embed.setDescription(text);
         embed.setTimestamp();
@@ -37,9 +37,9 @@ export class SuggestBaseCommand extends BaseCommand {
         await createMessageButtons({
             sendTarget: <TextChannel>channel, author: process.env.OWNER_ID, options: { embeds: [embed] }, settings: { max: 1, time: -1 }, buttons: [
                 {
-                    customId: "accept", style: ButtonStyle.Success, label: Localisation.getTranslation("button.accept"), onRun: async ({ interaction, message }) => {
+                    customId: "accept", style: ButtonStyle.Success, label: Localisation.getLocalisation("button.accept"), onRun: async ({ interaction, message }) => {
                         const embed = EmbedBuilder.from(message.embeds[0]);
-                        embed.setTitle(Localisation.getTranslation("generic.accepted"));
+                        embed.setTitle(Localisation.getLocalisation("generic.accepted"));
                         interaction.update({ embeds: [embed], components: [] });
 
                         suggestion.state = SuggestionState.Accepted;
@@ -48,9 +48,9 @@ export class SuggestBaseCommand extends BaseCommand {
                     }
                 },
                 {
-                    customId: "deny", style: ButtonStyle.Danger, label: Localisation.getTranslation("button.deny"), onRun: async ({ interaction, message }) => {
+                    customId: "deny", style: ButtonStyle.Danger, label: Localisation.getLocalisation("button.deny"), onRun: async ({ interaction, message }) => {
                         const embed = EmbedBuilder.from(message.embeds[0]);
-                        embed.setTitle(Localisation.getTranslation("generic.rejected"));
+                        embed.setTitle(Localisation.getLocalisation("generic.rejected"));
                         interaction.update({ embeds: [embed], components: [] });
 
                         suggestion.state = SuggestionState.Rejected;

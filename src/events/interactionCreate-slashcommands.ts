@@ -4,7 +4,7 @@ import { Localisation } from "../localisation";
 import { CommandAvailable } from "../structs/CommandAvailable";
 import { CommandAccess } from "../structs/CommandAccess";
 import { SlashCommandArguments } from "../structs/SlashCommand";
-import { isBooster, isDM, isModerator, isPatreon, reportBotError } from "../utils/Utils";
+import { isBooster, isDM, isModerator, isPatron, reportBotError } from "../utils/Utils";
 import { secondsToTime } from "../utils/FormatUtils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
@@ -20,7 +20,7 @@ export = () => {
 
         const reportIssue = async (text: string, ...args) => {
             await interaction.deferReply({ ephemeral: true }).catch(() => undefined);
-            await interaction.followUp(Localisation.getTranslation(text, ...args));
+            await interaction.followUp(Localisation.getLocalisation(text, ...args));
         };
 
 
@@ -32,8 +32,8 @@ export = () => {
 
 
         switch (command.access) {
-            case CommandAccess.Patreon: {
-                if (isDM(interaction.channel) || !(await isPatreon(interaction.user.id, interaction.guild.id))) {
+            case CommandAccess.Patron: {
+                if (isDM(interaction.channel) || !(await isPatron(interaction.user.id, interaction.guild.id))) {
                     return reportIssue("command.access.patreon");
                 }
             } break;
@@ -57,8 +57,8 @@ export = () => {
                     return reportIssue("command.access.botOwner");
                 }
             } break;
-            case CommandAccess.PatreonOrBooster: {
-                if (isDM(interaction.channel) || (!(await isPatreon(interaction.user.id, interaction.guild.id)) && !isBooster(<GuildMember>interaction.member))) {
+            case CommandAccess.PatronOrBooster: {
+                if (isDM(interaction.channel) || (!(await isPatron(interaction.user.id, interaction.guild.id)) && !isBooster(<GuildMember>interaction.member))) {
                     return reportIssue("command.access.patreon");
                 }
             } break;

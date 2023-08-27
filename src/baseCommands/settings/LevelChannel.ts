@@ -14,18 +14,18 @@ export class LevelChannelBaseCommand extends BaseCommand {
         await createWhatToDoButtons({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { time: 1000 * 60 * 5, max: 1 }, beforeButton: async ({ interaction }) => await interaction.update({ components: [] }), buttons: [
                 {
-                    customId: "set", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.set"), onRun: async ({ interaction }) => {
+                    customId: "set", style: ButtonStyle.Primary, label: Localisation.getLocalisation("button.set"), onRun: async ({ interaction }) => {
                         const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                         if (!channel) return;
 
                         serverInfo.document.levelChannel = channel.id;
 
                         await serverInfo.save();
-                        msg.reply(Localisation.getTranslation("levelchannel.set", channel));
+                        msg.reply(Localisation.getLocalisation("levelchannel.set", channel));
                     }
                 },
                 {
-                    customId: "get", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.get"), onRun: async () => {
+                    customId: "get", style: ButtonStyle.Primary, label: Localisation.getLocalisation("button.get"), onRun: async () => {
                         if (!serverInfo.document.levelChannel) return cmdArgs.reply("error.empty.levelchannel");
                         const channel = await getTextChannelFromMention(serverInfo.document.levelChannel, cmdArgs.guild);
                         if (!channel) return cmdArgs.reply("levelchannel.missing.channel");
@@ -33,7 +33,7 @@ export class LevelChannelBaseCommand extends BaseCommand {
                     }
                 },
                 {
-                    customId: "clear", style: ButtonStyle.Danger, label: Localisation.getTranslation("button.clear"), onRun: async () => {
+                    customId: "clear", style: ButtonStyle.Danger, label: Localisation.getLocalisation("button.clear"), onRun: async () => {
                         if (!serverInfo.document.levelChannel) return cmdArgs.reply("error.empty.levelchannel");
 
                         serverInfo.document.levelChannel = "";

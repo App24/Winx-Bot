@@ -5,6 +5,8 @@ import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
 import { getLeaderboardMembers, canvasToMessageAttachment, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { WeeklyLeaderboard } from "../../structs/databaseTypes/WeeklyLeaderboard";
+import { WEEKLY_TIME } from "../../Constants";
+import { dateToString } from "../../utils/FormatUtils";
 
 export class WeeklyLeaderboardBaseCommand extends BaseCommand {
     public async onRun(cmdArgs: BaseCommandType) {
@@ -26,6 +28,14 @@ export class WeeklyLeaderboardBaseCommand extends BaseCommand {
             msg = await cmdArgs.reply("leaderboard.generate");
         }
 
+        {
+            const i = recentLeaderboard.document.levels.findIndex(u => u.userId === user.id);
+            if (i < 0) {
+                recentLeaderboard.document.levels.push({ userId: user.id, xp: 0, level: 0 });
+                await recentLeaderboard.save();
+            }
+        }
+
         recentLeaderboard.document.levels.sort((a, b) => {
             if (a.level === b.level) {
                 return b.xp - a.xp;
@@ -45,7 +55,10 @@ export class WeeklyLeaderboardBaseCommand extends BaseCommand {
             }
         }
 
-        const leaderBoard = await drawLeaderboard(leaderboardLevels, user, cmdArgs.guildId, "Weekly Leaderboard");
+        const startDate = recentLeaderboard.document.startDate;
+        const endDate = new Date(recentLeaderboard.document.startDate.getTime() + WEEKLY_TIME);
+
+        const leaderBoard = await drawLeaderboard(leaderboardLevels, user, cmdArgs.guildId, `Weekly ${dateToString(startDate, "{dd}/{MM}/{YYYY}")} - ${dateToString(endDate, "{dd}/{MM}/{YYYY}")}`);
 
         cmdArgs.reply({ files: [canvasToMessageAttachment(leaderBoard, "leaderboard")] });
 

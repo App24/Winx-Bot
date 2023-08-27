@@ -16,7 +16,7 @@ export class CustomCommandListBaseCommand extends BaseCommand {
         if (!cmdArgs.args.length) {
             const embed = new EmbedBuilder();
             const data = [];
-            embed.setTitle(Localisation.getTranslation("customcommand.list.title"));
+            embed.setTitle(Localisation.getLocalisation("customcommand.list.title"));
             customCommands.forEach(customCommand => {
                 switch (customCommand.document.access) {
                     case CommandAccess.Moderators: {

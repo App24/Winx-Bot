@@ -1,0 +1,19 @@
+Body base (skin tone)
+
+Head:
+    Eyes
+    Lips
+    Nose
+    Hair
+
+Torso/Arms:
+    Shirt
+
+Hands:
+    Gloves
+
+Legs:
+    Skirt
+
+Feet:
+    Boots

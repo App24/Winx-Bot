@@ -31,7 +31,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                             customCommand.document.description = newDescription;
 
                             await customCommand.save();
-                            message.reply(Localisation.getTranslation("customcommand.success.edit"));
+                            message.reply(Localisation.getLocalisation("customcommand.success.edit"));
                         },
                     },
                     {
@@ -60,7 +60,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                                         await customCommand.save();
 
-                                        interaction.reply(Localisation.getTranslation("customcommand.success.edit"));
+                                        interaction.reply(Localisation.getLocalisation("customcommand.success.edit"));
                                     },
                                     description: null,
                                     emoji: null
@@ -69,7 +69,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                             options.push({
                                 value: "cancel",
-                                label: Localisation.getTranslation("generic.cancel"),
+                                label: Localisation.getLocalisation("generic.cancel"),
                                 onSelect: async ({ interaction }) => {
                                     interaction.deferUpdate();
                                 },
@@ -120,7 +120,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                                                             customCommand.document.outputs[i] = newOutput;
 
                                                             await customCommand.save();
-                                                            message.reply(Localisation.getTranslation("customcommand.success.edit"));
+                                                            message.reply(Localisation.getLocalisation("customcommand.success.edit"));
                                                         }
                                                     },
                                                     {
@@ -134,12 +134,12 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                                                             await customCommand.save();
 
-                                                            interaction.reply(Localisation.getTranslation("customcommand.success.edit"));
+                                                            interaction.reply(Localisation.getLocalisation("customcommand.success.edit"));
                                                         }
                                                     },
                                                     {
                                                         value: "cancel",
-                                                        label: Localisation.getTranslation("generic.cancel"),
+                                                        label: Localisation.getLocalisation("generic.cancel"),
                                                         onSelect: async ({ interaction }) => {
                                                             interaction.deferUpdate();
                                                         },
@@ -156,7 +156,7 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
 
                             options.push({
                                 value: "add",
-                                label: Localisation.getTranslation("button.add"),
+                                label: Localisation.getLocalisation("button.add"),
                                 default: false,
                                 description: null,
                                 emoji: null,
@@ -167,13 +167,13 @@ export class CustomCommandEditBaseCommand extends BaseCommand {
                                     customCommand.document.outputs.push(newOutput);
 
                                     await customCommand.save();
-                                    message.reply(Localisation.getTranslation("customcommand.success.edit"));
+                                    message.reply(Localisation.getLocalisation("customcommand.success.edit"));
                                 }
                             });
 
                             options.push({
                                 value: "cancel",
-                                label: Localisation.getTranslation("generic.cancel"),
+                                label: Localisation.getLocalisation("generic.cancel"),
                                 onSelect: async ({ interaction }) => {
                                     interaction.deferUpdate();
                                 },

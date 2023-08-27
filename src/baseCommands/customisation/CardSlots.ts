@@ -32,7 +32,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
         }
 
         selectMenuOptions.push({
-            label: Localisation.getTranslation("button.save"),
+            label: Localisation.getLocalisation("button.save"),
             value: "save",
             default: false,
             description: null,
@@ -61,14 +61,14 @@ export class CardSlotsBaseCommand extends BaseCommand {
                     await userSettings.save();
 
                     if (target instanceof ModalSubmitInteraction) {
-                        target.reply(Localisation.getTranslation("generic.done"));
+                        target.reply(Localisation.getLocalisation("generic.done"));
                     } else {
-                        target.reply(Localisation.getTranslation("generic.done"));
+                        target.reply(Localisation.getLocalisation("generic.done"));
                     }
                 };
 
                 options.push({
-                    label: Localisation.getTranslation("button.new"),
+                    label: Localisation.getLocalisation("button.new"),
                     value: "new",
                     default: false,
                     description: null,
@@ -108,7 +108,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
 
         if (slotsMenuOptions.length) {
             selectMenuOptions.push({
-                label: Localisation.getTranslation("button.load"),
+                label: Localisation.getLocalisation("button.load"),
                 value: "load",
                 default: false,
                 description: null,
@@ -128,7 +128,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
                                 const cardSlot = userSettings.document.cardSlots.find(c => c.name === slot);
 
                                 if (!cardSlot) {
-                                    return interaction.reply(Localisation.getTranslation("error.generic"));
+                                    return interaction.reply(Localisation.getLocalisation("error.generic"));
                                 }
 
                                 if (cardSlot.customWings !== "" && existsSync(cardSlot.customWings)) {
@@ -149,7 +149,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
 
                                 await userSettings.save();
 
-                                interaction.reply(Localisation.getTranslation("generic.done"));
+                                interaction.reply(Localisation.getLocalisation("generic.done"));
                             },
                         });
                     });
@@ -163,7 +163,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
             });
 
             selectMenuOptions.push({
-                label: Localisation.getTranslation("button.remove"),
+                label: Localisation.getLocalisation("button.remove"),
                 value: "remove",
                 default: false,
                 description: null,
@@ -172,7 +172,7 @@ export class CardSlotsBaseCommand extends BaseCommand {
                     const options: SelectOption[] = [];
 
                     options.push({
-                        label: Localisation.getTranslation("button.cancel"),
+                        label: Localisation.getLocalisation("button.cancel"),
                         value: "cancel",
                         onSelect: async ({ interaction }) => {
                             interaction.deferUpdate();
@@ -191,15 +191,15 @@ export class CardSlotsBaseCommand extends BaseCommand {
                             emoji: null,
                             async onSelect({ interaction }) {
                                 createMessageButtons({
-                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getTranslation("generic.confirmation"), buttons: [
+                                    sendTarget: interaction, author: cmdArgs.author, settings: { max: 1 }, options: Localisation.getLocalisation("generic.confirmation"), buttons: [
                                         {
                                             customId: "accept",
                                             style: ButtonStyle.Primary,
-                                            label: Localisation.getTranslation("button.accept"),
+                                            label: Localisation.getLocalisation("button.accept"),
                                             onRun: async ({ interaction }) => {
                                                 const slotIndex = userSettings.document.cardSlots.findIndex(c => c.name === slot);
 
-                                                if (slotIndex < 0) return interaction.reply(Localisation.getTranslation("error.generic"));
+                                                if (slotIndex < 0) return interaction.reply(Localisation.getLocalisation("error.generic"));
 
                                                 const cardSlot = userSettings.document.cardSlots[slotIndex];
 
@@ -211,13 +211,13 @@ export class CardSlotsBaseCommand extends BaseCommand {
 
                                                 await userSettings.save();
 
-                                                interaction.reply(Localisation.getTranslation("generic.done"));
+                                                interaction.reply(Localisation.getLocalisation("generic.done"));
                                             }
                                         },
                                         {
                                             customId: "cancel",
                                             style: ButtonStyle.Danger,
-                                            label: Localisation.getTranslation("button.cancel"),
+                                            label: Localisation.getLocalisation("button.cancel"),
                                             onRun: async ({ interaction }) => {
                                                 await interaction.deferUpdate();
                                             }

@@ -131,7 +131,7 @@ export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuild
     }
 
     const options: BaseMessageOptions = {
-        content: Localisation.getTranslation(levelUp ? "xp.level.up" : "xp.level.down", member, level)
+        content: Localisation.getLocalisation(levelUp ? "xp.level.up" : "xp.level.down", member, level)
     };
 
     if (userSettings.document.levelPing) {
@@ -140,7 +140,7 @@ export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuild
 
     await levelChannel.send(options);
     if (rankDetails && !rankDetails.rankLevel.isNull()) {
-        await levelChannel.send(Localisation.getTranslation(levelUp ? "xp.transformation.earn" : "xp.transformation.lost", member, capitalise(rankDetails.rank.name)));
+        await levelChannel.send(Localisation.getLocalisation(levelUp ? "xp.transformation.earn" : "xp.transformation.lost", member, capitalise(rankDetails.rank.name)));
         if (rankDetails.rankLevel.document.gifs && rankDetails.rankLevel.document.gifs.length) {
             await levelChannel.send(rankDetails.rankLevel.document.gifs[Math.floor(Math.random() * rankDetails.rankLevel.document.gifs.length)]);
         }

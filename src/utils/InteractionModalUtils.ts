@@ -3,6 +3,12 @@ import { APITextInputComponent, ActionRowBuilder, CollectorFilter, CommandIntera
 export async function createInteractionModal(modalData: ModalData) {
     const { sendTarget, fields, title, onSubmit, filter } = modalData;
 
+    let { time } = modalData;
+
+    if (!time) {
+        time = 1000 * 5 * 60;
+    }
+
     const optionsList = (Array.isArray(fields) ? fields : [fields]);
 
     const rows: ActionRowBuilder<TextInputBuilder>[] = [];
@@ -14,7 +20,7 @@ export async function createInteractionModal(modalData: ModalData) {
 
     await sendTarget.showModal(modal);
     const submission = await sendTarget.awaitModalSubmit({
-        time: 1000 * 5 * 60, filter: (interaction) => {
+        time, filter: (interaction) => {
             const value = interaction.user.id === sendTarget.user.id;
 
             if (filter !== undefined) {
@@ -32,6 +38,11 @@ export async function createInteractionModal(modalData: ModalData) {
         }
     });
 
+    if(!submission){
+        modalData.onTimeout?.();
+        return;
+    }
+
     const data = { information: {} };
 
     for (let i = 0; i < optionsList.length; i++) {
@@ -46,8 +57,10 @@ export interface ModalData {
     sendTarget: MessageComponentInteraction | CommandInteraction,
     fields: Partial<ModalFieldData>[] | Partial<ModalFieldData>,
     title: string,
+    time?: number,
     onSubmit(interaction: ModalInteraction): void,
-    filter?: CollectorFilter<[ModalInteraction]>
+    filter?: CollectorFilter<[ModalInteraction]>,
+    onTimeout?(): void
 }
 
 export interface ModalFieldData extends APITextInputComponent {

@@ -15,30 +15,30 @@ export class CheckErrorBaseCommand extends BaseCommand {
             {
                 options: [
                     {
-                        label: Localisation.getTranslation("button.check"),
+                        label: Localisation.getLocalisation("button.check"),
                         value: "check",
                         onSelect: async ({ interaction }) => {
                             const { value: errorCode } = await getStringReply({ sendTarget: interaction, author: cmdArgs.author, options: "checkerror.reply.code" });
                             if (errorCode === undefined)
                                 return;
                             const error = await getOneDatabase(ErrorData, { errorId: errorCode });
-                            if (error.isNull()) return <any>interaction.followUp(Localisation.getTranslation("error.invalid.errorCode"));
-                            interaction.followUp(Localisation.getTranslation("checkerror.error", dateToString(error.document.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.document.error));
+                            if (error.isNull()) return <any>interaction.followUp(Localisation.getLocalisation("error.invalid.errorCode"));
+                            interaction.followUp(Localisation.getLocalisation("checkerror.error", dateToString(error.document.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}"), error.document.error));
                         },
                         default: false,
                         description: null,
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.list"),
+                        label: Localisation.getLocalisation("button.list"),
                         value: "list",
                         onSelect: async ({ interaction }) => {
 
                             const errors = await ErrorData.find();
-                            if (!errors || !errors.length) return interaction.reply(Localisation.getTranslation("error.empty.errors"));
+                            if (!errors || !errors.length) return interaction.reply(Localisation.getLocalisation("error.empty.errors"));
                             const data = [];
                             errors.forEach(error => {
-                                data.push(Localisation.getTranslation("checkerror.list", error.errorId, dateToString(error.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
+                                data.push(Localisation.getLocalisation("checkerror.list", error.errorId, dateToString(error.createdAt, "{HH}:{mm}:{ss} {dd}/{MM}/{YYYY}")));
                             });
                             const embed = new EmbedBuilder();
                             embed.setColor((await getBotRoleColor(cmdArgs.guild)));
@@ -50,11 +50,11 @@ export class CheckErrorBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.prune"),
+                        label: Localisation.getLocalisation("button.prune"),
                         value: "prune",
                         onSelect: async ({ interaction }) => {
                             const errors = await ErrorData.find();
-                            if (!errors || !errors.length) return interaction.reply(Localisation.getTranslation("error.empty.errors"));
+                            if (!errors || !errors.length) return interaction.reply(Localisation.getLocalisation("error.empty.errors"));
 
                             const msPerMinute = 60 * 1000;
                             const msPerHour = msPerMinute * 60;
@@ -66,18 +66,18 @@ export class CheckErrorBaseCommand extends BaseCommand {
                                     await ErrorData.deleteOne({ errorId: error.errorId });
                                 }
                             });
-                            return interaction.reply(Localisation.getTranslation("checkerror.prune"));
+                            return interaction.reply(Localisation.getLocalisation("checkerror.prune"));
                         },
                         default: false,
                         description: null,
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.clear"),
+                        label: Localisation.getLocalisation("button.clear"),
                         value: "clear",
                         onSelect: async ({ interaction }) => {
                             await ErrorData.deleteMany();
-                            return interaction.reply(Localisation.getTranslation("checkerror.clear"));
+                            return interaction.reply(Localisation.getLocalisation("checkerror.clear"));
                         },
                         default: false,
                         description: null,

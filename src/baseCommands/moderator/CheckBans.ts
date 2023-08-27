@@ -1,5 +1,5 @@
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
-import { asyncForEach, getDatabase } from "../../utils/Utils";
+import { asyncMapForEach, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class CheckBansBaseCommand extends BaseCommand {
@@ -9,15 +9,12 @@ export class CheckBansBaseCommand extends BaseCommand {
         await cmdArgs.localisedReply("Checking");
         const bans = await cmdArgs.guild.bans.fetch();
         let amount = 0;
-        bans.forEach(ban => {
+        await asyncMapForEach(bans, async (_, ban) => {
             const index = levels.findIndex(u => u.document.levelData.userId === ban.user.id);
             if (index > -1) {
-                levels.splice(index, 1);
+                await UserLevel.deleteOne({ guildId: cmdArgs.guildId, "levelData.userId": ban.user.id });
                 amount++;
             }
-        });
-        await asyncForEach(levels, async (level) => {
-            await level.save();
         });
         cmdArgs.reply("checkbans.bans", amount);
     }

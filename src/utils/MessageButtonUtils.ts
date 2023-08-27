@@ -1,6 +1,7 @@
-import { ActionRowBuilder, AnySelectMenuInteraction, BaseMessageOptions, ButtonBuilder, ButtonInteraction, CommandInteraction, ComponentType, GuildMember, InteractionButtonComponentData, InteractionCollector, Message, MessageActionRowComponentBuilder, MessageComponentInteraction, TextBasedChannel, User } from "discord.js";
+import { ActionRowBuilder, AnySelectMenuInteraction, BaseMessageOptions, ButtonBuilder, ButtonInteraction, CommandInteraction, ComponentType, GuildMember, InteractionButtonComponentData, InteractionCollector, Message, MessageActionRowComponentBuilder, MessageComponentInteraction, ModalSubmitInteraction, TextBasedChannel, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { asyncForEach } from "./Utils";
+import { ModalInteraction } from "./InteractionModalUtils";
 
 export async function createMessageButtons(messageButtonData: MessageButtonData) {
     const { sendTarget, author, beforeButton, buttons: _buttons } = messageButtonData;
@@ -25,7 +26,7 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
 
     let sendMessage;
 
-    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction || sendTarget instanceof ModalSubmitInteraction) {
         sendMessage = sendTarget.reply.bind(sendTarget);
         if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
             if (!sendTarget.deferred && !sendTarget.replied) {
@@ -36,6 +37,8 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
                 }
             }
             sendMessage = sendTarget.followUp.bind(sendTarget);
+        } else if (sendTarget instanceof ModalSubmitInteraction) {
+            sendMessage = sendTarget.reply.bind(sendTarget);
         }
     } else {
         sendMessage = sendTarget.send.bind(sendTarget);
@@ -72,18 +75,22 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
 
     const collector = msg.createMessageComponentCollector({ filter: () => true, time: settings.time });
 
-    collector.on("end", () => {
+    collector.on("end", (_, reason) => {
         const components: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
-        msg.components.forEach(component => {
-            const row = new ActionRowBuilder<MessageActionRowComponentBuilder>();
-            component.components.forEach(c => {
-                if (c.type === ComponentType.Button) {
-                    row.addComponents(ButtonBuilder.from(c).setDisabled(true));
-                }
+        if (msg.components) {
+            msg.components.forEach(component => {
+                const row = new ActionRowBuilder<MessageActionRowComponentBuilder>();
+                component.components.forEach(c => {
+                    if (c.type === ComponentType.Button) {
+                        row.addComponents(ButtonBuilder.from(c).setDisabled(true));
+                    }
+                });
+                components.push(row);
             });
-            components.push(row);
-        });
+        }
         msg.edit({ components: components });
+        if (reason !== "clicked")
+            messageButtonData.onTimeout?.();
     });
 
     const data = { information: {} };
@@ -91,7 +98,7 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
     collector.on("collect", async (interaction) => {
         if (interaction.isButton()) {
             if (author && interaction.user.id !== authorId) {
-                await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
+                await interaction.reply({ ephemeral: true, content: Localisation.getLocalisation("generic.not.author") });
                 return;
             }
             if (beforeButton)
@@ -103,7 +110,7 @@ export async function createMessageButtons(messageButtonData: MessageButtonData)
             });
             use++;
             if (settings.max && settings.max > 0 && use >= settings.max) {
-                collector.emit("end", "");
+                collector.emit("end", null, "clicked");
             }
         }
     });
@@ -116,10 +123,10 @@ export async function createGenericButtons(messageButtonData: MessageButtonData)
 }
 
 export async function createWhatToDoButtons(messageButtonData: MessageButtonData) {
-    return createMessageButtons({ sendTarget: messageButtonData.sendTarget, author: messageButtonData.author, options: Localisation.getTranslation("generic.whattodo"), settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
+    return createMessageButtons({ sendTarget: messageButtonData.sendTarget, author: messageButtonData.author, options: Localisation.getLocalisation("generic.whattodo"), settings: messageButtonData.settings, beforeButton: messageButtonData.beforeButton, buttons: messageButtonData.buttons });
 }
 
-export type SendTarget = Message | TextBasedChannel | MessageComponentInteraction | CommandInteraction;
+export type SendTarget = Message | TextBasedChannel | MessageComponentInteraction | CommandInteraction | ModalSubmitInteraction;
 export type MessageAuthor = GuildMember | User | string;
 
 export interface MessageButtonData {
@@ -128,7 +135,8 @@ export interface MessageButtonData {
     options?: string | BaseMessageOptions,
     settings?: { max?: number, time?: number },
     beforeButton?: (interactionData: InteractionData) => void,
-    buttons: Partial<InteractiveButton>[]
+    buttons: Partial<InteractiveButton>[],
+    onTimeout?(): void
 }
 
 export interface InteractionData {

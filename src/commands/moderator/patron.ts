@@ -4,7 +4,7 @@ import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CommandAccess } from "../../structs/CommandAccess";
 import { PatronBaseCommand } from "../../baseCommands/moderator/Patron";
 
-class PatreonCommand extends Command {
+class PatronCommand extends Command {
     public constructor() {
         super();
         this.category = Moderator;
@@ -15,4 +15,4 @@ class PatreonCommand extends Command {
     }
 }
 
-export = PatreonCommand;
+export = PatronCommand;

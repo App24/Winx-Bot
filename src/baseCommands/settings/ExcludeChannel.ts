@@ -15,35 +15,35 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
                 options: [
                     {
-                        label: Localisation.getTranslation("button.add"),
+                        label: Localisation.getLocalisation("button.add"),
                         value: "add",
                         onSelect: async ({ interaction }) => {
                             const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!channel) return;
 
-                            if (serverInfo.document.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getTranslation("excludechannel.channel.already"));
+                            if (serverInfo.document.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getLocalisation("excludechannel.channel.already"));
 
                             serverInfo.document.excludeChannels.push(channel.id);
 
                             await serverInfo.save();
 
-                            msg.reply(Localisation.getTranslation("excludechannel.add", channel));
+                            msg.reply(Localisation.getLocalisation("excludechannel.add", channel));
                         },
                         default: false,
                         description: null,
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.remove"),
+                        label: Localisation.getLocalisation("button.remove"),
                         value: "remove",
                         onSelect: async ({ interaction }) => {
                             await interaction.deferReply();
-                            if (!serverInfo.document.excludeChannels.length) return interaction.editReply(Localisation.getTranslation("error.empty.excludedchannels"));
+                            if (!serverInfo.document.excludeChannels.length) return interaction.editReply(Localisation.getLocalisation("error.empty.excludedchannels"));
 
                             const options: SelectOption[] = [];
 
                             options.push({
-                                label: Localisation.getTranslation("button.cancel"),
+                                label: Localisation.getLocalisation("button.cancel"),
                                 value: "-1",
                                 onSelect: async ({ interaction }) => {
                                     interaction.deferUpdate();
@@ -64,7 +64,7 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
 
                                         await serverInfo.save();
 
-                                        interaction.reply(Localisation.getTranslation("excludechannel.remove", channel));
+                                        interaction.reply(Localisation.getLocalisation("excludechannel.remove", channel));
                                     },
                                     default: false,
                                     description: null,
@@ -83,7 +83,7 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.cleardeletedchannels"),
+                        label: Localisation.getLocalisation("button.cleardeletedchannels"),
                         value: "clear",
                         onSelect: async ({ interaction }) => {
                             await interaction.deferReply();
@@ -94,14 +94,14 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                                 }
                             });
                             await serverInfo.save();
-                            interaction.editReply(Localisation.getTranslation("excludechannel.clear"));
+                            interaction.editReply(Localisation.getLocalisation("excludechannel.clear"));
                         },
                         default: false,
                         description: null,
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.list"),
+                        label: Localisation.getLocalisation("button.list"),
                         value: "list",
                         onSelect: async ({ interaction }) => {
                             await interaction.deferReply();

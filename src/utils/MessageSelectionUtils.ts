@@ -1,4 +1,4 @@
-import { Message, User, MessageComponentInteraction, GuildMember, ActionRowBuilder, MessageSelectOption, SelectMenuBuilder, ComponentType, MessageActionRowComponentBuilder, CommandInteraction, StringSelectMenuBuilder, BaseMessageOptions } from "discord.js";
+import { Message, User, MessageComponentInteraction, GuildMember, ActionRowBuilder, MessageSelectOption, SelectMenuBuilder, ComponentType, MessageActionRowComponentBuilder, CommandInteraction, StringSelectMenuBuilder, BaseMessageOptions, ModalSubmitInteraction } from "discord.js";
 import { MAX_ITEMS_PER_SELECT_MENU } from "../Constants";
 import { Localisation } from "../localisation";
 import { InteractionData, SendTarget } from "./MessageButtonUtils";
@@ -38,7 +38,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                         const row = rows[index];
                         // SelectMenuBuilder.from(row.components[0]).setOptions(selectOptions[index].options[++selectOptions[index].selectIndex])
                         // (<SelectMenuBuilder>row.components[0]).setOptions(selectOptions[index].options[++selectOptions[index].selectIndex]);
-                        row.components[0] = (new SelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[++selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+                        row.components[0] = (new SelectMenuBuilder({ custom_id, placeholder: Localisation.getLocalisation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[++selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
                         // row.setComponents(selectOptions[index].options[++selectOptions[index].selectIndex]);
                         rows[index] = row;
                         await interaction.update({ components: rows });
@@ -54,7 +54,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
                     value: "previous",
                     onSelect: async ({ interaction }) => {
                         const row = rows[index];
-                        row.components[0] = (new StringSelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[--selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+                        row.components[0] = (new StringSelectMenuBuilder({ custom_id, placeholder: Localisation.getLocalisation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: selectOptions[index].options[--selectOptions[index].selectIndex], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
                         // (<SelectMenuBuilder>row.components[0]).setOptions(selectOptions[index].options[--selectOptions[index].selectIndex]);
                         rows[index] = row;
                         await interaction.update({ components: rows });
@@ -69,7 +69,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
         } while (options.length > 0);
 
         selectOptions.push({ selectMenu, selectIndex: 0, options: tempOptions });
-        rows[index].addComponents(new StringSelectMenuBuilder({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
+        rows[index].addComponents(new StringSelectMenuBuilder({ custom_id, placeholder: Localisation.getLocalisation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], min_values: selectMenu.minValues, max_values: selectMenu.maxValues }));
         // rows[index].addComponents(new MessageSelectMenu({ custom_id, placeholder: Localisation.getTranslation(selectMenu.placeholder || "generic.selectmenu.placeholder"), options: tempOptions[0], minValues: selectMenu.minValues, maxValues: selectMenu.maxValues }));
     });
 
@@ -77,9 +77,9 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
 
     let sendMessage;
 
-    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
+    if (sendTarget instanceof Message || sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction || sendTarget instanceof ModalSubmitInteraction) {
         sendMessage = sendTarget.reply.bind(sendTarget);
-        if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction) {
+        if (sendTarget instanceof MessageComponentInteraction || sendTarget instanceof CommandInteraction || sendTarget instanceof ModalSubmitInteraction) {
             if (!sendTarget.deferred && !sendTarget.replied) {
                 if (sendTarget instanceof MessageComponentInteraction) {
                     await sendTarget.deferUpdate();
@@ -140,7 +140,7 @@ export async function createMessageSelection(messageSelectData: MessageSelectDat
     collector.on("collect", async (interaction) => {
         if (interaction.isStringSelectMenu()) {
             if (author && interaction.user.id !== authorId) {
-                await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
+                await interaction.reply({ ephemeral: true, content: Localisation.getLocalisation("generic.not.author") });
                 return;
             }
             let navigation = false;

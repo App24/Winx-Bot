@@ -1,9 +1,9 @@
 export enum CommandAccess {
     None = 1,
-    Patreon,
+    Patron,
     Booster,
     Moderators,
     GuildOwner,
     BotOwner,
-    PatreonOrBooster
+    PatronOrBooster
 }

@@ -43,11 +43,11 @@
 
     "checkranks.start": "Started Checking...",
 
-    "patreon.remove": "Removed {0} as a patreon!",
-    "patreon.list": "{0}: Patreon since: {1}",
-    "patreon.add": "Added {0} as a patreon!",
-    "patreon.user.not": "That user is not a patreon!",
-    "patreon.user.already": "That user is already a patreon!",
+    "patreon.remove": "Removed {0} as a patron!",
+    "patreon.list": "{0}: Patron since: {1}",
+    "patreon.add": "Added {0} as a patron!",
+    "patreon.user.not": "That user is not a patron!",
+    "patreon.user.already": "That user is already a patron!",
 
     "setlevel.output": "Set the level of {0} to {1} and xp to {2}!",
 

@@ -14,7 +14,7 @@ export class CardCodeBaseCommand extends BaseCommand {
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
                 options: [
                     {
-                        label: Localisation.getTranslation("button.get"),
+                        label: Localisation.getLocalisation("button.get"),
                         value: "get",
                         onSelect: async ({ interaction }) => {
                             await interaction.reply({ content: userSettings.document.cardCode || DEFAULT_CARD_CODE, ephemeral: true });
@@ -24,7 +24,7 @@ export class CardCodeBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.set"),
+                        label: Localisation.getLocalisation("button.set"),
                         value: "set",
                         onSelect: async ({ interaction }) => {
                             await createInteractionModal({
@@ -33,7 +33,7 @@ export class CardCodeBaseCommand extends BaseCommand {
                                 title: "Set Card Code",
                                 onSubmit: async ({ data, interaction }) => {
 
-                                    interaction.reply({ content: Localisation.getTranslation("cardcode.set.output") });
+                                    interaction.reply({ content: Localisation.getLocalisation("cardcode.set.output") });
 
                                     const code = data.information.code;
 
@@ -48,12 +48,12 @@ export class CardCodeBaseCommand extends BaseCommand {
                         emoji: null
                     },
                     {
-                        label: Localisation.getTranslation("button.reset"),
+                        label: Localisation.getLocalisation("button.reset"),
                         value: "reset",
                         onSelect: async ({ interaction }) => {
                             userSettings.document.cardCode = DEFAULT_CARD_CODE;
                             await userSettings.save();
-                            interaction.reply(Localisation.getTranslation("cardcode.reset.output"));
+                            interaction.reply(Localisation.getLocalisation("cardcode.reset.output"));
                         },
                         default: false,
                         description: null,

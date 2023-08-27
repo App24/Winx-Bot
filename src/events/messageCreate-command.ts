@@ -8,7 +8,7 @@ import { CommandAvailable } from "../structs/CommandAvailable";
 import { CommandAccess } from "../structs/CommandAccess";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
 import { formatString, secondsToTime } from "../utils/FormatUtils";
-import { getOneDatabase, isBooster, isDM, isModerator, isPatreon, reportBotError } from "../utils/Utils";
+import { getOneDatabase, isBooster, isDM, isModerator, isPatron, reportBotError } from "../utils/Utils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -28,34 +28,34 @@ export = () => {
             const customCommand = await getOneDatabase(CustomCommand, { guildId: message.guildId, name: commandName });
             if (customCommand.isNull()) return;
             switch (customCommand.document.access) {
-                case CommandAccess.Patreon: {
-                    if (isDM(message.channel) || !(await isPatreon(message.author.id, message.guild.id))) {
-                        return message.reply(Localisation.getTranslation("command.access.patreon"));
+                case CommandAccess.Patron: {
+                    if (isDM(message.channel) || !(await isPatron(message.author.id, message.guild.id))) {
+                        return message.reply(Localisation.getLocalisation("command.access.patreon"));
                     }
                 } break;
                 case CommandAccess.Booster: {
                     if (isDM(message.channel) || !isBooster(message.member)) {
-                        return message.reply(Localisation.getTranslation("command.access.booster"));
+                        return message.reply(Localisation.getLocalisation("command.access.booster"));
                     }
                 } break;
                 case CommandAccess.Moderators: {
                     if (isDM(message.channel) || !isModerator(message.member)) {
-                        return message.reply(Localisation.getTranslation("command.access.moderator"));
+                        return message.reply(Localisation.getLocalisation("command.access.moderator"));
                     }
                 } break;
                 case CommandAccess.GuildOwner: {
                     if (isDM(message.channel) || message.author.id !== message.guild.ownerId) {
-                        return message.reply(Localisation.getTranslation("command.access.guildOwner"));
+                        return message.reply(Localisation.getLocalisation("command.access.guildOwner"));
                     }
                 } break;
                 case CommandAccess.BotOwner: {
                     if (message.author.id !== process.env.OWNER_ID) {
-                        return message.reply(Localisation.getTranslation("command.access.botOwner"));
+                        return message.reply(Localisation.getLocalisation("command.access.botOwner"));
                     }
                 } break;
-                case CommandAccess.PatreonOrBooster: {
-                    if (isDM(message.channel) || (!(await isPatreon(message.author.id, message.guild.id)) && !isBooster(message.member))) {
-                        return message.reply(Localisation.getTranslation("command.access.patreon"));
+                case CommandAccess.PatronOrBooster: {
+                    if (isDM(message.channel) || (!(await isPatron(message.author.id, message.guild.id)) && !isBooster(message.member))) {
+                        return message.reply(Localisation.getLocalisation("command.access.patreon"));
                     }
                 } break;
             }
@@ -69,45 +69,45 @@ export = () => {
             return msgToReply.reply({ content: formatString(randomMsg, ...args), failIfNotExists: false, allowedMentions: { repliedUser: msgToReply.author !== message.author } });
         }
 
-        if (!command.enabled) return message.reply(Localisation.getTranslation("command.disabled"));
+        if (!command.enabled) return message.reply(Localisation.getLocalisation("command.disabled"));
 
         if (!isDM(message.channel) && command.guildIds && !command.guildIds.includes(message.guild.id)) return;
 
         if (command.available === CommandAvailable.Guild && isDM(message.channel)) {
-            return message.reply(Localisation.getTranslation("command.available.server"));
+            return message.reply(Localisation.getLocalisation("command.available.server"));
         } else if (command.available === CommandAvailable.DM && !isDM(message.channel)) {
-            return message.reply(Localisation.getTranslation("command.available.dm"));
+            return message.reply(Localisation.getLocalisation("command.available.dm"));
         }
 
         switch (command.access) {
-            case CommandAccess.Patreon: {
-                if (isDM(message.channel) || !(await isPatreon(message.author.id, message.guild.id))) {
-                    return message.reply(Localisation.getTranslation("command.access.patreon"));
+            case CommandAccess.Patron: {
+                if (isDM(message.channel) || !(await isPatron(message.author.id, message.guild.id))) {
+                    return message.reply(Localisation.getLocalisation("command.access.patreon"));
                 }
             } break;
             case CommandAccess.Booster: {
                 if (isDM(message.channel) || !isBooster(message.member)) {
-                    return message.reply(Localisation.getTranslation("command.access.booster"));
+                    return message.reply(Localisation.getLocalisation("command.access.booster"));
                 }
             } break;
             case CommandAccess.Moderators: {
                 if (isDM(message.channel) || !isModerator(message.member)) {
-                    return message.reply(Localisation.getTranslation("command.access.moderator"));
+                    return message.reply(Localisation.getLocalisation("command.access.moderator"));
                 }
             } break;
             case CommandAccess.GuildOwner: {
                 if (isDM(message.channel) || message.author.id !== message.guild.ownerId) {
-                    return message.reply(Localisation.getTranslation("command.access.guildOwner"));
+                    return message.reply(Localisation.getLocalisation("command.access.guildOwner"));
                 }
             } break;
             case CommandAccess.BotOwner: {
                 if (message.author.id !== process.env.OWNER_ID) {
-                    return message.reply(Localisation.getTranslation("command.access.botOwner"));
+                    return message.reply(Localisation.getLocalisation("command.access.botOwner"));
                 }
             } break;
-            case CommandAccess.PatreonOrBooster: {
-                if (isDM(message.channel) || (!(await isPatreon(message.author.id, message.guild.id)) && !isBooster(message.member))) {
-                    return message.reply(Localisation.getTranslation("command.access.patreon"));
+            case CommandAccess.PatronOrBooster: {
+                if (isDM(message.channel) || (!(await isPatron(message.author.id, message.guild.id)) && !isBooster(message.member))) {
+                    return message.reply(Localisation.getLocalisation("command.access.patreon"));
                 }
             } break;
         }
@@ -125,7 +125,7 @@ export = () => {
 
             if (now < expirationTime) {
                 const timeLeft = (expirationTime - now) / 1000;
-                return message.reply(Localisation.getTranslation("command.cooldown", secondsToTime(timeLeft), commandName));
+                return message.reply(Localisation.getLocalisation("command.cooldown", secondsToTime(timeLeft), commandName));
             }
         }
 
@@ -133,10 +133,10 @@ export = () => {
         setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
         if (args.length < command.minArgs) {
-            let reply = Localisation.getTranslation("error.arguments.few");
+            let reply = Localisation.getLocalisation("error.arguments.few");
 
             if (command.usage) {
-                reply += `\n${Localisation.getTranslation("command.usage", PREFIX, commandName, command.getUsage())}`;
+                reply += `\n${Localisation.getLocalisation("command.usage", PREFIX, commandName, command.getUsage())}`;
             }
 
             return message.reply(reply);

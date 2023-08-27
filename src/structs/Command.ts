@@ -49,7 +49,7 @@ export abstract class Command {
         let text = "";
         if (this.usage) {
             this.usage.forEach((use, index) => {
-                const temp = use.usages.map((value) => Localisation.getTranslation(value)).join("/");
+                const temp = use.usages.map((value) => Localisation.getLocalisation(value)).join("/");
                 if (use.required)
                     text += `<${temp}>`;
                 else
@@ -114,10 +114,10 @@ export class CommandArguments {
 
     public async reply(options: string | MessageReplyOptions, ...args) {
         if (typeof options === "string") {
-            options = { content: Localisation.getTranslation(options, ...args) };
+            options = { content: Localisation.getLocalisation(options, ...args) };
         } else {
             if (options.content)
-                options.content = Localisation.getTranslation(options.content, ...args);
+                options.content = Localisation.getLocalisation(options.content, ...args);
         }
         options.failIfNotExists = false;
         return this.message.reply(options);
@@ -133,10 +133,10 @@ export class CommandArguments {
 
     public async dmReply(options: string | BaseMessageOptions, ...args) {
         if (typeof options === "string") {
-            options = Localisation.getTranslation(options, ...args);
+            options = Localisation.getLocalisation(options, ...args);
         } else {
             if (options.content)
-                options.content = Localisation.getTranslation(options.content, ...args);
+                options.content = Localisation.getLocalisation(options.content, ...args);
         }
         let sendTarget: DMChannel | TextBasedChannel = await this.author.createDM().catch(() => undefined);
         if (!sendTarget || isDM(this.channel)) {

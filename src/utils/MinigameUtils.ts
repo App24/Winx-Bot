@@ -3,11 +3,11 @@ import { Localisation } from "../localisation";
 import { createMessageEmbed } from "./Utils";
 
 export async function waitForPlayers(maxPlayers: number, minPlayers: number, title: string, guild: Guild, channel: TextBasedChannel, author: GuildMember, startGame: (members: GuildMember[]) => void) {
-    const buttons = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(new ButtonBuilder({ customId: "join", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.join") }));
+    const buttons = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(new ButtonBuilder({ customId: "join", style: ButtonStyle.Primary, label: Localisation.getLocalisation("button.join") }));
 
     let remainingPlayers = maxPlayers;
 
-    const embed = await createMessageEmbed({ description: Localisation.getTranslation("generic.waitingplayers", remainingPlayers), title: Localisation.getTranslation(title) }, guild);
+    const embed = await createMessageEmbed({ description: Localisation.getLocalisation("generic.waitingplayers", remainingPlayers), title: Localisation.getLocalisation(title) }, guild);
 
     const message = await channel.send({ embeds: [embed], components: [buttons] });
 
@@ -23,7 +23,7 @@ export async function waitForPlayers(maxPlayers: number, minPlayers: number, tit
         if (deleted) return;
         await message.edit({ components: [] });
         if (membersJoined.length < 1) {
-            embed.setDescription(Localisation.getTranslation("generic.noonejoin"));
+            embed.setDescription(Localisation.getLocalisation("generic.noonejoin"));
             message.edit({ embeds: [embed] });
         }
     });
@@ -31,11 +31,11 @@ export async function waitForPlayers(maxPlayers: number, minPlayers: number, tit
     collector.on("collect", async (interaction: ButtonInteraction) => {
         if (interaction.customId === "join") {
             if (interaction.user.id === author.id) {
-                await interaction.reply({ content: Localisation.getTranslation("error.minigame.author"), ephemeral: true });
+                await interaction.reply({ content: Localisation.getLocalisation("error.minigame.author"), ephemeral: true });
                 return;
             }
             if (membersJoined.find((member) => member.id === interaction.user.id)) {
-                await interaction.reply({ content: Localisation.getTranslation("error.minigame.alreadyjoin"), ephemeral: true });
+                await interaction.reply({ content: Localisation.getLocalisation("error.minigame.alreadyjoin"), ephemeral: true });
                 return;
             }
             remainingPlayers--;
@@ -47,14 +47,14 @@ export async function waitForPlayers(maxPlayers: number, minPlayers: number, tit
             } else {
                 const newButtons = buttons;
                 if (remainingPlayers <= minPlayers) {
-                    newButtons.addComponents(new ButtonBuilder({ customId: "start", style: ButtonStyle.Primary, label: Localisation.getTranslation("button.start") }));
+                    newButtons.addComponents(new ButtonBuilder({ customId: "start", style: ButtonStyle.Primary, label: Localisation.getLocalisation("button.start") }));
                 }
-                embed.setDescription(Localisation.getTranslation("generic.waitingplayers", remainingPlayers));
+                embed.setDescription(Localisation.getLocalisation("generic.waitingplayers", remainingPlayers));
                 await interaction.update({ embeds: [embed], components: [newButtons] });
             }
         } else if (interaction.customId === "start") {
             if (interaction.user.id !== author.id) {
-                await interaction.reply({ content: Localisation.getTranslation("error.minigame.notauthor"), ephemeral: true });
+                await interaction.reply({ content: Localisation.getLocalisation("error.minigame.notauthor"), ephemeral: true });
                 return;
             }
             deleted = true;

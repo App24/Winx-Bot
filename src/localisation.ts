@@ -17,7 +17,7 @@ class Language {
         }
     }
 
-    public getTranslation(key: string, ...args) {
+    public getLocalisation(key: string, ...args) {
         const toReturn = this.localisation[key];
         if (!toReturn) {
             console.log(`Couldn't find translation for key: '${key}'`);

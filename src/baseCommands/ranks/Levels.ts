@@ -26,7 +26,7 @@ export class LevelsBaseCommand extends BaseCommand {
         if (cmdArgs instanceof CommandArguments) {
             const options = ["You can be pinged when you level by using w!levelping", "You can boost to get custom wings"];
             const option = Math.floor((options.length * 3) * Math.random());
-            let message = Localisation.getTranslation("magiclevels.generate");
+            let message = Localisation.getLocalisation("magiclevels.generate");
             if (option < options.length)
                 message += `\n${options[option]}`;
             msg = await cmdArgs.localisedReply(message);

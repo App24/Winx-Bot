@@ -17,13 +17,13 @@ export class LevelPingBaseCommand extends BaseCommand {
                     style: ButtonStyle.Primary,
                     onRun: async ({ interaction }) => {
                         userSettings.document.levelPing = !userSettings.document.levelPing;
-                        interaction.reply({ content: Localisation.getTranslation("levelping.reply", userSettings.document.levelPing ? Localisation.getTranslation("generic.enabled") : Localisation.getTranslation("generic.disabled")) });
+                        interaction.reply({ content: Localisation.getLocalisation("levelping.reply", userSettings.document.levelPing ? Localisation.getLocalisation("generic.enabled") : Localisation.getLocalisation("generic.disabled")) });
                         await userSettings.save();
                     }
                 },
                 {
                     customId: "cancel",
-                    label: Localisation.getTranslation("button.cancel"),
+                    label: Localisation.getLocalisation("button.cancel"),
                     style: ButtonStyle.Danger,
                     onRun: async ({ interaction }) => {
                         await interaction.deferUpdate();

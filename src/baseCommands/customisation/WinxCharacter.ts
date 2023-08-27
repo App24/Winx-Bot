@@ -40,7 +40,7 @@ export class WinxCharacterBaseCommand extends BaseCommand {
                 default: isDefault(character),
                 onSelect: async ({ interaction }) => {
                     setWinxCharacter(WinxCharacter[character]);
-                    await interaction.reply(Localisation.getTranslation("winxcharacter.set", character));
+                    await interaction.reply(Localisation.getLocalisation("winxcharacter.set", character));
                 },
                 description: null,
                 emoji: null
@@ -49,7 +49,7 @@ export class WinxCharacterBaseCommand extends BaseCommand {
 
         options.push({
             value: "cancel",
-            label: Localisation.getTranslation("generic.cancel"),
+            label: Localisation.getLocalisation("generic.cancel"),
             onSelect: async ({ interaction }) => {
                 interaction.deferUpdate();
             },

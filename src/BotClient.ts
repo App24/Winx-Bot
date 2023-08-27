@@ -64,7 +64,7 @@ class BotClient extends Client {
         switch (this.botOptions.logLoading) {
             case 'simplified':
             case 'all':
-                console.log(Localisation.getTranslation("bot.load.command.simple", loaded));
+                console.log(Localisation.getLocalisation("bot.load.command.simple", loaded));
                 break;
         }
     }
@@ -86,7 +86,7 @@ class BotClient extends Client {
                 switch (this.botOptions.logLoading) {
                     case 'complex':
                     case 'all':
-                        console.log(Localisation.getTranslation("bot.load.command.complex", name));
+                        console.log(Localisation.getLocalisation("bot.load.command.complex", name));
                         break;
                 }
                 // loaded++;
@@ -113,7 +113,7 @@ class BotClient extends Client {
             switch (this.botOptions.logLoading) {
                 case "complex":
                 case "all":
-                    console.log(Localisation.getTranslation("bot.load.event.complex", name));
+                    console.log(Localisation.getLocalisation("bot.load.event.complex", name));
                     break;
             }
             loaded++;
@@ -122,7 +122,7 @@ class BotClient extends Client {
         switch (this.botOptions.logLoading) {
             case "simplified":
             case "all":
-                console.log(Localisation.getTranslation("bot.load.event.simple", loaded));
+                console.log(Localisation.getLocalisation("bot.load.event.simple", loaded));
                 break;
         }
     }
@@ -175,7 +175,7 @@ class BotClient extends Client {
         switch (this.botOptions.logLoading) {
             case 'simplified':
             case 'all':
-                console.log(Localisation.getTranslation("bot.load.slashcommand.simple", loaded));
+                console.log(Localisation.getLocalisation("bot.load.slashcommand.simple", loaded));
                 break;
         }
     }
@@ -198,7 +198,7 @@ class BotClient extends Client {
             switch (this.botOptions.logLoading) {
                 case 'complex':
                 case 'all':
-                    console.log(Localisation.getTranslation("bot.load.slashcommand.complex", name));
+                    console.log(Localisation.getLocalisation("bot.load.slashcommand.complex", name));
                     break;
             }
             return true;

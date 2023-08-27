@@ -22,7 +22,7 @@ export class RPSBaseCommand extends BaseCommand {
         buttons.addComponents(new ButtonBuilder({ customId: RPSMoves.Paper.toString(), style: ButtonStyle.Primary, emoji: "📜" }));
         buttons.addComponents(new ButtonBuilder({ customId: RPSMoves.Scissors.toString(), style: ButtonStyle.Primary, emoji: "✂" }));
 
-        const embed = await createMessageEmbed({ description: Localisation.getTranslation("rps.play") }, message.guild);
+        const embed = await createMessageEmbed({ description: Localisation.getLocalisation("rps.play") }, message.guild);
 
         const msg = await message.reply({ embeds: [embed], components: [buttons] });
 
@@ -47,13 +47,13 @@ export class RPSBaseCommand extends BaseCommand {
         collector.on("collect", async (interaction) => {
             if (!interaction.isButton()) return;
             if (![gameData.player1.id, gameData.player2.id].includes(interaction.user.id)) {
-                await interaction.reply({ ephemeral: true, content: Localisation.getTranslation("generic.not.author") });
+                await interaction.reply({ ephemeral: true, content: Localisation.getLocalisation("generic.not.author") });
                 return;
             }
             const currentPlayer = interaction.user.id === gameData.player1.id ? gameData.player1 : gameData.player2;
 
             if (currentPlayer.move !== RPSMoves.None) {
-                await interaction.reply({ content: Localisation.getTranslation("rps.alreadyplayed"), ephemeral: true });
+                await interaction.reply({ content: Localisation.getLocalisation("rps.alreadyplayed"), ephemeral: true });
                 return;
             }
 
@@ -61,7 +61,7 @@ export class RPSBaseCommand extends BaseCommand {
             currentPlayer.move = move;
             plays++;
 
-            await interaction.reply({ content: Localisation.getTranslation("rps.played"), ephemeral: true });
+            await interaction.reply({ content: Localisation.getLocalisation("rps.played"), ephemeral: true });
 
             if (plays >= 2) {
                 const player1Move = gameData.player1.move;
@@ -73,17 +73,17 @@ export class RPSBaseCommand extends BaseCommand {
                     if (finished) return;
                     if (player1Move === winner && player2Move === looser) {
                         finished = true;
-                        message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player1.id] } });
+                        message.reply({ content: Localisation.getLocalisation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player1.id] } });
                         collector.emit("end", "");
                     } else if (player2Move === winner && player1Move === looser) {
                         finished = true;
-                        message.reply({ content: Localisation.getTranslation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player2.id] } });
+                        message.reply({ content: Localisation.getLocalisation("minigame.win", gameData.player1.id), allowedMentions: { users: [gameData.player2.id] } });
                         collector.emit("end", "");
                     }
                 };
 
                 if (player1Move === player2Move) {
-                    await message.reply({ content: Localisation.getTranslation("minigame.draw") });
+                    await message.reply({ content: Localisation.getLocalisation("minigame.draw") });
                 }
 
                 checkWinner(RPSMoves.Paper, RPSMoves.Rock);

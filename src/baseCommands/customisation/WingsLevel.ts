@@ -48,12 +48,12 @@ export class WingsLevelBaseCommand extends BaseCommand {
         };
 
         options.push({
-            label: Localisation.getTranslation("generic.automatic"),
+            label: Localisation.getLocalisation("generic.automatic"),
             value: "-1",
             default: isDefault(-1),
             onSelect: async ({ interaction }) => {
                 setWingsLevel(-1);
-                interaction.reply(Localisation.getTranslation("wingslevel.set", "automatic"));
+                interaction.reply(Localisation.getLocalisation("wingslevel.set", "automatic"));
             },
             description: null,
             emoji: null
@@ -69,7 +69,7 @@ export class WingsLevelBaseCommand extends BaseCommand {
                 default: isDefault(rank.document.level),
                 onSelect: async ({ interaction }) => {
                     setWingsLevel(rank.document.level);
-                    interaction.reply(Localisation.getTranslation("wingslevel.set", role.name));
+                    interaction.reply(Localisation.getLocalisation("wingslevel.set", role.name));
                 },
                 description: null,
                 emoji: null

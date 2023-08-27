@@ -16,7 +16,7 @@ export class CharacterLinesBaseCommand extends BaseCommand {
 
     public async onRun(cmdArgs: BaseCommandType) {
         if (!existsSync(`lines/${this.name}.txt`)) {
-            reportBotError(Localisation.getTranslation("error.missing.character.lines", this.name), cmdArgs.body);
+            reportBotError(Localisation.getLocalisation("error.missing.character.lines", this.name), cmdArgs.body);
             return;
         }
 
@@ -34,7 +34,7 @@ export class CharacterLinesBaseCommand extends BaseCommand {
         }
 
         if (!data.length) {
-            reportBotError(Localisation.getTranslation("error.empty.character.lines", this.name), cmdArgs.body);
+            reportBotError(Localisation.getLocalisation("error.empty.character.lines", this.name), cmdArgs.body);
             return;
         }
 
