@@ -3,8 +3,14 @@ import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getOneDatabase } from "../../utils/Utils";
 import { getLevelXP, addXP } from "../../utils/XPUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class GiveXPBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const userLevel = await getOneDatabase(UserLevel, { guildId: cmdArgs.guildId, "levelData.userId": cmdArgs.author.id }, () => new UserLevel({ guildId: cmdArgs.guildId, levelData: { userId: cmdArgs.author.id } }));
         const level = Math.max(1, Math.abs(userLevel.document.levelData.level));

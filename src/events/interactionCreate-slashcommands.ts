@@ -6,6 +6,7 @@ import { CommandAccess } from "../structs/CommandAccess";
 import { SlashCommandArguments } from "../structs/SlashCommand";
 import { isBooster, isDM, isModerator, isPatron, reportBotError } from "../utils/Utils";
 import { secondsToTime } from "../utils/FormatUtils";
+import { hasPermission } from "../utils/PermissionUtils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -30,38 +31,10 @@ export = () => {
             return reportIssue("command.available.dm");
         }
 
+        const response = await hasPermission({ commandAccess: command.access, author: interaction.user, member: <GuildMember>interaction.member, isDM: isDM(interaction.channel), guild: interaction.guild, customCheck: command.baseCommand.customPermissionCheck });
 
-        switch (command.access) {
-            case CommandAccess.Patron: {
-                if (isDM(interaction.channel) || !(await isPatron(interaction.user.id, interaction.guild.id))) {
-                    return reportIssue("command.access.patreon");
-                }
-            } break;
-            case CommandAccess.Booster: {
-                if (isDM(interaction.channel) || !isBooster(<GuildMember>interaction.member)) {
-                    return reportIssue("command.access.booster");
-                }
-            } break;
-            case CommandAccess.Moderators: {
-                if (isDM(interaction.channel) || !isModerator(<GuildMember>interaction.member)) {
-                    return reportIssue("command.access.moderator");
-                }
-            } break;
-            case CommandAccess.GuildOwner: {
-                if (isDM(interaction.channel) || interaction.user.id !== interaction.guild.ownerId) {
-                    return reportIssue("command.access.guildOwner");
-                }
-            } break;
-            case CommandAccess.BotOwner: {
-                if (interaction.user.id !== process.env.OWNER_ID) {
-                    return reportIssue("command.access.botOwner");
-                }
-            } break;
-            case CommandAccess.PatronOrBooster: {
-                if (isDM(interaction.channel) || (!(await isPatron(interaction.user.id, interaction.guild.id)) && !isBooster(<GuildMember>interaction.member))) {
-                    return reportIssue("command.access.patreon");
-                }
-            } break;
+        if (!response.hasPermission) {
+            return reportIssue(response.reason);
         }
 
         if (!cooldowns.has(interaction.commandName)) {

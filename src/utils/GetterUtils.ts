@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, ChannelType, Guild, GuildMember, Role, ThreadChannel, User } from "discord.js";
+import { BaseGuildTextChannel, CategoryChannel, ChannelType, Guild, GuildChannel, GuildMember, Role, ThreadChannel, User } from "discord.js";
 import { BotUser } from "../BotClient";
 
 //#region User/Member
@@ -61,7 +61,7 @@ export function getGuildById(id: string): Promise<Guild> {
     return BotUser.guilds.fetch(id).catch(() => undefined);
 }
 
-export function GetChannelFromMention(mention: string, guild: Guild) {
+export function getChannelFromMention(mention: string, guild: Guild) {
     if (!mention || !guild) return;
     const matches = mention.match(/^<#!?(\d+)>$/);
 
@@ -77,7 +77,23 @@ export function getChannelById(id: string, guild: Guild) {
     return guild.channels.cache.find(channel => channel.id === id && channel.type === ChannelType.GuildText);
 }
 
-export function GetCategoryFromMention(mention: string, guild: Guild) {
+export function getGuildChannelFromMention(mention: string, guild: Guild) {
+    if (!mention || !guild) return;
+    const matches = mention.match(/^<#!?(\d+)>$/);
+
+    if (!matches) {
+        return getGuildChannelById(mention, guild);
+    }
+
+    return getGuildChannelById(matches[1], guild);
+}
+
+export function getGuildChannelById(id: string, guild: Guild) {
+    if (!id || !guild) return undefined;
+    return <GuildChannel>guild.channels.cache.find(channel => channel.id === id);
+}
+
+export function getCategoryFromMention(mention: string, guild: Guild) {
     if (!mention || !guild) return;
     const matches = mention.match(/^<#!?(\d+)>$/);
 
@@ -90,7 +106,7 @@ export function GetCategoryFromMention(mention: string, guild: Guild) {
 
 export function getCategoryById(id: string, guild: Guild) {
     if (!id || !guild) return undefined;
-    return guild.channels.cache.find(channel => channel.id === id && channel.type === ChannelType.GuildCategory);
+    return <CategoryChannel>guild.channels.cache.find(channel => channel.id === id && channel.type === ChannelType.GuildCategory);
 }
 
 export function getTextChannelFromMention(mention: string, guild: Guild) {

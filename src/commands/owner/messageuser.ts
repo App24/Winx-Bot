@@ -6,7 +6,6 @@ import { MessageUserBaseCommand } from "../../baseCommands/owner/MessageUser";
 class MessageUserCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.BotOwner;
         this.usage = [new CommandUsage(true, "argument.user"), new CommandUsage(true, "argument.message")];
         this.category = Owner;
 

@@ -1,3 +1,5 @@
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { DEFAULT_CARD_CODE } from "../../structs/databaseTypes/ServerUserSettings";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { WinxCharacter } from "../../structs/WinxCharacters";
@@ -8,6 +10,12 @@ import { asyncForEach, canvasToMessageAttachment } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class TestMlBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const level = parseInt(cmdArgs.args[0]);
         if (isNaN(level) || level < 0) return cmdArgs.reply("error.invalid.level");
@@ -25,7 +33,7 @@ export class TestMlBaseCommand extends BaseCommand {
         const member = await getMemberById(user.id, cmdArgs.guild);
         if (!member) return cmdArgs.reply("error.invalid.member");
 
-        const userLevel = new UserLevel(user.id);
+        const userLevel = new UserLevel({guildId: cmdArgs.guildId, "levelData.userId": user.id});
 
         userLevel.levelData.xp = 0;
         userLevel.levelData.level = level;

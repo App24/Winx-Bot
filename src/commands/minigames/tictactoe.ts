@@ -7,7 +7,6 @@ class TicTacToeCommand extends Command {
 
     public constructor() {
         super();
-        this.available = CommandAvailable.Guild;
         this.category = Minigames;
         this.aliases = ["n&c", "ttt"];
 

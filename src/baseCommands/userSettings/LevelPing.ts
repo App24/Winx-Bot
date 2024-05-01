@@ -4,8 +4,14 @@ import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettin
 import { createMessageButtons } from "../../utils/MessageButtonUtils";
 import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class LevelPingBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 
@@ -17,6 +23,7 @@ export class LevelPingBaseCommand extends BaseCommand {
                     style: ButtonStyle.Primary,
                     onRun: async ({ interaction }) => {
                         userSettings.document.levelPing = !userSettings.document.levelPing;
+                        userSettings.document.changedPing = true;
                         interaction.reply({ content: Localisation.getLocalisation("levelping.reply", userSettings.document.levelPing ? Localisation.getLocalisation("generic.enabled") : Localisation.getLocalisation("generic.disabled")) });
                         await userSettings.save();
                     }

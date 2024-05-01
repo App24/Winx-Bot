@@ -7,8 +7,6 @@ class CustomWingsCommand extends SlashCommand {
     public constructor() {
         super({ name: "", description: "Set your custom wings", dmPermission: false, type: ApplicationCommandType.ChatInput });
 
-        this.access = CommandAccess.PatronOrBooster;
-
         this.baseCommand = new CustomWingsBaseCommand();
     }
 }

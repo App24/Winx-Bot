@@ -9,8 +9,6 @@ class TestMLCommand extends Command {
         super();
         this.category = Moderator;
         this.usage = [new CommandUsage(true, "argument.level"), new CommandUsage(false, "all")];
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
         this.baseCommand = new TestMlBaseCommand();
     }
 }

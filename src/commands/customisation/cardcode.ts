@@ -6,7 +6,6 @@ import { CommandAvailable } from "../../structs/CommandAvailable";
 class CardCodeCommand extends Command {
     public constructor() {
         super();
-        this.available = CommandAvailable.Guild;
         this.category = Customisation;
 
         this.baseCommand = new CardCodeBaseCommand();

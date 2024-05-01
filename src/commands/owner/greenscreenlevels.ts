@@ -8,10 +8,6 @@ class GreenScreenLevelsCommand extends Command {
     public constructor() {
         super();
 
-        this.available = CommandAvailable.Guild;
-
-        this.access = CommandAccess.BotOwner;
-
         this.category = Owner;
 
         this.baseCommand = new GreenScreenLevelsBaseCommand();

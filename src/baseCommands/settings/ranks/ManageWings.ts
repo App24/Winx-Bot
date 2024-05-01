@@ -15,8 +15,16 @@ import { canvasToMessageAttachment, downloadFile, asyncForEach, getDatabase } fr
 import { BaseCommand, BaseCommandType } from "../../BaseCommand";
 import { getRoleById } from "../../../utils/GetterUtils";
 import { ModelWrapper } from "../../../structs/ModelWrapper";
+import { CommandAccess } from "../../../structs/CommandAccess";
+import { CommandAvailable } from "../../../structs/CommandAvailable";
 
 export class ManageWingsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         await createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:
@@ -138,7 +146,7 @@ export class ManageWingsBaseCommand extends BaseCommand {
 
                                         const rankLevel = rankRole;
 
-                                        const userLevel = new UserLevel(cmdArgs.author.id);
+                                        const userLevel = new UserLevel({guildId: cmdArgs.guildId,levelData: {userId: cmdArgs.author.id}});
 
                                         const serverUserSettings = await getServerUserSettings(cmdArgs.author.id, cmdArgs.guildId);
 

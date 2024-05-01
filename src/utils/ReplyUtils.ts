@@ -1,6 +1,6 @@
-import { Message, MessageComponentInteraction, BaseMessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember, Attachment, CommandInteraction, ModalSubmitInteraction } from "discord.js";
+import { Message, MessageComponentInteraction, BaseMessageOptions, Role, Guild, BaseGuildTextChannel, GuildMember, Attachment, CommandInteraction, ModalSubmitInteraction, CategoryChannel, GuildChannel } from "discord.js";
 import { Localisation } from "../localisation";
-import { getMemberFromMention, getRoleFromMention, getTextChannelFromMention } from "./GetterUtils";
+import { getChannelFromMention, getCategoryFromMention, getMemberFromMention, getRoleFromMention, getTextChannelFromMention, getGuildChannelFromMention } from "./GetterUtils";
 import { MessageAuthor, SendTarget } from "./MessageButtonUtils";
 import { createMessageCollector } from "./MessageUtils";
 import { isHexColor } from "./Utils";
@@ -145,8 +145,8 @@ export async function getImagesReply(replyData: ReplyData) {
             reject("missing.image");
             return msg.reply(Localisation.getLocalisation("error.missing.image"));
         }
-        
-        if(!images.length){
+
+        if (!images.length) {
             reject("invalid.image.format");
             return msg.reply(Localisation.getLocalisation("error.invalid.image"));
         }
@@ -198,6 +198,38 @@ export async function getTextChannelReply(replyData: GuildReplyData) {
 
     return getReply<BaseGuildTextChannel>(replyData, async (msg, resolve, reject) => {
         const channel = await getTextChannelFromMention(msg.content, replyData.guild);
+        if (!channel) {
+            reject("invalid.channel");
+            return msg.reply(Localisation.getLocalisation("error.invalid.channel"));
+        }
+
+        resolve({ value: channel, message: msg });
+    });
+}
+
+export async function getGuildChannelReply(replyData: GuildReplyData) {
+    if (!replyData.options) {
+        replyData.options = "argument.reply.channel";
+    }
+
+    return getReply<GuildChannel>(replyData, async (msg, resolve, reject) => {
+        const channel = await getGuildChannelFromMention(msg.content, replyData.guild);
+        if (!channel) {
+            reject("invalid.channel");
+            return msg.reply(Localisation.getLocalisation("error.invalid.channel"));
+        }
+
+        resolve({ value: channel, message: msg });
+    });
+}
+
+export async function getCategoryChannelReply(replyData: GuildReplyData) {
+    if (!replyData.options) {
+        replyData.options = "argument.reply.channel";
+    }
+
+    return getReply<CategoryChannel>(replyData, async (msg, resolve, reject) => {
+        const channel = await getCategoryFromMention(msg.content, replyData.guild);
         if (!channel) {
             reject("invalid.channel");
             return msg.reply(Localisation.getLocalisation("error.invalid.channel"));

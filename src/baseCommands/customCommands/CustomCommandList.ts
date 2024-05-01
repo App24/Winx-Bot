@@ -6,8 +6,15 @@ import { capitalise } from "../../utils/FormatUtils";
 import { getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageEmbed, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class CustomCommandListBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const customCommands = await getDatabase(CustomCommand, { guildId: cmdArgs.guildId });
 

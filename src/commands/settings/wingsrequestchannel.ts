@@ -7,8 +7,6 @@ import { CommandAvailable } from "../../structs/CommandAvailable";
 class WingsRequestCommand extends Command {
     public constructor() {
         super();
-        this.available = CommandAvailable.Guild;
-        this.access = CommandAccess.Moderators;
         this.category = Settings;
 
         this.baseCommand = new WingsRequestChannelBaseCommand();

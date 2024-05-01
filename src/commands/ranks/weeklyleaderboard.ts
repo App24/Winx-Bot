@@ -9,7 +9,6 @@ class RankCommand extends Command {
         this.category = Rank;
         this.usage = [new CommandUsage(false, "argument.user")];
         this.aliases = ["wrank", "wlb"];
-        this.available = CommandAvailable.Guild;
 
         this.baseCommand = new WeeklyLeaderboardBaseCommand();
     }

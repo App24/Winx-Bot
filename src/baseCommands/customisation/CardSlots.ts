@@ -10,8 +10,14 @@ import { createMessageSelection, SelectOption } from "../../utils/MessageSelecti
 import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { createInteractionModal } from "../../utils/InteractionModalUtils";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class CardSlotsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 

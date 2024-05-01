@@ -1,4 +1,4 @@
-import { BaseGuildTextChannel, Collection } from "discord.js";
+import { BaseGuildTextChannel, ChannelType, Collection } from "discord.js";
 import { BotUser } from "../BotClient";
 import { PREFIX } from "../Constants";
 import { getOneDatabase, isDM, reportBotError } from "../utils/Utils";
@@ -26,7 +26,7 @@ export = () => {
             const serverInfo = await getOneDatabase(ServerData, { guildId: message.guildId }, () => new ServerData({ guildId: message.guildId }));
             if (message.content.length < serverInfo.document.minMessageLength) return;
             const excluded = serverInfo.document.excludeChannels;
-            if (excluded && excluded.find(c => c === message.channel.id)) return;
+            if (excluded && (excluded.find(c => c === message.channel.id) || excluded.find(c=>c === (<any>message.channel).parentId))) return;
 
             if (!levelCooldowns.has(message.guild.id)) {
                 levelCooldowns.set(message.guild.id, new Collection());

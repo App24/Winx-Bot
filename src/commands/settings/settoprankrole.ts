@@ -7,8 +7,6 @@ import { CommandAvailable } from "../../structs/CommandAvailable";
 class SetTopRankRoleCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
         this.category = Settings;
 
         this.baseCommand = new SetTopRankRoleBaseCommand();

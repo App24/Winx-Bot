@@ -17,8 +17,6 @@ class LevelsCommand extends SlashCommand {
             dmPermission: false
         });
 
-        this.available = CommandAvailable.Guild;
-
         this.baseCommand = new LevelsBaseCommand();
     }
 }

@@ -7,8 +7,14 @@ import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { WeeklyLeaderboard } from "../../structs/databaseTypes/WeeklyLeaderboard";
 import { WEEKLY_TIME } from "../../Constants";
 import { dateToString } from "../../utils/FormatUtils";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class WeeklyLeaderboardBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const recentLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId: cmdArgs.guildId }, () => new WeeklyLeaderboard({ guildId: cmdArgs.guildId }));
         if (!recentLeaderboard.document.levels.length) return cmdArgs.reply("error.empty.levels");

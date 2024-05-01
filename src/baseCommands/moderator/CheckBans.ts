@@ -1,8 +1,16 @@
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { asyncMapForEach, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class CheckBansBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
         if (!levels.length) return cmdArgs.reply("error.empty.levels");

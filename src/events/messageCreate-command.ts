@@ -9,6 +9,7 @@ import { CommandAccess } from "../structs/CommandAccess";
 import { CustomCommand } from "../structs/databaseTypes/CustomCommand";
 import { formatString, secondsToTime } from "../utils/FormatUtils";
 import { getOneDatabase, isBooster, isDM, isModerator, isPatron, reportBotError } from "../utils/Utils";
+import { hasPermission } from "../utils/PermissionUtils";
 
 const cooldowns = new Collection<string, Collection<string, number>>();
 
@@ -79,7 +80,13 @@ export = () => {
             return message.reply(Localisation.getLocalisation("command.available.dm"));
         }
 
-        switch (command.access) {
+        const response = await hasPermission({ commandAccess: command.access, author: message.author, guild: message.guild, isDM: isDM(message.channel), member: message.member, customCheck: command.baseCommand.customPermissionCheck });
+
+        if (!response.hasPermission) {
+            return message.reply(Localisation.getLocalisation(response.reason));
+        }
+
+        /*switch (command.access) {
             case CommandAccess.Patron: {
                 if (isDM(message.channel) || !(await isPatron(message.author.id, message.guild.id))) {
                     return message.reply(Localisation.getLocalisation("command.access.patreon"));
@@ -110,7 +117,7 @@ export = () => {
                     return message.reply(Localisation.getLocalisation("command.access.patreon"));
                 }
             } break;
-        }
+        }*/
 
         if (!cooldowns.has(commandName)) {
             cooldowns.set(commandName, new Collection());
@@ -146,7 +153,7 @@ export = () => {
             const cmdArgs = new CommandArguments(message, args);
             await command.onRun(cmdArgs);
         } catch (error) {
-            await reportBotError(error.stack, message);
+            await reportBotError(`${commandName}\n${error.stack}`, message);
         }
 
     });

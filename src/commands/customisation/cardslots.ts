@@ -7,7 +7,6 @@ class CardSlotsCommand extends Command {
     public constructor() {
         super();
 
-        this.available = CommandAvailable.Guild;
 
         this.baseCommand = new CardSlotsBaseCommand();
         this.category = Customisation;

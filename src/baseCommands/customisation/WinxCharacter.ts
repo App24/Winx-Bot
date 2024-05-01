@@ -1,4 +1,5 @@
 import { Localisation } from "../../localisation";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { ServerUserSettings } from "../../structs/databaseTypes/ServerUserSettings";
 import { ModelWrapper } from "../../structs/ModelWrapper";
 import { WinxCharacter } from "../../structs/WinxCharacters";
@@ -9,6 +10,11 @@ import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { Document, Types } from "mongoose";
 
 export class WinxCharacterBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 

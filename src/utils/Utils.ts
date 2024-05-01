@@ -2,7 +2,7 @@ import { join } from "path";
 import { createWriteStream, existsSync, readdirSync, statSync } from "fs";
 import request from "request";
 import { LB_USERS, PREFIX, WEEKLY_TIME } from "../Constants";
-import { BaseGuildTextChannel, ChannelType, CommandInteraction, Guild, GuildMember, Message, AttachmentBuilder, MessageComponentInteraction, TextBasedChannel, ContextMenuCommandInteraction, EmbedBuilder, EmbedData } from "discord.js";
+import { BaseGuildTextChannel, ChannelType, CommandInteraction, Guild, GuildMember, Message, AttachmentBuilder, MessageComponentInteraction, TextBasedChannel, ContextMenuCommandInteraction, EmbedBuilder, EmbedData, User } from "discord.js";
 import { Localisation } from "../localisation";
 import { getBotRoleColor, getMemberById, getRoleById, getTextChannelById, getUserById } from "./GetterUtils";
 import { Canvas } from "canvas";
@@ -16,6 +16,7 @@ import { LevelData } from "../structs/databaseTypes/LevelData";
 import { PatronData } from "../structs/databaseTypes/PatronData";
 import { ErrorData } from "../structs/databaseTypes/ErrorData";
 import { DocumentWrapper } from "../structs/ModelWrapper";
+import { CommandAccess } from "../structs/CommandAccess";
 
 /**
  * 
@@ -156,7 +157,7 @@ export function isDM(channel: TextBasedChannel) {
 export async function isPatron(userId: string, guildId: string) {
     if (!userId || !guildId) return false;
     const patron = await getOneDatabase(PatronData, { guildId: guildId, userId: userId });
-    return patron !== null;
+    return !patron.isNull();
 }
 
 export function isBooster(member: GuildMember) {
@@ -458,4 +459,14 @@ export async function showWeeklyLeaderboardMessage(guild: Guild) {
             await channel.send({ embeds: [embed] });*/
         }
     }
+}
+
+export function hasFlagSet<T extends number>(value: T, check: T) {
+    return (value & check) === check;
+}
+
+export async function isTopChatter(guildId: string, userId: string) {
+    const weeklyLeaderboard = await getOneDatabase(WeeklyLeaderboard, { guildId }, () => new WeeklyLeaderboard({ guildId }));
+
+    return weeklyLeaderboard.document.levels.find(l => l.userId === userId) !== null;
 }

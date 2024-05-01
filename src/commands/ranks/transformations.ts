@@ -6,7 +6,6 @@ import { CommandAvailable } from "../../structs/CommandAvailable";
 class RanksCommand extends Command {
     public constructor() {
         super();
-        this.available = CommandAvailable.Guild;
         this.category = Rank;
         this.aliases = ["ranks"];
 

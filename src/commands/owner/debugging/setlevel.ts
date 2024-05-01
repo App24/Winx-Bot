@@ -8,8 +8,6 @@ class SetLevelCommand extends Command {
     public constructor() {
         super();
         this.category = Owner;
-        this.access = CommandAccess.BotOwner;
-        this.available = CommandAvailable.Guild;
         this.usage = [new CommandUsage(true, "argument.level"), new CommandUsage(false, "argument.xp")];
 
         this.baseCommand = new SetLevelBaseCommand();

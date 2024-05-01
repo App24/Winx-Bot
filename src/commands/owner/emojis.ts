@@ -7,8 +7,6 @@ import { EmojisBaseCommand } from "../../baseCommands/guildSpecific/Emojis";
 class EmojisCommand extends Command {
     public constructor() {
         super("Download emojis");
-        this.available = CommandAvailable.Guild;
-        this.access = CommandAccess.BotOwner;
         this.category = Owner;
 
         this.baseCommand = new EmojisBaseCommand();

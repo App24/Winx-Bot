@@ -8,8 +8,6 @@ class SetXPCommand extends Command {
     public constructor() {
         super();
         this.category = Settings;
-        this.access = CommandAccess.GuildOwner;
-        this.available = CommandAvailable.Guild;
 
         this.baseCommand = new ManageXpBaseCommand();
     }

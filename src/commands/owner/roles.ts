@@ -7,8 +7,6 @@ import { RolesBaseCommand } from "../../baseCommands/owner/Roles";
 class RolesCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.BotOwner;
-        this.available = CommandAvailable.Guild;
         this.category = Owner;
         this.deprecated = true;
 

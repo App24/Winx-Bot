@@ -1,7 +1,13 @@
+import { CommandAccess } from "../../structs/CommandAccess";
 import { getUserFromMention } from "../../utils/GetterUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class MessageUserBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.BotOwner;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const user = await getUserFromMention(cmdArgs.args.shift());
         if (!user) return cmdArgs.reply("error.invalid.user");

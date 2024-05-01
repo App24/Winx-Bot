@@ -18,8 +18,6 @@ class LeaderboardCommand extends SlashCommand {
             dmPermission: false
         });
 
-        this.available = CommandAvailable.Guild;
-
         this.baseCommand = new LeaderboardBaseCommand();
     }
 }

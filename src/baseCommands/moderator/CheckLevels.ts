@@ -8,8 +8,16 @@ import { getLeaderboardMembers, asyncForEach, getAllMessages, getOneDatabase, ge
 import { addXP } from "../../utils/XPUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { ServerData } from "../../structs/databaseTypes/ServerData";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class CheckLbLevelsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.GuildOwner;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const channels = Array.from(cmdArgs.guild.channels.cache.values());
 
@@ -69,6 +77,12 @@ export class CheckLbLevelsBaseCommand extends BaseCommand {
 }
 
 export class CheckLevelsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.GuildOwner;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const member = await getMemberFromMention(cmdArgs.args[0], cmdArgs.guild);
         if (!member) return cmdArgs.reply("error.invalid.member");

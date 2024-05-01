@@ -4,8 +4,16 @@ import { getTextChannelById } from "../../utils/GetterUtils";
 import { asyncForEach, getOneDatabase, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { createWingsRequest } from "../customisation/CustomWings";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class ListWingsRequestsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 

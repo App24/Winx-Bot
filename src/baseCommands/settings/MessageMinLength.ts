@@ -5,8 +5,16 @@ import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { createInteractionModal } from "../../utils/InteractionModalUtils";
 import { ServerData } from "../../structs/databaseTypes/ServerData";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class MessageMinLengthBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.GuildOwner;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 

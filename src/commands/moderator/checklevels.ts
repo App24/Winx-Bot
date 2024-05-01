@@ -7,8 +7,6 @@ import { CheckLevelsBaseCommand } from "../../baseCommands/moderator/CheckLevels
 class CheckLevelsCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.GuildOwner;
-        this.available = CommandAvailable.Guild;
         this.usage = [new CommandUsage(true, "argument.user")];
         this.category = Moderator;
 

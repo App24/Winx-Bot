@@ -13,8 +13,16 @@ import { getMemberReply, getImageReply } from "../../utils/ReplyUtils";
 import { canvasToMessageAttachment, downloadFile, getOneDatabase, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { ModelWrapper } from "../../structs/ModelWrapper";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class SetCustomWingsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {
@@ -56,7 +64,7 @@ export class SetCustomWingsBaseCommand extends BaseCommand {
                             const dir = `${CUSTOM_WINGS_FOLDER}/${cmdArgs.guildId}`;
                             const filePath = `${dir}/${user.id}.png`;
 
-                            const userLevel = new UserLevel({guildId: cmdArgs.guildId, userId: user.id});
+                            const userLevel = new UserLevel({ guildId: cmdArgs.guildId, "levelData.userId": user.id });
 
                             const serverUserSettings = await getServerUserSettings(user.id, cmdArgs.guildId);
 

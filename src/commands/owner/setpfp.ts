@@ -7,7 +7,6 @@ class SetPFPCommand extends Command {
     public constructor() {
         super();
         this.category = Owner;
-        this.access = CommandAccess.BotOwner;
 
         this.baseCommand = new SetPfpBaseCommand();
     }

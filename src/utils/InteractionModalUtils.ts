@@ -38,7 +38,7 @@ export async function createInteractionModal(modalData: ModalData) {
         }
     });
 
-    if(!submission){
+    if (!submission) {
         modalData.onTimeout?.();
         return;
     }

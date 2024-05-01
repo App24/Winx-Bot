@@ -10,8 +10,16 @@ import { createMessageSelection, SelectOption } from "../../../utils/MessageSele
 import { getLevelReply, getRoleReply } from "../../../utils/ReplyUtils";
 import { asyncForEach, getDatabase, getOneDatabase } from "../../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../../BaseCommand";
+import { CommandAccess } from "../../../structs/CommandAccess";
+import { CommandAvailable } from "../../../structs/CommandAvailable";
 
 export class ManageRanksBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         await createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:

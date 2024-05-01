@@ -6,8 +6,14 @@ import { getUserFromMention, getMemberById } from "../../utils/GetterUtils";
 import { getLeaderboardMembers, canvasToMessageAttachment, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { DocumentWrapper } from "../../structs/ModelWrapper";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class LeaderboardBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
         if (!levels.length) return cmdArgs.reply("error.empty.levels");

@@ -30,7 +30,7 @@ const activities = [
     new GenericOneDayEventActivity(new Date(2, 8, 21), "activity.event.peaceday"),
     new GenericOneDayEventActivity(new Date(2, 10, 2), "activity.event.daydead"),
     new GenericOneDayEventActivity(new Date(2, 10, 20), "activity.event.childrenday"),
-    new GenericOneDayEventActivity(new Date(22, 3, 20), "activity.event.earthday"),
+    new GenericOneDayEventActivity(new Date(2, 3, 22), "activity.event.earthday"),
     //#region Birthdays
     new BirthdayActivity(new Date(2, 11, 10), "Bloom"),
     new BirthdayActivity(new Date(2, 5, 15), "Aisha"),

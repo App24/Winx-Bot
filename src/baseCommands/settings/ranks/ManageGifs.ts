@@ -1,4 +1,6 @@
 import { Localisation } from "../../../localisation";
+import { CommandAccess } from "../../../structs/CommandAccess";
+import { CommandAvailable } from "../../../structs/CommandAvailable";
 import { RankLevel } from "../../../structs/databaseTypes/RankLevel";
 import { capitalise } from "../../../utils/FormatUtils";
 import { getRoleById } from "../../../utils/GetterUtils";
@@ -9,6 +11,12 @@ import { asyncForEach, getDatabase } from "../../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../../BaseCommand";
 
 export class ManageGifsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         await createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions:

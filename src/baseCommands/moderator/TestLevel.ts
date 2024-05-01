@@ -5,8 +5,16 @@ import { getOneDatabase } from "../../utils/Utils";
 import { showLevelMessage } from "../../utils/XPUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { ModelWrapper } from "../../structs/ModelWrapper";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class TestLevelBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const level = parseInt(cmdArgs.args[0]);
         if (isNaN(level) || level < 0) return cmdArgs.reply("error.invalid.level");

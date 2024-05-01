@@ -8,8 +8,6 @@ class GiveRolesCommand extends Command {
     public constructor() {
         super();
 
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
         this.usage = [new CommandUsage(true, "argument.role")];
         this.category = Moderator;
 

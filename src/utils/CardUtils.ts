@@ -11,10 +11,11 @@ import { rgbToHsl, fitTextOnCanvas, roundRect, underlineText, canvasColor } from
 import { capitalise } from "./FormatUtils";
 import { getRoleById } from "./GetterUtils";
 import { getWingsImageByLevel } from "./RankUtils";
-import { asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, isBooster, isPatron, getOneDatabase, getDatabase } from "./Utils";
+import { asyncForEach, hexToRGB, blend, isHexColor, getBrightnessColor, isBooster, isPatron, getOneDatabase, getDatabase, isTopChatter } from "./Utils";
 import { getLevelXP } from "./XPUtils";
 import { LevelData } from "../structs/databaseTypes/LevelData";
 import { DocumentWrapper, ModelWrapper } from "../structs/ModelWrapper";
+import { hasPermissionForCustomWings } from "./PermissionUtils";
 
 export interface CardData {
     leaderboardPosition: number,
@@ -60,7 +61,7 @@ export async function drawCard(cardData: CardData) {
 
     const wings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: member.id });
     let wingsImage: Image;
-    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatron(member.id, guild.id)) || isBooster(member))) {
+    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && (await hasPermissionForCustomWings(member))) {
         wingsImage = await loadImage(wings.document.wingsFile);
     }
 
@@ -92,7 +93,7 @@ export async function drawGreenScreenCard(greenScreenColor: string, cardData: Ca
 
     const wings = await getOneDatabase(CustomWings, { guildId: guild.id, userId: member.id });
     let wingsImage: Image;
-    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && ((await isPatron(member.id, guild.id)) || isBooster(member))) {
+    if (cl_customWings && !wings.isNull() && existsSync(wings.document.wingsFile) && (await hasPermissionForCustomWings(member))) {
         wingsImage = await loadImage(wings.document.wingsFile);
     }
 
@@ -304,9 +305,9 @@ async function drawCardWings(ctx: CanvasRenderingContext2D, decodedCode, data) {
 }
 
 async function drawCardPfp(ctx: CanvasRenderingContext2D, decodedCode, data) {
-    const { pfp_positionX, pfp_positionY, pfp_size } = decodedCode;
+    const { pfp_positionX, pfp_positionY, pfp_size, pfp_festiveHat } = decodedCode;
 
-    const { userAvatar } = data;
+    const { userAvatar, member } = data;
 
     const pfpRadius = 130 * pfp_size;
     const cardPfpX = pfp_positionX - pfpRadius;
@@ -320,6 +321,24 @@ async function drawCardPfp(ctx: CanvasRenderingContext2D, decodedCode, data) {
 
     ctx.drawImage(userAvatar, cardPfpX, cardPfpY, pfpRadius * 2, pfpRadius * 2);
     ctx.restore();
+
+    if ((pfp_festiveHat === "true" || !pfp_festiveHat)) {
+        const currentDay = new Date();
+        currentDay.setFullYear(2);
+        const hatPfp = getHat(currentDay, member.id);
+
+        if (!hatPfp) return;
+
+        const image = await loadImage(`./pfpHats/${hatPfp}.png`);
+
+        if (!image) return;
+
+        const ratio = image.height / image.width;
+        const width = pfpRadius;
+        const height = width * ratio;
+
+        ctx.drawImage(image, (cardPfpX - width) + pfpRadius, (cardPfpY - height) - (pfpRadius / 2), width * 2, height * 2);
+    }
 }
 
 async function drawCardXPBar(ctx: CanvasRenderingContext2D, decodedCode, data) {
@@ -759,7 +778,7 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
 
         const textColor = getBrightnessColor(hexToRGB(color));
 
-        if (value.position >= LB_USERS) {
+        if (value.position >= LB_USERS && previousUserSettings) {
             const { background_primaryColor, background_secondaryColor, lb_backgroundColorType, lb_primaryColor } = decodeCode(previousUserSettings.document.cardCode);
             ctx.fillStyle = getBrightnessColor(hexToRGB(getBackgroundColor(background_primaryColor, background_secondaryColor, lb_backgroundColorType, lb_primaryColor)));
             ctx.fillRect(0, pfpY - pfpRadius - pfpPadding - (separatorHeight / 2.), canvas.width, separatorHeight);
@@ -793,6 +812,27 @@ export async function drawLeaderboard(leaderboardLevels: { userLevel: LevelData,
         const avatar = await loadImage(value.member.displayAvatarURL({ extension: 'png' }));
         ctx.drawImage(avatar, pfpX - newPfpRadius + borderThickness, pfpY - newPfpRadius + borderThickness, newPfpRadius * 2, newPfpRadius * 2);
         ctx.restore();
+
+        const cardPfpX = pfpX - newPfpRadius + borderThickness;
+        const cardPfpY = pfpY - newPfpRadius + borderThickness;
+
+        const currentDay = new Date();
+        currentDay.setFullYear(2);
+        const hatPfp = getHat(currentDay, value.member.id);
+
+        if (hatPfp) {
+
+            const image = await loadImage(`./pfpHats/${hatPfp}.png`);
+
+            if (image) {
+
+                const ratio = image.height / image.width;
+                const width = pfpRadius;
+                const height = width * ratio;
+
+                ctx.drawImage(image, (cardPfpX - width) + pfpRadius, (cardPfpY - height) - (pfpRadius / 2), width * 2, height * 2);
+            }
+        }
 
         ctx.font = textFont;
         ctx.fillStyle = textColor;
@@ -843,4 +883,51 @@ function drawMaskedImage(mask: Image, image: Image | Canvas, globalCompositeOper
     ctx.drawImage(image, 0, 0);
 
     return canvas;
+}
+
+const pfpHats: { startDate: Date, endDate: Date, path: string, amount:number }[] = [
+    {
+        startDate: new Date(2, 9, 1),
+        endDate: new Date(2, 10, 1),
+        path: "halloween_hat",
+        amount: 3
+    },
+    {
+        startDate: new Date(2, 11, 1),
+        endDate: new Date(3, 0, 1),
+        path: "christmas_hat",
+        amount: 4
+    }
+];
+
+function getHat(date: Date, userId: string) {
+    const chars = userId.split('');
+    let result = 0;
+    chars.forEach(char => {
+        result += parseInt(char);
+    });
+
+    date.setFullYear(1902);
+
+    const pfpHat = pfpHats.find(pfp => {
+        const startDay = pfp.startDate;
+        startDay.setHours(0);
+        startDay.setMinutes(0);
+        startDay.setSeconds(0);
+        startDay.setMilliseconds(0);
+
+        const endDay = pfp.endDate;
+        endDay.setHours(0);
+        endDay.setMinutes(0);
+        endDay.setSeconds(0);
+        endDay.setMilliseconds(0);
+
+        return date >= startDay && date <= endDay;
+    });
+
+    if (!pfpHat) return;
+
+    const hatNumber = result % pfpHat.amount;
+
+    return pfpHat.path + `_${hatNumber}`;
 }

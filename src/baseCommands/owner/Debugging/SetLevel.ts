@@ -1,3 +1,5 @@
+import { CommandAccess } from "../../../structs/CommandAccess";
+import { CommandAvailable } from "../../../structs/CommandAvailable";
 import { UserLevel } from "../../../structs/databaseTypes/UserLevel";
 import { getMemberById } from "../../../utils/GetterUtils";
 import { getOneDatabase } from "../../../utils/Utils";
@@ -5,8 +7,14 @@ import { getLevelXP } from "../../../utils/XPUtils";
 import { BaseCommand, BaseCommandType } from "../../BaseCommand";
 
 export class SetLevelBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.BotOwner;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
-        const member = await getMemberById("598199612289056769", cmdArgs.guild);
+        const member = cmdArgs.member;
         if (!member) return cmdArgs.reply("error.invalid.member");
         if (member.user.bot) return cmdArgs.reply("error.user.bot");
         const level = parseInt(cmdArgs.args[0]);

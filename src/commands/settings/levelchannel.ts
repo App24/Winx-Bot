@@ -8,8 +8,6 @@ class LevelChannelCommand extends Command {
     public constructor() {
         super();
         this.category = Settings;
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
 
         this.baseCommand = new LevelChannelBaseCommand();
     }

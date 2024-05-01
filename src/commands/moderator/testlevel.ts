@@ -9,8 +9,6 @@ class TestLevelCommand extends Command {
         super();
         this.category = Moderator;
         this.usage = [new CommandUsage(true, "argument.level")];
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
         this.baseCommand = new TestLevelBaseCommand();
     }
 }

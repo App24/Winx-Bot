@@ -6,7 +6,6 @@ import { CommandAccess } from "../../structs/CommandAccess";
 class ReloadLocalisationCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.BotOwner;
         this.category = Owner;
         this.aliases = ["reloadlocal", "relocal"];
 

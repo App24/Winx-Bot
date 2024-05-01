@@ -2,12 +2,20 @@ import { EmbedBuilder } from "discord.js";
 import { Localisation } from "../../localisation";
 import { getTextChannelById, getThreadChannelById, getTextChannelFromMention, getBotRoleColor } from "../../utils/GetterUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
-import { getTextChannelReply } from "../../utils/ReplyUtils";
+import { getGuildChannelReply, getTextChannelReply } from "../../utils/ReplyUtils";
 import { asyncForEach, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { ServerData } from "../../structs/databaseTypes/ServerData";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class ExcludeChannelBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
@@ -18,7 +26,7 @@ export class ExcludeChannelBaseCommand extends BaseCommand {
                         label: Localisation.getLocalisation("button.add"),
                         value: "add",
                         onSelect: async ({ interaction }) => {
-                            const { value: channel, message: msg } = await getTextChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
+                            const { value: channel, message: msg } = await getGuildChannelReply({ sendTarget: interaction, author: cmdArgs.author, guild: cmdArgs.guild });
                             if (!channel) return;
 
                             if (serverInfo.document.excludeChannels.find(c => c === channel.id)) return msg.reply(Localisation.getLocalisation("excludechannel.channel.already"));

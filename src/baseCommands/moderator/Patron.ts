@@ -5,11 +5,16 @@ import { getBotRoleColor, getMemberById, getMemberFromMention } from "../../util
 import { asyncForEach, getDatabase, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType, BaseSubBaseCommand } from "../BaseCommand";
 import { PatronData } from "../../structs/databaseTypes/PatronData";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class PatronBaseCommand extends BaseCommand {
     public constructor() {
         super();
         this.subCommands = [new AddPatronSubBaseCommand(), new RemovePatronSubBaseCommand(), new ListPatronSubBaseCommand()];
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+
     }
 
     public async onRun(cmdArgs: BaseCommandType) {
@@ -30,7 +35,7 @@ class AddPatronSubBaseCommand extends BaseSubBaseCommand {
 
         const patrons = await getDatabase(PatronData, { guildId: cmdArgs.guildId });
 
-        if (!patrons.find(u => u.document.userId === member.id).isNull()) return cmdArgs.reply("patreon.user.already");
+        if (patrons.find(u => u.document.userId === member.id)) return cmdArgs.reply("patreon.user.already");
 
         const patron = new PatronData({ guildId: cmdArgs.guildId, userId: member.id, date: new Date() });
         await patron.save();

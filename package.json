@@ -34,7 +34,9 @@
     "discord.js": "^14.11.0",
     "dotenv": "^10.0.0",
     "keyv": "^4.0.3",
+    "mongodb": "^6.3.0",
     "mongoose": "^7.4.1",
+    "node-fetch": "^2.7.0",
     "request": "^2.88.2",
     "zip-a-folder": "^2.0.0"
   },

@@ -8,8 +8,6 @@ class ManageRanksCommand extends Command {
     public constructor() {
         super();
         this.category = Settings;
-        this.available = CommandAvailable.Guild;
-        this.access = CommandAccess.Moderators;
 
         this.baseCommand = new ManageRanksBaseCommand();
     }

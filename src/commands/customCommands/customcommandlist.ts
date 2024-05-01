@@ -7,8 +7,6 @@ import { CustomCommandListBaseCommand } from "../../baseCommands/customCommands/
 class CustomCommandListCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
         this.category = CustomCommandsSettings;
         this.usage = [new CommandUsage(false, "argument.name")];
         this.aliases = ["cclist"];

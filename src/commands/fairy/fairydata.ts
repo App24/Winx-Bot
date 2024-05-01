@@ -8,7 +8,6 @@ class FairyDataCommand extends Command {
         super();
 
         this.category = Fairy;
-        this.access = CommandAccess.BotOwner;
 
         this.baseCommand = new FairyDataBaseCommand();
     }

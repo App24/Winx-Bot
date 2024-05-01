@@ -127,8 +127,14 @@ export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuild
     const userSettings = await getServerUserSettings(member.id, levelChannel.guildId);
 
     if (userSettings.document.levelPing === undefined) {
-        userSettings.document.levelPing = false;
+        userSettings.document.levelPing = true;
     }
+
+    if(userSettings.document.changedPing === undefined){
+        userSettings.document.changedPing = true;
+    }
+
+    const showPingCommandReminder = userSettings.document.levelPing && !userSettings.document.changedPing;
 
     const options: BaseMessageOptions = {
         content: Localisation.getLocalisation(levelUp ? "xp.level.up" : "xp.level.down", member, level)
@@ -143,6 +149,9 @@ export async function showLevelMessage(levelUp: boolean, levelChannel: BaseGuild
         await levelChannel.send(Localisation.getLocalisation(levelUp ? "xp.transformation.earn" : "xp.transformation.lost", member, capitalise(rankDetails.rank.name)));
         if (rankDetails.rankLevel.document.gifs && rankDetails.rankLevel.document.gifs.length) {
             await levelChannel.send(rankDetails.rankLevel.document.gifs[Math.floor(Math.random() * rankDetails.rankLevel.document.gifs.length)]);
+        }
+        if(showPingCommandReminder){
+            await levelChannel.send("You can disable being pinged on level up using w!levelping");
         }
     }
 }

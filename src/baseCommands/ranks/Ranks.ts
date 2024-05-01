@@ -3,8 +3,14 @@ import { Localisation } from "../../localisation";
 import { RankLevel } from "../../structs/databaseTypes/RankLevel";
 import { asyncForEach, createMessageEmbed, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class RanksBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const ranks = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });
         if (!ranks.length) return cmdArgs.reply("error.empty.ranks");

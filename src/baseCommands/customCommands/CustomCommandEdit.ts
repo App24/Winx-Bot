@@ -1,5 +1,6 @@
 import { Localisation } from "../../localisation";
 import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 import { CustomCommand } from "../../structs/databaseTypes/CustomCommand";
 import { capitalise } from "../../utils/FormatUtils";
 import { createMessageSelection, SelectOption } from "../../utils/MessageSelectionUtils";
@@ -8,6 +9,12 @@ import { getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 
 export class CustomCommandEditBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const cmdName = cmdArgs.args[0].toLowerCase();
         const customCommand = await getOneDatabase(CustomCommand, { guildId: cmdArgs.guild, name: cmdName });

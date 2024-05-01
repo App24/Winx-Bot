@@ -15,9 +15,6 @@ export abstract class Command {
     public description: string;
     public usage: CommandUsage[];
 
-    public available: CommandAvailable;
-    public access: CommandAccess;
-
     public aliases: string[];
 
     public cooldown: number;
@@ -31,7 +28,6 @@ export abstract class Command {
     public constructor(description?: string) {
         this.description = description;
         this.category = Other;
-        this.available = CommandAvailable.Both;
     }
 
     public get enabled() {
@@ -74,6 +70,16 @@ export abstract class Command {
             }
         }
         return amount;
+    }
+
+    public get access() {
+        if (!this.baseCommand) return CommandAccess.Everyone;
+        return this.baseCommand.access;
+    }
+
+    public get available() {
+        if (!this.baseCommand) return CommandAvailable.Both;
+        return this.baseCommand.available;
     }
 }
 

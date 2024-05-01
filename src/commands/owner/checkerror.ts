@@ -6,7 +6,6 @@ import { CommandAccess } from "../../structs/CommandAccess";
 class CheckErrorCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.BotOwner;
         this.category = Owner;
 
         this.baseCommand = new CheckErrorBaseCommand();

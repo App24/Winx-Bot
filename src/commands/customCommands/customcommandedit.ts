@@ -7,8 +7,6 @@ import { CustomCommandEditBaseCommand } from "../../baseCommands/customCommands/
 class CustomCommandEditCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
         this.category = CustomCommandsSettings;
         this.usage = [new CommandUsage(true, "argument.name")];
         this.aliases = ["ccedit"];

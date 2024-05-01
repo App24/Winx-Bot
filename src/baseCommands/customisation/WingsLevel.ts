@@ -10,8 +10,14 @@ import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { Document, Types } from "mongoose";
 import { ModelWrapper } from "../../structs/ModelWrapper";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class WingsLevelBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const userSettings = await getOneDatabase(ServerUserSettings, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new ServerUserSettings({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 

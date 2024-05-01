@@ -5,6 +5,7 @@ import { CommandArguments } from "../../structs/Command";
 import { waitForPlayers } from "../../utils/MinigameUtils";
 import { canvasToMessageAttachment } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class TicTacToeBaseCommand extends BaseCommand {
 
@@ -21,6 +22,7 @@ export class TicTacToeBaseCommand extends BaseCommand {
         this.squareSize = 150;
         this.lineWidth = 31;
         this.canvasSize = this.squareSize * this.nSquares + this.lineWidth * (this.nSquares - 1);
+        this.available = CommandAvailable.Guild;
     }
 
     public async onRun(cmdArgs: BaseCommandType) {

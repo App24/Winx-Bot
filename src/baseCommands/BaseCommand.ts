@@ -1,14 +1,22 @@
+import { Guild, GuildMember, TextBasedChannel, User } from "discord.js";
 import { CommandArguments } from "../structs/Command";
 import { SlashCommandArguments } from "../structs/SlashCommand";
 import { asyncForEach } from "../utils/Utils";
+import { CommandAccess } from "../structs/CommandAccess";
+import { PermissionData, PermissionResponse } from "../utils/PermissionUtils";
+import { CommandAvailable } from "../structs/CommandAvailable";
 
 export type BaseCommandType = CommandArguments | SlashCommandArguments;
 
 export abstract class BaseCommand {
     protected subCommands: BaseSubBaseCommand[];
+    public access: CommandAccess;
+    public available: CommandAvailable;
 
     public constructor() {
         this.subCommands = [];
+        this.access = CommandAccess.Everyone;
+        this.available = CommandAvailable.Both;
     }
 
     public abstract onRun(cmdArgs: BaseCommandType);
@@ -29,6 +37,10 @@ export abstract class BaseCommand {
             }
         });
         return found;
+    }
+
+    public async customPermissionCheck(permissionData: PermissionData): Promise<PermissionResponse> {
+        return { hasPermission: false, reason: "" };
     }
 }
 

@@ -4,8 +4,14 @@ import { CommandArguments } from "../../structs/Command";
 import { waitForPlayers } from "../../utils/MinigameUtils";
 import { createMessageEmbed } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class RPSBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         if (cmdArgs instanceof CommandArguments) {
             waitForPlayers(1, 1, "minigame.rps.name", cmdArgs.guild, cmdArgs.channel, cmdArgs.member, (members) => {

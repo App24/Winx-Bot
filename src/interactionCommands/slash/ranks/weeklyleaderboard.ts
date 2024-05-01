@@ -18,8 +18,6 @@ class WeeklyLeaderboardCommand extends SlashCommand {
             dmPermission: false
         });
 
-        this.available = CommandAvailable.Guild;
-
         this.baseCommand = new WeeklyLeaderboardBaseCommand();
     }
 }

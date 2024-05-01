@@ -1,15 +1,12 @@
 import { ApplicationCommandData, Guild, TextBasedChannel, User, GuildMember, CommandInteraction, InteractionReplyOptions, DMChannel, BaseMessageOptions } from "discord.js";
 import { CommandAvailable } from "./CommandAvailable";
-import { CommandAccess } from "./CommandAccess";
 import { Localisation } from "../localisation";
 import { BaseCommand } from "../baseCommands/BaseCommand";
+import { CommandAccess } from "./CommandAccess";
 
 export abstract class SlashCommand {
     public commandData: Partial<ApplicationCommandData>;
     public deferEphemeral: boolean;
-
-    public access: CommandAccess;
-    public available: CommandAvailable;
 
     public guildIds: string[];
 
@@ -20,8 +17,6 @@ export abstract class SlashCommand {
     public constructor(commandData: Partial<ApplicationCommandData>) {
         this.commandData = commandData;
         this.deferEphemeral = false;
-        this.access = CommandAccess.None;
-        this.available = CommandAvailable.Both;
         this.guildIds = [];
         this.cooldown = 3;
     }
@@ -30,6 +25,16 @@ export abstract class SlashCommand {
         if (this.baseCommand) {
             await this.baseCommand.onRun(cmdArgs);
         }
+    }
+
+    public get access() {
+        if (!this.baseCommand) return CommandAccess.Everyone;
+        return this.baseCommand.access;
+    }
+
+    public get available() {
+        if (!this.baseCommand) return CommandAvailable.Both;
+        return this.baseCommand.available;
     }
 }
 

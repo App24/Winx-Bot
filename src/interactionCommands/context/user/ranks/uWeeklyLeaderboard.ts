@@ -9,8 +9,6 @@ class WeeklyLeaderboardCommand extends SlashCommand {
 
         this.deferEphemeral = true;
 
-        this.available = CommandAvailable.Guild;
-
         this.baseCommand = new WeeklyLeaderboardBaseCommand();
     }
 }

@@ -7,8 +7,6 @@ import { CustomCommandAddBaseCommand } from "../../baseCommands/customCommands/C
 class CustomCommandAddCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
         this.category = CustomCommandsSettings;
         this.usage = [new CommandUsage(true, "argument.name"), new CommandUsage(true, "argument.description"), new CommandUsage(true, "argument.outputs")];
         this.aliases = ["ccadd"];

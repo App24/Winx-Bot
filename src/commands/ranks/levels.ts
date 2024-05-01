@@ -7,7 +7,6 @@ class LevelsCommand extends Command {
     public constructor() {
         super();
         this.usage = [new CommandUsage(false, "argument.user")];
-        this.available = CommandAvailable.Guild;
         this.category = Rank;
         this.aliases = ["ml", "magiclevels"];
 

@@ -4,8 +4,16 @@ import { UserLevel } from "../../structs/databaseTypes/UserLevel";
 import { getRoleById } from "../../utils/GetterUtils";
 import { asyncForEach, getDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class CheckRanksBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Moderators;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const levels = await getDatabase(UserLevel, { guildId: cmdArgs.guildId });
         const ranks = await getDatabase(RankLevel, { guildId: cmdArgs.guildId });

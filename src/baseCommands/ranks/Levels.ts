@@ -8,8 +8,15 @@ import { canvasToMessageAttachment, isHexColor, getOneDatabase } from "../../uti
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { getLeaderboardPosition, getWeeklyLeaderboardPosition } from "../../utils/XPUtils";
 import { Localisation } from "../../localisation";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class LevelsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         let user = cmdArgs.author;
         if (cmdArgs.args.length) {
@@ -66,6 +73,12 @@ export class LevelsBaseCommand extends BaseCommand {
 }
 
 export class GreenScreenLevelsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.BotOwner;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         let greenScreenColor = "#00ff00";
 

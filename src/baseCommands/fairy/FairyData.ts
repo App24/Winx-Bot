@@ -4,8 +4,14 @@ import { createFairy, getFairyImage } from "../../utils/FairyUtils";
 import { canvasToMessageAttachment, createMessageEmbed, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { Fairy } from "../../structs/fairy/Fairy";
+import { CommandAccess } from "../../structs/CommandAccess";
 
 export class FairyDataBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.BotOwner;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const fairyData = await getOneDatabase(FairyData, { userId: cmdArgs.author.id });
 

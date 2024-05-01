@@ -4,8 +4,14 @@ import { Localisation } from "../../localisation";
 import { createMessageSelection } from "../../utils/MessageSelectionUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { reportBotError } from "../../utils/Utils";
+import { CommandAccess } from "../../structs/CommandAccess";
 
 export class RegisterSlashCommandsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.BotOwner;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         await createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, settings: { max: 1 }, selectMenuOptions: {

@@ -6,7 +6,6 @@ class GiveXPCommand extends Command {
     constructor() {
         super();
         this.cooldown = 60 * 5;
-        this.available = CommandAvailable.Guild;
 
         this.baseCommand = new GiveXPBaseCommand();
     }

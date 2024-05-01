@@ -3,8 +3,14 @@ import { BotUser } from "../../BotClient";
 import { CommandArguments } from "../../structs/Command";
 import { getImageReply } from "../../utils/ReplyUtils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
+import { CommandAccess } from "../../structs/CommandAccess";
 
 export class SetPfpBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.BotOwner;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         let image: Attachment;
         if (cmdArgs instanceof CommandArguments) {

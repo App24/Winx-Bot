@@ -1,4 +1,4 @@
-import { Guild, BaseGuildTextChannel, EmbedBuilder, TextChannel, ButtonStyle } from "discord.js";
+import { Guild, BaseGuildTextChannel, EmbedBuilder, TextChannel, ButtonStyle, GuildMember, User, TextBasedChannel } from "discord.js";
 import { existsSync, mkdirSync, unlinkSync, renameSync } from "fs";
 import { CARD_CANVAS_WIDTH, CARD_CANVAS_HEIGHT, CUSTOM_WINGS_REQUEST_FOLDER, CUSTOM_WINGS_FOLDER } from "../../Constants";
 import { Localisation } from "../../localisation";
@@ -11,8 +11,17 @@ import { downloadFile, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { ServerData } from "../../structs/databaseTypes/ServerData";
 import { ModelWrapper } from "../../structs/ModelWrapper";
+import { CommandAccess } from "../../structs/CommandAccess";
+import { WeeklyLeaderboard } from "../../structs/databaseTypes/WeeklyLeaderboard";
+import { CommandAvailable } from "../../structs/CommandAvailable";
 
 export class CustomWingsBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.Patron | CommandAccess.Booster | CommandAccess.WeeklyTopChatter;
+        this.available = CommandAvailable.Guild;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         const serverInfo = await getOneDatabase(ServerData, { guildId: cmdArgs.guildId }, () => new ServerData({ guildId: cmdArgs.guildId }));
 
@@ -27,7 +36,7 @@ export class CustomWingsBaseCommand extends BaseCommand {
 
         const wingsRequest = await getOneDatabase(WingsRequest, { guildId: cmdArgs.guildId, userId: cmdArgs.author.id }, () => new WingsRequest({ guildId: cmdArgs.guildId, userId: cmdArgs.author.id }));
 
-        const dir = `${CUSTOM_WINGS_REQUEST_FOLDER} /${cmdArgs.guildId}`;
+        const dir = `${CUSTOM_WINGS_REQUEST_FOLDER}/${cmdArgs.guildId}`;
         const filePath = `${dir}/${cmdArgs.author.id}.png`;
 
         const download = await msg.reply(Localisation.getLocalisation("setrank.wings.download"));

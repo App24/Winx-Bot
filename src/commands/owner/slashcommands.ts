@@ -6,7 +6,6 @@ import { RegisterSlashCommandsBaseCommand } from "../../baseCommands/owner/Slash
 class RegisterSlashCommandsCommand extends Command {
     public constructor() {
         super();
-        this.access = CommandAccess.BotOwner;
         this.category = Owner;
 
         this.baseCommand = new RegisterSlashCommandsBaseCommand();

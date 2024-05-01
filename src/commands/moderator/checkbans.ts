@@ -8,8 +8,6 @@ class CheckBansCommand extends Command {
     public constructor() {
         super();
         this.category = Moderator;
-        this.access = CommandAccess.Moderators;
-        this.available = CommandAvailable.Guild;
 
         this.baseCommand = new CheckBansBaseCommand();
     }

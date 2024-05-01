@@ -7,8 +7,14 @@ import { getStringReply } from "../../utils/ReplyUtils";
 import { asyncForEach, getOneDatabase } from "../../utils/Utils";
 import { BaseCommand, BaseCommandType } from "../BaseCommand";
 import { ErrorData } from "../../structs/databaseTypes/ErrorData";
+import { CommandAccess } from "../../structs/CommandAccess";
 
 export class CheckErrorBaseCommand extends BaseCommand {
+    public constructor() {
+        super();
+        this.access = CommandAccess.BotOwner;
+    }
+
     public async onRun(cmdArgs: BaseCommandType) {
         await createMessageSelection({
             sendTarget: cmdArgs.body, author: cmdArgs.author, selectMenuOptions:
