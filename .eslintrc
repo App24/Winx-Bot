@@ -19,6 +19,7 @@
         "no-mixed-spaces-and-tabs": "off",
         "no-empty": "off",
         "no-useless-escape": "off",
-        "no-async-promise-executor": "off"
+        "no-async-promise-executor": "off",
+        "@typescript-eslint/no-unused-vars": "warn"
     }
 }

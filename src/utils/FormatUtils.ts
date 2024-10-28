@@ -4,11 +4,15 @@
  * @returns stringified time
  */
 export function secondsToTime(time: number) {
-    const hours = Math.floor(time / 3600);
+    const weeks = Math.floor(time / 3600 / 24 / 7);
+    const days = Math.floor(time / 3600 / 24 % 7);
+    const hours = Math.floor(time / 3600 % 24);
     const minutes = Math.floor(time % 3600 / 60);
     const seconds = Math.floor(time % 3600 % 60);
 
     const times = [];
+    if (weeks > 0) times.push(weeks.toFixed(0) + " week(s)");
+    if (days > 0) times.push(days.toFixed(0) + " day(s)");
     if (hours > 0) times.push(hours.toFixed(0) + " hour(s)");
     if (minutes > 0) times.push(minutes.toFixed(0) + " minute(s)");
     if (seconds > 0 || !times.length) times.push(seconds.toFixed(0) + " second(s)");
