@@ -1,11 +1,13 @@
 import { basename, Client, ClientOptions, GatewayIntentBits, IntentsBitField, Options, Partials } from "discord.js";
 import { loadFiles } from "./utils/Utils";
-import { Localisation } from "./Localisation";
+import { Localisation } from "./localisation";
 import { LocalisationKeys } from "./structs/LocalKeys";
 
 class BotClient extends Client {
     public constructor(options?: ClientOptions) {
         super(options);
+
+        this.loadLocalisation();
 
         (async () => {
             await this.loadEvents();
@@ -24,11 +26,20 @@ class BotClient extends Client {
             if (typeof func !== "function") continue;
 
             func();
-            
+
             loaded++;
         }
 
-        console.log(Localisation.getLocalisation(LocalisationKeys.bot_load_event, loaded));
+        console.log(Localisation.getLocalisation({ key: LocalisationKeys.bot_load_event, args: [loaded] }));
+    }
+
+    public loadLocalisation() {
+        Localisation.clearLocalisation();
+        const files = loadFiles("lang", ".json");
+        if (!files) return;
+        for (const file of files) {
+            Localisation.loadLocalisation(file);
+        }
     }
 }
 

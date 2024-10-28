@@ -1,5 +1,7 @@
 import { ShardingManager } from "discord.js";
 import dotenv from "dotenv";
+import { Localisation } from "./localisation";
+import { loadFiles } from "./utils/Utils";
 
 dotenv.config();
 
