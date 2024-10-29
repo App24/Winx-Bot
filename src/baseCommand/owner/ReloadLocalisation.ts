@@ -12,14 +12,8 @@ export class ReloadLocalisationBaseCommand extends BaseCommand {
     }
 
     async onRun(cmdArgs: CommandArgumentsType) {
-        await BotUser.shard.broadcastEval((_) => {
-            Localisation.clearLocalisation();
-            const files = loadFiles("lang", ".json");
-            if (!files) return;
-            for (const file of files) {
-                Localisation.loadLocalisation(file);
-            }
-        });
+        await cmdArgs.reply({key: LocalisationKeys.reply_checking});
+        BotUser.loadLocalisation();
         cmdArgs.reply({ key: LocalisationKeys.reply_done });
     }
 }

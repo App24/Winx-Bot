@@ -13,6 +13,11 @@ export = () => {
         const commandName = parsed.command.toLowerCase();
         const args = parsed.arguments;
 
+        const command = BotUser.getCommand(commandName);
+
+        if (message.author.id !== process.env.OWNER_ID) return;
+
         const cmdArgs = new MessageCommandArguments(message, args);
+        await command.baseCommand.onRun(cmdArgs);
     });
 };

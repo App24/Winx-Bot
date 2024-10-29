@@ -3,5 +3,6 @@ export enum LocalisationKeys {
     bot_load_command = "bot.load.command",
 
     reply_check_dm = "reply.checkdm",
-    reply_done = "reply.done"
+    reply_done = "reply.done",
+    reply_checking = "reply.checking"
 }

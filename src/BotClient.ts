@@ -6,7 +6,7 @@ import path from "path";
 import { Command } from "./structs/Command";
 
 class BotClient extends Client {
-    private commands = new Collection<string, Command>();
+    public commands = new Collection<string, Command>();
 
     public constructor(options?: ClientOptions) {
         super(options);
@@ -57,8 +57,8 @@ class BotClient extends Client {
             } else {
                 command = new cClass();
             }
-            if (!command.description)
-                command.description = `${name}.command.description`;
+            if (!command.baseCommand.description)
+                command.baseCommand.description = `${name}.command.description`;
             command.commandName = name;
             this.commands.set(name, command);
             return true;
@@ -92,6 +92,10 @@ class BotClient extends Client {
         for (const file of files) {
             Localisation.loadLocalisation(file);
         }
+    }
+
+    public getCommand(commandName: string) {
+        return this.commands.get(commandName) || this.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
     }
 }
 

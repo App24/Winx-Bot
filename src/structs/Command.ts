@@ -7,14 +7,13 @@ import { LocalisationKeys } from "./LocalKeys";
 export abstract class Command {
     public category: Category;
 
-    public description: string;
-
     public readonly baseCommand: BaseCommand;
 
     public commandName: string;
 
-    public constructor(baseCommand: BaseCommand, description?: string) {
-        this.description = description;
+    public aliases: string[];
+
+    public constructor(baseCommand: BaseCommand) {
         this.baseCommand = baseCommand;
         this.category = Other;
     }
@@ -23,9 +22,5 @@ export abstract class Command {
         if (this.baseCommand) {
             await this.baseCommand.onRun(cmdArgs);
         }
-    }
-
-    public get localisedDescription(){
-        return Localisation.getLocalisation({key: this.description});
     }
 }

@@ -46,7 +46,7 @@ abstract class BaseCommandArguments<Slash extends boolean = boolean> {
 
     public abstract body();
 
-    public abstract reply(options: LocalisationType | If<Slash, LocalisationInteractionReplyOptions, LocalisationMessageReplyOptions>, ...args): If<Slash, Promise<void>, Promise<Message>>;
+    public abstract reply(options: LocalisationType | If<Slash, LocalisationInteractionReplyOptions, LocalisationMessageReplyOptions>): If<Slash, Promise<void>, Promise<Message>>;
 
     public async dmReply(options: LocalisationType | LocalisationBaseMessageOptions) {
         let localisedOptions: BaseMessageOptions;
@@ -79,8 +79,30 @@ export class MessageCommandArguments extends BaseCommandArguments<false> {
     public body() {
         return this.message;
     }
-    public reply(options: LocalisationType | LocalisationMessageReplyOptions, ...args: any[]): Promise<Message<boolean>> {
-        throw new Error("Method not implemented.");
+    public reply(options: LocalisationType | LocalisationMessageReplyOptions): Promise<Message<boolean>> {
+        let localisedOptions: MessageReplyOptions = {};
+        if("key" in options){
+            localisedOptions.content = Localisation.getLocalisation(options);
+        }else{
+            localisedOptions = <any>options;
+            if(options.content){
+                localisedOptions.content = Localisation.getLocalisation(options.content);
+            }
+        }
+        localisedOptions.failIfNotExists = false;
+        return this.message.reply(localisedOptions);
+        // try {
+        //     if (typeof options === "string") {
+        //         options = { content: Localisation.getLocalisation(options, ...args) };
+        //     } else {
+        //         if (options.content)
+        //             options.content = Localisation.getLocalisation(options.content, ...args);
+        //     }
+        //     options.failIfNotExists = false;
+        //     return this.message.reply(options);
+        // } catch (error) {
+        //     return reportBotError(error.stack, this.message);
+        // }
     }
 }
 
@@ -96,7 +118,7 @@ export class SlashCommandArguments extends BaseCommandArguments<true> {
         return this.interaction;
     }
 
-    public reply(options: LocalisationType | LocalisationInteractionReplyOptions, ...args: any[]): Promise<void> {
+    public reply(options: LocalisationType | LocalisationInteractionReplyOptions): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

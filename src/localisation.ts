@@ -29,6 +29,10 @@ class Language {
         }
         return formatString(toReturn, ...args);
     }
+
+    public hasLocalisation(key:LocalisationKeys){
+        return this.localisation[key] !== undefined;
+    }
 }
 
 export class LocalisationType {
