@@ -32,7 +32,7 @@ class Language {
 }
 
 export class LocalisationType {
-    key: LocalisationKeys;
+    key: LocalisationKeys | string;
     args?: any[];
 }
 

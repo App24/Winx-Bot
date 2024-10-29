@@ -37,3 +37,30 @@ export function loadFiles(directory: string, fileExtension = ".*") {
 
     return files;
 }
+
+/**
+ * 
+ * @param array list of items to iterate through
+ * @param callbackFn callback function to run
+ */
+export async function asyncForEach<T>(array: T[], callbackFn: (value: T, index: number, array: readonly T[]) => Promise<any> | any) {
+    for (let i = 0; i < array.length; i++) {
+        const exit = await callbackFn(array[i], i, array);
+        if (exit === true) return true;
+    }
+    return false;
+}
+
+/**
+ * 
+ * @param map map to iterate through
+ * @param callbackFn callback function to run
+ */
+export async function asyncMapForEach<T, D>(map: Map<T, D>, callbackFn: (key: T, value: D, index: number, map: ReadonlyMap<T, D>) => Promise<any> | any) {
+    const keys = Array.from(map.keys());
+    const values = Array.from(map.values());
+    for (let i = 0; i < map.size; i++) {
+        const exit = await callbackFn(keys[i], values[i], i, map);
+        if (exit === true) break;
+    }
+}

@@ -1,17 +1,69 @@
-import { basename, Client, ClientOptions, GatewayIntentBits, IntentsBitField, Options, Partials } from "discord.js";
-import { loadFiles } from "./utils/Utils";
+import { basename, Client, ClientOptions, Collection, GatewayIntentBits, IntentsBitField, Options, Partials } from "discord.js";
+import { asyncForEach, loadFiles } from "./utils/Utils";
 import { Localisation } from "./localisation";
 import { LocalisationKeys } from "./structs/LocalKeys";
+import path from "path";
+import { Command } from "./structs/Command";
 
 class BotClient extends Client {
+    private commands = new Collection<string, Command>();
+
     public constructor(options?: ClientOptions) {
         super(options);
 
         this.loadLocalisation();
 
-        (async () => {
-            await this.loadEvents();
-        })();
+        this.loadCommands();
+        this.loadEvents();
+    }
+
+    private async loadCommands() {
+        const files = loadFiles("dist/commands", ".js");
+        if (!files) return;
+        let loaded = 0;
+        for (const file of files) {
+            try {
+                const commandImport = await import(`./${file.substr(5, file.length)}`);
+                const { default: cClass } = commandImport;
+                const cClasses = [];
+                if (!Array.isArray(cClass)) {
+                    cClasses.push(cClass);
+                } else {
+                    cClasses.push(...cClass);
+                }
+
+                await asyncForEach(cClasses, async (c) => {
+                    let command = c;
+                    let name = path.basename(file).slice(0, -3);
+                    // if (c instanceof MultiCommand) {
+                    //     command = await c.generateCommand();
+                    //     name = c.name;
+                    // }
+                    if (this.loadCommand(command, name)) {
+                        loaded++;
+                    }
+                });
+
+            } catch { }
+        }
+        console.log(Localisation.getLocalisation({ key: LocalisationKeys.bot_load_command, args: [loaded] }));
+    }
+
+    private loadCommand(cClass, name: string) {
+        try {
+            let command: Command;
+            if (cClass instanceof Command) {
+                command = cClass;
+            } else {
+                command = new cClass();
+            }
+            if (!command.description)
+                command.description = `${name}.command.description`;
+            command.commandName = name;
+            this.commands.set(name, command);
+            return true;
+        }
+        catch { return false; }
     }
 
     private async loadEvents() {
