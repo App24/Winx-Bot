@@ -23,3 +23,5 @@ export const FAIRY_PARTS_DATA_FOLDER = "fairyParts/data";
 export const FAIRY_PARTS_IMAGES_FOLDER = "fairyParts/images";
 
 export const WEEKLY_TIME = 1000 * 60 * 60 * 24 * 7;
+
+export const CARD_CACHE = "cache/cards";
